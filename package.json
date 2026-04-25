@@ -1,0 +1,22 @@
+{
+  "name": "scamreport",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "bun": ">=1.1.0"
+  },
+  "scripts": {
+    "dev": "concurrently -n api,mobile -c blue,magenta \"bun run --filter @my-product/api dev\" \"cd apps/mobile && flutter run\"",
+    "test": "bun run --filter @my-product/api test && bun run --filter @my-product/shared test && cd apps/mobile && flutter test",
+    "typecheck": "bun run --filter @my-product/shared typecheck && bun run --filter @my-product/api typecheck",
+    "lint": "cd apps/mobile && dart analyze",
+    "prisma:generate": "bun run --filter @my-product/api prisma:generate"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

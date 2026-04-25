@@ -1,0 +1,25 @@
+// Prisma schema. Add models below and run `bun run prisma:migrate` to generate
+// a migration and `bun run prisma:generate` to regenerate the client.
+//
+// v7 notes:
+// - No `url` here; v7 rejects it in the schema.
+// - The runtime URL (pooled — DATABASE_URL) is supplied to PrismaClient via
+//   the @prisma/adapter-pg driver in src/core/db/client.ts.
+// - The migration URL (direct — DIRECT_URL) is set in prisma.config.ts.
+//
+// Pattern:
+//
+// model User {
+//   id        String   @id @default(cuid())
+//   email     String   @unique
+//   createdAt DateTime @default(now())
+// }
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}

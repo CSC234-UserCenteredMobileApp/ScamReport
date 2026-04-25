@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  api:
+    name: API — typecheck + test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install workspace deps
+        run: bun install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: bun run --filter @my-product/api prisma:generate
+
+      - name: Typecheck (shared + api)
+        run: bun run typecheck
+
+      - name: Run api tests
+        run: bun run --filter @my-product/api test
+
+  mobile:
+    name: Mobile — analyze + test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.x'
+          channel: stable
+          cache: true
+
+      - name: Fetch Flutter deps
+        run: flutter pub get
+
+      - name: Static analysis
+        run: dart analyze
+
+      - name: Run tests
+        run: flutter test
