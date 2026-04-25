@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(unset DIRECT_URL)",
+      "Bash(unset DATABASE_URL)",
+      "Bash(bun run *)"
+    ]
+  }
+}
