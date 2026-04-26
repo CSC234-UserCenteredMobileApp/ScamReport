@@ -2,11 +2,32 @@
 
 This is a mobile product built on Flutter (app) + Elysia.js (backend on Bun) + a shared TypeBox contract package.
 
+## Product Context
+
+The **Scam Report Platform** is an Android-only application (MVP) that allows users to quickly verify suspicious phone numbers, URLs, or messages against a community-sourced scam database.
+- **Quick Verdicts**: Returns a colour-coded verdict (Scam, Suspicious, Safe, Unknown) within 3 seconds.
+- **AI Semantic Search**: Provides natural-language search over scam reports using RAG (Gemini + `pgvector`).
+- **Proactive Interception**: Share-sheet and clipboard scanning features on Android.
+
 ## Architecture
 
-- **`apps/mobile`**: Flutter app. Feature-first layout (`lib/features/<feature>/{data,domain,presentation}`).
+The project follows a monorepo structure with three main areas:
+- **`apps/mobile`**: Flutter app. Feature-first layout (`lib/features/<feature>/{data,domain,presentation}`). Uses Riverpod for state and `drift` for local SQLite caching.
 - **`apps/api`**: Elysia.js + Prisma backend. Feature-first layout (`src/features/<feature>/`).
 - **`packages/shared`**: TypeBox schemas shared between api and mobile.
+
+**Core Infrastructure:**
+- **Data Layer**: PostgreSQL on **Supabase** (Postgres 15) utilizing **`pgvector`** for semantic similarity search.
+- **Auth & Push**: **Firebase Authentication** (Google OAuth/Email) and **Firebase Cloud Messaging (FCM)** for status change alerts and announcements.
+- **AI/LLM**: **Gemini API** (`text-embedding-004`) for generating embeddings of scam reports.
+
+## Key Documentation
+
+Always refer to these files for detailed rules and specs:
+- **`PRODUCT-REQUIREMENTS.md`**: Authoritative source for product flows, user roles, and functional requirements.
+- **`DATABASE_DESIGN.md`**: Detailed schema definitions, enumerated types, and Row-Level Security (RLS) policies.
+- **`docs/architecture.md`**: High-level system design, external service mapping, and cross-app workflows.
+- **`HOW_TO_CONTRIBUTE.md`**: Development setup, branch conventions, and environment configuration.
 
 ## Contract-first Workflow
 
