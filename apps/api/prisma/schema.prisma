@@ -1,19 +1,20 @@
-// Prisma schema. Add models below and run `bun run prisma:migrate` to generate
-// a migration and `bun run prisma:generate` to regenerate the client.
+// Prisma schema for the Scam Report Platform.
+//
+// See DATABASE_DESIGN.md (repo root) for the canonical design rationale.
 //
 // v7 notes:
-// - No `url` here; v7 rejects it in the schema.
 // - The runtime URL (pooled — DATABASE_URL) is supplied to PrismaClient via
 //   the @prisma/adapter-pg driver in src/core/db/client.ts.
 // - The migration URL (direct — DIRECT_URL) is set in prisma.config.ts.
 //
-// Pattern:
-//
-// model User {
-//   id        String   @id @default(cuid())
-//   email     String   @unique
-//   createdAt DateTime @default(now())
-// }
+// What this schema models vs. what lives in raw SQL (migration.sql):
+// - Models, enums, FK relations, basic indexes  → here.
+// - Postgres extensions, citext (via @db.Citext), inet (via @db.Inet)  → here.
+// - vector(768) embedding column                → Unsupported() here, real
+//                                                  type in raw SQL.
+// - Partial / functional / ivfflat indexes      → raw SQL.
+// - Triggers (updated_at, status sync, push enqueue, ≤5 evidence files)  → raw SQL.
+// - RLS policies + current_firebase_uid() helper → raw SQL.
 
 generator client {
   provider = "prisma-client"
@@ -22,4 +23,311 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+// =============================================================================
+// Enums — mapped to lowercase Postgres enum types (see DATABASE_DESIGN.md §3)
+// =============================================================================
+
+enum UserRole {
+  user
+  admin
+
+  @@map("user_role")
+}
+
+enum PreferredLang {
+  th
+  en
+
+  @@map("preferred_lang")
+}
+
+enum ReportStatus {
+  pending
+  verified
+  rejected
+  flagged
+  withdrawn
+
+  @@map("report_status")
+}
+
+enum IdentifierKind {
+  phone
+  url
+  other
+
+  @@map("identifier_kind")
+}
+
+enum EvidenceKind {
+  image
+  pdf
+
+  @@map("evidence_kind")
+}
+
+enum ModerationActionKind {
+  approve
+  reject
+  flag
+  unflag
+
+  @@map("moderation_action")
+}
+
+enum VerdictLabel {
+  scam
+  suspicious
+  safe
+  unknown
+
+  @@map("verdict_label")
+}
+
+enum CheckInputKind {
+  phone
+  url
+  text
+
+  @@map("check_input_kind")
+}
+
+enum AnnouncementCategory {
+  fraud_alert
+  tips
+  platform_update
+
+  @@map("announcement_cat")
+}
+
+enum AnnouncementStatus {
+  draft
+  published
+  unpublished
+
+  @@map("announcement_stat")
+}
+
+enum ConsentKind {
+  registration
+  first_report_submission
+  privacy_policy
+  terms_of_service
+
+  @@map("consent_kind")
+}
+
+// =============================================================================
+// Tables
+// =============================================================================
+
+/// Internal user profile — one row per Firebase account. (DESIGN §4.1)
+model User {
+  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  firebaseUid       String        @unique @map("firebase_uid")
+  email             String?       @unique @db.Citext
+  displayName       String?       @map("display_name")
+  role              UserRole      @default(user)
+  preferredLanguage PreferredLang @default(th) @map("preferred_language")
+  createdAt         DateTime      @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt         DateTime      @default(now()) @map("updated_at") @db.Timestamptz()
+  deletedAt         DateTime?     @map("deleted_at") @db.Timestamptz()
+
+  consents        ConsentRecord[]
+  reports         Report[]
+  moderations     ModerationAction[]
+  announcements   Announcement[]
+  fcmDevices      FcmDevice[]
+  searchQueries   SearchQuery[]
+  checkLogs       CheckLog[]
+  deletionRequest AccountDeletionRequest?
+
+  @@index([role])
+  @@map("users")
+}
+
+/// Append-only PDPA consent log. (DESIGN §4.2)
+model ConsentRecord {
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String?     @map("user_id") @db.Uuid
+  consentType   ConsentKind @map("consent_type")
+  policyVersion String      @map("policy_version")
+  acceptedAt    DateTime    @default(now()) @map("accepted_at") @db.Timestamptz()
+  ipAddress     String?     @map("ip_address") @db.Inet
+  userAgent     String?     @map("user_agent")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("consent_records")
+}
+
+/// Reference taxonomy for scam categories. (DESIGN §4.3)
+model ScamType {
+  id           Int     @id @db.SmallInt
+  code         String  @unique
+  labelEn      String  @map("label_en")
+  labelTh      String  @map("label_th")
+  isActive     Boolean @default(true) @map("is_active")
+  displayOrder Int     @default(0) @map("display_order") @db.SmallInt
+
+  reports Report[]
+
+  @@map("scam_types")
+}
+
+/// The central content table. (DESIGN §4.4)
+model Report {
+  id                         String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  reporterId                 String?         @map("reporter_id") @db.Uuid
+  title                      String
+  description                String
+  scamTypeId                 Int             @map("scam_type_id") @db.SmallInt
+  targetIdentifier           String?         @map("target_identifier")
+  targetIdentifierKind       IdentifierKind? @map("target_identifier_kind")
+  targetIdentifierNormalized String?         @map("target_identifier_normalized") @db.Citext
+  status                     ReportStatus    @default(pending)
+  priorityFlag               Boolean         @default(false) @map("priority_flag")
+  rejectionRemark            String?         @map("rejection_remark")
+  createdAt                  DateTime        @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt                  DateTime        @default(now()) @map("updated_at") @db.Timestamptz()
+  verifiedAt                 DateTime?       @map("verified_at") @db.Timestamptz()
+
+  reporter User?    @relation(fields: [reporterId], references: [id], onDelete: SetNull)
+  scamType ScamType @relation(fields: [scamTypeId], references: [id])
+
+  evidenceFiles            EvidenceFile[]
+  moderations              ModerationAction[]
+  embedding                ReportEmbedding?
+  searchQueriesAsTopResult SearchQuery[]      @relation("SearchTopResult")
+
+  @@index([status, createdAt(sort: Desc)])
+  @@index([reporterId, createdAt(sort: Desc)])
+  @@index([scamTypeId])
+  @@map("reports")
+}
+
+/// Up to 5 files per report. Bytes live in Supabase Storage. (DESIGN §4.5)
+model EvidenceFile {
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  reportId    String       @map("report_id") @db.Uuid
+  storagePath String       @unique @map("storage_path")
+  kind        EvidenceKind
+  mimeType    String       @map("mime_type")
+  sizeBytes   BigInt       @map("size_bytes")
+  uploadedAt  DateTime     @default(now()) @map("uploaded_at") @db.Timestamptz()
+
+  report Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@map("evidence_files")
+}
+
+/// Immutable audit log. Append-only — no UPDATE/DELETE policy is granted to
+/// anyone, including admins. (DESIGN §4.6)
+model ModerationAction {
+  id        String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  reportId  String               @map("report_id") @db.Uuid
+  adminId   String?              @map("admin_id") @db.Uuid
+  action    ModerationActionKind
+  remark    String
+  createdAt DateTime             @default(now()) @map("created_at") @db.Timestamptz()
+
+  report Report @relation(fields: [reportId], references: [id], onDelete: Restrict)
+  admin  User?  @relation(fields: [adminId], references: [id], onDelete: SetNull)
+
+  @@index([reportId, createdAt(sort: Desc)])
+  @@map("moderation_actions")
+}
+
+/// Gemini text-embedding-004 vectors for semantic search. (DESIGN §4.7)
+model ReportEmbedding {
+  reportId     String                     @id @map("report_id") @db.Uuid
+  embedding    Unsupported("vector(768)")
+  contentHash  String                     @map("content_hash")
+  modelVersion String                     @map("model_version")
+  updatedAt    DateTime                   @default(now()) @map("updated_at") @db.Timestamptz()
+
+  report Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@map("report_embeddings")
+}
+
+/// Admin-published communications. (DESIGN §4.8)
+model Announcement {
+  id            String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  authorId      String?              @map("author_id") @db.Uuid
+  slug          String               @unique
+  title         String
+  body          String
+  category      AnnouncementCategory
+  status        AnnouncementStatus   @default(draft)
+  pushedToFcmAt DateTime?            @map("pushed_to_fcm_at") @db.Timestamptz()
+  publishedAt   DateTime?            @map("published_at") @db.Timestamptz()
+  createdAt     DateTime             @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt     DateTime             @default(now()) @map("updated_at") @db.Timestamptz()
+
+  author User? @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@map("announcements")
+}
+
+/// Per-device push tokens (a user may have multiple Android devices). (DESIGN §4.9)
+model FcmDevice {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  fcmToken   String   @unique @map("fcm_token")
+  appVersion String?  @map("app_version")
+  lastSeenAt DateTime @default(now()) @map("last_seen_at") @db.Timestamptz()
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("fcm_devices")
+}
+
+/// Server-side log of every POST /check call. (DESIGN §4.10)
+model CheckLog {
+  id              String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String?        @map("user_id") @db.Uuid
+  inputKind       CheckInputKind @map("input_kind")
+  inputNormalized String         @map("input_normalized") @db.Citext
+  inputHash       String         @map("input_hash")
+  verdict         VerdictLabel
+  matchCount      Int            @default(0) @map("match_count")
+  latencyMs       Int?           @map("latency_ms")
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz()
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([inputNormalized, createdAt(sort: Desc)])
+  @@map("check_logs")
+}
+
+/// Semantic-search abuse log. Registered users only. (DESIGN §4.11)
+model SearchQuery {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String?  @map("user_id") @db.Uuid
+  queryText    String   @map("query_text")
+  resultsCount Int      @map("results_count")
+  topResultId  String?  @map("top_result_id") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  user      User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  topResult Report? @relation("SearchTopResult", fields: [topResultId], references: [id], onDelete: SetNull)
+
+  @@map("search_queries")
+}
+
+/// Drives the 7-day purge worker. (DESIGN §4.12)
+model AccountDeletionRequest {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String    @unique @map("user_id") @db.Uuid
+  requestedAt DateTime  @default(now()) @map("requested_at") @db.Timestamptz()
+  purgeDueAt  DateTime  @map("purge_due_at") @db.Timestamptz()
+  purgedAt    DateTime? @map("purged_at") @db.Timestamptz()
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account_deletion_requests")
 }
