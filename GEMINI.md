@@ -9,16 +9,22 @@ The **Scam Report Platform** is an Android-only application (MVP) that allows us
 - **AI Semantic Search**: Provides natural-language search over scam reports using RAG (Gemini + `pgvector`).
 - **Proactive Interception**: Share-sheet and clipboard scanning features on Android.
 
+### Direction (v1.1)
+- **Android Only**: No iOS build or specific code paths.
+- **Reporter Statuses**: Strictly `Pending`, `Verified`, `Rejected`. An admin status of `flagged` maps to `Pending` in all reporter-facing views.
+- **Push Notifications**: Automatic FCM notifications for two cases: report status change (to reporter) and new announcements (to all). No topic subscriptions or user toggles.
+- **Official Scam Types**: `phone_impersonation`, `phishing_sms`, `fake_qr`, `ecommerce_fraud`, `investment`, `romance`.
+
 ## Architecture
 
 The project follows a monorepo structure with three main areas:
 - **`apps/mobile`**: Flutter app. Feature-first layout (`lib/features/<feature>/{data,domain,presentation}`). Uses Riverpod for state and `drift` for local SQLite caching.
-- **`apps/api`**: Elysia.js + Prisma backend. Feature-first layout (`src/features/<feature>/`).
+- **`apps/api`**: Elysia.js + Prisma v7 backend. Feature-first layout (`src/features/<feature>/`).
 - **`packages/shared`**: TypeBox schemas shared between api and mobile.
 
 **Core Infrastructure:**
 - **Data Layer**: PostgreSQL on **Supabase** (Postgres 15) utilizing **`pgvector`** for semantic similarity search.
-- **Auth & Push**: **Firebase Authentication** (Google OAuth/Email) and **Firebase Cloud Messaging (FCM)** for status change alerts and announcements.
+- **Auth & Push**: **Firebase Authentication** (Google OAuth/Email) and **Firebase Cloud Messaging (FCM)**.
 - **AI/LLM**: **Gemini API** (`text-embedding-004`) for generating embeddings of scam reports.
 
 ## Key Documentation
@@ -37,6 +43,21 @@ Every endpoint starts with a schema in `packages/shared`.
 3. Import in `apps/api/src/features/<name>/<name>.route.ts` and use as a validator.
 4. **CRITICAL:** Run `./scripts/codegen.sh` from the repo root to regenerate Dart types into `apps/mobile/lib/core/api_types/`.
 5. Consume the Dart types in `apps/mobile/lib/features/<feature>/data/`.
+
+## Common Tasks
+
+### Adding a new API endpoint
+1. Define the contract in `packages/shared/src/schemas/`. Re-export from `index.ts`.
+2. Create the route plugin at `apps/api/src/features/<feature>/<feature>.route.ts`. Use the shared schema.
+3. Register the plugin in `apps/api/src/index.ts`.
+4. Write a test at `apps/api/test/<name>.test.ts`.
+5. Run `./scripts/codegen.sh`.
+
+### Adding a new Flutter feature
+1. Create folders under `apps/mobile/lib/features/<feature>/`: `domain/`, `data/`, `presentation/`.
+2. Add files: `<feature>_entity.dart` (domain), `<feature>_repository.dart` (data), `<feature>_screen.dart` and `<feature>_providers.dart` (presentation).
+3. Wire routing in `apps/mobile/lib/core/router/app_router.dart`.
+4. Add tests under `apps/mobile/test/features/<feature>/`.
 
 ## Top-level Commands (run from repo root)
 

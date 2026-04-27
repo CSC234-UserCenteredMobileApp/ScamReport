@@ -1,11 +1,11 @@
 # GEMINI.md — `apps/mobile`
 
-Flutter app. **Feature-first layout**.
+Flutter app for Android. **Feature-first layout**.
 
 ## Layout & Patterns
 
 - **Feature-first**: `lib/features/<feature>/{data,domain,presentation}`.
-  - `domain/`: pure Dart entities + use cases. No Flutter imports.
+  - `domain/`: pure Dart entities + use cases. **No Flutter imports**.
   - `data/`: repositories, API clients.
   - `presentation/`: widgets + Riverpod providers.
 - **Core**: Contains theme, router (`GoRouter`), DI, and `api_types/` (generated Dart types).
@@ -23,13 +23,14 @@ Pick the layer that fits:
 - **AppDatabase (drift)** (`appDatabaseProvider`): Structured data like cache entries and drafts.
   - Run `dart run build_runner build` after editing tables.
 
-## Style Rules
+## Style & Design Rules
 
+- **Design System**: Use `VerdictPalette` extension for traffic-light colours (Scam, Suspicious, Safe, Unknown). **Do not hardcode hex values** in widgets.
 - **Small widgets**: Extract any widget over ~80 lines.
 - **Const constructors**: Use `const` wherever they compile.
 - **No business logic in widgets**: Push to domain / data layers.
 - **No `print`**: Lints block it. Use appropriate logging.
-- **Firebase**: Initialized at startup. FCM permission prompt fires at startup.
+- **Firebase**: Initialized at startup. FCM permission prompt fires at startup (can be deferred).
 
 ## Commands
 

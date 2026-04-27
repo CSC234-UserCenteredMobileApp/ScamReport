@@ -14,6 +14,7 @@ import '../di/auth.dart';
 // visitor hitting one is redirected to /login. Add to this list as
 // registered-user / admin features land.
 const _authRequired = <String>{
+  '/', // The home screen (currently ExampleScreen) requires sign-in.
   // future: '/search', '/submit', '/my-reports', '/mod', ...
 };
 

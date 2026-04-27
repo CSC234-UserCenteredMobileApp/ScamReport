@@ -4,7 +4,7 @@ The **contract layer** between `apps/mobile` and `apps/api`.
 
 ## Rules & Patterns
 
-- **TypeBox only**: `@sinclair/typebox` is the only runtime dependency. All schemas must be defined with it.
+- **TypeBox only**: `@sinclair/typebox` is the only runtime dependency. **Do not add** other validation or HTTP libraries.
 - **Define schemas**: Use `Type.Object({...})`.
 - **Export static types**: Export the companion TS type via `export type X = Static<typeof XSchema>;`.
 - **Re-export**: Every new schema file must be re-exported from `src/index.ts`.
