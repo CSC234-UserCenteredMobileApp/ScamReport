@@ -3,7 +3,8 @@
     "allow": [
       "Bash(unset DIRECT_URL)",
       "Bash(unset DATABASE_URL)",
-      "Bash(bun run *)"
+      "Bash(bun run *)",
+      "WebFetch(domain:api.anthropic.com)"
     ]
   }
 }
