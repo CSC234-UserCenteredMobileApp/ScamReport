@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| **Document Version** | 1.1 |
+| **Document Version** | 1.2 |
 | **Status** | Draft — for team review |
-| **Date issued** | 2026-04-26 |
+| **Date issued** | 2026-04-28 |
 | **Course** | CSC231 Agile Project Management |
 | **Institution** | King Mongkut's University of Technology Thonburi (KMUTT), School of Information Technology |
 | **Team** | A.P (lead), T.P, B.S, S.P, Y.R |
@@ -165,7 +165,7 @@ The admin-facing queue is the primary tool for keeping the database trustworthy.
 - The queue auto-refreshes; a badge on the tab shows the current pending count.
 
 **Report review screen:**
-When an admin taps a report, they see the full submission: title, description, scam type, target identifier, and evidence files (viewable inline). Three actions are available:
+When an admin taps a report, they see the **scam content only** — title, description, scam type, target identifier, and evidence files (viewable inline). The reporter's identity is **never displayed to the admin**: no user ID, no display name, no email, no handle, no avatar. The API enforces this by stripping reporter fields from admin response payloads; the database retains the reporter linkage for legal traceability and abuse investigation, but it is never returned to the admin client. Three actions are available:
 
 | Action | Result | Remark required? |
 |---|---|---|
@@ -175,7 +175,7 @@ When an admin taps a report, they see the full submission: title, description, s
 
 **"Flag for discussion"** is not an escalation to a higher role — there is no higher role. It is a signal to other admins on the team that this report needs a group decision before action is taken. Flagged reports appear at the top of the queue with a distinct indicator.
 
-**Audit trail:** Every action (approve, reject, flag, un-flag) is recorded with the admin's ID, timestamp, and remark. This log is visible to all admins on the report detail screen but is not public.
+**Audit trail:** Every action (approve, reject, flag, un-flag) is recorded with the **acting admin's** ID, timestamp, and remark. The reporter's ID is never written to or shown in this log. The log is visible to all admins on the report detail screen but is not public.
 
 ---
 
@@ -270,6 +270,7 @@ Requirement IDs map to screens in §4.
 | FR-1.3 | The system shall allow returning users to sign in and maintain a session via Firebase ID tokens. *(P-01)* |
 | FR-1.4 | The system shall gate admin-only screens based on the `admin` role flag; non-admin accounts must never reach these screens. |
 | FR-1.5 | The system shall allow a user to delete their account, triggering purge of personal data within 7 days while retaining anonymised report content. |
+| FR-1.6 | On Android, the system shall offer biometric (fingerprint / face) re-authentication as a convenience method to unlock a stored Firebase session token. Biometric is a fallback over password, never a replacement. Re-prompt on cold start; not on background→foreground unless > 5 minutes have elapsed. Web platform does not support biometric. *(P-12)* |
 
 ### 5.2 Quick Verdict Check
 
@@ -307,14 +308,14 @@ Requirement IDs map to screens in §4.
 | FR-5.1 | Registered users shall submit a report with: title (required), description (required), scam type (required), target identifier (optional), and up to 5 evidence files (optional). *(P-10)* |
 | FR-5.2 | The submit button shall remain disabled until all required fields are filled. *(P-10)* |
 | FR-5.3 | Before final submission, the user shall see and explicitly confirm a consent notice stating that the report content (not their identity) will be made public if approved. *(P-10)* |
-| FR-5.4 | Submitted reports shall enter `Pending` status and appear in My Reports immediately after submission. *(P-11)* |
+| FR-5.4 | Submitted reports shall enter `Pending` status and appear in My Reports immediately after submission. Submission requires network connectivity; there is no offline-submit queue. *(P-11)* |
 | FR-5.5 | Users shall be able to edit or withdraw a report only while it is in `Pending` status. *(P-11)* |
 
 ### 5.6 My Reports
 
 | ID | Requirement |
 |---|---|
-| FR-6.1 | The My Reports screen shall display all of the user's submissions grouped by status: Pending, Verified, Rejected. Reports that are internally `Flagged` by an admin shall display as `Pending` to the reporter. *(P-11)* |
+| FR-6.1 | The My Reports screen shall display all of the user's submissions grouped by status: Pending, Verified, Rejected. Reports that are internally `Flagged` by an admin shall display as `Pending` to the reporter. The list is served from a Firestore mirror of the per-user collection (`my-reports/{uid}/items`) with offline persistence enabled, so cached entries remain readable without network and status changes propagate in real time on reconnect. *(P-11)* |
 | FR-6.2 | For reports in `Rejected` status, the admin's remark shall be visible to the reporter and to no one else. *(P-11)* |
 
 ### 5.7 Moderation
@@ -324,16 +325,17 @@ Requirement IDs map to screens in §4.
 | FR-7.1 | Administrators shall view all `Pending` and `Flagged` reports in the moderation queue, sorted by age (oldest first) by default, with a secondary sort by priority flag. *(A-01)* |
 | FR-7.2 | A badge on the admin tab shall display the current count of pending reports. *(A-01)* |
 | FR-7.3 | On a report review screen, an admin shall take exactly one of three actions: Approve, Reject, or Flag for Discussion — each requiring a remark. *(A-02)* |
-| FR-7.4 | Approving a report shall immediately set its status to `Verified` and make it visible on the public feed. *(A-02)* |
+| FR-7.4 | Approving a report shall immediately set its status to `Verified` and make it visible on the public feed. The admin response payload for any report (review screen, queue, detail) shall **not** contain the reporter's user ID, email, display name, handle, or any other field that could identify the reporter. *(A-02)* |
 | FR-7.5 | Flagging a report shall set its status to `Flagged`, move it to the top of the moderation queue with a distinct visual indicator, and preserve it for further team review. There is no higher admin tier to escalate to. *(A-02)* |
 | FR-7.6 | Every admin action shall be recorded in an immutable audit log with: admin user ID, action taken, timestamp, and remark. The log is visible to all admins on the report detail screen and is never shown publicly. *(A-02)* |
 | FR-7.7 | Administrators shall create, edit, publish, unpublish, and delete announcements. *(A-03)* |
+| FR-7.8 | The API shall enforce reporter anonymity for all admin-facing endpoints (`/admin/*`, `/mod/*`). The database may retain the reporter linkage for legal traceability and abuse investigation, but the response payload to admin clients shall never contain reporter identity. The `security-reviewer` agent verifies this on every PR touching admin routes. *(A-01, A-02)* |
 
 ### 5.8 Communications and Notifications
 
 | ID | Requirement |
 |---|---|
-| FR-8.1 | Anyone shall view the announcements list, filterable by category. *(P-05)* |
+| FR-8.1 | Anyone shall view the announcements list, filterable by category. The list is served from a Firestore mirror of the `alerts` collection with offline persistence enabled, so cached entries remain readable without network and new announcements arrive via real-time listener. *(P-05)* |
 | FR-8.2 | Anyone shall open an announcement's detail page at a shareable URL. *(P-06)* |
 | FR-8.3 | When an admin approves or rejects a report, the system shall automatically send an FCM push notification to the report's submitter indicating the outcome (Verified or Rejected). |
 | FR-8.4 | When an admin publishes an announcement, the system shall automatically send an FCM push notification to all registered users. |
@@ -392,18 +394,30 @@ Requirement IDs map to screens in §4.
 - If the network is unavailable, the app shows an offline banner.
 - Recently cached verdicts (last 100) are shown with a "cached result" label.
 - The verdict for a new, uncached item cannot be retrieved offline; the app shows a clear "No connection — try again" message rather than a false result.
+- **Alerts** (announcements list + detail) and **My Reports** are served from a Firestore mirror with offline persistence enabled. Cached entries remain readable without network; updates propagate in real time on reconnect. All other features (verdict, feed, AI search, submit, moderation) require connectivity.
+- There is no offline submission queue. Submitting a report requires network; the user is shown a clear retry message if connectivity is unavailable.
 
 ### 6.6 Platform Scope
 
-- **Android is the only supported platform** for this release. There is no iOS build, no iOS-specific code path, and no APNs integration.
+- **Primary platform: Android.** The full feature set (verdict, feed, AI search, submit, my-reports, alerts, biometric login, moderation, announcement editor, share-target, clipboard scanner) ships on Android.
+- **Secondary platform: Flutter Web — public surface only.** Web ships these screens only: Splash / Login (P-01), Registration (P-02), Verified Feed (P-03), Report Detail (P-04), Announcements List (P-05), Announcement Detail (P-06), Privacy (P-07), Terms (P-08), Verdict (P-13), Onboarding overlay. Web does **not** ship: biometric login (no `local_auth` web implementation), Submit Report (P-10), My Reports (P-11), AI Search (P-09), all admin screens (A-01..A-03), share-target, clipboard scanner, FCM background handlers. Mobile non-web features are gated by `kIsWeb` checks.
+- **Out: iOS** — no iOS build, no iOS-specific code path, no APNs integration, no Apple OAuth.
 - The app must not use Android Accessibility Services or system-overlay windows (platform policy compliance).
 
 ### 6.7 Code Quality
 
-- Architecture follows Feature-first + Clean Architecture (as defined in `GEMINI.md`).
+- Architecture follows Feature-first + Clean Architecture (as defined in `GEMINI.md` and `docs/architecture.md`).
 - All repository methods return `Result<T, Failure>`; no uncaught exceptions cross the domain boundary.
-- Target: 100% unit-test coverage for `domain/` and `data/` layers; widget tests for all critical UI paths.
+- **Coverage target: ≥ 80% line coverage for every package** (`apps/mobile`, `apps/api`, `packages/shared`). CI fails any PR that drops a package below threshold. Widget tests are required for every screen; domain unit tests are required for every use-case; route tests are required for every API endpoint.
 - CI must be green before any merge to main.
+- Static analysis: `dart analyze --fatal-infos` (mobile) and `bun run typecheck` (api + shared) gate every PR.
+
+### 6.8 Reliability
+
+- **Crash reporting:** Firebase Crashlytics is wired in `main.dart` to capture both Flutter framework errors (`FlutterError.onError`) and uncaught zone errors. Production builds upload symbols on release.
+- **Feature flags:** Every newly-shipped feature is wrapped in a Firebase Remote Config boolean flag, default-off in production until promoted. The flag service lives at `apps/mobile/lib/core/feature_flags/feature_flags.dart`.
+- **Rollback plan:** A misbehaving feature is disabled by flipping its Remote Config flag from the Firebase Console — no app redeploy required. Migration revert + on-call procedure documented in `docs/rollback-plan.md`.
+- **Observability targets:** Crash-free user rate ≥ 99% per release; every crash session is reproducible from the Crashlytics dashboard within 24 hours.
 
 ---
 
@@ -424,15 +438,22 @@ The following are explicitly excluded and should not be designed or built until 
 
 ## 8. Open Questions
 
-These must be resolved before Sprint 1 begins. Outcomes should be recorded in v1.1 of this document.
+Resolutions are recorded inline. New open questions added in subsequent revisions go below the resolved table.
+
+### 8.1 Resolved
+
+| # | Question | Resolution (v1.2, 2026-04-28) |
+|---|---|---|
+| OQ-1 | **Reporter display to admins / public** | **Fully anonymised.** Admin views and audit logs never display reporter identity (see FR-7.4 + FR-7.8). Public feed and report-detail page already strip reporter (FR-3.4). DB retains reporter linkage for legal/abuse traceability only; never returned to any client. |
+| OQ-3 | **Regional / province tagging on submission** | **Out of scope this release.** No province field added. Future release may revisit. |
+| OQ-4 | **Offline submission queue** | **No queue.** Submission requires network connectivity (FR-5.4). Aligns with Firestore's read-only scope (alerts + my-reports mirror only). |
+| OQ-5 | **`POST /check` API contract** | **Locked.** Request schema `{type: 'phone' \| 'url' \| 'text', payload: string, meta?: object}`. Response schema `{verdict: 'scam' \| 'suspicious' \| 'safe' \| 'unknown', matched_count: number, matches: ReportSummary[]}`. Authoritative TypeBox source: `packages/shared/check.ts` (created in S2). |
+
+### 8.2 Still open
 
 | # | Question | Owner | Impact |
 |---|---|---|---|
-| OQ-1 | **Reporter display in public feed** — do we show a masked username (e.g. "User_4f2a") or fully anonymise every report? | Product + Legal (B.S) | Affects Report Detail page design and API response shape |
 | OQ-2 | **Evidence retention after rejection** — how long do we keep evidence files for rejected reports before purging? | Legal + Backend (A.P) | Affects Supabase storage policy and PDPA compliance |
-| OQ-3 | **Regional tagging** — do we add a province field to the submission form to power a future "scam near you" view? | Product | One extra field at submission; affects feed filter design |
-| OQ-4 | **Offline report queue** — if the user submits a report while offline, do we queue it for retry on reconnection, or require connectivity at submission time? | UX + Backend | Affects submission flow and local storage design |
-| OQ-5 | **`POST /check` API contract** — confirm the accepted schema `{type, payload, meta?}` and the exact verdict response shape with the backend team. | Backend (A.P) | Blocks all proactive feature and verdict screen implementation |
 
 ---
 
@@ -462,11 +483,12 @@ These must be resolved before Sprint 1 begins. Outcomes should be recorded in v1
 |---|---|---|---|
 | 1.0 | 2026-04-25 | Team | Initial PRD derived from BRD v2.0; reframed around product behaviour. |
 | 1.1 | 2026-04-26 | Team | Simplified: report statuses reduced to Pending/Verified/Rejected (reporter-facing); push notifications scoped to two cases (status change → reporter, announcement → all users); platform narrowed to Android only; Apple OAuth removed; topic subscriptions removed; OQ-6 and OQ-7 resolved and closed. |
+| 1.2 | 2026-04-28 | Team | Enterprise-Grade rubric alignment. Added: Flutter Web public surface (§6.6), biometric login FR-1.6, Firestore mirror for alerts (FR-8.1) and my-reports (FR-6.1) with offline-first persistence (§6.5), full reporter anonymisation in admin views (FR-7.4 + FR-7.8 + §3.6), reliability section (§6.8) with Crashlytics + Remote Config feature flags + rollback. Coverage target unified to ≥ 80% line all packages (§6.7). OQ-1, OQ-3, OQ-4, OQ-5 resolved. Submit requires connectivity (FR-5.4). |
 
-**Sign-off required before Sprint 1:**
+**Sign-off required before Sprint 2:**
 - [ ] Team consensus (A.P, T.P, B.S, S.P, Y.R)
-- [ ] `POST /check` API contract confirmed (A.P)
-- [ ] Open Questions OQ-1 through OQ-5 recorded as resolved or deferred
+- [ ] `POST /check` API contract reflected in `packages/shared/check.ts` (A.P)
+- [ ] Multi-agent workflow live and a sample PR carries the agent trail block (P1)
 
 ---
 
