@@ -1,0 +1,22 @@
+9:30
+Report a scam
+Title *
+Description *
+0/500 characters
+Scam type *
+Phone Impersonation
+Phishing SMS
+Fake QR Code
+E-commerce Fraud
+Investment Fraud
+Romance Scam
+Target identifier
+Optional — what was the scammer's number, link, or account?
+Evidence (optional)
+Add up to 5 images or PDFs
+Continue
+Home
+Feed
+Report
+Alerts
+Me

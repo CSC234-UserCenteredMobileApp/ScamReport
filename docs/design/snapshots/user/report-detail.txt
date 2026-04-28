@@ -1,0 +1,20 @@
+9:30
+Verified
+Phishing SMS
+Fake Kerry parcel SMS with phishing link
+ Verified 2026-04-22
+ 142 reports
+⚠ REPORTED IDENTIFIER
+kerry-th-track[.]net
+WHAT HAPPENED
+A widely-circulated SMS scam impersonating Kerry Express delivery. The message claims a parcel is being held due to incomplete address details, with a link that prompts users to log in and enter card details on a counterfeit page. Multiple victims have reported card fraud within hours of submitting credentials.
+EVIDENCE
+Screenshot 1
+Screenshot 2
+Report a similar scam
+The reporter's identity is never shown publicly. Only the scam content above is shared.
+Home
+Feed
+Report
+Alerts
+Me

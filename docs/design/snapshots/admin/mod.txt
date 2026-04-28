@@ -1,0 +1,47 @@
+9:30
+Moderation queue
+5
+PENDING
+1
+FLAGGED
+12h
+AVG AGE
+Oldest first
+Priority flag
+Phishing SMS
+2h ago
+Fake delivery confirmation OTP request
+ User_3a91
+ 3 evidence
+Review
+Flagged
+Romance Scam
+4h ago
+Romance scam asking for emergency wire
+ User_be07
+ 5 evidence
+Review
+Team note: Need to verify if persona matches earlier r-2210 report.
+Phone Impersonation
+12h ago
+Caller from "MEA" demanding meter fee
+ User_2c14
+ 1 evidence
+Review
+Investment Fraud
+16h ago
+Crypto giveaway page using Elon Musk photo
+ User_91fa
+ 2 evidence
+Review
+Fake QR
+20h ago
+PromptPay QR mismatch on local cafe poster
+ User_5d20
+ 4 evidence
+Review
+Home
+Feed
+Moderate
+Alerts
+Me

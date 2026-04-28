@@ -1,0 +1,22 @@
+9:30
+Review report
+Pending • ago
+Phishing SMS
+Fake Kerry parcel SMS with phishing link
+Submitted by • 2026-04-22
+DESCRIPTION
+Caller claimed to be from delivery service confirming an order. Asked the user to share an OTP "to verify the package handover." The user pressed for details — caller hung up. The number is registered to a SIM activated 3 days ago and has appeared in two earlier rejected reports.
+TARGET IDENTIFIER
++66 8 4419 2270
+EVIDENCE ()
+AUDIT TRAIL
+Submitted
+2026-04-22
+Reject
+Flag
+Approve
+Home
+Feed
+Moderate
+Alerts
+Me
