@@ -1,0 +1,40 @@
+# CODEOWNERS — ScamReport
+#
+# Auto-routes review requests when a PR touches a path. Last-matching rule
+# wins per path. Tied to the team mapping locked on 2026-04-28 (see
+# `docs/sprint-2.md` and the term-assignment delivery plan).
+#
+# NOTE: GitHub usernames here are placeholders matching team initials.
+# A.P (Orchestrator + Infra) must replace each `@A.P`/`@T.P`/etc. with the
+# actual GitHub login before merging this file. Until then, GitHub will warn
+# that the owners do not match real users; reviews still get routed manually.
+
+# Default — A.P approves anything not otherwise matched.
+*                                       @A.P
+
+# Backend / contract / DB — T.P + S.P co-own; A.P backstop.
+apps/api/**                             @T.P @S.P @A.P
+packages/shared/**                      @T.P @S.P @A.P
+prisma/**                               @T.P @S.P @A.P
+
+# Mobile — Y.R + B.S co-own; A.P backstop.
+apps/mobile/**                          @Y.R @B.S @A.P
+
+# Tests — S.P (integration owner) signs off in addition to area owners.
+**/*.test.ts                            @S.P
+**/*_test.dart                          @S.P
+apps/mobile/integration_test/**         @S.P
+apps/mobile/test/**                     @S.P
+apps/api/test/**                        @S.P
+
+# Infra / security / docs — A.P. Security-touching files also pull in S.P.
+.github/**                              @A.P
+firestore.rules                         @A.P @S.P
+firebase.json                           @A.P
+firestore.indexes.json                  @A.P
+.claude/**                              @A.P
+docs/**                                 @A.P
+CODEOWNERS                              @A.P
+PRODUCT-REQUIREMENTS.md                 @A.P
+DATABASE_DESIGN.md                      @A.P @T.P @S.P
+SECURITY.md                             @A.P @S.P
