@@ -1,12 +1,12 @@
 # ScamReport
 
-ScamReport is a mobile product for reporting and tracking scam incidents, built on Flutter + Elysia.js with a shared TypeBox contract layer.
+ScamReport is a mobile product for reporting and tracking scam incidents, built on Flutter + Elysia.js with a shared TypeBox contract layer. **Primary platform: Android.** A Flutter Web build ships the public surface only (verdict, feed, alerts, login, legal). Backend uses Postgres (Prisma) as system of record with a narrow Firestore mirror for offline-first reads of `alerts` and `my-reports`.
 
 ## Tech stack
 
 | Layer | Tools |
 | --- | --- |
-| **Mobile** | Flutter 3.27, Riverpod, go_router, `drift` (SQLite), `shared_preferences`, `flutter_secure_storage`, Firebase (Auth, FCM, Analytics, Crashlytics) |
+| **Mobile** | Flutter 3.27, Riverpod, go_router, `drift` (SQLite), `shared_preferences`, `flutter_secure_storage`, `local_auth` (biometric, Android only), Firebase (Auth, FCM, Analytics, Crashlytics, **Cloud Firestore** for `alerts` + `my-reports`, **Remote Config** for feature flags) |
 | **Backend** | Elysia.js on Bun, Prisma v7 with `@prisma/adapter-pg`, Supabase Postgres + Storage, Firebase Admin, Gemini API |
 | **Contract** | TypeBox schemas in `packages/shared` — used as Elysia validators on the api side and as the source for Dart codegen on mobile |
 
@@ -41,7 +41,7 @@ bun run prisma:generate
 
 # 5. Place Firebase config files
 #    Android: apps/mobile/android/app/google-services.json
-#    iOS:     apps/mobile/ios/Runner/GoogleService-Info.plist
+#    Web:     apps/mobile/web/firebase-config.js (per Firebase Hosting setup)
 #    Backend: apps/api/firebase-service-account.json
 
 # 6. Run dev (api + mobile concurrently)
@@ -50,7 +50,10 @@ bun run dev
 
 ## Documentation
 
+- [`PRODUCT-REQUIREMENTS.md`](./PRODUCT-REQUIREMENTS.md) — what the product does (functional + non-functional)
 - [`docs/architecture.md`](./docs/architecture.md) — how the three pieces fit together, contract-first workflow, testing strategy
+- [`docs/ai-workflow.md`](./docs/ai-workflow.md) — multi-agent workflow (engineer / architect / qa / security-reviewer); writer ≠ approver enforcement
+- [`docs/design/`](./docs/design/index.md) — per-screen design specs (tokens, layout, states, role variants)
 - [`HOW_TO_CONTRIBUTE.md`](./HOW_TO_CONTRIBUTE.md) — first-run, where to add things, branch / PR conventions
 - [`docs/decisions/`](./docs/decisions/) — Architecture Decision Records (ADRs)
 

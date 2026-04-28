@@ -4,15 +4,20 @@ This is a mobile product built on Flutter (app) + Elysia.js (backend on Bun) + a
 
 ## Product Context
 
-The **Scam Report Platform** is an Android-only application (MVP) that allows users to quickly verify suspicious phone numbers, URLs, or messages against a community-sourced scam database.
+The **Scam Report Platform** primarily targets Android (full feature set) with a Flutter Web build that ships only the public surface (verdict, feed, alerts, login, legal). It allows users to quickly verify suspicious phone numbers, URLs, or messages against a community-sourced scam database.
 - **Quick Verdicts**: Returns a colour-coded verdict (Scam, Suspicious, Safe, Unknown) within 3 seconds.
 - **AI Semantic Search**: Provides natural-language search over scam reports using RAG (Gemini + `pgvector`).
 - **Proactive Interception**: Share-sheet and clipboard scanning features on Android.
 
-### Direction (v1.1)
-- **Android Only**: No iOS build or specific code paths.
+### Direction (v1.2, 2026-04-28)
+- **Platforms**: Android primary (full feature set). Flutter Web public-surface only — no biometric, no submit, no admin on Web. No iOS.
 - **Reporter Statuses**: Strictly `Pending`, `Verified`, `Rejected`. An admin status of `flagged` maps to `Pending` in all reporter-facing views.
+- **Reporter Anonymity**: Admin views and audit logs **never** display reporter identity. API strips reporter fields from `/admin/*` and `/mod/*` responses.
 - **Push Notifications**: Automatic FCM notifications for two cases: report status change (to reporter) and new announcements (to all). No topic subscriptions or user toggles.
+- **Firestore (narrow scope)**: `alerts` + `my-reports/{uid}/items` mirror only — read-only on the client, server-only writes via admin SDK. Postgres is system of record.
+- **Biometric**: Android `local_auth` fallback for re-unlock; not on Web.
+- **Feature flags**: Firebase Remote Config; new features default-off in prod.
+- **Coverage target**: ≥ 80% line coverage all packages; CI gate enforces.
 - **Official Scam Types**: `phone_impersonation`, `phishing_sms`, `fake_qr`, `ecommerce_fraud`, `investment`, `romance`.
 
 ## Architecture
@@ -94,6 +99,7 @@ Every endpoint starts with a schema in `packages/shared`.
 
 - **api:** `bun --filter @my-product/api test` must pass if api was touched.
 - **mobile:** `cd apps/mobile && dart analyze && flutter test` must pass if mobile was touched.
+- **Coverage:** `flutter test --coverage` and `bun test --coverage` must hit ≥ 80% line per package; CI fails any drop.
 - **Manual:** Manually exercise the affected flow on at least one platform.
 
 ## Workspace Specific Rules

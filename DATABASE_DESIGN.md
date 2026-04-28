@@ -2,19 +2,30 @@
 
 | | |
 |---|---|
-| **Document Version** | 1.1 |
+| **Document Version** | 1.2 |
 | **Status** | Draft — for team review |
-| **Date issued** | 2026-04-26 |
-| **Derived from** | PRD v1.1 (2026-04-26), BRD v2.0 (2026-04-23) |
-| **Target backend** | Supabase Postgres 15 + `pgvector` |
+| **Date issued** | 2026-04-28 |
+| **Derived from** | PRD v1.2 (2026-04-28), BRD v2.0 (2026-04-23) |
+| **Target backend** | Supabase Postgres 15 + `pgvector` (system of record), Firebase Cloud Firestore (read-only mirror for `alerts` + `my-reports`) |
 
 > **Scope of this document:** schema design (tables, columns, types, constraints, indexes, RLS posture, retention rules) sufficient to start Sprint 1 backend work. SQL migrations are separate deliverables.
 
+> **Polyglot persistence note:** Postgres remains the system of record for **all** tables in this document. Firestore mirrors **only** two read surfaces — `alerts` (announcements) and `my-reports/{uid}/items` (per-user submission history) — to provide offline-first reads and real-time listener UI on mobile. Firestore is never authoritative; on any divergence Postgres wins. Mirror writes are server-only (admin SDK), never from the client. See `docs/architecture.md` "Firestore mirror" section for the sync worker shape and `firestore.rules` for the security policy.
+
 ---
 
-## 0. What Changed in v1.1
+## 0. What Changed
 
-Tracking the deltas from DB design v1.0 in one place so reviewers can focus their attention.
+### v1.2 (2026-04-28)
+
+| Area | v1.1 | v1.2 | Why |
+|---|---|---|---|
+| Polyglot persistence | Postgres only | Postgres + Firestore mirror (read-only, `alerts` + `my-reports/{uid}/items`) | PRD v1.2 §6.5: offline-first reads + real-time listeners for two surfaces. Postgres still authoritative; **no schema change** to Postgres. |
+| Reporter visibility in admin payloads | Reporter ID present in `/admin/*` responses | Reporter fields stripped server-side from all `/admin/*` and `/mod/*` responses | PRD v1.2 FR-7.4 + FR-7.8 / OQ-1 resolution. **No schema change** — `reports.reporter_user_id` stays for legal traceability; only the API serializer changes. |
+| Web platform | none | Flutter Web public surface (verdict, feed, alerts, login). No DB surface change — same Postgres reads, no Firestore writes from web | PRD v1.2 §6.6. |
+| Open questions | OQ-1..5 open | OQ-1, OQ-3, OQ-4, OQ-5 resolved; OQ-2 still open | PRD v1.2 §8. |
+
+### v1.1 (2026-04-26)
 
 | Area | v1.0 | v1.1 | Why |
 |---|---|---|---|

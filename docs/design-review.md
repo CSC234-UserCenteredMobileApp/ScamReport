@@ -2,6 +2,10 @@
 
 > **Per-screen specs:** see [`docs/design/index.md`](./design/index.md). This file stays the canonical reference for tokens, screen inventory, flows, and team-level decisions; `docs/design/` is the per-screen depth (layout / states / interactions / role variants) distilled from the prototype.
 
+> **Platform note (PRD v1.2):** The full screen inventory below targets **Android**. The **Flutter Web** build ships only the public surface — Splash/Login (P-01, P-02), Verified Feed (P-03), Report Detail (P-04), Announcements (P-05, P-06), Privacy / Terms (P-07, P-08), Verdict (P-13), Onboarding overlay. Web does not ship Submit (P-10), My Reports (P-11), AI Search (P-09), Moderation (A-01, A-02), Announcement Editor (A-03), biometric login, share-target, or the clipboard scanner. Platform-specific UI (biometric toggle on Settings, clipboard banner) is gated by `kIsWeb` checks at presentation layer.
+
+> **Reporter anonymity (PRD v1.2 FR-7.4 + FR-7.8):** The mod queue (A-01) and admin review (A-02) screens **must not** display reporter identity — no user ID, no display name, no email, no avatar, no masked handle. The previous `User_3a91`-style mask shown in the prototype is **no longer accepted**; admin-facing report cards show scam content only. The API enforces this server-side.
+
 **Source:** Claude Design handoff bundle (received 2026-04-26).
 Design tool URL: `https://api.anthropic.com/v1/design/h/GMhLuv4UPDeZgCDxLDgTLg?open_file=ScamReport+Prototype.html` (auth-protected; expand from claude.ai if you need to re-open).
 
@@ -111,7 +115,7 @@ Admin uses `announcement-editor` → publish → all registered users receive an
 | §6.4 colour is never the only differentiator | Colour + icon + label everywhere verdict appears | ✓ aligned |
 | §6.4 Thai is default | Tweak default is `lang: 'en'` in this prototype, but I18N has full Thai strings | ⚠️ flip the default in the Flutter app |
 | Scam types taxonomy (PRD §3.4 e.g.) | 6 types: phone_imp / phishing_sms / fake_qr / ecommerce / investment / romance | ⚠️ DB seed has 5 different keys |
-| OQ-1 reporter display | Mod queue shows masked usernames (`User_3a91`) | ⚠️ implicitly resolved — team should ratify |
+| OQ-1 reporter display | Mod queue shows masked usernames (`User_3a91`) | ❌ **overridden by PRD v1.2** — admin views are now fully anonymised. Strip masked handles when implementing A-01 / A-02. |
 | Tweaks panel | Dev tooling only; not part of app | ❌ do not implement |
 
 ---
