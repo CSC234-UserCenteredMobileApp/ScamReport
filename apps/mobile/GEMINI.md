@@ -26,6 +26,9 @@ Pick the layer that fits:
 ## Style & Design Rules
 
 - **Design System**: Use `VerdictPalette` extension for traffic-light colours (Scam, Suspicious, Safe, Unknown). **Do not hardcode hex values** in widgets.
+- **Design Docs**: Mandatory reading **before** writing code:
+  - `docs/design/components.md`: Reusable widget catalogue.
+  - `docs/design/screens/<screen>.md`: Specific screen specifications.
 - **Small widgets**: Extract any widget over ~80 lines.
 - **Const constructors**: Use `const` wherever they compile.
 - **No business logic in widgets**: Push to domain / data layers.
