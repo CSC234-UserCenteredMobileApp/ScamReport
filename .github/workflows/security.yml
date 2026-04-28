@@ -37,7 +37,7 @@ jobs:
           gitleaks version
 
       - name: Run gitleaks
-        run: gitleaks detect --no-banner --redact --verbose --exit-code 1
+        run: gitleaks detect --config=.gitleaks.toml --no-banner --redact --verbose --exit-code 1
 
   bun-audit:
     name: Dependency audit (bun audit)
