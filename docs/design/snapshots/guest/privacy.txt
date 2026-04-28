@@ -1,0 +1,26 @@
+9:30
+Privacy Policy
+
+Last updated: April 25, 2026
+
+1. What we collect
+
+We collect the email address you sign up with, content of reports you submit, and search queries to monitor for abuse. We never collect your contact list, location history, or SMS message bodies.
+
+2. How we use it
+
+Reports approved by moderators are shared publicly without your identity. Search queries are logged per user for abuse detection only.
+
+3. Your rights (PDPA)
+
+Under Thailand's PDPA you may request access, correction, or deletion of your personal data. We purge personal data within 7 days of an account deletion request.
+
+4. On-device processing
+
+SMS smishing detection (Android only) extracts URLs and phone numbers from messages on your device. Only the extracted identifiers are sent to our servers — never the raw SMS body.
+
+Home
+Feed
+Report
+Alerts
+Me

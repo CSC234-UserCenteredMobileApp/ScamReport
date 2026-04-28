@@ -4,7 +4,11 @@
       "Bash(unset DIRECT_URL)",
       "Bash(unset DATABASE_URL)",
       "Bash(bun run *)",
-      "WebFetch(domain:api.anthropic.com)"
+      "WebFetch(domain:api.anthropic.com)",
+      "Bash(awk 'NR==182' \"/home/symphony/Documents/ScamReport Prototype _standalone_guest.html\")",
+      "Bash(awk 'NR==175 {print length\\($0\\); exit}' \"/home/symphony/Documents/ScamReport Prototype _standalone_guest.html\")",
+      "Bash(awk 'NR==179 {print length\\($0\\); exit}' \"/home/symphony/Documents/ScamReport Prototype _standalone_guest.html\")",
+      "Bash(awk 'NR==183 {print length\\($0\\); exit}' \"/home/symphony/Documents/ScamReport Prototype _standalone_guest.html\")"
     ]
   }
 }

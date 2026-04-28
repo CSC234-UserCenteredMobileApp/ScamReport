@@ -1,0 +1,15 @@
+9:30
+Fraud Alert
+Surge in fake Songkran-themed parcel SMS scams
+2026-04-23 • Posted by ScamReport Team
+Over the past 72 hours, we have verified 142 reports of an SMS scam impersonating Kerry, Flash, and J&T Express. Messages typically read: "Your parcel could not be delivered. Confirm your address: [link]". The links lead to a near-identical clone of the real courier login page.
+
+What to do:
+• Never tap a link in a delivery SMS. Open the courier app or website directly.
+• If you have already entered card details, contact your bank immediately to freeze the card.
+• Forward suspicious SMS to 1185 (TruePalice) or report it here in the app.
+Home
+Feed
+Moderate
+Alerts
+Me

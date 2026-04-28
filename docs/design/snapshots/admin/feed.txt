@@ -1,0 +1,51 @@
+9:30
+Verified feed
+2,184
+TOTAL
++28
+THIS WEEK
+SMS
+phishing
+TOP TYPE
+All
+Phone Impersonation
+Phishing SMS
+Fake QR Code
+E-commerce Fraud
+Investment Fraud
+Romance Scam
+Phishing SMS
+04-22
+Fake Kerry parcel SMS with phishing link
+Received SMS claiming a parcel was held; the link redirects to a fake login page mimicking Kerry Express.
+142 reports
+Phone Impersonation
+04-21
+Caller pretending to be from the Revenue Department
+Aggressive caller claims unpaid tax penalties and demands immediate transfer to a "verification account".
+87 reports
+Fake QR
+04-20
+Fake Lazada order confirmation QR
+QR codes posted in shopping forums claiming to confirm a refund; instead initiates a PromptPay debit.
+23 reports
+E-commerce Fraud
+04-18
+E-commerce store accepts payment but never ships
+Store advertises heavily-discounted electronics; takes payment then goes silent. Site uses stolen product images.
+56 reports
+Phishing SMS
+04-16
+LINE message asking for OTP from "bank security"
+Sender impersonates a major Thai bank and requests OTP "to verify a suspicious login".
+38 reports
+Investment Fraud
+04-14
+Investment "guaranteed 20% monthly return" scheme
+Fake trading platform promising guaranteed returns. Withdrawals blocked after deposits exceed ฿50k.
+19 reports
+Home
+Feed
+Moderate
+Alerts
+Me
