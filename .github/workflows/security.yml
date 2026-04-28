@@ -1,0 +1,64 @@
+name: Security
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    # Nightly 03:00 UTC. Picks up upstream advisories landing between PRs.
+    - cron: '0 3 * * *'
+
+# Tighten default token. The jobs below need only read access to the repo;
+# upgrading any single job to write requires per-job permissions override.
+permissions:
+  contents: read
+
+jobs:
+  gitleaks:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  bun-audit:
+    name: Dependency audit (bun audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install workspace deps
+        run: bun install --frozen-lockfile
+
+      - name: Run bun audit (fails on high or critical)
+        run: bun audit --prod
+
+  dart-analyze:
+    name: Static analysis (dart analyze --fatal-infos)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.x'
+          channel: stable
+          cache: true
+
+      - name: Fetch Flutter deps
+        run: flutter pub get
+
+      - name: Static analysis
+        run: dart analyze --fatal-infos

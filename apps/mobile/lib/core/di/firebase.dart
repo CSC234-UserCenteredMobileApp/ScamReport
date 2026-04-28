@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:developer' as developer;
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 import '../../firebase_options.dart';
 
@@ -23,6 +26,52 @@ Future<bool> initializeFirebase() async {
       stackTrace: st,
     );
     return false;
+  }
+
+  // Firestore offline persistence — required for PRD §6.5: alerts +
+  // my-reports must remain readable without network. Settings must be set
+  // before any read/write to Firestore. The single Settings API works on
+  // mobile (native SQLite cache) and web (IndexedDB cache).
+  try {
+    FirebaseFirestore.instance.settings = const Settings(
+      persistenceEnabled: true,
+      cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+    );
+  } catch (e, st) {
+    developer.log(
+      '[firestore] persistence config failed — continuing without offline cache',
+      name: 'firebase',
+      error: e,
+      stackTrace: st,
+    );
+  }
+
+  // Remote Config — feature flags. Defaults are ALWAYS false in code so a
+  // failed fetch never silently turns a feature on; promote a flag by setting
+  // it to true in the Firebase Console (PRD §6.8 Reliability).
+  try {
+    final remoteConfig = FirebaseRemoteConfig.instance;
+    await remoteConfig.setConfigSettings(
+      RemoteConfigSettings(
+        fetchTimeout: const Duration(seconds: 10),
+        minimumFetchInterval: const Duration(minutes: 30),
+      ),
+    );
+    await remoteConfig.setDefaults(<String, dynamic>{
+      // One key per feature shipping behind a flag. Add as features land.
+      'enable_biometric_login': false,
+      'enable_clipboard_scanner': false,
+      'enable_share_target': false,
+      'enable_ai_search': false,
+    });
+    unawaited(remoteConfig.fetchAndActivate());
+  } catch (e, st) {
+    developer.log(
+      '[remote-config] init failed — flags will fall back to defaults (all off)',
+      name: 'firebase',
+      error: e,
+      stackTrace: st,
+    );
   }
 
   // Ask for FCM permission. iOS requires this before getToken() works; on

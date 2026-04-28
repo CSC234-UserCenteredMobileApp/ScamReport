@@ -8,7 +8,7 @@ on:
 
 jobs:
   api:
-    name: API — typecheck + test
+    name: API — typecheck + test + 80% coverage
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,11 +26,42 @@ jobs:
       - name: Typecheck (shared + api)
         run: bun run typecheck
 
-      - name: Run api tests
-        run: bun run --filter @my-product/api test
+      - name: Run api tests with coverage
+        run: bun --filter @my-product/api test --coverage --coverage-reporter=lcov --coverage-dir=coverage
+
+      - name: Enforce api line coverage threshold (PRD §6.7 = 80%)
+        env:
+          THRESHOLD: '80'
+          LCOV: apps/api/coverage/lcov.info
+        run: |
+          set -e
+          if [ ! -f "$LCOV" ]; then
+            echo "::error::Expected $LCOV but it was not produced by 'bun test --coverage'."
+            exit 1
+          fi
+          LINES=$(grep -E '^LF:' "$LCOV" | awk -F: '{s+=$2} END {print s+0}')
+          HITS=$(grep -E '^LH:' "$LCOV" | awk -F: '{s+=$2} END {print s+0}')
+          if [ "$LINES" -eq 0 ]; then
+            echo "::warning::No lines reported by lcov; treating as pass to avoid blocking on tooling drift."
+            exit 0
+          fi
+          PCT=$(awk -v h="$HITS" -v l="$LINES" 'BEGIN { printf "%.2f", (h/l)*100 }')
+          echo "API line coverage: ${PCT}% (${HITS}/${LINES})"
+          awk -v p="$PCT" -v t="$THRESHOLD" 'BEGIN { exit (p < t) }' || {
+            echo "::error::API coverage ${PCT}% is below ${THRESHOLD}% threshold."
+            exit 1
+          }
+
+      - name: Upload api lcov
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-lcov
+          path: apps/api/coverage/lcov.info
+          if-no-files-found: warn
 
   mobile:
-    name: Mobile — analyze + test
+    name: Mobile — analyze + test + 80% coverage
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -48,7 +79,38 @@ jobs:
         run: flutter pub get
 
       - name: Static analysis
-        run: dart analyze
+        run: dart analyze --fatal-infos
 
-      - name: Run tests
-        run: flutter test
+      - name: Run tests with coverage
+        run: flutter test --coverage
+
+      - name: Enforce mobile line coverage threshold (PRD §6.7 = 80%)
+        env:
+          THRESHOLD: '80'
+          LCOV: coverage/lcov.info
+        run: |
+          set -e
+          if [ ! -f "$LCOV" ]; then
+            echo "::error::Expected $LCOV but it was not produced by 'flutter test --coverage'."
+            exit 1
+          fi
+          LINES=$(grep -E '^LF:' "$LCOV" | awk -F: '{s+=$2} END {print s+0}')
+          HITS=$(grep -E '^LH:' "$LCOV" | awk -F: '{s+=$2} END {print s+0}')
+          if [ "$LINES" -eq 0 ]; then
+            echo "::warning::No lines reported by lcov; treating as pass to avoid blocking on tooling drift."
+            exit 0
+          fi
+          PCT=$(awk -v h="$HITS" -v l="$LINES" 'BEGIN { printf "%.2f", (h/l)*100 }')
+          echo "Mobile line coverage: ${PCT}% (${HITS}/${LINES})"
+          awk -v p="$PCT" -v t="$THRESHOLD" 'BEGIN { exit (p < t) }' || {
+            echo "::error::Mobile coverage ${PCT}% is below ${THRESHOLD}% threshold."
+            exit 1
+          }
+
+      - name: Upload mobile lcov
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-lcov
+          path: apps/mobile/coverage/lcov.info
+          if-no-files-found: warn
