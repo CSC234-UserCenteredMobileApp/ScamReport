@@ -8,7 +8,7 @@ Mobile product built on Flutter (app) + Elysia.js (backend on Bun) + a shared Ty
 - `apps/api/` — Elysia.js + Prisma backend
 - `packages/shared/` — TypeBox schemas shared between api and mobile (contract layer)
 - `scripts/` — `dev.sh` (runs api + mobile), `codegen.sh` (TypeBox → Dart)
-- `docs/` — architecture + ADRs
+- `docs/` — architecture + ADRs + per-screen design specs (`docs/design/index.md`)
 
 ## Working on a single app — read this
 
@@ -36,3 +36,13 @@ Starting from the repo root loads this file only — fine for cross-cutting chan
 ## Details
 
 Stack overview, contract-first workflow, and testing strategy live in [`docs/architecture.md`](./docs/architecture.md). Don't inline that here.
+
+## Design
+
+Tokens live in `apps/mobile/lib/core/theme/app_theme.dart` (warm coral primary, `VerdictPalette` extension). Per-screen specs live in [`docs/design/`](./docs/design/index.md). For a feature implementation task, load `docs/design-review.md` (tokens + inventory) plus the relevant `docs/design/screens/<screen>.md` — do **not** open the prototype HTML in `~/Documents/`; it's 1.4 MB per role and already distilled into the spec docs.
+
+## Multi-agent workflow
+
+The project uses four specialised Claude Code agents — `engineer`, `architect`, `qa`, `security-reviewer` — defined in [`.claude/agents/`](./.claude/agents/). Per the term-assignment rubric, the AI that **writes** code may not be the AI that **approves** it: the engineer ships a PR, then a fresh session running the architect agent reviews it, the qa agent extends tests + runs gates, and the security-reviewer agent audits any PR touching auth / RBAC / Firestore / secrets / validation. A human approver signs off last.
+
+Full loop, per-agent rules, and evidence-trail conventions live in [`docs/ai-workflow.md`](./docs/ai-workflow.md). Plan-Mode discipline + the team's role split are described there as well. Update both this section and `docs/ai-workflow.md` in the same PR whenever the workflow changes.

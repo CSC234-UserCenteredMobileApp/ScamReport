@@ -1,5 +1,7 @@
 # Design review — Scam Report mobile app
 
+> **Per-screen specs:** see [`docs/design/index.md`](./design/index.md). This file stays the canonical reference for tokens, screen inventory, flows, and team-level decisions; `docs/design/` is the per-screen depth (layout / states / interactions / role variants) distilled from the prototype.
+
 **Source:** Claude Design handoff bundle (received 2026-04-26).
 Design tool URL: `https://api.anthropic.com/v1/design/h/GMhLuv4UPDeZgCDxLDgTLg?open_file=ScamReport+Prototype.html` (auth-protected; expand from claude.ai if you need to re-open).
 

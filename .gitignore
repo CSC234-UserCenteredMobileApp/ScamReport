@@ -47,3 +47,7 @@ GoogleService-Info.plist
 Thumbs.db
 *.swp
 *.swo
+
+# --- Tooling scratch ---
+.playwright-mcp/
+.tmp-design-extract/
