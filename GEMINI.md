@@ -27,13 +27,33 @@ The project follows a monorepo structure with three main areas:
 - **Auth & Push**: **Firebase Authentication** (Google OAuth/Email) and **Firebase Cloud Messaging (FCM)**.
 - **AI/LLM**: **Gemini API** (`text-embedding-004`) for generating embeddings of scam reports.
 
+## Multi-agent Workflow
+
+The project uses a strict multi-agent workflow to meet the `CSC234` term-assignment rubric. The core rule is **Writer != Approver**.
+- **`engineer`**: Implements features, writes code and tests, and opens PRs.
+- **`architect`**: Runs in a separate session to review PRs against Clean Architecture and design rules.
+- **`qa`**: Runs in a separate session to extend test coverage and verify quality.
+- **`security-reviewer`**: Audits PRs touching auth, secrets, or database rules.
+
+Every implementation **MUST** start with a human-approved plan in `~/.claude/plans/`. An agent that writes code **MUST NOT** approve its own work.
+
+## Design Specs
+
+The design prototype is distilled into markdown specifications in `docs/design/`.
+- **Theming**: Rely strictly on the `VerdictPalette` extension and `ColorScheme` tokens in `app_theme.dart`. **No hardcoded hex values.**
+- **Components**: Prioritize using widgets from `docs/design/components.md` before inventing new ones.
+- **Screens**: Each screen has a layout and interaction spec in `docs/design/screens/<name>.md`.
+
 ## Key Documentation
 
 Always refer to these files for detailed rules and specs:
-- **`PRODUCT-REQUIREMENTS.md`**: Authoritative source for product flows, user roles, and functional requirements.
-- **`DATABASE_DESIGN.md`**: Detailed schema definitions, enumerated types, and Row-Level Security (RLS) policies.
-- **`docs/architecture.md`**: High-level system design, external service mapping, and cross-app workflows.
-- **`HOW_TO_CONTRIBUTE.md`**: Development setup, branch conventions, and environment configuration.
+- **`PRODUCT-REQUIREMENTS.md`**: Authoritative source for product flows and functional requirements.
+- **`DATABASE_DESIGN.md`**: Detailed schema definitions and enumerated types.
+- **`docs/architecture.md`**: High-level system design and Clean-Arch rules.
+- **`docs/ai-workflow.md`**: Detailed multi-agent orchestration and accountability rules.
+- **`docs/design/index.md`**: Entry point for screen and component specifications.
+- **`.claude/agents/`**: Configuration and hard rules for specialized agents.
+- **`HOW_TO_CONTRIBUTE.md`**: Development setup and branch conventions.
 
 ## Contract-first Workflow
 
