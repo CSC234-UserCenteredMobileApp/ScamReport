@@ -1,0 +1,43 @@
+rules_version = '2';
+
+// ScamReport Firestore security rules.
+//
+// Polyglot persistence policy (PRD v1.2 §6.5, DATABASE_DESIGN v1.2):
+//   Postgres is the system of record. Firestore mirrors only two read surfaces
+//   to enable offline-first reads + real-time listeners on mobile.
+//   All mirror writes are server-only via the Firebase Admin SDK; clients
+//   are forbidden from writing to either collection.
+//
+//   alerts/**                    public read,  server-only write
+//   my-reports/{uid}/items/**    owner-only read, server-only write
+//
+// Anything not explicitly allowed below is denied.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Announcements mirror — sourced from Postgres `announcements` table by
+    // apps/api/src/sync/firestore_sync.ts::mirrorAlert(...). Public-readable
+    // (announcements are public on the production app + Web). Never written
+    // from the client.
+    match /alerts/{announcementId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Per-user submission history mirror — sourced from Postgres `reports`
+    // filtered to the owner by apps/api/src/sync/firestore_sync.ts::
+    // mirrorMyReport(...). Visible only to the owning user. The mirror writer
+    // maps `flagged` -> `pending` for the reporter's view (PRD FR-6.1).
+    // Never written from the client (per PRD OQ-4 / FR-5.4: submission
+    // requires connectivity and goes through the API).
+    match /my-reports/{uid}/items/{reportId} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // Default deny.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
