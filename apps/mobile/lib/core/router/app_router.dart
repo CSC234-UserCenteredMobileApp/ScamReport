@@ -165,6 +165,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           body: Center(child: Text('My reports — coming soon')),
         ),
       ),
+      GoRoute(path: '/privacy', builder: (_, __) => const PrivacyScreen()),
+      GoRoute(path: '/terms',   builder: (_, __) => const TermsScreen()),
     ],
   );
 });
