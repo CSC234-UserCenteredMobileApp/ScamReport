@@ -142,14 +142,14 @@ class _AccountSection extends StatelessWidget {
           _NavTile(
             icon: Icons.lock_outline,
             title: 'Privacy policy',
-            onTap: () => context.push('/privacy'),
+            onTap: () => context.push('/me/privacy'),
             isFirst: isGuest,
           ),
           const Divider(height: 1, indent: 16, endIndent: 16),
           _NavTile(
             icon: Icons.article_outlined,
             title: 'Terms of service',
-            onTap: () => context.push('/terms'),
+            onTap: () => context.push('/me/terms'),
             isLast: isGuest,
           ),
           if (!isGuest) ...[

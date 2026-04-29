@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -171,7 +172,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 }
 
-class _ConsentBlock extends StatelessWidget {
+class _ConsentBlock extends StatefulWidget {
   const _ConsentBlock({
     required this.acceptedTos,
     required this.acceptedPrivacy,
@@ -185,28 +186,74 @@ class _ConsentBlock extends StatelessWidget {
   final ValueChanged<bool?> onChangedPrivacy;
 
   @override
+  State<_ConsentBlock> createState() => _ConsentBlockState();
+}
+
+class _ConsentBlockState extends State<_ConsentBlock> {
+  late final TapGestureRecognizer _tosRecognizer;
+  late final TapGestureRecognizer _privacyRecognizer;
+
+  @override
+  void initState() {
+    super.initState();
+    _tosRecognizer = TapGestureRecognizer()
+      ..onTap = () => context.push('/terms');
+    _privacyRecognizer = TapGestureRecognizer()
+      ..onTap = () => context.push('/privacy');
+  }
+
+  @override
+  void dispose() {
+    _tosRecognizer.dispose();
+    _privacyRecognizer.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final linkStyle = TextStyle(
+      color: cs.primary,
+      fontWeight: FontWeight.w600,
+    );
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: cs.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         children: [
           CheckboxListTile(
-            value: acceptedTos,
-            onChanged: onChangedTos,
-            title: const Text('I accept the Terms of Service.'),
+            value: widget.acceptedTos,
+            onChanged: widget.onChangedTos,
+            title: Text.rich(TextSpan(children: [
+              const TextSpan(text: 'I accept the '),
+              TextSpan(
+                text: 'Terms of Service',
+                style: linkStyle,
+                recognizer: _tosRecognizer,
+              ),
+              const TextSpan(text: '.'),
+            ])),
             controlAffinity: ListTileControlAffinity.leading,
             contentPadding: EdgeInsets.zero,
             visualDensity: VisualDensity.compact,
           ),
           CheckboxListTile(
-            value: acceptedPrivacy,
-            onChanged: onChangedPrivacy,
-            title: const Text('I accept the Privacy Policy.'),
+            value: widget.acceptedPrivacy,
+            onChanged: widget.onChangedPrivacy,
+            title: Text.rich(TextSpan(children: [
+              const TextSpan(text: 'I accept the '),
+              TextSpan(
+                text: 'Privacy Policy',
+                style: linkStyle,
+                recognizer: _privacyRecognizer,
+              ),
+              const TextSpan(text: '.'),
+            ])),
             controlAffinity: ListTileControlAffinity.leading,
             contentPadding: EdgeInsets.zero,
             visualDensity: VisualDensity.compact,
