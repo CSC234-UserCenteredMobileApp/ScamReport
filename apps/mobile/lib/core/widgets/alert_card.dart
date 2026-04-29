@@ -1,7 +1,11 @@
-part of 'home_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-class _AlertCard extends StatelessWidget {
-  const _AlertCard({required this.alert});
+import '../theme/app_theme.dart';
+import '../../features/home/domain/recent_alert.dart';
+
+class AlertCard extends StatelessWidget {
+  const AlertCard({super.key, required this.alert});
 
   final RecentAlert alert;
 
@@ -103,4 +107,3 @@ String _formatDate(DateTime dt) {
   final d = dt.day.toString().padLeft(2, '0');
   return '$y-$m-$d';
 }
-

@@ -3,19 +3,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/alert_card.dart';
+import '../../../core/widgets/report_card.dart';
+import '../../../core/widgets/section_header.dart';
+import '../../../core/widgets/stat_card_row.dart';
 import '../../auth/presentation/auth_providers.dart';
-import '../domain/home_stats.dart';
-import '../domain/recent_alert.dart';
-import '../domain/recent_report.dart';
 import 'home_providers.dart';
 
 part '_brand_header.dart';
 part '_clipboard_banner.dart';
-part '_stat_card_row.dart';
-part '_section_header.dart';
-part '_alert_card.dart';
-part '_report_card.dart';
 
 // ---------------------------------------------------------------------------
 // Generic skeleton box — shared across the part files.
@@ -171,17 +167,17 @@ class _StatsSection extends ConsumerWidget {
       children: [
         const Padding(
           padding: px16,
-          child: _SectionHeader(title: 'This Week'),
+          child: SectionHeader(title: 'This Week'),
         ),
         const SizedBox(height: 12),
         Padding(
           padding: px16,
           child: statsAsync.when(
-            loading: () => const _StatCardRowSkeleton(),
+            loading: () => const StatCardRowSkeleton(),
             error: (_, __) => _ErrorRow(
               onRetry: () => ref.invalidate(homeStatsProvider),
             ),
-            data: (stats) => _StatCardRow(stats: stats),
+            data: (stats) => StatCardRow(stats: stats),
           ),
         ),
       ],
@@ -204,7 +200,7 @@ class _AlertsSection extends ConsumerWidget {
       children: [
         Padding(
           padding: px16,
-          child: _SectionHeader(
+          child: SectionHeader(
             title: 'Recent Fraud Alerts',
             onSeeAll: () => context.push('/alerts'),
           ),
@@ -227,7 +223,7 @@ class _AlertsSection extends ConsumerWidget {
               children: [
                 for (int i = 0; i < alerts.take(2).length; i++) ...[
                   if (i > 0) const SizedBox(height: 8),
-                  _AlertCard(alert: alerts[i]),
+                  AlertCard(alert: alerts[i]),
                 ],
               ],
             ),
@@ -253,7 +249,7 @@ class _ReportsSection extends ConsumerWidget {
       children: [
         Padding(
           padding: px16,
-          child: _SectionHeader(
+          child: SectionHeader(
             title: 'Recently Verified',
             onSeeAll: () => context.push('/feed'),
           ),
@@ -276,7 +272,7 @@ class _ReportsSection extends ConsumerWidget {
               children: [
                 for (int i = 0; i < reports.take(2).length; i++) ...[
                   if (i > 0) const SizedBox(height: 8),
-                  _ReportCard(report: reports[i]),
+                  ReportCard(report: reports[i]),
                 ],
               ],
             ),

@@ -11,16 +11,18 @@ Tokens always come from `apps/mobile/lib/core/theme/app_theme.dart` (`ColorSchem
 | `AuthScaffold` | `apps/mobile/lib/features/auth/presentation/_auth_scaffold.dart` | Scrollable scaffold with brand pill + wordmark + tagline. Used by `login` and `register`. |
 | `PasswordField` | `apps/mobile/lib/features/auth/presentation/_password_field.dart` | TextFormField with show/hide toggle. |
 | `ErrorBanner` | `apps/mobile/lib/features/auth/presentation/_error_banner.dart` | Soft container using `VerdictPalette.scam` tones. |
+| `AppShell` | `apps/mobile/lib/core/widgets/app_shell.dart` | Shared scaffold with 5-tab `BottomNavigationBar`. Role-aware: 3rd tab = "Moderate" for admin. Wraps GoRouter `StatefulNavigationShell`. |
+| `StatCardRow` | `apps/mobile/lib/core/widgets/stat_card_row.dart` | 3-up stat cards. Takes `HomeStats`. Coral accent on `newThisWeek` value. |
+| `AlertCard` | `apps/mobile/lib/core/widgets/alert_card.dart` | Category-colored icon + chip + title + date. Takes `RecentAlert`. |
+| `ReportCard` | `apps/mobile/lib/core/widgets/report_card.dart` | Scam type chip + date + title + excerpt + report count. Takes `RecentReport`. |
+| `SectionHeader` | `apps/mobile/lib/core/widgets/section_header.dart` | Uppercase label + optional "See all" button. |
+| `BrandHeader` | `apps/mobile/lib/features/home/presentation/_brand_header.dart` | Avatar pill + greeting. Home-only. |
+| `ClipboardBanner` | `apps/mobile/lib/features/home/presentation/_clipboard_banner.dart` | Clipboard detection banner. Home-only. |
 
 ## To build (referenced by screens)
 
 | Widget | Used by | Sketch |
 | --- | --- | --- |
-| `BottomNav` | every authenticated screen | 5 tabs (`Home / Feed / Report \| Moderate / Alerts / Me`). Active tab uses primary fill + label colour; rest use `onSurfaceVariant`. Admin variant swaps "Report" for "Moderate". |
-| `ClipboardBanner` | `home` | Coral-tinted card with clipboard icon, snippet, "Check it" primary button, and dismiss `×`. Appears only when clipboard contains a phone/url-like value (FR-9.2). |
-| `StatCardRow` | `home`, `feed` | 3-up grid: big number / label. Used for `2,184 Verified reports`, `+36 New this week`, top scam type. |
-| `AlertCard` | `home`, `alerts` | Category chip (Fraud Alert / Tips / Platform Update) + title + date. Variants by category colour. |
-| `ReportCard` | `home`, `feed` | Type chip + date + title + excerpt + "N reports" count. Tappable → `report-detail`. |
 | `VerdictPill` | `report-detail`, `verdict` | Coloured chip showing one of `Scam / Suspicious / Safe / Unknown` with icon + label. Driven by `VerdictPalette.<verdict>.{bg,fg}`. |
 | `FilterChipBar` | `feed`, `alerts`, `my-reports` | Horizontal scrollable chip row. Active chip uses primary fill, inactive uses `surfaceContainerHighest`. |
 | `EvidenceList` | `report-detail`, `admin-review` | List of evidence items (Screenshot 1, Screenshot 2). Tap to preview (mocked in prototype). |
@@ -28,7 +30,6 @@ Tokens always come from `apps/mobile/lib/core/theme/app_theme.dart` (`ColorSchem
 | `StepBar` | `submit-report` | "Step 1 / 2" indicator at top of multi-step form. |
 | `ModQueueRow` | `mod` | Type chip + age + title + reporter handle (`User_xxxx`) + N evidence + Review button. Flagged variant adds a pinned border + team note row beneath. |
 | `AuditTrailRow` | `admin-review` | Timeline-style row: action label + admin handle + timestamp + remark text. |
-| `BrandHeader` | `home` | Avatar pill (initials for logged-in roles, generic icon for guest) + greeting + tagline. |
 | `LegalDoc` | `privacy`, `terms` | Static Markdown-style scrollable column with H1 + numbered sections + last-updated date. |
 | `EmptyGate` | `search`, `submit-report` (guest variant) | Sign-in/sign-up call-to-action panel that replaces the gated screen for guests. |
 | `Toast` | global | Bottom-of-frame ephemeral message. The prototype uses it for stubbed actions (e.g., share sheet). |
