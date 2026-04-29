@@ -41,3 +41,10 @@
 
 - _2026-04-28_: A.P opens `infra/s2-prereqs` covering S2-01, S2-02, plus shared scaffolding (firestore.rules, firebase.json, CODEOWNERS, PR template, this board, pubspec deps, rollback plan stub). Other rows unblocked once that PR merges.
 - _2026-04-28_: PRs #5 (infra prereqs), #6 (CODEOWNERS real handles) merged. Firestore enabled in `scamreport-62b4c`; rules deployed via `firebase deploy --only firestore:rules`. Supabase `evidence` bucket created. A.P opens `infra/s2-quality-gates` covering S2-08, S2-09, S2-14. Feature rows S2-03..S2-07, S2-10, S2-11 fully unblocked for teammates to claim.
+- _2026-04-29_: Settings / Me screen (P-12 / FR-10.2) shipped outside the sprint board. `/me` route is live. Key facts for teammates:
+  - **`settingsProvider`** (`AsyncNotifierProvider<SettingsNotifier, SettingsState>`) at `features/settings/presentation/settings_providers.dart` — single source of truth for `themeMode` + `language` + notification prefs. Any feature that needs the current theme or language should `ref.watch(settingsProvider)`.
+  - **`main.dart`** now watches `settingsProvider` and passes `themeMode` + `locale` to `MaterialApp.router`. Thai (`th`) is the default locale on a fresh install.
+  - **Notification prefs are local-only** (SharedPreferences). API sync deferred to FR-8.x — do not assume they hit the backend yet.
+  - **Notifier method is `.save(SettingsState)`**, not `.update()` — Riverpod's `AsyncNotifierBase` already owns `.update()`.
+  - **New stub routes added:** `/my-reports`, `/privacy`, `/terms` (each shows "coming soon"). S2-07 owner (B.S): the biometric Settings toggle goes inside the existing `SettingsScreen` in a new `SECURITY` card section — coordinate with A.P before adding to avoid merge conflict.
+  - **`flutter_localizations` + `intl`** added to `pubspec.yaml`. Run `flutter pub get` after pulling.
