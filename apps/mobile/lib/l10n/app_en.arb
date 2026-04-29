@@ -1,0 +1,71 @@
+{
+  "@@locale": "en",
+
+  "searchHint": "Paste a number, link, or message…",
+  "aiSearch": "AI search",
+
+  "sectionThisWeek": "This Week",
+  "sectionRecentAlerts": "Recent Fraud Alerts",
+  "sectionRecentlyVerified": "Recently Verified",
+  "seeAll": "See all",
+  "loadFailedRetry": "Failed to load — tap to retry",
+
+  "greetingGuest": "Hi 👋",
+  "greetingWithName": "Hi, {name} 👋",
+  "@greetingWithName": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "tagline": "Stay one step ahead of scams",
+
+  "clipboardBannerTitle": "We noticed something on your clipboard",
+  "checkIt": "Check it",
+
+  "statVerifiedReports": "VERIFIED\nREPORTS",
+  "statNewThisWeek": "NEW THIS\nWEEK",
+  "statTopScamType": "TOP SCAM\nTYPE",
+
+  "categoryFraudAlert": "Fraud Alert",
+  "categoryTips": "Tips",
+  "categoryPlatformUpdate": "Platform Update",
+
+  "reportCountLabel": "{count} reports",
+  "@reportCountLabel": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "settingsTitle": "Settings",
+  "settingsSectionNotifications": "NOTIFICATIONS",
+  "settingsSectionPreferences": "PREFERENCES",
+  "settingsSectionAccount": "ACCOUNT",
+  "myReports": "My reports",
+  "privacyPolicy": "Privacy policy",
+  "termsOfService": "Terms of service",
+  "signOut": "Sign out",
+  "signOutDialogContent": "Sign out of ScamReport?",
+  "cancel": "Cancel",
+
+  "languageLabel": "Language",
+  "languageEnglish": "English",
+  "languageThai": "ภาษาไทย",
+  "themeLabel": "Theme",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+
+  "notifPhoneScam": "Phone scam alerts",
+  "notifPhoneScamDesc": "Get notified about new phone scams",
+  "notifSmsPhishing": "SMS phishing alerts",
+  "notifSmsPhishingDesc": "Trending SMS scam patterns",
+  "notifRegional": "Regional alerts",
+  "notifRegionalDesc": "Scams reported in your province",
+
+  "navHome": "Home",
+  "navFeed": "Feed",
+  "navReport": "Report",
+  "navModerate": "Moderate",
+  "navAlerts": "Alerts",
+  "navMe": "Me"
+}

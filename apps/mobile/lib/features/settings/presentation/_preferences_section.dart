@@ -19,12 +19,12 @@ class _PreferencesSection extends ConsumerWidget {
           children: [
             _PrefRow(
               icon: Icons.language_outlined,
-              label: 'Language',
+              label: context.l10n.languageLabel,
               isFirst: true,
               trailing: SegmentedButton<String>(
-                segments: const [
-                  ButtonSegment(value: 'en', label: Text('English')),
-                  ButtonSegment(value: 'th', label: Text('ภาษาไทย')),
+                segments: [
+                  ButtonSegment(value: 'en', label: Text(context.l10n.languageEnglish)),
+                  ButtonSegment(value: 'th', label: Text(context.l10n.languageThai)),
                 ],
                 selected: {settings.language},
                 onSelectionChanged: (s) => ref
@@ -42,12 +42,12 @@ class _PreferencesSection extends ConsumerWidget {
             const Divider(height: 1, indent: 16, endIndent: 16),
             _PrefRow(
               icon: Icons.visibility_outlined,
-              label: 'Theme',
+              label: context.l10n.themeLabel,
               isLast: true,
               trailing: SegmentedButton<ThemeMode>(
-                segments: const [
-                  ButtonSegment(value: ThemeMode.light, label: Text('Light')),
-                  ButtonSegment(value: ThemeMode.dark, label: Text('Dark')),
+                segments: [
+                  ButtonSegment(value: ThemeMode.light, label: Text(context.l10n.themeLight)),
+                  ButtonSegment(value: ThemeMode.dark, label: Text(context.l10n.themeDark)),
                 ],
                 selected: {
                   settings.themeMode == ThemeMode.system

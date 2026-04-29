@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/l10n.dart';
+
 class SectionHeader extends StatelessWidget {
   const SectionHeader({super.key, required this.title, this.onSeeAll});
 
@@ -28,7 +30,7 @@ class SectionHeader extends StatelessWidget {
               visualDensity: VisualDensity.compact,
               padding: const EdgeInsets.symmetric(horizontal: 8),
             ),
-            child: const Text('See all'),
+            child: Text(context.l10n.seeAll),
           ),
       ],
     );

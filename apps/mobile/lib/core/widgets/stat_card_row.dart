@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../features/home/domain/home_stats.dart';
+import '../../l10n/l10n.dart';
 
 class StatCardRow extends StatelessWidget {
   const StatCardRow({super.key, required this.stats});
@@ -15,7 +16,7 @@ class StatCardRow extends StatelessWidget {
         Expanded(
           child: StatCard(
             value: _formatNumber(stats.verifiedTotal),
-            label: 'VERIFIED\nREPORTS',
+            label: context.l10n.statVerifiedReports,
             valueColor: theme.colorScheme.onSurface,
           ),
         ),
@@ -23,7 +24,7 @@ class StatCardRow extends StatelessWidget {
         Expanded(
           child: StatCard(
             value: '+${stats.newThisWeek}',
-            label: 'NEW THIS\nWEEK',
+            label: context.l10n.statNewThisWeek,
             valueColor: theme.colorScheme.primary,
           ),
         ),
@@ -31,7 +32,7 @@ class StatCardRow extends StatelessWidget {
         Expanded(
           child: StatCard(
             value: stats.topScamType,
-            label: 'TOP SCAM\nTYPE',
+            label: context.l10n.statTopScamType,
             valueColor: theme.colorScheme.onSurface,
             maxLines: 2,
           ),

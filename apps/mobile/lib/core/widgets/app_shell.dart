@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/auth_providers.dart';
+import '../../l10n/l10n.dart';
 
 /// Shared scaffold that wraps all bottom-nav branches.
 /// The [navigationShell] is provided by [StatefulShellRoute.indexedStack].
@@ -25,7 +26,7 @@ class AppShell extends ConsumerWidget {
         ref.watch(currentUserProvider).valueOrNull?.isAdmin ?? false;
 
     final colorScheme = Theme.of(context).colorScheme;
-
+    final l10n = context.l10n;
     final int currentIndex = navigationShell.currentIndex;
 
     return Scaffold(
@@ -34,34 +35,29 @@ class AppShell extends ConsumerWidget {
         currentIndex: currentIndex,
         onTap: _onTap,
         items: [
-          // 0 — Home
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Home',
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.home_outlined),
+            activeIcon: const Icon(Icons.home),
+            label: l10n.navHome,
           ),
-          // 1 — Feed
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.format_list_bulleted_outlined),
-            activeIcon: Icon(Icons.format_list_bulleted),
-            label: 'Feed',
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.format_list_bulleted_outlined),
+            activeIcon: const Icon(Icons.format_list_bulleted),
+            label: l10n.navFeed,
           ),
-          // 2 — Report / Moderate (center, coral circle)
           BottomNavigationBarItem(
             icon: _CenterNavIcon(color: colorScheme.primary),
-            label: isAdmin ? 'Moderate' : 'Report',
+            label: isAdmin ? l10n.navModerate : l10n.navReport,
           ),
-          // 3 — Alerts
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.notifications_outlined),
-            activeIcon: Icon(Icons.notifications),
-            label: 'Alerts',
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.notifications_outlined),
+            activeIcon: const Icon(Icons.notifications),
+            label: l10n.navAlerts,
           ),
-          // 4 — Me
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Me',
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.person_outline),
+            activeIcon: const Icon(Icons.person),
+            label: l10n.navMe,
           ),
         ],
       ),

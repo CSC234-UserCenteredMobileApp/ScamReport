@@ -76,7 +76,7 @@ class _ClipboardBannerState extends ConsumerState<_ClipboardBanner> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'We noticed something on your clipboard',
+                    context.l10n.clipboardBannerTitle,
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -102,7 +102,7 @@ class _ClipboardBannerState extends ConsumerState<_ClipboardBanner> {
                 textStyle: theme.textTheme.labelSmall
                     ?.copyWith(fontWeight: FontWeight.w600),
               ),
-              child: const Text('Check it'),
+              child: Text(context.l10n.checkIt),
             ),
             const SizedBox(width: 4),
             IconButton(

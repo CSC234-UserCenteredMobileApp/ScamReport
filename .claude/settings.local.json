@@ -12,7 +12,8 @@
       "Read(//home/symphony/**)",
       "Read(//home/symphony/Downloads/**)",
       "WebSearch",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Bash(flutter gen-l10n *)"
     ]
   }
 }

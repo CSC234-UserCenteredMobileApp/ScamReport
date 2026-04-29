@@ -7,6 +7,7 @@ import '../../../core/widgets/alert_card.dart';
 import '../../../core/widgets/report_card.dart';
 import '../../../core/widgets/section_header.dart';
 import '../../../core/widgets/stat_card_row.dart';
+import '../../../l10n/l10n.dart';
 import '../../auth/presentation/auth_providers.dart';
 import 'home_providers.dart';
 
@@ -99,7 +100,7 @@ class _ErrorRow extends StatelessWidget {
     return GestureDetector(
       onTap: onRetry,
       child: Text(
-        'Failed to load — tap to retry',
+        context.l10n.loadFailedRetry,
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
@@ -128,7 +129,7 @@ class _SearchSection extends StatelessWidget {
                 Icons.shield_outlined,
                 color: Theme.of(context).colorScheme.primary,
               ),
-              hintText: 'Paste a number, link, or message…',
+              hintText: context.l10n.searchHint,
             ),
           ),
           const SizedBox(height: 8),
@@ -137,7 +138,7 @@ class _SearchSection extends StatelessWidget {
             child: OutlinedButton.icon(
               onPressed: () => context.push('/search'),
               icon: const Icon(Icons.auto_awesome_outlined, size: 18),
-              label: const Text('AI search'),
+              label: Text(context.l10n.aiSearch),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Theme.of(context).colorScheme.primary,
                 side: BorderSide(
@@ -165,9 +166,9 @@ class _StatsSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
+        Padding(
           padding: px16,
-          child: SectionHeader(title: 'This Week'),
+          child: SectionHeader(title: context.l10n.sectionThisWeek),
         ),
         const SizedBox(height: 12),
         Padding(
@@ -201,7 +202,7 @@ class _AlertsSection extends ConsumerWidget {
         Padding(
           padding: px16,
           child: SectionHeader(
-            title: 'Recent Fraud Alerts',
+            title: context.l10n.sectionRecentAlerts,
             onSeeAll: () => context.push('/alerts'),
           ),
         ),
@@ -250,7 +251,7 @@ class _ReportsSection extends ConsumerWidget {
         Padding(
           padding: px16,
           child: SectionHeader(
-            title: 'Recently Verified',
+            title: context.l10n.sectionRecentlyVerified,
             onSeeAll: () => context.push('/feed'),
           ),
         ),
