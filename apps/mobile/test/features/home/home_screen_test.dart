@@ -7,6 +7,8 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:mobile/core/api_client.dart';
 import 'package:mobile/core/theme/app_theme.dart';
+import 'package:mobile/features/auth/domain/auth_user.dart';
+import 'package:mobile/features/auth/presentation/auth_providers.dart';
 import 'package:mobile/features/home/domain/home_stats.dart';
 import 'package:mobile/features/home/domain/recent_alert.dart';
 import 'package:mobile/features/home/domain/recent_report.dart';
@@ -209,6 +211,32 @@ void main() {
       // the generic greeting "Hi 👋" is shown.
       expect(find.text('Hi 👋'), findsOneWidget);
       expect(find.text('Stay one step ahead of scams'), findsOneWidget);
+    });
+
+    testWidgets('greeting shows name for authenticated user', (tester) async {
+      const authUser = AuthUser(
+        id: '1',
+        firebaseUid: 'uid1',
+        email: 'tester@example.com',
+        displayName: 'John Doe',
+        role: 'user',
+        preferredLanguage: 'en',
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            currentUserProvider.overrideWith((ref) => authUser),
+            httpClientProvider.overrideWithValue(_happyClient()),
+          ],
+          child: _themed(const HomeScreen()),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Greeting should include the first name "John".
+      expect(find.text('Hi, John 👋'), findsOneWidget);
     });
   });
 
