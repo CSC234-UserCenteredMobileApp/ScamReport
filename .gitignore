@@ -51,3 +51,6 @@ Thumbs.db
 # --- Tooling scratch ---
 .playwright-mcp/
 .tmp-design-extract/
+
+# --- Git worktrees ---
+.worktrees/
