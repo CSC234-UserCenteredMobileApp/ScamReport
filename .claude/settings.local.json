@@ -10,7 +10,8 @@
       "Bash(awk 'NR==179 {print length\\($0\\); exit}' \"/home/symphony/Documents/ScamReport Prototype _standalone_guest.html\")",
       "Bash(awk 'NR==183 {print length\\($0\\); exit}' \"/home/symphony/Documents/ScamReport Prototype _standalone_guest.html\")",
       "Read(//home/symphony/**)",
-      "Read(//home/symphony/Downloads/**)"
+      "Read(//home/symphony/Downloads/**)",
+      "WebSearch"
     ]
   }
 }
