@@ -12,7 +12,7 @@ export const announcementsRoute = new Elysia().get(
       where: { status: 'published' },
       orderBy: { publishedAt: 'desc' },
       take: limit,
-      select: { id: true, title: true, category: true, publishedAt: true },
+      select: { id: true, title: true, category: true, publishedAt: true, createdAt: true },
     });
 
     return {
@@ -20,7 +20,7 @@ export const announcementsRoute = new Elysia().get(
         id: r.id,
         title: r.title,
         category: r.category,
-        publishedAt: r.publishedAt!.toISOString(),
+        publishedAt: (r.publishedAt ?? r.createdAt).toISOString(),
       })),
     };
   },

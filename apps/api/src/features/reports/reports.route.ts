@@ -33,7 +33,7 @@ export const reportsRoute = new Elysia().get(
           scamTypeCode: r.scamType.code,
           scamTypeLabelEn: r.scamType.labelEn,
           scamTypeLabelTh: r.scamType.labelTh,
-          verifiedAt: r.verifiedAt!.toISOString(),
+          verifiedAt: (r.verifiedAt ?? r.createdAt).toISOString(),
           reportCount,
         };
       }),
