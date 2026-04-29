@@ -84,8 +84,10 @@ void main() {
       await tester.pumpWidget(_pumpApp(router, _fakeUser(admin: false)));
       await tester.pumpAndSettle();
 
-      // 'Home' appears twice: once as nav label and once as the branch body.
-      expect(find.text('Home'), findsAtLeastNWidgets(1));
+      // 'Home' appears exactly twice: once as the active nav label, once as
+      // the branch body text — proving the nav item and the route body both
+      // render.
+      expect(find.text('Home'), findsNWidgets(2));
       // These labels only appear once (inactive tabs / nav labels only).
       expect(find.text('Feed'), findsOneWidget);
       expect(find.text('Report'), findsOneWidget);
@@ -120,8 +122,9 @@ void main() {
       await tester.tap(find.text('Feed'));
       await tester.pumpAndSettle();
 
-      // The Feed branch body text should now be visible.
-      expect(find.text('Feed'), findsWidgets);
+      // After navigation 'Feed' appears twice: once as nav label and once as
+      // the branch body — proving the tap actually triggered navigation.
+      expect(find.text('Feed'), findsNWidgets(2));
     });
   });
 }
