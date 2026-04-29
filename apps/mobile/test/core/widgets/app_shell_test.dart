@@ -6,6 +6,7 @@ import 'package:mobile/core/theme/app_theme.dart';
 import 'package:mobile/core/widgets/app_shell.dart';
 import 'package:mobile/features/auth/domain/auth_user.dart';
 import 'package:mobile/features/auth/presentation/auth_providers.dart';
+import 'package:mobile/l10n/l10n.dart';
 
 // A minimal router whose only route is a StatefulShellRoute.indexedStack
 // wrapping AppShell. Used to exercise the shell in isolation.
@@ -73,6 +74,8 @@ Widget _pumpApp(GoRouter router, AuthUser? user) {
     child: MaterialApp.router(
       routerConfig: router,
       theme: lightTheme(),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
     ),
   );
 }

@@ -12,6 +12,7 @@ import 'package:mobile/features/home/domain/recent_alert.dart';
 import 'package:mobile/features/home/domain/recent_report.dart';
 import 'package:mobile/features/home/presentation/home_providers.dart';
 import 'package:mobile/features/home/presentation/home_screen.dart';
+import 'package:mobile/l10n/l10n.dart';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -22,6 +23,8 @@ import 'package:mobile/features/home/presentation/home_screen.dart';
 Widget _themed(Widget widget) {
   return MaterialApp(
     theme: lightTheme(),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
     home: widget,
   );
 }
