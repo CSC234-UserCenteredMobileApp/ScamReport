@@ -12,7 +12,7 @@ class _StatCardRow extends StatelessWidget {
       children: [
         Expanded(
           child: _StatCard(
-            value: stats.verifiedTotal.toString(),
+            value: _formatNumber(stats.verifiedTotal),
             label: 'VERIFIED\nREPORTS',
             valueColor: theme.colorScheme.onSurface,
           ),
@@ -84,6 +84,19 @@ class _StatCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Formats an integer with comma thousands separators (e.g. 2184 → "2,184").
+/// Avoids pulling in the `intl` package for a single call.
+String _formatNumber(int n) {
+  final s = n.toString();
+  final buf = StringBuffer();
+  for (int i = 0; i < s.length; i++) {
+    final pos = s.length - i - 1;
+    if (i > 0 && i % 3 == 0) buf.write(',');
+    buf.write(s[pos]);
+  }
+  return buf.toString().split('').reversed.join();
 }
 
 class _StatCardRowSkeleton extends StatelessWidget {

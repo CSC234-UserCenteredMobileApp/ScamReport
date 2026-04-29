@@ -127,7 +127,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Stats section — always in the viewport.
-      expect(find.text('2184'), findsOneWidget);
+      // Numbers are comma-formatted (e.g. 2184 → "2,184").
+      expect(find.text('2,184'), findsOneWidget);
       expect(find.text('+36'), findsOneWidget);
       expect(find.text('SMS phishing'), findsOneWidget);
 
@@ -166,7 +167,7 @@ void main() {
       await tester.pump();
 
       // Real stat data must not be visible yet.
-      expect(find.text('2184'), findsNothing);
+      expect(find.text('2,184'), findsNothing);
       expect(find.text('+36'), findsNothing);
     });
 

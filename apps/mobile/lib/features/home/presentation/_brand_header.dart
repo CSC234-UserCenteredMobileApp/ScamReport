@@ -24,10 +24,12 @@ class _BrandHeader extends ConsumerWidget {
         ),
       );
     } else {
-      final String name =
-          user.displayName?.isNotEmpty == true ? user.displayName! : (user.email ?? '');
-      greeting = 'Hi, ${name.split(' ').first} \u{1F44B}';
-      final String initials = name.isNotEmpty ? name[0].toUpperCase() : '?';
+      final String rawName = user.displayName?.isNotEmpty == true
+          ? user.displayName!
+          : (user.email?.split('@').first ?? '');
+      final String displayFirst = rawName.split(' ').first;
+      greeting = 'Hi, $displayFirst \u{1F44B}';
+      final String initials = rawName.isNotEmpty ? rawName[0].toUpperCase() : '?';
       avatar = CircleAvatar(
         radius: 20,
         backgroundColor: theme.colorScheme.primary,
