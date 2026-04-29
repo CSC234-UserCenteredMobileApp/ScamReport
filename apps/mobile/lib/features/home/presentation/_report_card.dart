@@ -1,5 +1,12 @@
 part of 'home_screen.dart';
 
+/// Format DateTime as MM-dd without external package.
+String _formatMonthDay(DateTime dt) {
+  final m = dt.month.toString().padLeft(2, '0');
+  final d = dt.day.toString().padLeft(2, '0');
+  return '$m-$d';
+}
+
 class _ReportCard extends StatelessWidget {
   const _ReportCard({required this.report});
 
