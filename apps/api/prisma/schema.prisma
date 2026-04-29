@@ -131,6 +131,7 @@ model User {
   displayName       String?       @map("display_name")
   role              UserRole      @default(user)
   preferredLanguage PreferredLang @default(th) @map("preferred_language")
+  province          String?       @map("province")
   createdAt         DateTime      @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt         DateTime      @default(now()) @map("updated_at") @db.Timestamptz()
   deletedAt         DateTime?     @map("deleted_at") @db.Timestamptz()
@@ -186,6 +187,7 @@ model Report {
   scamTypeId                 Int             @map("scam_type_id") @db.SmallInt
   targetIdentifier           String?         @map("target_identifier")
   targetIdentifierKind       IdentifierKind? @map("target_identifier_kind")
+  province                   String?         @map("province")
   targetIdentifierNormalized String?         @map("target_identifier_normalized") @db.Citext
   status                     ReportStatus    @default(pending)
   priorityFlag               Boolean         @default(false) @map("priority_flag")
@@ -262,6 +264,7 @@ model Announcement {
   body          String
   category      AnnouncementCategory
   status        AnnouncementStatus   @default(draft)
+  province      String?              @map("province")
   pushedToFcmAt DateTime?            @map("pushed_to_fcm_at") @db.Timestamptz()
   publishedAt   DateTime?            @map("published_at") @db.Timestamptz()
   createdAt     DateTime             @default(now()) @map("created_at") @db.Timestamptz()

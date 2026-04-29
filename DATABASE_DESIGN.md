@@ -23,7 +23,7 @@
 | Polyglot persistence | Postgres only | Postgres + Firestore mirror (read-only, `alerts` + `my-reports/{uid}/items`) | PRD v1.2 §6.5: offline-first reads + real-time listeners for two surfaces. Postgres still authoritative; **no schema change** to Postgres. |
 | Reporter visibility in admin payloads | Reporter ID present in `/admin/*` responses | Reporter fields stripped server-side from all `/admin/*` and `/mod/*` responses | PRD v1.2 FR-7.4 + FR-7.8 / OQ-1 resolution. **No schema change** — `reports.reporter_user_id` stays for legal traceability; only the API serializer changes. |
 | Web platform | none | Flutter Web public surface (verdict, feed, alerts, login). No DB surface change — same Postgres reads, no Firestore writes from web | PRD v1.2 §6.6. |
-| Open questions | OQ-1..5 open | OQ-1, OQ-3, OQ-4, OQ-5 resolved; OQ-2 still open | PRD v1.2 §8. |
+| Open questions | OQ-1..5 open | OQ-1, OQ-4, OQ-5 resolved; OQ-2 still open; OQ-3 resolved in v1.3 (see below) | PRD v1.2 §8. |
 
 ### v1.1 (2026-04-26)
 
@@ -35,7 +35,13 @@
 | Reporter-facing status | 4 statuses surfaced (Pending / Verified / Rejected / Flagged) | 3 statuses surfaced (Pending / Verified / Rejected); `flagged` is admin-internal | FR-6.1. **No schema change** — `report_status` still has `flagged`; the API now maps `flagged → 'pending'` when responding to the reporter. |
 | Open-question impact table | OQ-1 through OQ-7 | OQ-1 through OQ-5 (OQ-6, OQ-7 closed) | PRD v1.1 closes the two questions whose schema landing was already settled. |
 
-Everything else — `users`, `reports`, `evidence_files`, `moderation_actions`, `report_embeddings`, `announcements`, `check_logs`, `search_queries`, `consent_records`, `account_deletion_requests` — is unchanged from v1.0.
+### v1.3 (2026-04-29)
+
+| Area | Change | Why |
+|---|---|---|
+| Province filter (OQ-3 resolved) | Add `province text NULL` to `users` + `announcements`. Add `province text NULL` to `reports` (optional field on submission). No `provinces` reference table needed — province values are free-text Thai province names validated client-side against a 77-province static list. | PRD v1.3 FR-5.1, FR-8.6, FR-10.3. Feed-filter-only; no FCM topics. Firestore `mirrorAlert` includes `province` field in mirrored doc for offline client-side filtering. |
+
+Everything else — `users`, `reports`, `evidence_files`, `moderation_actions`, `report_embeddings`, `announcements`, `check_logs`, `search_queries`, `consent_records`, `account_deletion_requests` — is unchanged from v1.0 except for the province columns above.
 
 ---
 
@@ -418,7 +424,7 @@ PRD v1.1 closes OQ-6 and OQ-7. Remaining schema-touching questions:
 |---|---|
 | **OQ-1** Reporter display | Already covered: `reports.reporter_id` is internal-only. Add a `users.public_handle` column (e.g. `'User_4f2a'`) only if the team picks "masked username". |
 | **OQ-2** Evidence retention after rejection | Add a scheduled job that deletes `evidence_files` rows (and storage objects) where the parent report is `status = 'rejected'` and older than the agreed retention window. No schema change. |
-| **OQ-3** Regional tagging | Add `reports.province_code text` and a `provinces` reference table. (No longer requires a `notification_topics` row per region — topics are gone.) |
+| ~~**OQ-3** Regional tagging~~ | **Resolved (v1.3).** Add `province text NULL` to `users`, `announcements`, and `reports`. No reference table — 77 Thai province names validated client-side. No `notification_topics` needed (feed-filter-only, no FCM topics). |
 | **OQ-4** Offline report queue | Client-side concern (local SQLite). Add `reports.client_submission_id uuid UNIQUE` if backend idempotency is required. |
 | **OQ-5** `/check` contract | Schema is already shaped around `{type, payload}` — `check_input_kind` enum + `input_normalized`. No changes expected once the contract is signed. |
 
