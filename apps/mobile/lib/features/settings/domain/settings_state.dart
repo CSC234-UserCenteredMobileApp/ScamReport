@@ -7,7 +7,6 @@ class SettingsState {
     required this.phoneScamAlerts,
     required this.smsPhishingAlerts,
     required this.regionalAlerts,
-    this.province,
   });
 
   final ThemeMode themeMode;
@@ -15,7 +14,6 @@ class SettingsState {
   final bool phoneScamAlerts;
   final bool smsPhishingAlerts;
   final bool regionalAlerts;
-  final String? province;
 
   static const SettingsState defaults = SettingsState(
     themeMode: ThemeMode.system,
@@ -31,8 +29,6 @@ class SettingsState {
     bool? phoneScamAlerts,
     bool? smsPhishingAlerts,
     bool? regionalAlerts,
-    String? province,
-    bool clearProvince = false,
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
@@ -40,7 +36,6 @@ class SettingsState {
       phoneScamAlerts: phoneScamAlerts ?? this.phoneScamAlerts,
       smsPhishingAlerts: smsPhishingAlerts ?? this.smsPhishingAlerts,
       regionalAlerts: regionalAlerts ?? this.regionalAlerts,
-      province: clearProvince ? null : (province ?? this.province),
     );
   }
 }

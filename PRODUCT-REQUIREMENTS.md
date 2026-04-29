@@ -305,7 +305,7 @@ Requirement IDs map to screens in §4.
 
 | ID | Requirement |
 |---|---|
-| FR-5.1 | Registered users shall submit a report with: title (required), description (required), scam type (required), target identifier (optional), province (optional), and up to 5 evidence files (optional). *(P-10)* |
+| FR-5.1 | Registered users shall submit a report with: title (required), description (required), scam type (required), target identifier (optional), and up to 5 evidence files (optional). *(P-10)* |
 | FR-5.2 | The submit button shall remain disabled until all required fields are filled. *(P-10)* |
 | FR-5.3 | Before final submission, the user shall see and explicitly confirm a consent notice stating that the report content (not their identity) will be made public if approved. *(P-10)* |
 | FR-5.4 | Submitted reports shall enter `Pending` status and appear in My Reports immediately after submission. Submission requires network connectivity; there is no offline-submit queue. *(P-11)* |
@@ -336,7 +336,6 @@ Requirement IDs map to screens in §4.
 | ID | Requirement |
 |---|---|
 | FR-8.1 | Anyone shall view the announcements list, filterable by category. The list is served from a Firestore mirror of the `alerts` collection with offline persistence enabled, so cached entries remain readable without network and new announcements arrive via real-time listener. *(P-05)* |
-| FR-8.6 | When the "Regional alerts" toggle is enabled in Settings, the announcements list shall show only announcements tagged with the user's selected province. When the toggle is off, all announcements are shown regardless of province. Province is stored on the user's profile and on each announcement (optional field). *(P-05, P-12)* |
 | FR-8.2 | Anyone shall open an announcement's detail page at a shareable URL. *(P-06)* |
 | FR-8.3 | When an admin approves or rejects a report, the system shall automatically send an FCM push notification to the report's submitter indicating the outcome (Verified or Rejected). |
 | FR-8.4 | When an admin publishes an announcement, the system shall automatically send an FCM push notification to all registered users. |
@@ -356,8 +355,7 @@ Requirement IDs map to screens in §4.
 | ID | Requirement |
 |---|---|
 | FR-10.1 | New users shall see a brief onboarding tutorial on first launch explaining the three core actions: Check, Browse, and Report. *(P-12)* |
-| FR-10.2 | Users shall manage language preference (Thai / English) and account settings from the Settings screen. *(P-12)* |
-| FR-10.3 | The Settings screen shall include a "Regional alerts" `SwitchListTile`. When enabled, a province picker (all 77 Thai provinces) appears below the toggle; the selected province is persisted to the user's profile. Enabling/disabling the toggle immediately applies or removes the province filter on the announcements list (FR-8.6). *(P-12)* |
+| FR-10.2 | Users shall manage language preference (Thai / English) and account settings from the Settings screen. Push notifications are automatic and require no user configuration. *(P-12)* |
 
 ---
 
@@ -447,7 +445,7 @@ Resolutions are recorded inline. New open questions added in subsequent revision
 | # | Question | Resolution (v1.2, 2026-04-28) |
 |---|---|---|
 | OQ-1 | **Reporter display to admins / public** | **Fully anonymised.** Admin views and audit logs never display reporter identity (see FR-7.4 + FR-7.8). Public feed and report-detail page already strip reporter (FR-3.4). DB retains reporter linkage for legal/abuse traceability only; never returned to any client. |
-| OQ-3 | **Regional / province tagging on submission** | **Resolved (v1.3, 2026-04-29): back in scope as feed-filter-only.** Province added as optional field on reports (FR-5.1) and announcements (FR-8.6). Users set province in Settings (FR-10.3); toggle filters the alerts feed. No FCM topic-per-province — notifications remain broadcast-only. |
+| OQ-3 | **Regional / province tagging on submission** | **Out of scope this release.** No province field added. Future release may revisit. |
 | OQ-4 | **Offline submission queue** | **No queue.** Submission requires network connectivity (FR-5.4). Aligns with Firestore's read-only scope (alerts + my-reports mirror only). |
 | OQ-5 | **`POST /check` API contract** | **Locked.** Request schema `{type: 'phone' \| 'url' \| 'text', payload: string, meta?: object}`. Response schema `{verdict: 'scam' \| 'suspicious' \| 'safe' \| 'unknown', matched_count: number, matches: ReportSummary[]}`. Authoritative TypeBox source: `packages/shared/check.ts` (created in S2). |
 
@@ -485,8 +483,7 @@ Resolutions are recorded inline. New open questions added in subsequent revision
 |---|---|---|---|
 | 1.0 | 2026-04-25 | Team | Initial PRD derived from BRD v2.0; reframed around product behaviour. |
 | 1.1 | 2026-04-26 | Team | Simplified: report statuses reduced to Pending/Verified/Rejected (reporter-facing); push notifications scoped to two cases (status change → reporter, announcement → all users); platform narrowed to Android only; Apple OAuth removed; topic subscriptions removed; OQ-6 and OQ-7 resolved and closed. |
-| 1.2 | 2026-04-28 | Team | Enterprise-Grade rubric alignment. Added: Flutter Web public surface (§6.6), biometric login FR-1.6, Firestore mirror for alerts (FR-8.1) and my-reports (FR-6.1) with offline-first persistence (§6.5), full reporter anonymisation in admin views (FR-7.4 + FR-7.8 + §3.6), reliability section (§6.8) with Crashlytics + Remote Config feature flags + rollback. Coverage target unified to ≥ 80% line all packages (§6.7). OQ-1, OQ-4, OQ-5 resolved. Submit requires connectivity (FR-5.4). |
-| 1.3 | 2026-04-29 | A.P | OQ-3 reopened and resolved: province filter back in scope as feed-filter-only (no FCM topics). Added FR-5.1 province field (optional on submission), FR-8.6 regional alerts feed filter, FR-10.3 province picker + toggle in Settings. `province String?` added to User + Announcement schema (Prisma migration in S3). |
+| 1.2 | 2026-04-28 | Team | Enterprise-Grade rubric alignment. Added: Flutter Web public surface (§6.6), biometric login FR-1.6, Firestore mirror for alerts (FR-8.1) and my-reports (FR-6.1) with offline-first persistence (§6.5), full reporter anonymisation in admin views (FR-7.4 + FR-7.8 + §3.6), reliability section (§6.8) with Crashlytics + Remote Config feature flags + rollback. Coverage target unified to ≥ 80% line all packages (§6.7). OQ-1, OQ-3, OQ-4, OQ-5 resolved. Submit requires connectivity (FR-5.4). |
 
 **Sign-off required before Sprint 2:**
 - [ ] Team consensus (A.P, T.P, B.S, S.P, Y.R)

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/constants/thai_provinces.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../auth/domain/auth_user.dart';
 import '../../auth/presentation/auth_providers.dart';

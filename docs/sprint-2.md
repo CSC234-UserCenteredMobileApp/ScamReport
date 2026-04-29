@@ -48,4 +48,3 @@
   - **Notifier method is `.save(SettingsState)`**, not `.update()` — Riverpod's `AsyncNotifierBase` already owns `.update()`.
   - **New stub routes added:** `/my-reports`, `/privacy`, `/terms` (each shows "coming soon"). S2-07 owner (B.S): the biometric Settings toggle goes inside the existing `SettingsScreen` in a new `SECURITY` card section — coordinate with A.P before adding to avoid merge conflict.
   - **`flutter_localizations` + `intl`** added to `pubspec.yaml`. Run `flutter pub get` after pulling.
-- _2026-04-29_: OQ-3 (province field) reinstated as **feed-filter-only** (PRD v1.3, D6 reversed). Province stored on `users` + `announcements` + `reports` (`province text NULL` Prisma migration, S3). Settings screen gets province picker + "Regional alerts" toggle (FR-10.3); alerts feed filters by province when toggle on (FR-8.6). **No FCM topics.** Owner recommendation: settings UI → B.S, alerts filter → Y.R, API + migration → T.P.
