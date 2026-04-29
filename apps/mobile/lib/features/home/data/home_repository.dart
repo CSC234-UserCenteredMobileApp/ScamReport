@@ -41,6 +41,7 @@ class HomeRepository {
         excerpt: map['excerpt'] as String,
         scamTypeCode: map['scamTypeCode'] as String,
         scamTypeLabelEn: map['scamTypeLabelEn'] as String,
+        scamTypeLabelTh: map['scamTypeLabelTh'] as String,
         verifiedAt: DateTime.parse(map['verifiedAt'] as String),
         reportCount: map['reportCount'] as int,
       );

@@ -1,0 +1,61 @@
+{
+  "@@locale": "th",
+
+  "searchHint": "วางหมายเลข ลิงก์ หรือข้อความ…",
+  "aiSearch": "ค้นหาด้วย AI",
+
+  "sectionThisWeek": "สัปดาห์นี้",
+  "sectionRecentAlerts": "การแจ้งเตือนการฉ้อโกงล่าสุด",
+  "sectionRecentlyVerified": "ตรวจสอบล่าสุด",
+  "seeAll": "ดูทั้งหมด",
+  "loadFailedRetry": "โหลดล้มเหลว — แตะเพื่อลองอีกครั้ง",
+
+  "greetingGuest": "สวัสดี 👋",
+  "greetingWithName": "สวัสดี, {name} 👋",
+  "tagline": "ก้าวนำหน้าการฉ้อโกงหนึ่งก้าว",
+
+  "clipboardBannerTitle": "เราพบบางอย่างในคลิปบอร์ดของคุณ",
+  "checkIt": "ตรวจสอบ",
+
+  "statVerifiedReports": "รายงาน\nที่ยืนยันแล้ว",
+  "statNewThisWeek": "ใหม่\nสัปดาห์นี้",
+  "statTopScamType": "ประเภทหลอกลวง\nอันดับต้น",
+
+  "categoryFraudAlert": "การแจ้งเตือนฉ้อโกง",
+  "categoryTips": "เคล็ดลับ",
+  "categoryPlatformUpdate": "อัปเดตแพลตฟอร์ม",
+
+  "reportCountLabel": "{count} รายงาน",
+
+  "settingsTitle": "การตั้งค่า",
+  "settingsSectionNotifications": "การแจ้งเตือน",
+  "settingsSectionPreferences": "การตั้งค่าส่วนตัว",
+  "settingsSectionAccount": "บัญชี",
+  "myReports": "รายงานของฉัน",
+  "privacyPolicy": "นโยบายความเป็นส่วนตัว",
+  "termsOfService": "ข้อกำหนดการให้บริการ",
+  "signOut": "ออกจากระบบ",
+  "signOutDialogContent": "ออกจากระบบ ScamReport?",
+  "cancel": "ยกเลิก",
+
+  "languageLabel": "ภาษา",
+  "languageEnglish": "English",
+  "languageThai": "ภาษาไทย",
+  "themeLabel": "ธีม",
+  "themeLight": "สว่าง",
+  "themeDark": "มืด",
+
+  "notifPhoneScam": "การแจ้งเตือนการหลอกลวงทางโทรศัพท์",
+  "notifPhoneScamDesc": "รับการแจ้งเตือนเกี่ยวกับการหลอกลวงทางโทรศัพท์ใหม่",
+  "notifSmsPhishing": "การแจ้งเตือนฟิชชิง SMS",
+  "notifSmsPhishingDesc": "รูปแบบการหลอกลวง SMS ที่กำลังเป็นที่นิยม",
+  "notifRegional": "การแจ้งเตือนตามภูมิภาค",
+  "notifRegionalDesc": "การหลอกลวงที่รายงานในจังหวัดของคุณ",
+
+  "navHome": "หน้าแรก",
+  "navFeed": "ฟีด",
+  "navReport": "รายงาน",
+  "navModerate": "กลั่นกรอง",
+  "navAlerts": "แจ้งเตือน",
+  "navMe": "ฉัน"
+}

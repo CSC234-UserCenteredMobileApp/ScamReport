@@ -13,7 +13,7 @@ class _BrandHeader extends ConsumerWidget {
     final Widget avatar;
 
     if (user == null) {
-      greeting = 'Hi \u{1F44B}';
+      greeting = context.l10n.greetingGuest;
       avatar = CircleAvatar(
         radius: 20,
         backgroundColor: theme.colorScheme.surfaceContainerHighest,
@@ -28,7 +28,7 @@ class _BrandHeader extends ConsumerWidget {
           ? user.displayName!
           : (user.email?.split('@').first ?? '');
       final String displayFirst = rawName.split(' ').first;
-      greeting = 'Hi, $displayFirst \u{1F44B}';
+      greeting = context.l10n.greetingWithName(displayFirst);
       final String initials = rawName.isNotEmpty ? rawName[0].toUpperCase() : '?';
       avatar = CircleAvatar(
         radius: 20,
@@ -57,7 +57,7 @@ class _BrandHeader extends ConsumerWidget {
               ),
             ),
             Text(
-              'Stay one step ahead of scams',
+              context.l10n.tagline,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

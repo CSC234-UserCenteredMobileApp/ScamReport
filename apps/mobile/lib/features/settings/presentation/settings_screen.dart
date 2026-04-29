@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/l10n.dart';
 import '../../auth/domain/auth_user.dart';
 import '../../auth/presentation/auth_providers.dart';
 import 'settings_providers.dart';
@@ -44,7 +45,7 @@ class SettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(context.l10n.settingsTitle),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -56,19 +57,19 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: 24),
 
             // Notifications
-            const _SectionLabel('NOTIFICATIONS'),
+            _SectionLabel(context.l10n.settingsSectionNotifications),
             const SizedBox(height: 8),
             const _NotificationsSection(),
             const SizedBox(height: 24),
 
             // Preferences
-            const _SectionLabel('PREFERENCES'),
+            _SectionLabel(context.l10n.settingsSectionPreferences),
             const SizedBox(height: 8),
             const _PreferencesSection(),
             const SizedBox(height: 24),
 
             // Account links
-            const _SectionLabel('ACCOUNT'),
+            _SectionLabel(context.l10n.settingsSectionAccount),
             const SizedBox(height: 8),
             _AccountSection(user: user),
             const SizedBox(height: 24),
@@ -133,7 +134,7 @@ class _AccountSection extends StatelessWidget {
           if (!isGuest) ...[
             _NavTile(
               icon: Icons.inbox_outlined,
-              title: 'My reports',
+              title: context.l10n.myReports,
               onTap: () => context.push('/my-reports'),
               isFirst: true,
             ),
@@ -141,14 +142,14 @@ class _AccountSection extends StatelessWidget {
           ],
           _NavTile(
             icon: Icons.lock_outline,
-            title: 'Privacy policy',
+            title: context.l10n.privacyPolicy,
             onTap: () => context.push('/me/privacy'),
             isFirst: isGuest,
           ),
           const Divider(height: 1, indent: 16, endIndent: 16),
           _NavTile(
             icon: Icons.article_outlined,
-            title: 'Terms of service',
+            title: context.l10n.termsOfService,
             onTap: () => context.push('/me/terms'),
             isLast: isGuest,
           ),
@@ -219,7 +220,7 @@ class _SignOutTile extends StatelessWidget {
       child: ListTile(
         leading: Icon(Icons.logout, color: verdict.scam.accent, size: 22),
         title: Text(
-          'Sign out',
+          context.l10n.signOut,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: verdict.scam.accent,
                 fontWeight: FontWeight.w500,
@@ -233,15 +234,16 @@ class _SignOutTile extends StatelessWidget {
   }
 
   void _showSignOutDialog(BuildContext context) {
+    final l10n = context.l10n;
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Sign out'),
-        content: const Text('Sign out of ScamReport?'),
+        title: Text(l10n.signOut),
+        content: Text(l10n.signOutDialogContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () async {
@@ -252,7 +254,7 @@ class _SignOutTile extends StatelessWidget {
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(ctx).extension<VerdictPalette>()!.scam.accent,
             ),
-            child: const Text('Sign out'),
+            child: Text(l10n.signOut),
           ),
         ],
       ),

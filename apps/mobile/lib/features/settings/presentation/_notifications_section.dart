@@ -18,8 +18,8 @@ class _NotificationsSection extends ConsumerWidget {
         child: Column(
           children: [
             _NotifTile(
-              title: 'Phone scam alerts',
-              subtitle: 'Get notified about new phone scams',
+              title: context.l10n.notifPhoneScam,
+              subtitle: context.l10n.notifPhoneScamDesc,
               value: settings.phoneScamAlerts,
               onChanged: (v) => ref
                   .read(settingsProvider.notifier)
@@ -28,8 +28,8 @@ class _NotificationsSection extends ConsumerWidget {
             ),
             const Divider(height: 1, indent: 16, endIndent: 16),
             _NotifTile(
-              title: 'SMS phishing alerts',
-              subtitle: 'Trending SMS scam patterns',
+              title: context.l10n.notifSmsPhishing,
+              subtitle: context.l10n.notifSmsPhishingDesc,
               value: settings.smsPhishingAlerts,
               onChanged: (v) => ref
                   .read(settingsProvider.notifier)
@@ -37,8 +37,8 @@ class _NotificationsSection extends ConsumerWidget {
             ),
             const Divider(height: 1, indent: 16, endIndent: 16),
             _NotifTile(
-              title: 'Regional alerts',
-              subtitle: 'Scams reported in your province',
+              title: context.l10n.notifRegional,
+              subtitle: context.l10n.notifRegionalDesc,
               value: settings.regionalAlerts,
               onChanged: (v) => ref
                   .read(settingsProvider.notifier)

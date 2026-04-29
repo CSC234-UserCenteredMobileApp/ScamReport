@@ -110,6 +110,38 @@ ThemeData darkTheme() => _buildTheme(
       ),
     );
 
+// Sarabun is the Thai fallback — covers Thai glyphs that Plus Jakarta Sans lacks.
+// fontFamilyFallback is checked only when the primary font has no glyph for a character.
+final _thaiFontFamily = GoogleFonts.sarabun().fontFamily!;
+
+TextStyle _patch(TextStyle? s) =>
+    (s ?? const TextStyle()).copyWith(fontFamilyFallback: [_thaiFontFamily]);
+
+TextTheme _applyThaiFont(TextTheme t) => TextTheme(
+      displayLarge: _patch(t.displayLarge),
+      displayMedium: _patch(t.displayMedium),
+      displaySmall: _patch(t.displaySmall),
+      headlineLarge: _patch(t.headlineLarge),
+      headlineMedium: _patch(t.headlineMedium),
+      headlineSmall: _patch(t.headlineSmall),
+      titleLarge: _patch(t.titleLarge),
+      titleMedium: _patch(t.titleMedium),
+      titleSmall: _patch(t.titleSmall),
+      bodyLarge: _patch(t.bodyLarge),
+      bodyMedium: _patch(t.bodyMedium),
+      bodySmall: _patch(t.bodySmall),
+      labelLarge: _patch(t.labelLarge),
+      labelMedium: _patch(t.labelMedium),
+      labelSmall: _patch(t.labelSmall),
+    );
+
+// Bottom-nav label style — must include fallback manually (not inherited from textTheme).
+final _navLabelStyle = TextStyle(
+  fontSize: 11,
+  fontWeight: FontWeight.w600,
+  fontFamilyFallback: [_thaiFontFamily],
+);
+
 ThemeData _buildTheme({
   required Brightness brightness,
   required Color bg,
@@ -136,9 +168,11 @@ ThemeData _buildTheme({
   final baseTextTheme = brightness == Brightness.light
       ? Typography.material2021().black
       : Typography.material2021().white;
-  final textTheme = GoogleFonts.plusJakartaSansTextTheme(baseTextTheme).apply(
-    bodyColor: onSurface,
-    displayColor: onSurface,
+  final textTheme = _applyThaiFont(
+    GoogleFonts.plusJakartaSansTextTheme(baseTextTheme).apply(
+      bodyColor: onSurface,
+      displayColor: onSurface,
+    ),
   );
 
   return ThemeData(
@@ -235,8 +269,8 @@ ThemeData _buildTheme({
       unselectedItemColor: mutedHint,
       type: BottomNavigationBarType.fixed,
       showUnselectedLabels: true,
-      selectedLabelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-      unselectedLabelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+      selectedLabelStyle: _navLabelStyle,
+      unselectedLabelStyle: _navLabelStyle,
     ),
 
     dividerTheme: DividerThemeData(color: outline, thickness: 1, space: 1),

@@ -5,6 +5,7 @@ class RecentReport {
     required this.excerpt,
     required this.scamTypeCode,
     required this.scamTypeLabelEn,
+    required this.scamTypeLabelTh,
     required this.verifiedAt,
     required this.reportCount,
   });
@@ -13,6 +14,7 @@ class RecentReport {
   final String excerpt;
   final String scamTypeCode;
   final String scamTypeLabelEn;
+  final String scamTypeLabelTh;
   final DateTime verifiedAt;
   final int reportCount;
 }

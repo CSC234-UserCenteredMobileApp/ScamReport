@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../theme/app_theme.dart';
 import '../../features/home/domain/recent_alert.dart';
+import '../../l10n/l10n.dart';
 
 class AlertCard extends StatelessWidget {
   const AlertCard({super.key, required this.alert});
@@ -24,17 +25,17 @@ class AlertCard extends StatelessWidget {
         iconBg = verdict.scam.bg;
         iconFg = verdict.scam.fg;
         iconData = Icons.warning_amber_outlined;
-        chipLabel = 'Fraud Alert';
+        chipLabel = context.l10n.categoryFraudAlert;
       case AlertCategory.tips:
         iconBg = verdict.safe.bg;
         iconFg = verdict.safe.fg;
         iconData = Icons.shield_outlined;
-        chipLabel = 'Tips';
+        chipLabel = context.l10n.categoryTips;
       case AlertCategory.platformUpdate:
         iconBg = verdict.unknown.bg;
         iconFg = verdict.unknown.fg;
         iconData = Icons.info_outline;
-        chipLabel = 'Platform Update';
+        chipLabel = context.l10n.categoryPlatformUpdate;
     }
 
     final dateStr = _formatDate(alert.publishedAt);

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/home/domain/recent_report.dart';
+import '../../l10n/l10n.dart';
 
 class ReportCard extends StatelessWidget {
   const ReportCard({super.key, required this.report});
@@ -13,6 +14,10 @@ class ReportCard extends StatelessWidget {
     final theme = Theme.of(context);
     final chipBg = theme.colorScheme.surfaceContainerHighest;
     final chipFg = theme.colorScheme.onSurfaceVariant;
+    final locale = Localizations.localeOf(context);
+    final scamTypeLabel = locale.languageCode == 'th'
+        ? report.scamTypeLabelTh
+        : report.scamTypeLabelEn;
 
     return Card(
       child: InkWell(
@@ -27,7 +32,7 @@ class ReportCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Chip(
-                    label: Text(report.scamTypeLabelEn),
+                    label: Text(scamTypeLabel),
                     backgroundColor: chipBg,
                     labelStyle: theme.textTheme.labelSmall?.copyWith(
                       color: chipFg,
@@ -73,7 +78,7 @@ class ReportCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '${report.reportCount} reports',
+                    context.l10n.reportCountLabel(report.reportCount),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
