@@ -1,5 +1,5 @@
-import { Elysia, t } from 'elysia';
-import { AnnouncementListResponse } from '@my-product/shared';
+import { Elysia } from 'elysia';
+import { AnnouncementListResponse, AnnouncementListQuery } from '@my-product/shared';
 import { getPrisma } from '../../core/db/client';
 
 export const announcementsRoute = new Elysia().get(
@@ -9,10 +9,13 @@ export const announcementsRoute = new Elysia().get(
     const limit = Math.min(query.limit ?? 10, 50);
 
     const rows = await prisma.announcement.findMany({
-      where: { status: 'published' },
+      where: {
+        status: 'published',
+        ...(query.province ? { province: query.province } : {}),
+      },
       orderBy: { publishedAt: 'desc' },
       take: limit,
-      select: { id: true, title: true, category: true, publishedAt: true, createdAt: true },
+      select: { id: true, title: true, category: true, province: true, publishedAt: true, createdAt: true },
     });
 
     return {
@@ -21,11 +24,12 @@ export const announcementsRoute = new Elysia().get(
         title: r.title,
         category: r.category,
         publishedAt: (r.publishedAt ?? r.createdAt).toISOString(),
+        ...(r.province ? { province: r.province } : {}),
       })),
     };
   },
   {
-    query: t.Object({ limit: t.Optional(t.Integer({ minimum: 1, maximum: 50 })) }),
+    query: AnnouncementListQuery,
     response: AnnouncementListResponse,
   },
 );

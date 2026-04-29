@@ -12,6 +12,7 @@ export const AnnouncementCard = Type.Object({
   title: Type.String(),
   category: AnnouncementCategory,
   publishedAt: Type.String({ format: 'date-time' }),
+  province: Type.Optional(Type.String()),
 });
 export type AnnouncementCard = Static<typeof AnnouncementCard>;
 
@@ -19,3 +20,9 @@ export const AnnouncementListResponse = Type.Object({
   items: Type.Array(AnnouncementCard),
 });
 export type AnnouncementListResponse = Static<typeof AnnouncementListResponse>;
+
+export const AnnouncementListQuery = Type.Object({
+  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 50 })),
+  province: Type.Optional(Type.String({ minLength: 1 })),
+});
+export type AnnouncementListQuery = Static<typeof AnnouncementListQuery>;
