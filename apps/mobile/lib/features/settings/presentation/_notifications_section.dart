@@ -42,65 +42,10 @@ class _NotificationsSection extends ConsumerWidget {
               value: settings.regionalAlerts,
               onChanged: (v) => ref
                   .read(settingsProvider.notifier)
-                  .save(settings.copyWith(
-                    regionalAlerts: v,
-                    clearProvince: !v,
-                  )),
-              isLast: !settings.regionalAlerts,
+                  .save(settings.copyWith(regionalAlerts: v)),
+              isLast: true,
             ),
-            if (settings.regionalAlerts) ...[
-              const Divider(height: 1, indent: 16, endIndent: 16),
-              _ProvincePicker(
-                value: settings.province,
-                onChanged: (p) => ref
-                    .read(settingsProvider.notifier)
-                    .save(settings.copyWith(province: p)),
-              ),
-            ],
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ProvincePicker extends StatelessWidget {
-  const _ProvincePicker({required this.value, required this.onChanged});
-
-  final String? value;
-  final ValueChanged<String?> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-        child: DropdownButtonFormField<String>(
-          initialValue: value,
-          isExpanded: true,
-          decoration: InputDecoration(
-            labelText: 'Province',
-            labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          ),
-          hint: Text(
-            'Select province',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
-          ),
-          items: kThaiProvinces
-              .map((p) => DropdownMenuItem(value: p, child: Text(p)))
-              .toList(),
-          onChanged: onChanged,
         ),
       ),
     );
