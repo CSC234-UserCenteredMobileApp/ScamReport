@@ -36,6 +36,18 @@ Flutter app. Feature-first layout: everything for a feature lives in `lib/featur
 - No business logic in widgets — push to domain / data layers.
 - No `print` (lint blocks it).
 
+## Shared widgets (`lib/core/widgets/`)
+
+Don't recreate these — import from `core/widgets/` directly.
+
+| Widget | File | Usage |
+|--------|------|-------|
+| `AppShell` | `app_shell.dart` | Bottom-nav scaffold. Use as the `StatefulShellRoute` builder. |
+| `StatCardRow` | `stat_card_row.dart` | 3-up stat cards. Takes `HomeStats`. |
+| `AlertCard` | `alert_card.dart` | Announcement card. Takes `RecentAlert`. |
+| `ReportCard` | `report_card.dart` | Verified report card. Takes `RecentReport`. |
+| `SectionHeader` | `section_header.dart` | Uppercase label + optional "See all" callback. |
+
 ## Commands
 
 - `flutter run` — launch on an attached device / simulator

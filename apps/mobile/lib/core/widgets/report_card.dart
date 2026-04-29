@@ -1,7 +1,10 @@
-part of 'home_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-class _ReportCard extends StatelessWidget {
-  const _ReportCard({required this.report});
+import '../../features/home/domain/recent_report.dart';
+
+class ReportCard extends StatelessWidget {
+  const ReportCard({super.key, required this.report});
 
   final RecentReport report;
 
@@ -83,4 +86,11 @@ class _ReportCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Format DateTime as MM-dd without external package.
+String _formatMonthDay(DateTime dt) {
+  final m = dt.month.toString().padLeft(2, '0');
+  final d = dt.day.toString().padLeft(2, '0');
+  return '$m-$d';
 }

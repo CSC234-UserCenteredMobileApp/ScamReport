@@ -1,7 +1,9 @@
-part of 'home_screen.dart';
+import 'package:flutter/material.dart';
 
-class _StatCardRow extends StatelessWidget {
-  const _StatCardRow({required this.stats});
+import '../../features/home/domain/home_stats.dart';
+
+class StatCardRow extends StatelessWidget {
+  const StatCardRow({super.key, required this.stats});
 
   final HomeStats stats;
 
@@ -11,7 +13,7 @@ class _StatCardRow extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: _StatCard(
+          child: StatCard(
             value: _formatNumber(stats.verifiedTotal),
             label: 'VERIFIED\nREPORTS',
             valueColor: theme.colorScheme.onSurface,
@@ -19,7 +21,7 @@ class _StatCardRow extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         Expanded(
-          child: _StatCard(
+          child: StatCard(
             value: '+${stats.newThisWeek}',
             label: 'NEW THIS\nWEEK',
             valueColor: theme.colorScheme.primary,
@@ -27,7 +29,7 @@ class _StatCardRow extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         Expanded(
-          child: _StatCard(
+          child: StatCard(
             value: stats.topScamType,
             label: 'TOP SCAM\nTYPE',
             valueColor: theme.colorScheme.onSurface,
@@ -39,8 +41,9 @@ class _StatCardRow extends StatelessWidget {
   }
 }
 
-class _StatCard extends StatelessWidget {
-  const _StatCard({
+class StatCard extends StatelessWidget {
+  const StatCard({
+    super.key,
     required this.value,
     required this.label,
     required this.valueColor,
@@ -99,8 +102,8 @@ String _formatNumber(int n) {
   return buf.toString().split('').reversed.join();
 }
 
-class _StatCardRowSkeleton extends StatelessWidget {
-  const _StatCardRowSkeleton();
+class StatCardRowSkeleton extends StatelessWidget {
+  const StatCardRowSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -112,6 +115,23 @@ class _StatCardRowSkeleton extends StatelessWidget {
         SizedBox(width: 8),
         Expanded(child: _SkeletonBox(height: 88)),
       ],
+    );
+  }
+}
+
+class _SkeletonBox extends StatelessWidget {
+  const _SkeletonBox({required this.height});
+
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: height,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
+      ),
     );
   }
 }
