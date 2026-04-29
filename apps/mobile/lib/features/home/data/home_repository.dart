@@ -10,10 +10,11 @@ class HomeRepository {
 
   Future<HomeStats> getStats() async {
     final json = await _api.fetchStats();
+    final data = json['data'] as Map<String, dynamic>;
     return HomeStats(
-      verifiedTotal: json['verifiedTotal'] as int,
-      newThisWeek: json['newThisWeek'] as int,
-      topScamType: json['topScamType'] as String,
+      verifiedTotal: data['verifiedTotal'] as int,
+      newThisWeek: data['newThisWeek'] as int,
+      topScamType: data['topScamType'] as String,
     );
   }
 

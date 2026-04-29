@@ -35,7 +35,8 @@ class HomeApi {
         'GET /announcements failed with ${response.statusCode}: ${response.body}',
       );
     }
-    return jsonDecode(response.body) as List<dynamic>;
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    return body['items'] as List<dynamic>;
   }
 
   Future<List<dynamic>> fetchRecentReports({int limit = 2}) async {
@@ -51,6 +52,7 @@ class HomeApi {
         'GET /reports failed with ${response.statusCode}: ${response.body}',
       );
     }
-    return jsonDecode(response.body) as List<dynamic>;
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    return body['items'] as List<dynamic>;
   }
 }
