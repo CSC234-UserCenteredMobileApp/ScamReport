@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
+import '../../features/settings/presentation/settings_screen.dart';
 import '../di/auth.dart';
 import '../widgets/app_shell.dart';
 
@@ -88,9 +89,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/me',
-              builder: (_, __) => const Scaffold(
-                body: Center(child: Text('Me — coming soon')),
-              ),
+              builder: (_, __) => const SettingsScreen(),
             ),
           ]),
         ],
@@ -127,6 +126,24 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           body: Center(
             child: Text('Report ${s.pathParameters['id']}'),
           ),
+        ),
+      ),
+      GoRoute(
+        path: '/my-reports',
+        builder: (_, __) => const Scaffold(
+          body: Center(child: Text('My reports — coming soon')),
+        ),
+      ),
+      GoRoute(
+        path: '/privacy',
+        builder: (_, __) => const Scaffold(
+          body: Center(child: Text('Privacy policy — coming soon')),
+        ),
+      ),
+      GoRoute(
+        path: '/terms',
+        builder: (_, __) => const Scaffold(
+          body: Center(child: Text('Terms of service — coming soon')),
         ),
       ),
     ],

@@ -11,16 +11,18 @@ Tokens always come from `apps/mobile/lib/core/theme/app_theme.dart` (`ColorSchem
 | `AuthScaffold` | `apps/mobile/lib/features/auth/presentation/_auth_scaffold.dart` | Scrollable scaffold with brand pill + wordmark + tagline. Used by `login` and `register`. |
 | `PasswordField` | `apps/mobile/lib/features/auth/presentation/_password_field.dart` | TextFormField with show/hide toggle. |
 | `ErrorBanner` | `apps/mobile/lib/features/auth/presentation/_error_banner.dart` | Soft container using `VerdictPalette.scam` tones. |
+| `BottomNav` (via `AppShell`) | `apps/mobile/lib/core/widgets/app_shell.dart` | 5-tab `BottomNavigationBar` inside a `StatefulShellRoute`. Admin role swaps tab 2 label to "Moderate". Reads `currentUserProvider` to detect role. |
+| `BrandHeader` | `apps/mobile/lib/features/home/presentation/_brand_header.dart` | Avatar pill (initials for authed, generic icon for guest) + greeting + tagline. Used by `home`. |
+| `ClipboardBanner` | `apps/mobile/lib/features/home/presentation/_clipboard_banner.dart` | Coral card with clipboard snippet, "Check it" button, dismiss ×. Shown when clipboard has phone/url pattern (FR-9.2). |
+| `StatCardRow` | `apps/mobile/lib/features/home/presentation/_stat_card_row.dart` | 3-up grid: big number / label. Used by `home`; reuse in `feed` and `mod`. |
+| `AlertCard` | `apps/mobile/lib/features/home/presentation/_alert_card.dart` | Category chip + title + date. Category colour variants (Fraud Alert → scam red, Tips → safe green, Platform Update → coral). Reuse in `alerts`. |
+| `ReportCard` | `apps/mobile/lib/features/home/presentation/_report_card.dart` | Type chip + date + title + excerpt + "N reports" count. Tappable → `report-detail`. Reuse in `feed`. |
+| `_AccountCard` | `apps/mobile/lib/features/settings/presentation/_account_card.dart` | Role-aware identity card: guest (person icon + "Sign in" btn) / user (coral avatar + name + email) / admin (+ coral "Admin" chip). Reuse wherever user identity is shown. |
 
 ## To build (referenced by screens)
 
 | Widget | Used by | Sketch |
 | --- | --- | --- |
-| `BottomNav` | every authenticated screen | 5 tabs (`Home / Feed / Report \| Moderate / Alerts / Me`). Active tab uses primary fill + label colour; rest use `onSurfaceVariant`. Admin variant swaps "Report" for "Moderate". |
-| `ClipboardBanner` | `home` | Coral-tinted card with clipboard icon, snippet, "Check it" primary button, and dismiss `×`. Appears only when clipboard contains a phone/url-like value (FR-9.2). |
-| `StatCardRow` | `home`, `feed` | 3-up grid: big number / label. Used for `2,184 Verified reports`, `+36 New this week`, top scam type. |
-| `AlertCard` | `home`, `alerts` | Category chip (Fraud Alert / Tips / Platform Update) + title + date. Variants by category colour. |
-| `ReportCard` | `home`, `feed` | Type chip + date + title + excerpt + "N reports" count. Tappable → `report-detail`. |
 | `VerdictPill` | `report-detail`, `verdict` | Coloured chip showing one of `Scam / Suspicious / Safe / Unknown` with icon + label. Driven by `VerdictPalette.<verdict>.{bg,fg}`. |
 | `FilterChipBar` | `feed`, `alerts`, `my-reports` | Horizontal scrollable chip row. Active chip uses primary fill, inactive uses `surfaceContainerHighest`. |
 | `EvidenceList` | `report-detail`, `admin-review` | List of evidence items (Screenshot 1, Screenshot 2). Tap to preview (mocked in prototype). |
@@ -28,7 +30,6 @@ Tokens always come from `apps/mobile/lib/core/theme/app_theme.dart` (`ColorSchem
 | `StepBar` | `submit-report` | "Step 1 / 2" indicator at top of multi-step form. |
 | `ModQueueRow` | `mod` | Type chip + age + title + reporter handle (`User_xxxx`) + N evidence + Review button. Flagged variant adds a pinned border + team note row beneath. |
 | `AuditTrailRow` | `admin-review` | Timeline-style row: action label + admin handle + timestamp + remark text. |
-| `BrandHeader` | `home` | Avatar pill (initials for logged-in roles, generic icon for guest) + greeting + tagline. |
 | `LegalDoc` | `privacy`, `terms` | Static Markdown-style scrollable column with H1 + numbered sections + last-updated date. |
 | `EmptyGate` | `search`, `submit-report` (guest variant) | Sign-in/sign-up call-to-action panel that replaces the gated screen for guests. |
 | `Toast` | global | Bottom-of-frame ephemeral message. The prototype uses it for stubbed actions (e.g., share sheet). |
