@@ -1,21 +1,22 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
-import '../../features/example/presentation/example_screen.dart';
+import '../../features/home/presentation/home_screen.dart';
 import '../di/auth.dart';
+import '../widgets/app_shell.dart';
 
 // Routes that require an authenticated Firebase user. An unauthenticated
 // visitor hitting one is redirected to /login. Add to this list as
 // registered-user / admin features land.
 const _authRequired = <String>{
-  '/', // The home screen (currently ExampleScreen) requires sign-in.
-  // future: '/search', '/submit', '/my-reports', '/mod', ...
+  '/', // The home screen requires sign-in.
+  // future: '/search', '/submit-report', '/my-reports', '/mod', ...
 };
 
 final goRouterProvider = Provider<GoRouter>((ref) {
@@ -43,9 +44,91 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(path: '/', builder: (_, __) => const ExampleScreen()),
+      // -----------------------------------------------------------------------
+      // Bottom-nav shell — 5 branches share the AppShell scaffold.
+      // -----------------------------------------------------------------------
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, shell) => AppShell(navigationShell: shell),
+        branches: [
+          // 0 — Home
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/',
+              builder: (_, __) => const HomeScreen(),
+            ),
+          ]),
+          // 1 — Feed
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/feed',
+              builder: (_, __) => const Scaffold(
+                body: Center(child: Text('Feed — coming soon')),
+              ),
+            ),
+          ]),
+          // 2 — Report / Moderate
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/submit-report',
+              builder: (_, __) => const Scaffold(
+                body: Center(child: Text('Report — coming soon')),
+              ),
+            ),
+          ]),
+          // 3 — Alerts
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/alerts',
+              builder: (_, __) => const Scaffold(
+                body: Center(child: Text('Alerts — coming soon')),
+              ),
+            ),
+          ]),
+          // 4 — Me
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/me',
+              builder: (_, __) => const Scaffold(
+                body: Center(child: Text('Me — coming soon')),
+              ),
+            ),
+          ]),
+        ],
+      ),
+
+      // -----------------------------------------------------------------------
+      // Full-screen flows — no bottom nav (outside the shell).
+      // -----------------------------------------------------------------------
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
       GoRoute(path: '/register', builder: (_, __) => const RegisterScreen()),
+      GoRoute(
+        path: '/check-input',
+        builder: (_, __) => const Scaffold(
+          body: Center(child: Text('Check input — coming soon')),
+        ),
+      ),
+      GoRoute(
+        path: '/search',
+        builder: (_, __) => const Scaffold(
+          body: Center(child: Text('Search — coming soon')),
+        ),
+      ),
+      GoRoute(
+        path: '/announcement-detail/:id',
+        builder: (_, s) => Scaffold(
+          body: Center(
+            child: Text('Announcement ${s.pathParameters['id']}'),
+          ),
+        ),
+      ),
+      GoRoute(
+        path: '/report-detail/:id',
+        builder: (_, s) => Scaffold(
+          body: Center(
+            child: Text('Report ${s.pathParameters['id']}'),
+          ),
+        ),
+      ),
     ],
   );
 });
