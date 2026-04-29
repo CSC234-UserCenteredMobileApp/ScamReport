@@ -92,8 +92,6 @@ class _NotifTile extends StatelessWidget {
                 ?.copyWith(color: cs.onSurfaceVariant)),
         value: value,
         onChanged: onChanged,
-        activeThumbColor: cs.primary,
-        activeTrackColor: cs.primary.withValues(alpha: 0.5),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       ),
     );
