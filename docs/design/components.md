@@ -18,6 +18,7 @@ Tokens always come from `apps/mobile/lib/core/theme/app_theme.dart` (`ColorSchem
 | `AlertCard` | `apps/mobile/lib/features/home/presentation/_alert_card.dart` | Category chip + title + date. Category colour variants (Fraud Alert → scam red, Tips → safe green, Platform Update → coral). Reuse in `alerts`. |
 | `ReportCard` | `apps/mobile/lib/features/home/presentation/_report_card.dart` | Type chip + date + title + excerpt + "N reports" count. Tappable → `report-detail`. Reuse in `feed`. |
 | `_AccountCard` | `apps/mobile/lib/features/settings/presentation/_account_card.dart` | Role-aware identity card: guest (person icon + "Sign in" btn) / user (coral avatar + name + email) / admin (+ coral "Admin" chip). Reuse wherever user identity is shown. |
+| `EmptyGate` | `apps/mobile/lib/core/widgets/empty_gate.dart` | Sign-in/sign-up CTA panel for guests on gated screens. Props: icon, heading, body, primaryLabel/onPrimary, optional secondaryLabel/onSecondary. Bottom nav stays visible — gate renders inside the shell scaffold. |
 
 ## To build (referenced by screens)
 
@@ -31,7 +32,6 @@ Tokens always come from `apps/mobile/lib/core/theme/app_theme.dart` (`ColorSchem
 | `ModQueueRow` | `mod` | Type chip + age + title + reporter handle (`User_xxxx`) + N evidence + Review button. Flagged variant adds a pinned border + team note row beneath. |
 | `AuditTrailRow` | `admin-review` | Timeline-style row: action label + admin handle + timestamp + remark text. |
 | `LegalDoc` | `privacy`, `terms` | Static Markdown-style scrollable column with H1 + numbered sections + last-updated date. |
-| `EmptyGate` | `search`, `submit-report` (guest variant) | Sign-in/sign-up call-to-action panel that replaces the gated screen for guests. |
 | `Toast` | global | Bottom-of-frame ephemeral message. The prototype uses it for stubbed actions (e.g., share sheet). |
 
 ## Typography conventions

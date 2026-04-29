@@ -5,19 +5,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/presentation/auth_providers.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../di/auth.dart';
 import '../widgets/app_shell.dart';
+import '../widgets/empty_gate.dart';
 
 // Routes that require an authenticated Firebase user. An unauthenticated
 // visitor hitting one is redirected to /login. Add to this list as
 // registered-user / admin features land.
 const _authRequired = <String>{
-  '/', // The home screen requires sign-in.
-  // future: '/search', '/submit-report', '/my-reports', '/mod', ...
+  // Home and feed are public. Auth-gated routes show EmptyGate inline
+  // rather than redirecting so the bottom nav stays visible.
 };
 
 final goRouterProvider = Provider<GoRouter>((ref) {
@@ -71,8 +73,25 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/submit-report',
-              builder: (_, __) => const Scaffold(
-                body: Center(child: Text('Report — coming soon')),
+              builder: (_, __) => Consumer(
+                builder: (context, ref, _) {
+                  final user = ref.watch(currentUserProvider).valueOrNull;
+                  if (user == null) {
+                    return Scaffold(
+                      appBar: AppBar(title: const Text('Report a scam')),
+                      body: EmptyGate(
+                        icon: Icons.lock_outline,
+                        heading: 'Sign in to submit a report',
+                        body: 'We require an account to keep the verified database trustworthy.',
+                        primaryLabel: 'Sign in or register',
+                        onPrimary: () => context.push('/login'),
+                      ),
+                    );
+                  }
+                  return const Scaffold(
+                    body: Center(child: Text('Report — coming soon')),
+                  );
+                },
               ),
             ),
           ]),
