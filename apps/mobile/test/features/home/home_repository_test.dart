@@ -2,9 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:mobile/features/home/data/home_api.dart';
 import 'package:mobile/features/home/data/home_repository.dart';
-import 'package:mobile/features/home/domain/home_stats.dart';
 import 'package:mobile/features/home/domain/recent_alert.dart';
-import 'package:mobile/features/home/domain/recent_report.dart';
 
 class MockHomeApi extends Mock implements HomeApi {}
 
