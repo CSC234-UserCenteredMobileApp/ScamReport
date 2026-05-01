@@ -63,7 +63,7 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
 
-            // 3. Search input + AI search button
+            // 3. Search input + Ask AI button
             SliverToBoxAdapter(child: _SearchSection()),
             SliverToBoxAdapter(child: SizedBox(height: 16)),
 
@@ -110,7 +110,7 @@ class _ErrorRow extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// _SearchSection — search TextField + AI search button
+// _SearchSection — search TextField + Ask AI button
 // ---------------------------------------------------------------------------
 class _SearchSection extends StatelessWidget {
   const _SearchSection();
@@ -136,7 +136,7 @@ class _SearchSection extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () => context.push('/search'),
+              onPressed: () => context.push('/ask-ai'),
               icon: const Icon(Icons.auto_awesome_outlined, size: 18),
               label: Text(context.l10n.aiSearch),
               style: OutlinedButton.styleFrom(

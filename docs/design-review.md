@@ -2,7 +2,7 @@
 
 > **Per-screen specs:** see [`docs/design/index.md`](./design/index.md). This file stays the canonical reference for tokens, screen inventory, flows, and team-level decisions; `docs/design/` is the per-screen depth (layout / states / interactions / role variants) distilled from the prototype.
 
-> **Platform note (PRD v1.2):** The full screen inventory below targets **Android**. The **Flutter Web** build ships only the public surface — Splash/Login (P-01, P-02), Verified Feed (P-03), Report Detail (P-04), Announcements (P-05, P-06), Privacy / Terms (P-07, P-08), Verdict (P-13), Onboarding overlay. Web does not ship Submit (P-10), My Reports (P-11), AI Search (P-09), Moderation (A-01, A-02), Announcement Editor (A-03), biometric login, share-target, or the clipboard scanner. Platform-specific UI (biometric toggle on Settings, clipboard banner) is gated by `kIsWeb` checks at presentation layer.
+> **Platform note (PRD v1.2):** The full screen inventory below targets **Android**. The **Flutter Web** build ships only the public surface — Splash/Login (P-01, P-02), Verified Feed (P-03), Report Detail (P-04), Announcements (P-05, P-06), Privacy / Terms (P-07, P-08), Verdict (P-13), Onboarding overlay. Web does not ship Submit (P-10), My Reports (P-11), Ask AI (P-09), Moderation (A-01, A-02), Announcement Editor (A-03), biometric login, share-target, or the clipboard scanner. Platform-specific UI (biometric toggle on Settings, clipboard banner) is gated by `kIsWeb` checks at presentation layer.
 
 > **Reporter anonymity (PRD v1.2 FR-7.4 + FR-7.8):** The mod queue (A-01) and admin review (A-02) screens **must not** display reporter identity — no user ID, no display name, no email, no avatar, no masked handle. The previous `User_3a91`-style mask shown in the prototype is **no longer accepted**; admin-facing report cards show scam content only. The API enforces this server-side.
 
@@ -64,7 +64,7 @@ Each prototype screen maps to a PRD §4 ID.
 ### Registered user
 | PRD | Prototype screen | Purpose |
 | --- | --- | --- |
-| P-09 | `search` | AI semantic search; ranked relevance cards (FR-4.1–FR-4.5) |
+| P-09 | `ask-ai` | Ask AI conversational chat — scam guidance + reporting-intent detection + AI report drafting (FR-4.1–FR-4.8) — **UX/UI spec pending** |
 | P-10 | `submit-report` | Two-step submit form with consent gate (FR-5.1–FR-5.3) |
 | P-11 | `my-reports` | Submission history grouped by status (FR-6.1, FR-6.2) |
 | P-12 | `me` (Settings) | Language, theme, account (FR-10.2) |
@@ -106,7 +106,7 @@ Admin uses `announcement-editor` → publish → all registered users receive an
 | FR-2.2 verdict colour + icon + text label | Each verdict has a colour, a distinct icon, and a label | ✓ aligned |
 | FR-2.4 verdict accessible to guests | `verdict` screen reachable without login | ✓ aligned |
 | FR-3.4 report detail never shows reporter | `report-detail` displays scam content only | ✓ aligned |
-| FR-4.4 AI Search not a verdict tool | Result cards show relevance, no Scam/Safe label | ✓ aligned |
+| FR-4.4 Ask AI is not a verdict tool | Ask AI uses conversational format; no Scam/Safe verdict label | ✓ aligned |
 | FR-5.3 consent gate before submit | 2-step form, step 2 is explicit consent | ✓ aligned |
 | FR-6.1 flagged reports surface as Pending to reporter | **`MY_REPORTS_SAMPLE` shows `Flagged` directly** | ⚠️ diverges (sample-data bug) |
 | FR-7.6 every admin action has admin ID + timestamp + remark in audit log | `admin-review` collects remarks; audit log surfaced | ✓ aligned |

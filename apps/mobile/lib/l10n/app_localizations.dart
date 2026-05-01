@@ -107,7 +107,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiSearch.
   ///
   /// In en, this message translates to:
-  /// **'AI search'**
+  /// **'Ask AI'**
   String get aiSearch;
 
   /// No description provided for @sectionThisWeek.

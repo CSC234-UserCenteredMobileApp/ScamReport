@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Document Version** | 1.2 |
+| **Document Version** | 1.4 |
 | **Status** | Draft — for team review |
-| **Date issued** | 2026-04-28 |
-| **Derived from** | PRD v1.2 (2026-04-28), BRD v2.0 (2026-04-23) |
+| **Date issued** | 2026-05-01 |
+| **Derived from** | PRD v1.3 (2026-05-01), BRD v2.0 (2026-04-23) |
 | **Target backend** | Supabase Postgres 15 + `pgvector` (system of record), Firebase Cloud Firestore (read-only mirror for `alerts` + `my-reports`) |
 
 > **Scope of this document:** schema design (tables, columns, types, constraints, indexes, RLS posture, retention rules) sufficient to start Sprint 1 backend work. SQL migrations are separate deliverables.
@@ -15,6 +15,19 @@
 ---
 
 ## 0. What Changed
+
+### v1.4 (2026-05-01)
+
+| Area | v1.3 | v1.4 | Why |
+|---|---|---|---|
+| Ask AI attachments | No attachment support on `ai_messages` | Added `ai_message_attachments` table | PRD v1.3 FR-4.2: Gemini multimodal — users can attach screenshots/PDFs to Ask AI chat |
+
+### v1.3 (2026-05-01)
+
+| Area | v1.2 | v1.3 | Why |
+|---|---|---|---|
+| Ask AI schema | `search_queries` table (one row per semantic search) | Replaced by `ai_conversations` + `ai_messages` | PRD v1.3 §3.3: AI Search replaced by conversational Ask AI with reporting-intent detection. |
+| Regional tagging | OQ-3 open ("out of scope this release, may revisit") | **Permanently dropped.** No `province_code`, no `provinces` table. | PRD v1.3 §7. |
 
 ### v1.2 (2026-04-28)
 
@@ -35,7 +48,7 @@
 | Reporter-facing status | 4 statuses surfaced (Pending / Verified / Rejected / Flagged) | 3 statuses surfaced (Pending / Verified / Rejected); `flagged` is admin-internal | FR-6.1. **No schema change** — `report_status` still has `flagged`; the API now maps `flagged → 'pending'` when responding to the reporter. |
 | Open-question impact table | OQ-1 through OQ-7 | OQ-1 through OQ-5 (OQ-6, OQ-7 closed) | PRD v1.1 closes the two questions whose schema landing was already settled. |
 
-Everything else — `users`, `reports`, `evidence_files`, `moderation_actions`, `report_embeddings`, `announcements`, `check_logs`, `search_queries`, `consent_records`, `account_deletion_requests` — is unchanged from v1.0.
+Everything else — `users`, `reports`, `evidence_files`, `moderation_actions`, `report_embeddings`, `announcements`, `check_logs`, `consent_records`, `account_deletion_requests` — is unchanged from v1.0.
 
 ---
 
@@ -64,7 +77,7 @@ erDiagram
     users ||--o{ moderation_actions : performs
     users ||--o{ announcements : authors
     users ||--o{ fcm_devices : owns
-    users ||--o{ search_queries : runs
+    users ||--o{ ai_conversations : starts
     users ||--o{ check_logs : runs
     users ||--o| account_deletion_requests : requests
 
@@ -72,13 +85,17 @@ erDiagram
     reports ||--o{ evidence_files : has
     reports ||--o{ moderation_actions : audited_by
     reports ||--|| report_embeddings : indexed_by
+    ai_conversations ||--o{ ai_messages : contains
+    users ||--o{ ai_conversations : starts
+    reports ||--o{ ai_conversations : linked_to
 ```
 
-The model now has three logical clusters (down from four — the topic-subscription cluster is gone):
+The model now has four logical clusters (down from five — the topic-subscription cluster is gone):
 
 1. **Identity & consent** — `users`, `consent_records`, `account_deletion_requests`
 2. **Content** — `reports`, `evidence_files`, `scam_types`, `report_embeddings`, `announcements`
-3. **Moderation, communications & analytics** — `moderation_actions`, `fcm_devices`, `check_logs`, `search_queries`
+3. **Moderation, communications & analytics** — `moderation_actions`, `fcm_devices`, `check_logs`
+4. **Ask AI** — `ai_conversations`, `ai_messages`, `ai_message_attachments`
 
 ---
 
@@ -318,18 +335,47 @@ Server-side log of every `POST /check` call (PRD §3.1). Useful for the public f
 
 **Retention:** rows older than 90 days are aggregated into a daily rollup table and purged.
 
-### 4.11 `search_queries`
+### 4.11 `ai_conversations`, `ai_messages`, and `ai_message_attachments` *(replaces `search_queries`)*
 
-Semantic-search abuse log (PRD §3.3). Registered users only.
+> **Status:** Schema confirmed and in `prisma/schema.prisma`. Replaces the former `search_queries` table. UX/UI spec for the Ask AI screen is pending (`docs/design/screens/ask-ai.md`); the DB schema is stable regardless of UI decisions.
+
+`ai_conversations` — one row per chat session:
 
 | Column | Type | Notes |
 |---|---|---|
 | `id` | `uuid` PK | |
-| `user_id` | `uuid` FK → `users(id)` ON DELETE SET NULL | Set null on user deletion; the abuse-detection content survives anonymised. |
-| `query_text` | `text` NOT NULL | |
-| `results_count` | `integer` NOT NULL | |
-| `top_result_id` | `uuid` FK → `reports(id)` ON DELETE SET NULL | Optional. |
+| `user_id` | `uuid` FK → `users(id)` ON DELETE SET NULL | |
+| `linked_report_id` | `uuid` FK → `reports(id)` ON DELETE SET NULL | Set when the conversation leads to a report submission via "Report with AI". |
 | `created_at` | `timestamptz` NOT NULL DEFAULT `now()` | |
+| `last_message_at` | `timestamptz` NOT NULL DEFAULT `now()` | |
+
+**Index:** `(user_id, last_message_at DESC)`.
+
+`ai_messages` — individual turns within a conversation:
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `uuid` PK | |
+| `conversation_id` | `uuid` FK → `ai_conversations(id)` ON DELETE CASCADE | |
+| `role` | `text` NOT NULL | `'user'` or `'assistant'` |
+| `content` | `text` NOT NULL | |
+| `intent_detected` | `boolean` NOT NULL DEFAULT `false` | True if the AI detected reporting intent on this turn. |
+| `created_at` | `timestamptz` NOT NULL DEFAULT `now()` | |
+
+**Index:** `(conversation_id, created_at ASC)`.
+
+`ai_message_attachments` — file metadata for attachments on user messages. Bytes live in Supabase Storage bucket `chat-attachments/`.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `uuid` PK | |
+| `message_id` | `uuid` FK → `ai_messages(id)` ON DELETE CASCADE | |
+| `storage_path` | `text` UNIQUE NOT NULL | `chat-attachments/{conversation_id}/{uuid}.ext` |
+| `mime_type` | `text` NOT NULL | One of: `image/jpeg`, `image/png`, `image/webp`, `image/gif`, `application/pdf` |
+| `size_bytes` | `bigint` NOT NULL | Max 10 MB enforced at API layer |
+| `created_at` | `timestamptz` NOT NULL DEFAULT `now()` | |
+
+**Limits (enforced at API layer):** max 3 attachments per message, max 10 MB per file, allowed MIME types listed above.
 
 ### 4.12 `account_deletion_requests`
 
@@ -401,7 +447,9 @@ Neither case requires a separate "outbound notification log" table at MVP. If de
 | `moderation_actions` | ❌ | ❌ | ✅ insert + select | ❌ | ❌ | ✅ insert only (no update/delete ever) |
 | `announcements` (status = published) | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ |
 | `check_logs` | ❌ | ✅ own | ✅ | — | inserts via backend | — |
-| `search_queries` | ❌ | ✅ own | ✅ | — | inserts via backend | — |
+| `ai_conversations` | ❌ | ✅ own | ✅ | ❌ | inserts via backend | — |
+| `ai_messages` | ❌ | ✅ own conversation | ✅ | ❌ | inserts via backend | — |
+| `ai_message_attachments` | ❌ | ✅ own conversation | ✅ | ❌ | inserts via backend | — |
 | `fcm_devices` | ❌ | ✅ own | ✅ (for push fan-out) | ❌ | ✅ register own device | ❌ |
 
 > Removed from v1.0 table: `notification_topics`, `user_topic_subscriptions` rows.
@@ -418,7 +466,7 @@ PRD v1.1 closes OQ-6 and OQ-7. Remaining schema-touching questions:
 |---|---|
 | **OQ-1** Reporter display | Already covered: `reports.reporter_id` is internal-only. Add a `users.public_handle` column (e.g. `'User_4f2a'`) only if the team picks "masked username". |
 | **OQ-2** Evidence retention after rejection | Add a scheduled job that deletes `evidence_files` rows (and storage objects) where the parent report is `status = 'rejected'` and older than the agreed retention window. No schema change. |
-| **OQ-3** Regional tagging | Add `reports.province_code text` and a `provinces` reference table. (No longer requires a `notification_topics` row per region — topics are gone.) |
+| ~~**OQ-3** Regional tagging~~ | **Permanently dropped (PRD v1.3).** No `province_code` column, no `provinces` table, no regional filter. Removed from scope in §7 of the PRD. |
 | **OQ-4** Offline report queue | Client-side concern (local SQLite). Add `reports.client_submission_id uuid UNIQUE` if backend idempotency is required. |
 | **OQ-5** `/check` contract | Schema is already shaped around `{type, payload}` — `check_input_kind` enum + `input_normalized`. No changes expected once the contract is signed. |
 
@@ -449,7 +497,7 @@ PRD v1.1 closes OQ-6 and OQ-7. Remaining schema-touching questions:
 6. `moderation_actions` + status-sync trigger + status-change push enqueue trigger
 7. `announcements` + publish push enqueue trigger
 8. `fcm_devices`
-9. `check_logs`, `search_queries`
+9. `check_logs`, `ai_conversations`, `ai_messages`, `ai_message_attachments`
 10. `account_deletion_requests`
 11. RLS policies + the `current_firebase_uid()` helper
 12. Indexes (most are already in DDL; the `ivfflat` index is built last, after seed data)

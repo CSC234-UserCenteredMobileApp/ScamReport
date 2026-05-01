@@ -12,7 +12,7 @@ class AppLocalizationsTh extends AppLocalizations {
   String get searchHint => 'วางหมายเลข ลิงก์ หรือข้อความ…';
 
   @override
-  String get aiSearch => 'ค้นหาด้วย AI';
+  String get aiSearch => 'ถามกับ AI';
 
   @override
   String get sectionThisWeek => 'สัปดาห์นี้';

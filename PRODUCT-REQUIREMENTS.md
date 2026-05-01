@@ -83,7 +83,6 @@ The public feed is the default home view for users who are not actively checking
 **Filters available:**
 - Scam type (e.g. Phone Impersonation, Phishing SMS, Fake QR, E-commerce Fraud)
 - Date range
-- (Future) Province/region tag
 
 **Each feed card shows:**
 - Report title
@@ -97,24 +96,34 @@ Live aggregate statistics are displayed at the top of the feed: total verified r
 
 ---
 
-### 3.3 AI Semantic Search (registered users only)
+### 3.3 Ask AI (registered users only)
 
-Registered users can ask the app a natural-language question about a scam, rather than requiring an exact string match.
+> **UX/UI spec:** pending update — screen design will be revised before Sprint 3 implementation begins.
 
-**Examples of valid queries:**
-- "ข้อความว่าพัสดุตกค้างจาก Kerry มีลิงก์ให้กดไหม" *(Is there a parcel-held message from Kerry with a link?)*
-- "Someone called pretending to be from the Revenue Department"
+Registered users can open a conversational AI chat (similar in interaction model to Claude or ChatGPT) to discuss anything scam-related in natural language. The AI draws on the verified report database, reasons over the conversation, and guides the user — without requiring them to know exact identifiers or search terms.
+
+**Example conversations:**
+- "มีคนโทรมาบอกว่ามาจากกรมสรรพากรแล้วบอกให้กดโอนเงิน" *(Someone called claiming to be from the Revenue Department and asked me to transfer money)*
+- "I got a LINE message with a link to claim a parcel from Kerry — is this real?"
+- "What are the most common scams targeting elderly people right now?"
 
 **How it works for the user:**
-1. The user types a free-text description into the search field on the Search screen.
-2. Results are returned as ranked report cards, most relevant first.
-3. Each result card shows a relevance indicator (high / medium / low confidence) alongside the standard report card fields.
-4. The user can tap any result to open the full Report Detail Page.
-5. If no relevant results are found, the screen shows a friendly empty state with a suggestion to submit a new report.
+1. The user opens the Ask AI screen and types a message — no special syntax or query format required.
+2. The AI responds conversationally: it may search the verified report database, surface relevant past reports, explain patterns, or ask follow-up questions.
+3. The AI actively monitors the conversation for signals that the user is describing a scam they personally experienced (e.g. "I already clicked the link", "they asked me for my bank details", "this happened to me yesterday").
+4. When the AI detects likely reporting intent — even if the user has not explicitly said "I want to report this" — a **"Report with AI"** button surfaces in the chat interface.
+5. Tapping "Report with AI" opens a pre-filled submission draft:
+   - **Title** — AI-generated from the conversation summary
+   - **Description** — AI-drafted from the user's messages
+   - **Scam type** — AI-classified from the described incident
+   - **Target identifier** — extracted from the conversation if mentioned (phone number, URL, etc.)
+   - **Evidence** — user may still attach screenshots; the conversation itself is attached as a draft source for the admin's context but is **not** made public
+6. The user reviews the draft, edits any field, confirms the consent notice, and submits.
+7. If no relevant reports are found and no reporting intent is detected, the AI suggests submitting a new report and can initiate the same flow.
 
-**Important UX note:** The AI search is a *discovery* tool, not a verdict tool. It helps users find similar past reports. It does not replace the Quick Verdict Check (§3.1) and does not output a Scam/Safe label on its own. This distinction must be communicated clearly in the UI (e.g. different screen entry point, different result layout).
+**Important:** Ask AI is a *discovery and guidance* tool, not a verdict tool. It does not output a Scam/Safe label and does not replace the Quick Verdict Check (§3.1). The AI may reference matched reports and describe patterns, but any formal verdict still comes from `POST /check`.
 
-**Why login is required:** Semantic search queries are logged per user to monitor abuse (e.g. probing the database with scammer-side queries) and to allow future personalisation. Guests see a prompt to sign up when they attempt to access this screen.
+**Why login is required:** Conversations are logged per user to monitor abuse (e.g. scammers probing the database) and to support the reporting flow. Guests see a sign-up prompt when they attempt to access this screen.
 
 ---
 
@@ -246,7 +255,7 @@ When an SMS arrives, the app reads it passively (no raw message body is sent to 
 | P-06 | Announcement Detail | All | Full view of a single announcement |
 | P-07 | Privacy Policy | All | Static legal text |
 | P-08 | Terms of Service | All | Static legal text |
-| P-09 | AI Search | Registered user | Natural-language semantic search |
+| P-09 | Ask AI | Registered user | Conversational AI chat — scam discovery, guidance, and AI-assisted report drafting |
 | P-10 | Submit Report | Registered user | Report submission form |
 | P-11 | My Reports | Registered user | Submission history and status |
 | P-12 | Settings / Onboarding | Registered user | Notifications, language, account, tutorial |
@@ -291,15 +300,20 @@ Requirement IDs map to screens in §4.
 | FR-3.3 | Anyone shall open a verified report's detail page at a stable, shareable URL. *(P-04)* |
 | FR-3.4 | The report detail page shall display scam content (title, description, type, target identifier, evidence) but shall never display the reporter's identity. *(P-04)* |
 
-### 5.4 AI Semantic Search
+### 5.4 Ask AI
+
+> **UX/UI spec for P-09 is pending update.** The requirements below define behaviour; screen layout will be specified in `docs/design/screens/ask-ai.md` before Sprint 3 implementation begins.
 
 | ID | Requirement |
 |---|---|
-| FR-4.1 | Only registered users shall access the semantic search screen; guests shall see a sign-up prompt. *(P-09)* |
-| FR-4.2 | The system shall accept a natural-language query and return ranked report matches using RAG (Gemini + pgvector), within 3 seconds P95. *(P-09)* |
-| FR-4.3 | Each result shall display a relevance confidence level (high / medium / low) alongside standard report card fields. *(P-09)* |
-| FR-4.4 | The search results screen shall not display a Scam/Safe verdict label; it is a discovery tool, not a verdict tool. The UI must make this distinction clear. *(P-09)* |
-| FR-4.5 | If no results are found, the screen shall show an empty state with a suggestion to submit a new report. *(P-09)* |
+| FR-4.1 | Only registered users shall access the Ask AI screen; guests shall see a sign-up prompt. *(P-09)* |
+| FR-4.2 | The system shall accept natural-language messages and conduct a conversational exchange with the user. The AI may search the verified report database as part of its responses. *(P-09)* |
+| FR-4.3 | The AI shall not output a Scam/Safe verdict label. It is a discovery and guidance tool, not a verdict tool. *(P-09)* |
+| FR-4.4 | The system shall monitor each conversation for signals of reporting intent (user describing a personal scam experience). When intent is detected — even without an explicit request from the user — a "Report with AI" button shall surface in the chat interface. *(P-09)* |
+| FR-4.5 | The "Report with AI" flow shall pre-populate a report submission draft with: AI-generated title, AI-drafted description, AI-classified scam type, and any target identifier extracted from the conversation. The user must review and confirm the consent notice before submission. *(P-09, P-10)* |
+| FR-4.6 | The user shall be able to edit any field of the AI-drafted report before submitting. Submission follows the standard consent and status flow (FR-5.3, FR-5.4). *(P-10)* |
+| FR-4.7 | If no relevant reports are found and no reporting intent is detected, the AI shall suggest submitting a new report and offer to initiate the "Report with AI" drafting flow. *(P-09)* |
+| FR-4.8 | Conversations shall be logged per user for abuse monitoring. Conversation content is not public; it is visible to the submitting user and (in anonymised form) to the backend for moderation quality analysis. *(P-09)* |
 
 ### 5.5 Report Submission
 
@@ -433,6 +447,7 @@ The following are explicitly excluded and should not be designed or built until 
 - Federated login with national ID (ThaID) or bank KYC.
 - Non-Thai/English localisation.
 - Any monetisation, subscription, or advertising feature.
+- **Regional / province-based alerts or filtering** — province tagging on reports and region-targeted notifications are removed from scope. No `province_code` column, no `provinces` reference table, no regional filter on the feed or alerts.
 
 ---
 
@@ -445,7 +460,7 @@ Resolutions are recorded inline. New open questions added in subsequent revision
 | # | Question | Resolution (v1.2, 2026-04-28) |
 |---|---|---|
 | OQ-1 | **Reporter display to admins / public** | **Fully anonymised.** Admin views and audit logs never display reporter identity (see FR-7.4 + FR-7.8). Public feed and report-detail page already strip reporter (FR-3.4). DB retains reporter linkage for legal/abuse traceability only; never returned to any client. |
-| OQ-3 | **Regional / province tagging on submission** | **Out of scope this release.** No province field added. Future release may revisit. |
+| OQ-3 | **Regional / province tagging on submission** | **Permanently removed.** No province field, no provinces table, no regional filter on feed or alerts. See §7. *(v1.3, 2026-05-01)* |
 | OQ-4 | **Offline submission queue** | **No queue.** Submission requires network connectivity (FR-5.4). Aligns with Firestore's read-only scope (alerts + my-reports mirror only). |
 | OQ-5 | **`POST /check` API contract** | **Locked.** Request schema `{type: 'phone' \| 'url' \| 'text', payload: string, meta?: object}`. Response schema `{verdict: 'scam' \| 'suspicious' \| 'safe' \| 'unknown', matched_count: number, matches: ReportSummary[]}`. Authoritative TypeBox source: `packages/shared/check.ts` (created in S2). |
 
@@ -463,7 +478,8 @@ Resolutions are recorded inline. New open questions added in subsequent revision
 |---|---|
 | **PRD** | Product Requirements Document (this document) |
 | **MVP** | Minimum Viable Product — the smallest feature set that delivers the core product experience |
-| **RAG** | Retrieval-Augmented Generation — semantic search over stored report embeddings, powered by Gemini + pgvector |
+| **RAG** | Retrieval-Augmented Generation — used internally by Ask AI to retrieve relevant verified reports as context for the AI's responses |
+| **Ask AI** | The conversational AI feature (P-09) replacing the former AI Search. Lets users chat with the AI about scams; AI detects reporting intent and offers to draft a report on the user's behalf |
 | **pgvector** | Postgres extension for vector-similarity search |
 | **FCM** | Firebase Cloud Messaging — Google's push-notification service |
 | **PDPA** | Personal Data Protection Act (Thailand) |
@@ -484,6 +500,7 @@ Resolutions are recorded inline. New open questions added in subsequent revision
 | 1.0 | 2026-04-25 | Team | Initial PRD derived from BRD v2.0; reframed around product behaviour. |
 | 1.1 | 2026-04-26 | Team | Simplified: report statuses reduced to Pending/Verified/Rejected (reporter-facing); push notifications scoped to two cases (status change → reporter, announcement → all users); platform narrowed to Android only; Apple OAuth removed; topic subscriptions removed; OQ-6 and OQ-7 resolved and closed. |
 | 1.2 | 2026-04-28 | Team | Enterprise-Grade rubric alignment. Added: Flutter Web public surface (§6.6), biometric login FR-1.6, Firestore mirror for alerts (FR-8.1) and my-reports (FR-6.1) with offline-first persistence (§6.5), full reporter anonymisation in admin views (FR-7.4 + FR-7.8 + §3.6), reliability section (§6.8) with Crashlytics + Remote Config feature flags + rollback. Coverage target unified to ≥ 80% line all packages (§6.7). OQ-1, OQ-3, OQ-4, OQ-5 resolved. Submit requires connectivity (FR-5.4). |
+| 1.3 | 2026-05-01 | A.P | Feature changes: (1) P-09 renamed from "AI Search" to "Ask AI" — conversational AI chat with proactive reporting-intent detection and AI-assisted report drafting (§3.3, §5.4 FR-4.x rewritten). (2) Regional/province alerts permanently removed from scope (§7, OQ-3 closed). (3) Feed filter "(Future) Province/region tag" removed (§3.2). Admin moderator tools UX/UI spec pending update — see `docs/admin-moderator-tools.md`. |
 
 **Sign-off required before Sprint 2:**
 - [ ] Team consensus (A.P, T.P, B.S, S.P, Y.R)

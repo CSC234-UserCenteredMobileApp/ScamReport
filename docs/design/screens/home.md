@@ -18,7 +18,7 @@ Lands here after sign-in (and for guests). Surfaces clipboard banner, primary ch
    - Copy: `We noticed something on your clipboard` / `<value>`
    - Buttons: `Check it` (primary) → `verdict` with payload; `×` (dismiss).
 3. **Search input** — `TextField` with shield icon prefix, placeholder `Paste a number, link, or message…`. Submitting → `verdict`. (Variant — see Notes.)
-4. **`AI search` button** — outlined card with sparkle icon → `search`.
+4. **`Ask AI` button** — outlined card with sparkle icon → `ask-ai`.
 5. **`THIS WEEK` section** — uppercase label + `Updated <hh:mm>`. Below: 3-up `StatCardRow` with `2,184 / Verified reports`, `+36 / New this week`, `SMS phishing / Top scam type`.
 6. **`RECENT FRAUD ALERTS` section** — uppercase label + `See all` link → `alerts`. Below: 2 most recent `AlertCard`s.
 7. **`RECENTLY VERIFIED` section** — uppercase label + `See all` link → `feed`. Below: 2 most recent `ReportCard`s.
@@ -35,7 +35,7 @@ Lands here after sign-in (and for guests). Surfaces clipboard banner, primary ch
 | Tap | Goes to |
 | --- | --- |
 | Search input submit | `verdict` (with `runCheck` flow) |
-| `AI search` | `search` |
+| `Ask AI` | `ask-ai` |
 | `Check it` (clipboard) | `verdict` with clipboard value as payload |
 | `×` (clipboard) | dismiss banner for session |
 | Alert card | `announcement-detail` |
