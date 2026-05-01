@@ -1,4 +1,3 @@
-9:30
 New announcement
 Category
 Fraud Alert
@@ -12,6 +11,6 @@ Save draft
 Publish
 Home
 Feed
-Report
+Ask AI
 Alerts
 Me

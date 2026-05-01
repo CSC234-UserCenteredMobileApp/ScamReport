@@ -1,4 +1,3 @@
-9:30
 Announcements
 All
 Fraud Alert
@@ -18,6 +17,6 @@ AI Search now supports voice messages and screenshots
 You can now drag a screenshot or voice message into AI Search to find similar reports. We process media on your device — nothing is uploaded.
 Home
 Feed
-Report
+Ask AI
 Alerts
 Me

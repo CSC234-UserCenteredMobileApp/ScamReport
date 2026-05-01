@@ -1,4 +1,3 @@
-9:30
 Report a scam
 Sign in to submit a report
 
@@ -7,6 +6,6 @@ We require an account to keep the verified database trustworthy.
 Sign in or register
 Home
 Feed
-Report
+Ask AI
 Alerts
 Me

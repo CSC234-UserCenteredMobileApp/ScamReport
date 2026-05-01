@@ -1,4 +1,3 @@
-9:30
 Settings
 Guest
 Not signed in
@@ -24,6 +23,6 @@ Terms of service
 ScamReport v1.0 • KMUTT SIT
 Home
 Feed
-Report
+Ask AI
 Alerts
 Me

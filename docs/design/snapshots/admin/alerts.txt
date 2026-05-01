@@ -1,5 +1,7 @@
-9:30
 Announcements
+Post an announcement
+Alert users to a new scam wave or share a safety tip.
+New
 All
 Fraud Alert
 Tips
