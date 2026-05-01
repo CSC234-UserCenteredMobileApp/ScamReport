@@ -33,7 +33,7 @@ The raw bundle is not committed; everything actionable is captured below.
 | `--unknown-*` | slate set | slate-on-dark | `VerdictPalette.unknown` |
 | `--bg / --surface / --surface-2` | `#fafaf7 / #ffffff / #f5f4ef` | `#14130f / #1d1c18 / #26241f` | `colorScheme.surface*` + `scaffoldBackgroundColor` |
 | `--ink / --ink-soft / --ink-muted` | `#1a1814 / #4b4842 / #847f74` | inverted | `colorScheme.onSurface*` + `textTheme` colours |
-| `--font-display` | Plus Jakarta Sans | same | `GoogleFonts.plusJakartaSansTextTheme()` |
+| `--font-display` | Plus Jakarta Sans | same | `GoogleFonts.plusJakartaSansTextTheme()` + Sarabun `fontFamilyFallback` for Thai glyphs |
 | `--font-mono` | JetBrains Mono | same | reserve for the rare mono use case (e.g. `target_identifier` display) |
 | `--r-sm / md / lg / xl / full` | `8 / 12 / 16 / 24 / 999` px | same | `RoundedRectangleBorder` per component |
 | `--shadow-sm…xl` | warm soft shadows | dark equivalents | M3 elevation tokens |
@@ -113,7 +113,7 @@ Admin uses `announcement-editor` → publish → all registered users receive an
 | FR-9.2 clipboard banner non-destructive | Banner appears on app resume, dismissible, doesn't transmit until tap | ✓ aligned |
 | FR-10.2 language toggle | Settings screen + Tweaks shows EN/TH | ✓ aligned |
 | §6.4 colour is never the only differentiator | Colour + icon + label everywhere verdict appears | ✓ aligned |
-| §6.4 Thai is default | Tweak default is `lang: 'en'` in this prototype, but I18N has full Thai strings | ⚠️ flip the default in the Flutter app |
+| §6.4 Thai is default | Tweak default is `lang: 'en'` in this prototype, but I18N has full Thai strings | ✓ Flutter default is `th` (`SettingsState.defaults`) |
 | Scam types taxonomy (PRD §3.4 e.g.) | 6 types: phone_imp / phishing_sms / fake_qr / ecommerce / investment / romance | ⚠️ DB seed has 5 different keys |
 | OQ-1 reporter display | Mod queue shows masked usernames (`User_3a91`) | ❌ **overridden by PRD v1.2** — admin views are now fully anonymised. Strip masked handles when implementing A-01 / A-02. |
 | Tweaks panel | Dev tooling only; not part of app | ❌ do not implement |
@@ -152,4 +152,4 @@ These came out of the design review and need a call before relevant feature work
 - **Flutter theme:** `apps/mobile/lib/core/theme/app_theme.dart` — written this PR, exposes `lightTheme()`, `darkTheme()`, and `VerdictPalette` extension.
 - **Screen implementation:** each PRD screen ID becomes a Flutter feature folder under `apps/mobile/lib/features/<screen>/{data,domain,presentation}/`. Use `/add-feature` slash command. Use the design as the visual spec; don't transliterate React component shapes — match the visual output via Flutter idioms.
 - **Sample data / fixtures:** when adding a feature, copy relevant samples from the prototype's `data.jsx` for tests and dev seeding, but treat them as fixtures, not requirements.
-- **EN/TH copy:** the prototype has working bilingual strings; reuse them when wiring `Localizations`.
+- **EN/TH copy:** ✓ done — ARB files in `apps/mobile/lib/l10n/` (43 keys × 2 locales). All UI strings use `context.l10n.*` via `flutter gen-l10n`. Sarabun font fallback active for Thai glyphs.

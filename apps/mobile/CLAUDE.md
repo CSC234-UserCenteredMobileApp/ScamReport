@@ -29,6 +29,33 @@ Flutter app. Feature-first layout: everything for a feature lives in `lib/featur
   - `FlutterSecureStorage` (`secureStorageProvider`) — encrypted at rest. Use for refresh tokens or anything sensitive.
   - `AppDatabase` / drift (`appDatabaseProvider`) — anything queryable, structured, or large. Cached API responses (`CacheEntries`) and user drafts (`Drafts`) live here. Re-run `dart run build_runner build` after editing tables.
 
+## Localisation
+
+Thai (`th`) and English (`en`) supported. Default locale: `th` (from `SettingsState.defaults`).
+
+| Path | Purpose |
+|------|---------|
+| `lib/l10n/app_en.arb` | English source strings |
+| `lib/l10n/app_th.arb` | Thai translations |
+| `lib/l10n/app_localizations*.dart` | Generated — do not edit |
+| `lib/l10n/l10n.dart` | `context.l10n` shorthand + re-export |
+
+**Adding a string:**
+1. Add key + value to both ARB files
+2. Run `flutter gen-l10n` (or just `flutter run` — auto-triggers)
+3. Use via `context.l10n.yourKey`
+
+Import everywhere: `import 'package:mobile/l10n/l10n.dart';`
+
+**Parameterised strings** (e.g. name, count) use ICU placeholders in ARB:
+```json
+"greetingWithName": "Hi, {name} 👋",
+"@greetingWithName": { "placeholders": { "name": { "type": "String" } } }
+```
+Then call `context.l10n.greetingWithName(displayName)`.
+
+**Font:** Plus Jakarta Sans (Latin) + Sarabun (Thai fallback) — wired in `app_theme.dart` via `_applyThaiFont()` / `fontFamilyFallback`. No per-widget config needed.
+
 ## Style
 
 - Small widgets. Extract any widget over ~80 lines.
