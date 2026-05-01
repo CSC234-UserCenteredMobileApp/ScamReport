@@ -17,7 +17,7 @@ void main() {
     });
 
     test('aiSearch returns English string', () {
-      expect(l10n.aiSearch, 'AI search');
+      expect(l10n.aiSearch, 'Ask AI');
     });
 
     test('section headers', () {
@@ -119,7 +119,7 @@ void main() {
     });
 
     test('aiSearch', () {
-      expect(l10n.aiSearch, 'ค้นหาด้วย AI');
+      expect(l10n.aiSearch, 'ถามกับ AI');
     });
 
     test('section headers', () {
