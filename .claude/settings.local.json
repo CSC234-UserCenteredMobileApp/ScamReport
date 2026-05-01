@@ -13,7 +13,8 @@
       "Read(//home/symphony/Downloads/**)",
       "WebSearch",
       "Bash(git *)",
-      "Bash(flutter gen-l10n *)"
+      "Bash(flutter gen-l10n *)",
+      "Bash(python3 -m scripts /home/symphony/Documents/projects/ScamReport/CLAUDE.md)"
     ]
   }
 }

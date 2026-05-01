@@ -28,6 +28,7 @@
 - Feature-first: everything for a feature lives under `lib/features/<feature>/{data,domain,presentation}`.
 - `core/` holds cross-cutting wiring: theme, router (go_router), DI (Riverpod + Firebase init), local cache (`drift`/SQLite + `shared_preferences` + `flutter_secure_storage`), feature flags (`core/feature_flags/`), observability (`core/observability/`).
 - State: Riverpod. HTTP: standard Dart client calling api with generated Dart types.
+- **i18n:** Thai (`th`, default) and English (`en`). All UI strings live in `lib/l10n/app_en.arb` + `app_th.arb`; generated via `flutter gen-l10n`. Widgets access strings via `context.l10n.*` (import `lib/l10n/l10n.dart`). Font: Plus Jakarta Sans (Latin) + Sarabun fallback (Thai).
 - **Platforms:** Android (full feature set) + Flutter Web (public surface only). Web omits biometric, submit, my-reports, AI search, and admin screens. Platform-specific UI gated by `kIsWeb`.
 
 #### Clean-Arch layer rules
@@ -132,6 +133,7 @@ This keeps the two apps from drifting: there is no handwritten DTO on either sid
 | Change a schema | Edit `packages/shared/`, then run codegen |
 | Add cross-cutting middleware | `apps/api/src/core/middleware/` |
 | Add theme / routing / DI | `apps/mobile/lib/core/` |
+| Add a UI string (EN + TH) | Edit `apps/mobile/lib/l10n/app_en.arb` + `app_th.arb`, run `flutter gen-l10n`, access via `context.l10n.key` |
 | Change DB schema | `apps/api/prisma/schema.prisma`, then `bun run prisma:generate` and create a migration |
 
 ## Testing strategy
