@@ -135,16 +135,10 @@ class _SearchSection extends StatelessWidget {
           const SizedBox(height: 8),
           SizedBox(
             width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () => context.push('/ask-ai'),
-              icon: const Icon(Icons.auto_awesome_outlined, size: 18),
-              label: Text(context.l10n.aiSearch),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Theme.of(context).colorScheme.primary,
-                side: BorderSide(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
+            child: FilledButton.icon(
+              onPressed: () => context.push('/submit-report'),
+              icon: const Icon(Icons.flag_outlined, size: 18),
+              label: Text(context.l10n.reportAScam),
             ),
           ),
         ],

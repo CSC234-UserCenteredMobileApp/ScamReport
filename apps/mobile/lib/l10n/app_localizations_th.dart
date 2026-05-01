@@ -47,6 +47,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get checkIt => 'ตรวจสอบ';
 
   @override
+  String get reportAScam => 'รายงานการหลอกลวง';
+
+  @override
   String get statVerifiedReports => 'รายงาน\nที่ยืนยันแล้ว';
 
   @override

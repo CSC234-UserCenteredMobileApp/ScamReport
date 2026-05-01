@@ -71,27 +71,32 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               ),
             ),
           ]),
-          // 2 — Report / Moderate
+          // 2 — Ask AI / Moderate (admin)
           StatefulShellBranch(routes: [
             GoRoute(
-              path: '/submit-report',
+              path: '/ask-ai',
               builder: (_, __) => Consumer(
                 builder: (context, ref, _) {
                   final user = ref.watch(currentUserProvider).valueOrNull;
+                  if (user?.isAdmin == true) {
+                    return const Scaffold(
+                      body: Center(child: Text('Mod queue — coming soon')),
+                    );
+                  }
                   if (user == null) {
                     return Scaffold(
-                      appBar: AppBar(title: const Text('Report a scam')),
+                      appBar: AppBar(title: const Text('Ask AI')),
                       body: EmptyGate(
-                        icon: Icons.lock_outline,
-                        heading: 'Sign in to submit a report',
-                        body: 'We require an account to keep the verified database trustworthy.',
+                        icon: Icons.auto_awesome_outlined,
+                        heading: 'Sign in to use Ask AI',
+                        body: 'Ask AI helps you identify scams and get guidance on what to do next.',
                         primaryLabel: 'Sign in or register',
                         onPrimary: () => context.push('/login'),
                       ),
                     );
                   }
                   return const Scaffold(
-                    body: Center(child: Text('Report — coming soon')),
+                    body: Center(child: Text('Ask AI — coming soon')),
                   );
                 },
               ),
@@ -132,15 +137,15 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
       GoRoute(path: '/register', builder: (_, __) => const RegisterScreen()),
       GoRoute(
-        path: '/check-input',
+        path: '/submit-report',
         builder: (_, __) => const Scaffold(
-          body: Center(child: Text('Check input — coming soon')),
+          body: Center(child: Text('Submit report — coming soon')),
         ),
       ),
       GoRoute(
-        path: '/ask-ai',
+        path: '/check-input',
         builder: (_, __) => const Scaffold(
-          body: Center(child: Text('Ask AI — coming soon')),
+          body: Center(child: Text('Check input — coming soon')),
         ),
       ),
       GoRoute(

@@ -170,6 +170,12 @@ abstract class AppLocalizations {
   /// **'Check it'**
   String get checkIt;
 
+  /// No description provided for @reportAScam.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a scam'**
+  String get reportAScam;
+
   /// No description provided for @statVerifiedReports.
   ///
   /// In en, this message translates to:

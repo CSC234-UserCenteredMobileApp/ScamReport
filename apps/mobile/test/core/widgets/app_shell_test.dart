@@ -32,9 +32,9 @@ GoRouter _buildRouter({required AuthUser? user}) {
           ]),
           StatefulShellBranch(routes: [
             GoRoute(
-              path: '/submit-report',
+              path: '/ask-ai',
               builder: (_, __) =>
-                  const Scaffold(body: Center(child: Text('Report'))),
+                  const Scaffold(body: Center(child: Text('Ask AI'))),
             ),
           ]),
           StatefulShellBranch(routes: [
@@ -93,7 +93,7 @@ void main() {
       expect(find.text('Home'), findsNWidgets(2));
       // These labels only appear once (inactive tabs / nav labels only).
       expect(find.text('Feed'), findsOneWidget);
-      expect(find.text('Report'), findsOneWidget);
+      expect(find.text('Ask AI'), findsOneWidget);
       expect(find.text('Alerts'), findsOneWidget);
       expect(find.text('Me'), findsOneWidget);
     });
@@ -108,12 +108,12 @@ void main() {
       expect(find.text('Report'), findsNothing);
     });
 
-    testWidgets('shows "Report" label when user is null (guest)', (tester) async {
+    testWidgets('shows "Ask AI" label when user is null (guest)', (tester) async {
       final router = _buildRouter(user: null);
       await tester.pumpWidget(_pumpApp(router, null));
       await tester.pumpAndSettle();
 
-      expect(find.text('Report'), findsOneWidget);
+      expect(find.text('Ask AI'), findsOneWidget);
       expect(find.text('Moderate'), findsNothing);
     });
 
