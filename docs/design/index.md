@@ -27,7 +27,7 @@ Source: extracted from `~/Documents/ScamReport Prototype _standalone_{guest,user
 | `announcement-detail` | FR-8.2 / P-06 | all | [announcement-detail.md](screens/announcement-detail.md) |
 | `privacy` | P-07 | all | [privacy.md](screens/privacy.md) |
 | `terms` | P-08 | all | [terms.md](screens/terms.md) |
-| `search` | FR-4.x / P-09 | user, admin (gated for guest) | [search.md](screens/search.md) |
+| `ask-ai` | FR-4.x / P-09 | user, admin (gated for guest) | ask-ai.md *(spec pending UX/UI update)* |
 | `submit-report` | FR-5.x / P-10 | user, admin (gated for guest) | [submit-report.md](screens/submit-report.md) |
 | `my-reports` | FR-6.x / P-11 | user, admin | [my-reports.md](screens/my-reports.md) |
 | `me` | P-12 / FR-10.2 | all | [me.md](screens/me.md) |

@@ -29,7 +29,7 @@
 - `core/` holds cross-cutting wiring: theme, router (go_router), DI (Riverpod + Firebase init), local cache (`drift`/SQLite + `shared_preferences` + `flutter_secure_storage`), feature flags (`core/feature_flags/`), observability (`core/observability/`).
 - State: Riverpod. HTTP: standard Dart client calling api with generated Dart types.
 - **i18n:** Thai (`th`, default) and English (`en`). All UI strings live in `lib/l10n/app_en.arb` + `app_th.arb`; generated via `flutter gen-l10n`. Widgets access strings via `context.l10n.*` (import `lib/l10n/l10n.dart`). Font: Plus Jakarta Sans (Latin) + Sarabun fallback (Thai).
-- **Platforms:** Android (full feature set) + Flutter Web (public surface only). Web omits biometric, submit, my-reports, AI search, and admin screens. Platform-specific UI gated by `kIsWeb`.
+- **Platforms:** Android (full feature set) + Flutter Web (public surface only). Web omits biometric, submit, my-reports, Ask AI, and admin screens. Platform-specific UI gated by `kIsWeb`.
 
 #### Clean-Arch layer rules
 
@@ -82,7 +82,7 @@ The api fans out to three external services. Mobile **does** talk directly to Fi
 | Firebase Crashlytics | Crash + non-fatal error capture | Mobile: `apps/mobile/lib/core/observability/crashlytics_init.dart` (wired in `main.dart`). |
 | Firebase Analytics | Screen views + custom events | Mobile: `firebase_analytics` (no PII; hashed user IDs only). |
 | Supabase | Postgres host + Storage. Mobile uploads files via the api, never directly. | Postgres → Prisma (`DATABASE_URL` / `DIRECT_URL`). Storage → `src/core/supabase/`. |
-| Gemini | LLM + embeddings for AI semantic search | `src/core/gemini/client.ts` (`generateText(prompt)`, `embed(text)`). |
+| Gemini | LLM + embeddings for Ask AI (conversational chat, reporting-intent detection, report drafting) and admin AI confidence scoring | `src/core/gemini/client.ts` (`generateText(prompt)`, `embed(text)`). |
 | Biometric (`local_auth`) | Android-only re-unlock convenience for stored Firebase session token | Mobile: `apps/mobile/lib/features/auth/data/biometric_service.dart`. Web no-op. |
 
 All server-side singletons are lazy — the api boots even when their env vars aren't set; the first call into a missing service throws a clear error.
@@ -102,7 +102,7 @@ Postgres is **system of record** for every entity. Firestore mirrors only two re
 
 **Sync worker** (`apps/api/src/sync/firestore_sync.ts`): two functions, `mirrorAlert(alert)` and `mirrorMyReport(report)`. Called inline at the end of relevant route handlers. **Mirror failure is logged + captured by Crashlytics, never returned as a 500** — Postgres write succeeded; user-visible state is correct. A nightly reconciliation job re-mirrors any divergences.
 
-**What stays Postgres-only:** verified feed (P-03), report detail (P-04), AI semantic search (P-09 — needs `pgvector`), moderation queue (A-01), admin review (A-02), all mutations.
+**What stays Postgres-only:** verified feed (P-03), report detail (P-04), Ask AI conversations (P-09 — needs `pgvector` for report retrieval), moderation queue (A-01), admin review (A-02), all mutations.
 
 ### Reliability — feature flags + Crashlytics + rollback
 

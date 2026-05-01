@@ -12,7 +12,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchHint => 'Paste a number, link, or message…';
 
   @override
-  String get aiSearch => 'AI search';
+  String get aiSearch => 'Ask AI';
 
   @override
   String get sectionThisWeek => 'This Week';

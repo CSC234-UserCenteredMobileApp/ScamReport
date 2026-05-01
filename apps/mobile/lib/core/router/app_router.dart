@@ -138,9 +138,9 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
-        path: '/search',
+        path: '/ask-ai',
         builder: (_, __) => const Scaffold(
-          body: Center(child: Text('Search — coming soon')),
+          body: Center(child: Text('Ask AI — coming soon')),
         ),
       ),
       GoRoute(
