@@ -52,6 +52,6 @@ None. FR-2.4 mandates accessibility for guests. The "Report this" CTA still rout
 
 ## Notes / open questions
 
-- Two layout variants in the prototype: **card** (verdict pill + content as a card) and **full-bleed** (verdict colour fills the whole screen). `design-review.md` flags this as decision 6 — pick before building.
+- Layout is **full-bleed**: verdict colour fills the whole screen top-to-bottom. Decision 6 in `design-review.md` is locked — do not implement the card variant.
 - Per PRD §6.4 colour is never the only differentiator → always pair the verdict colour with an icon AND the verdict label text.
 - Loading copy mentions on-device hashing — confirm with the FR-2 implementation; if untrue, soften the copy ("Looking this up…") to avoid making a privacy claim we don't keep.

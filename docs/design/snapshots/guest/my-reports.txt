@@ -1,4 +1,3 @@
-9:30
 My reports
 All
 Pending (1)
@@ -27,6 +26,6 @@ Investment Fraud
 Under team review. We'll let you know once a decision is made.
 Home
 Feed
-Report
+Ask AI
 Alerts
 Me

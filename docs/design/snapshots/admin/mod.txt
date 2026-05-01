@@ -1,44 +1,68 @@
-9:30
 Moderation queue
+AI triage · 5 new
+BETA
+2
+Likely scam
+2
+Needs review
+1
+Likely reject
+AI cross-checks each report against the database, prior verdicts, and known scam patterns. Final call is yours.
 5
 PENDING
 1
 FLAGGED
 12h
 AVG AGE
-Oldest first
-Priority flag
+AI score
+Oldest
+Flagged
 Phishing SMS
 2h ago
+94
+AI
 Fake delivery confirmation OTP request
+Likely scam · 17 db matches
  User_3a91
- 3 evidence
+ 3
+Review
+Investment Fraud
+16h ago
+88
+AI
+Crypto giveaway page using Elon Musk photo
+Likely scam · 9 db matches
+ User_91fa
+ 2
 Review
 Flagged
 Romance Scam
 4h ago
+78
+AI
 Romance scam asking for emergency wire
+Needs review · 4 db matches
  User_be07
- 5 evidence
+ 5
 Review
 Team note: Need to verify if persona matches earlier r-2210 report.
 Phone Impersonation
 12h ago
+41
+AI
 Caller from "MEA" demanding meter fee
+Needs review · 1 db match
  User_2c14
- 1 evidence
-Review
-Investment Fraud
-16h ago
-Crypto giveaway page using Elon Musk photo
- User_91fa
- 2 evidence
+ 1
 Review
 Fake QR
 20h ago
+22
+AI
 PromptPay QR mismatch on local cafe poster
+Likely reject · 0 db matches
  User_5d20
- 4 evidence
+ 4
 Review
 Home
 Feed

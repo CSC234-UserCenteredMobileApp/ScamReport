@@ -1,12 +1,13 @@
-9:30
-AI Search
-This is a discovery tool — it surfaces similar reports, but does not give a Scam/Safe verdict.
-TRY ASKING
-Someone called pretending to be from the Revenue Department
-Parcel-held message from Kerry with a link
-LINE friend asking for OTP from "bank security"
+Ask ScamReport
+BETA
+Trained on 2,184 community reports
+Hi, I'm your scam radar.
+
+Tell me what happened — a weird SMS, a suspicious call, a too-good offer — and I'll tell you if others have seen it.
+
+AI can make mistakes · check important info
 Home
 Feed
-Report
+Ask AI
 Alerts
 Me

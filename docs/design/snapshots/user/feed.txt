@@ -1,4 +1,3 @@
-9:30
 Verified feed
 2,184
 TOTAL
@@ -46,6 +45,6 @@ Fake trading platform promising guaranteed returns. Withdrawals blocked after de
 19 reports
 Home
 Feed
-Report
+Ask AI
 Alerts
 Me

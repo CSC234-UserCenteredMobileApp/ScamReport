@@ -6,18 +6,13 @@
 
 > **Reporter anonymity (PRD v1.2 FR-7.4 + FR-7.8):** The mod queue (A-01) and admin review (A-02) screens **must not** display reporter identity — no user ID, no display name, no email, no avatar, no masked handle. The previous `User_3a91`-style mask shown in the prototype is **no longer accepted**; admin-facing report cards show scam content only. The API enforces this server-side.
 
-**Source:** Claude Design handoff bundle (received 2026-04-26).
-Design tool URL: `https://api.anthropic.com/v1/design/h/GMhLuv4UPDeZgCDxLDgTLg?open_file=ScamReport+Prototype.html` (auth-protected; expand from claude.ai if you need to re-open).
+**Source:** Claude Design handoff bundle (received 2026-04-26) — screenshots + snapshots last synced **2026-05-01** from new bundled prototypes.
 
-**What was in the bundle:**
-- `README.md` — instructions for the implementing agent
-- `chats/chat1.md` — full conversation transcript, including the design-direction commit ("warm coral primary, traffic-light verdict palette, Plus Jakarta Sans") and two rounds of dark-mode contrast fixes
-- `project/ScamReport Prototype.html` — entry point; renders an Android frame and a screen router via React+Babel-standalone
-- `project/styles.css` — design tokens (brand, verdict, neutrals, type, radii, shadows) + global styles for both light and dark themes
-- `project/data.jsx` — sample reports / scam types / announcements / I18N strings (EN + TH)
-- `project/icons.jsx`, `screens-core.jsx`, `screens-account.jsx`, `screens-admin.jsx`, `android-frame.jsx`, `tweaks-panel.jsx`
+**Current prototype files (2026-05-01):** Self-contained bundles in `C:\Users\PooM\Downloads\` — `user.html`, `admin.html`, `guest.html`. Each ~4 MB (React app + base64-gzip assets, no external dependencies). Serve via `python -m http.server 8765 --bind 127.0.0.1` in Downloads, then re-capture with `node scripts/capture-design.mjs`.
 
-The raw bundle is not committed; everything actionable is captured below.
+**Original bundle (2026-04-26):** multi-file format (`project/ScamReport Prototype.html` + `styles.css` + `*.jsx`); see git history. Design decisions from the original bundle still apply; only screenshots/snapshots and the locked decisions below have changed.
+
+The raw prototypes are not committed; everything actionable is captured below.
 
 ---
 
@@ -132,9 +127,9 @@ These came out of the design review and need a call before relevant feature work
 3. **OQ-1 reporter display.** Design assumes masked username. Either ratify (and add `users.public_handle text NOT NULL DEFAULT 'User_' || substr(replace(id::text, '-', ''), 0, 5)` in a follow-up migration) or override in favour of full anonymisation.
 4. **Slug naming.** Pick between `phone_imp` (design) and `phone_impersonation` (DB). Engineering recommendation: longer DB slugs. Update design tokens / sample data when implementing.
 5. **Sample announcement copy.** `a-003` claims AI Search supports voice + screenshots. Treat as placeholder copy only; don't carry into the production seed.
-6. **Two layout variations to lock in.**
-   - **Home:** search-led (familiar utility-app pattern) vs. panic big-button (single-action focus). The PRD doesn't prescribe; pick one before building P-01/home.
-   - **Verdict:** card layout vs. full-bleed. Both meet FR-2.2; full-bleed reads as more urgent, card lets the matched-reports count breathe. Pick before building P-13.
+6. ~~Two layout variations to lock in.~~ **Locked 2026-05-01** (from new prototype `TWEAK_DEFAULTS`):
+   - **Home:** ✅ **search-led** — the search bar is the primary hero. Big-button variant dropped.
+   - **Verdict:** ✅ **full-bleed** — verdict colour fills the whole screen. Card variant dropped. See `docs/design/screens/verdict.md`.
 
 ---
 

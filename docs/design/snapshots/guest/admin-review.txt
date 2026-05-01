@@ -1,22 +1,29 @@
-9:30
 Review report
-Pending • ago
+2h ago
 Phishing SMS
-Fake Kerry parcel SMS with phishing link
-Submitted by • 2026-04-22
+Fake delivery confirmation OTP request
+User_3a91
+•
+2026-04-25 09:24
+Overview
+Evidence
+3
+AI
+History
+94
+RISK
+AI VERDICT
+Likely scam
+Strong evidence this is a real scam.
 DESCRIPTION
-Caller claimed to be from delivery service confirming an order. Asked the user to share an OTP "to verify the package handover." The user pressed for details — caller hung up. The number is registered to a SIM activated 3 days ago and has appeared in two earlier rejected reports.
+SMS claims a Kerry parcel is held at customs and asks the user to "verify identity" by forwarding an OTP code. Link goes to kerry-th-track.net which is already on our domestic blocklist. The same wording appeared in 17 verified reports this month.
 TARGET IDENTIFIER
 +66 8 4419 2270
-EVIDENCE ()
-AUDIT TRAIL
-Submitted
-2026-04-22
 Reject
 Flag
 Approve
 Home
 Feed
-Report
+Ask AI
 Alerts
 Me

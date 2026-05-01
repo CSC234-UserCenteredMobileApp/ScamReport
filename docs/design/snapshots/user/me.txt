@@ -1,4 +1,3 @@
-9:30
 Settings
 A
 Anya
@@ -25,6 +24,6 @@ Sign out
 ScamReport v1.0 • KMUTT SIT
 Home
 Feed
-Report
+Ask AI
 Alerts
 Me
