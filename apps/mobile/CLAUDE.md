@@ -74,6 +74,7 @@ Don't recreate these — import from `core/widgets/` directly.
 | `AlertCard` | `alert_card.dart` | Announcement card. Takes `RecentAlert`. |
 | `ReportCard` | `report_card.dart` | Verified report card. Takes `RecentReport`. |
 | `SectionHeader` | `section_header.dart` | Uppercase label + optional "See all" callback. |
+| `FilterChipBar<T>` | `filter_chip_bar.dart` | Horizontal scrollable chip row for filtering. Takes `options`, `selected`, `onSelected`, `labelBuilder`. |
 
 ## Commands
 

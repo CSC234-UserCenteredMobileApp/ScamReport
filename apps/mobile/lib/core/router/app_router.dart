@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/alerts/presentation/alerts_screen.dart';
+import '../../features/alerts/presentation/announcement_detail_screen.dart';
 import '../../features/auth/presentation/auth_providers.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
@@ -105,9 +107,15 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/alerts',
-              builder: (_, __) => const Scaffold(
-                body: Center(child: Text('Alerts — coming soon')),
-              ),
+              builder: (_, __) => const AlertsScreen(),
+              routes: [
+                GoRoute(
+                  path: ':id',
+                  builder: (_, s) => AnnouncementDetailScreen(
+                    id: s.pathParameters['id']!,
+                  ),
+                ),
+              ],
             ),
           ]),
           // 4 — Me
@@ -149,10 +157,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/announcement-detail/:id',
-        builder: (_, s) => Scaffold(
-          body: Center(
-            child: Text('Announcement ${s.pathParameters['id']}'),
-          ),
+        builder: (_, s) => AnnouncementDetailScreen(
+          id: s.pathParameters['id']!,
         ),
       ),
       GoRoute(
