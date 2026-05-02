@@ -26,7 +26,7 @@ void main() {
   group('AnnouncementDetailScreen', () {
     const fakeId = 'test-id-123';
 
-    Alert _fakeAlert() => Alert(
+    Alert fakeAlert() => Alert(
           id: fakeId,
           title: 'New Scam Wave',
           excerpt: 'Scammers use SMS to lure victims.',
@@ -61,7 +61,7 @@ void main() {
         ProviderScope(
           overrides: [
             alertDetailProvider(fakeId)
-                .overrideWith((ref) async => _fakeAlert()),
+                .overrideWith((ref) async => fakeAlert()),
           ],
           child: _themed(const AnnouncementDetailScreen(id: fakeId)),
         ),
@@ -79,7 +79,7 @@ void main() {
         ProviderScope(
           overrides: [
             alertDetailProvider(fakeId)
-                .overrideWith((ref) async => _fakeAlert()),
+                .overrideWith((ref) async => fakeAlert()),
           ],
           child: _themed(const AnnouncementDetailScreen(id: fakeId)),
         ),
@@ -96,7 +96,7 @@ void main() {
         ProviderScope(
           overrides: [
             alertDetailProvider(fakeId)
-                .overrideWith((ref) async => _fakeAlert()),
+                .overrideWith((ref) async => fakeAlert()),
           ],
           child: _themed(const AnnouncementDetailScreen(id: fakeId)),
         ),
