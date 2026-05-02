@@ -149,6 +149,18 @@ class AppLocalizationsTh extends AppLocalizations {
   String get alertsEmpty => 'ยังไม่มีประกาศ';
 
   @override
+  String get retry => 'ลองอีกครั้ง';
+
+  @override
+  String get shareLink => 'แชร์';
+
+  @override
+  String get linkCopied => 'คัดลอกลิงก์แล้ว';
+
+  @override
+  String get postedByTeam => 'โพสต์โดย ScamReport Team';
+
+  @override
   String get navHome => 'หน้าแรก';
 
   @override

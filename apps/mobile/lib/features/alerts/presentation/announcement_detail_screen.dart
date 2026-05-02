@@ -40,7 +40,7 @@ class AnnouncementDetailScreen extends ConsumerWidget {
               const SizedBox(height: 8),
               TextButton(
                 onPressed: () => ref.invalidate(alertDetailProvider(id)),
-                child: const Text('Retry'),
+                child: Text(context.l10n.retry),
               ),
             ],
           ),
@@ -90,7 +90,7 @@ class _AnnouncementBody extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.share_outlined),
             onPressed: () => _shareLink(context, alert.slug),
-            tooltip: 'Share',
+            tooltip: context.l10n.shareLink,
           ),
         ],
       ),
@@ -124,7 +124,7 @@ class _AnnouncementBody extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              '${_formatDateFull(alert.publishedAt)} • Posted by ScamReport Team',
+              '${_formatDateFull(alert.publishedAt)} • ${context.l10n.postedByTeam}',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -137,12 +137,13 @@ class _AnnouncementBody extends StatelessWidget {
     );
   }
 
-  void _shareLink(BuildContext context, String slug) {
-    Clipboard.setData(
+  Future<void> _shareLink(BuildContext context, String slug) async {
+    await Clipboard.setData(
       ClipboardData(text: 'https://scamreport.app/announcements/$slug'),
     );
+    if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Link copied to clipboard')),
+      SnackBar(content: Text(context.l10n.linkCopied)),
     );
   }
 }

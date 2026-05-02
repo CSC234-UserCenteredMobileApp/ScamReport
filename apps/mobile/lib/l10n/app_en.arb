@@ -67,6 +67,11 @@
   "filterAll": "All",
   "alertsEmpty": "No announcements yet.",
 
+  "retry": "Retry",
+  "shareLink": "Share",
+  "linkCopied": "Link copied to clipboard",
+  "postedByTeam": "Posted by ScamReport Team",
+
   "navHome": "Home",
   "navFeed": "Feed",
   "navReport": "Report",

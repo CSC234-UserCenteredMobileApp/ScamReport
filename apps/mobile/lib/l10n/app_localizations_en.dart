@@ -148,6 +148,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get alertsEmpty => 'No announcements yet.';
 
   @override
+  String get retry => 'Retry';
+
+  @override
+  String get shareLink => 'Share';
+
+  @override
+  String get linkCopied => 'Link copied to clipboard';
+
+  @override
+  String get postedByTeam => 'Posted by ScamReport Team';
+
+  @override
   String get navHome => 'Home';
 
   @override

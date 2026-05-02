@@ -368,6 +368,30 @@ abstract class AppLocalizations {
   /// **'No announcements yet.'**
   String get alertsEmpty;
 
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @shareLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get shareLink;
+
+  /// No description provided for @linkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied to clipboard'**
+  String get linkCopied;
+
+  /// No description provided for @postedByTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Posted by ScamReport Team'**
+  String get postedByTeam;
+
   /// No description provided for @navHome.
   ///
   /// In en, this message translates to:

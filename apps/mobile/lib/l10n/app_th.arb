@@ -57,6 +57,11 @@
   "filterAll": "ทั้งหมด",
   "alertsEmpty": "ยังไม่มีประกาศ",
 
+  "retry": "ลองอีกครั้ง",
+  "shareLink": "แชร์",
+  "linkCopied": "คัดลอกลิงก์แล้ว",
+  "postedByTeam": "โพสต์โดย ScamReport Team",
+
   "navHome": "หน้าแรก",
   "navFeed": "ฟีด",
   "navReport": "รายงาน",

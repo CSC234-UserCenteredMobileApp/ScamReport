@@ -30,7 +30,7 @@ class AlertsScreen extends ConsumerWidget {
     return Scaffold(
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: () async => ref.invalidate(alertsProvider),
+          onRefresh: () => ref.refresh(alertsProvider.future),
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
@@ -148,7 +148,7 @@ class _AlertsError extends StatelessWidget {
             const SizedBox(height: 8),
             TextButton(
               onPressed: onRetry,
-              child: const Text('Retry'),
+              child: Text(context.l10n.retry),
             ),
           ],
         ),

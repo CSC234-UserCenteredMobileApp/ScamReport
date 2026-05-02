@@ -19,13 +19,13 @@ final alertsRepositoryProvider = Provider<AlertsRepository>((ref) {
 // Data providers ------------------------------------------------------------
 /// Fetches the full list of announcements.
 final alertsProvider = FutureProvider<List<Alert>>((ref) async {
-  return ref.read(alertsRepositoryProvider).listAlerts();
+  return ref.watch(alertsRepositoryProvider).listAlerts();
 });
 
 /// Fetches a single announcement by id.
 final alertDetailProvider =
     FutureProvider.family<Alert, String>((ref, id) async {
-  return ref.read(alertsRepositoryProvider).getAlert(id);
+  return ref.watch(alertsRepositoryProvider).getAlert(id);
 });
 
 // Filter state --------------------------------------------------------------
