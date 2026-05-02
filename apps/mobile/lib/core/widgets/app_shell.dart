@@ -47,7 +47,7 @@ class AppShell extends ConsumerWidget {
           ),
           BottomNavigationBarItem(
             icon: _CenterNavIcon(color: colorScheme.primary),
-            label: isAdmin ? l10n.navModerate : l10n.navReport,
+            label: isAdmin ? l10n.navModerate : l10n.aiSearch,
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.notifications_outlined),
@@ -81,7 +81,7 @@ class _CenterNavIcon extends StatelessWidget {
         shape: BoxShape.circle,
       ),
       child: Icon(
-        Icons.add,
+        Icons.auto_awesome,
         color: Theme.of(context).colorScheme.onPrimary,
         size: 28,
       ),

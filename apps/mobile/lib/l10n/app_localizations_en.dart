@@ -47,6 +47,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkIt => 'Check it';
 
   @override
+  String get reportAScam => 'Report a scam';
+
+  @override
   String get statVerifiedReports => 'VERIFIED\nREPORTS';
 
   @override
