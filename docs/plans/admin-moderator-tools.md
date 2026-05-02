@@ -38,7 +38,7 @@ Three admin screens + their API contracts:
 |---|---|---|---|
 | A | Remark templates | Preset chips above remark textarea: "Insufficient evidence", "Duplicate — already verified", "Not scam content", "Contains personal info", "Test/malformed". One tap pre-fills the field. | Client-side only. Zero API changes. ~1 widget + constants. |
 | B | Duplicate identifier badge | `GET /admin/reports/:id` returns `duplicateCount` — count of verified reports with the same `target_identifier_normalized`. Shows banner on review screen if > 0. | One extra `COUNT` query in detail endpoint. One banner widget. |
-| C | AI confidence score | On admin detail load, embed the pending report's `title + description` via Gemini `text-embedding-004`, query cosine similarity against verified `report_embeddings`, map top-3 avg similarity → `aiScore (0–100)` + `aiConfidence (high/medium/low/unknown)`. Shown as advisory badge — admin still decides. | Add `embed(text)` to Gemini client. `computeAiScore()` in service. ~300–500ms added to admin detail load. |
+| C | AI confidence score | On admin detail load, embed the pending report's `title + description` via Gemini `gemini-embedding-001`, query cosine similarity against verified `report_embeddings`, map top-3 avg similarity → `aiScore (0–100)` + `aiConfidence (high/medium/low/unknown)`. Shown as advisory badge — admin still decides. | `embed(text)` already in `core/gemini/client.ts`. Add `computeAiScore()` in service. ~300–500ms added to admin detail load. |
 
 **Not building yet:** bulk approve/reject (transaction complexity + mobile multi-select adds ~1 day risk; revisit when queue volume justifies it).
 
@@ -49,7 +49,7 @@ Three admin screens + their API contracts:
 **How it works:**
 
 1. Admin opens a report for review.
-2. API embeds `title + description` on-demand using Gemini `text-embedding-004`.
+2. API embeds `title + description` on-demand using Gemini `gemini-embedding-001` (768-dim).
 3. Queries `report_embeddings` for top-5 cosine-similar verified reports.
 4. Computes weighted average similarity of top-3 matches.
 5. Maps to score + confidence label:
@@ -71,7 +71,7 @@ Three admin screens + their API contracts:
 
 | File | Change |
 |---|---|
-| `apps/api/src/core/gemini/client.ts` | Add `embed(text: string): Promise<number[]>` using `text-embedding-004` |
+| `apps/api/src/core/gemini/client.ts` | ~~Add `embed(text)` using `text-embedding-004`~~ **Done** — `embed()` + `EMBEDDING_MODEL = 'gemini-embedding-001'` already implemented |
 | `apps/api/src/features/admin-reports/admin-reports.service.ts` | Add `computeAiScore(titlePlusDescription: string)` |
 | `packages/shared/src/schemas/admin-reports.ts` | Add `aiScore: number`, `aiConfidence` enum to `AdminReportDetail` + `AdminQueueItem` |
 | Mobile review screen | AI confidence chip next to status |
