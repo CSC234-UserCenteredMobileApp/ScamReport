@@ -57,7 +57,7 @@ export const announcementsRoute = new Elysia()
       };
     },
     {
-      params: t.Object({ id: t.String() }),
+      params: t.Object({ id: t.String({ format: 'uuid' }) }),
       response: {
         200: AnnouncementDetailResponse,
         404: t.Object({ message: t.String() }),
