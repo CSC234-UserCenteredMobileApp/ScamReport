@@ -1,8 +1,8 @@
 # Ask AI — File Attachment Support
 
-> **Status:** Ready to implement
-> **Scope:** Schema only (Prisma + docs update). API layer and mobile UI are separate tasks — see "Out of scope" section.
-> **Depends on:** `ai_conversations` + `ai_messages` already in `prisma/schema.prisma` (done)
+> **Status:** Schema complete — API + mobile UI remaining
+> **Scope:** DB schema + Prisma model are **done** (in `prisma/schema.prisma` + `migration.sql`). Remaining: API route, mobile UI — see "Out of scope" section.
+> **Depends on:** `ai_conversations` + `ai_messages` + `ai_message_attachments` all in `prisma/schema.prisma` ✅
 > **PRD ref:** FR-4.2, FR-4.5 (PRD v1.3 §3.3 — Ask AI feature)
 
 ---

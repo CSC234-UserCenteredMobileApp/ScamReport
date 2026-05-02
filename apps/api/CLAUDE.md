@@ -22,7 +22,7 @@ apps/api/
         ├── supabase/
         │   ├── client.ts             # SupabaseClient singleton (service role)
         │   └── storage.ts            # uploadFile / getSignedUrl / deleteFile helpers
-        ├── gemini/client.ts          # Gemini SDK singleton + generateText(prompt) helper
+        ├── gemini/client.ts          # Gemini SDK singleton + generateText(prompt) + embed(text) helpers
         ├── middleware/
         │   └── auth.middleware.ts    # Bearer ID token → request.user (defined; not yet attached)
         └── lib/                      # shared utils

@@ -210,7 +210,7 @@ CREATE TRIGGER "moderation_actions_no_delete"
 BEFORE DELETE ON "moderation_actions"
 FOR EACH ROW EXECUTE FUNCTION reject_audit_mutation();
 
--- 4.7 report_embeddings (one row per report; vector(768) for Gemini text-embedding-004)
+-- 4.7 report_embeddings (one row per report; vector(768) for Gemini gemini-embedding-001)
 CREATE TABLE "report_embeddings" (
     "report_id"     UUID         PRIMARY KEY REFERENCES "reports"("id") ON DELETE CASCADE,
     "embedding"     vector(768)  NOT NULL,
@@ -278,14 +278,41 @@ CREATE TABLE "check_logs" (
 
 CREATE INDEX "check_logs_input_idx" ON "check_logs" ("input_normalized", "created_at" DESC);
 
--- 4.11 search_queries
-CREATE TABLE "search_queries" (
-    "id"            UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
-    "user_id"       UUID         REFERENCES "users"("id") ON DELETE SET NULL,
-    "query_text"    TEXT         NOT NULL,
-    "results_count" INTEGER      NOT NULL,
-    "top_result_id" UUID         REFERENCES "reports"("id") ON DELETE SET NULL,
-    "created_at"    TIMESTAMPTZ  NOT NULL DEFAULT now()
+-- 4.11 ai_conversations, ai_messages, ai_message_attachments
+-- Replaces the old search_queries table (DATABASE_DESIGN v1.3 — Ask AI conversational feature).
+
+CREATE TABLE "ai_conversations" (
+    "id"               UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    "user_id"          UUID        REFERENCES "users"("id") ON DELETE SET NULL,
+    "linked_report_id" UUID        REFERENCES "reports"("id") ON DELETE SET NULL,
+    "created_at"       TIMESTAMPTZ NOT NULL DEFAULT now(),
+    "last_message_at"  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX "ai_conversations_user_last_idx"
+    ON "ai_conversations" ("user_id", "last_message_at" DESC);
+
+CREATE TABLE "ai_messages" (
+    "id"              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    "conversation_id" UUID        NOT NULL REFERENCES "ai_conversations"("id") ON DELETE CASCADE,
+    "role"            TEXT        NOT NULL,
+    "content"         TEXT        NOT NULL,
+    "intent_detected" BOOLEAN     NOT NULL DEFAULT false,
+    "created_at"      TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    CONSTRAINT "ai_messages_role_check" CHECK ("role" IN ('user', 'assistant'))
+);
+
+CREATE INDEX "ai_messages_conv_idx"
+    ON "ai_messages" ("conversation_id", "created_at" ASC);
+
+CREATE TABLE "ai_message_attachments" (
+    "id"           UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    "message_id"   UUID        NOT NULL REFERENCES "ai_messages"("id") ON DELETE CASCADE,
+    "storage_path" TEXT        NOT NULL UNIQUE,
+    "mime_type"    TEXT        NOT NULL,
+    "size_bytes"   BIGINT      NOT NULL,
+    "created_at"   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- 4.12 account_deletion_requests
@@ -300,11 +327,13 @@ CREATE TABLE "account_deletion_requests" (
 -- 5. Seed data ----------------------------------------------------------------
 
 INSERT INTO "scam_types" ("id", "code", "label_en", "label_th", "display_order") VALUES
-    (1, 'phone_impersonation', 'Phone impersonation', 'แอบอ้างทางโทรศัพท์',     10),
-    (2, 'phishing_sms',        'Phishing SMS',        'SMS หลอกลวง',             20),
-    (3, 'fake_qr',             'Fake QR code',        'QR Code ปลอม',            30),
-    (4, 'ecommerce_fraud',     'E-commerce fraud',    'หลอกลวงการซื้อขายออนไลน์', 40),
-    (5, 'other',               'Other',               'อื่น ๆ',                  99);
+    (1, 'phone_impersonation', 'Phone impersonation', 'แอบอ้างทางโทรศัพท์',       10),
+    (2, 'phishing_sms',        'Phishing SMS',        'SMS หลอกลวง',               20),
+    (3, 'fake_qr',             'Fake QR code',        'QR Code ปลอม',              30),
+    (4, 'ecommerce_fraud',     'E-commerce fraud',    'หลอกลวงการซื้อขายออนไลน์',  40),
+    (5, 'other',               'Other',               'อื่น ๆ',                    99),
+    (6, 'investment_fraud',    'Investment fraud',    'การลงทุนหลอกลวง',           50),
+    (7, 'romance_scam',        'Romance scam',        'หลอกลวงด้านความสัมพันธ์',   60);
 
 -- ============================================================================
 -- TODO (next migration):

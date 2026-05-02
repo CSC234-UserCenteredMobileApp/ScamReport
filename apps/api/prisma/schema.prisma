@@ -240,7 +240,7 @@ model ModerationAction {
   @@map("moderation_actions")
 }
 
-/// Gemini text-embedding-004 vectors for semantic search. (DESIGN §4.7)
+/// Gemini gemini-embedding-001 vectors (768-dim) for semantic search. (DESIGN §4.7)
 model ReportEmbedding {
   reportId     String                     @id @map("report_id") @db.Uuid
   embedding    Unsupported("vector(768)")
