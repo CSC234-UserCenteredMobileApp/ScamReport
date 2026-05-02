@@ -385,6 +385,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Me'**
   String get navMe;
+
+  /// No description provided for @feedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified feed'**
+  String get feedTitle;
+
+  /// No description provided for @feedFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get feedFilterAll;
+
+  /// No description provided for @feedNoReports.
+  ///
+  /// In en, this message translates to:
+  /// **'No reports yet — be the first to submit one.'**
+  String get feedNoReports;
+
+  /// No description provided for @feedStatTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'TOTAL'**
+  String get feedStatTotal;
+
+  /// No description provided for @feedStatThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'THIS WEEK'**
+  String get feedStatThisWeek;
+
+  /// No description provided for @feedStatTopType.
+  ///
+  /// In en, this message translates to:
+  /// **'TOP TYPE'**
+  String get feedStatTopType;
 }
 
 class _AppLocalizationsDelegate

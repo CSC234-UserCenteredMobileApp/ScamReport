@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/auth_providers.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
+import '../../features/feed/presentation/feed_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/legal/presentation/privacy_screen.dart';
 import '../../features/legal/presentation/terms_screen.dart';
@@ -66,9 +67,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/feed',
-              builder: (_, __) => const Scaffold(
-                body: Center(child: Text('Feed — coming soon')),
-              ),
+              builder: (_, __) => const FeedScreen(),
             ),
           ]),
           // 2 — Ask AI / Moderate (admin)

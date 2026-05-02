@@ -156,4 +156,22 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get navMe => 'ฉัน';
+
+  @override
+  String get feedTitle => 'ฟีดที่ตรวจสอบแล้ว';
+
+  @override
+  String get feedFilterAll => 'ทั้งหมด';
+
+  @override
+  String get feedNoReports => 'ยังไม่มีรายงาน — เป็นคนแรกที่ส่ง';
+
+  @override
+  String get feedStatTotal => 'ยอดรวม';
+
+  @override
+  String get feedStatThisWeek => 'สัปดาห์นี้';
+
+  @override
+  String get feedStatTopType => 'ประเภทหลัก';
 }

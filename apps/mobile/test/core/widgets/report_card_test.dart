@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobile/core/theme/app_theme.dart';
 import 'package:mobile/core/widgets/report_card.dart';
 import 'package:mobile/features/home/domain/recent_report.dart';
 import 'package:mobile/l10n/l10n.dart';
 
 Widget _themed(Widget widget, {Locale locale = const Locale('en')}) {
   return MaterialApp(
-    theme: ThemeData(),
+    theme: lightTheme(),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     locale: locale,

@@ -155,4 +155,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navMe => 'Me';
+
+  @override
+  String get feedTitle => 'Verified feed';
+
+  @override
+  String get feedFilterAll => 'All';
+
+  @override
+  String get feedNoReports => 'No reports yet — be the first to submit one.';
+
+  @override
+  String get feedStatTotal => 'TOTAL';
+
+  @override
+  String get feedStatThisWeek => 'THIS WEEK';
+
+  @override
+  String get feedStatTopType => 'TOP TYPE';
 }
