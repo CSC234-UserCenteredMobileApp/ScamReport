@@ -140,6 +140,15 @@ class AppLocalizationsTh extends AppLocalizations {
   String get notifRegionalDesc => 'การหลอกลวงที่รายงานในจังหวัดของคุณ';
 
   @override
+  String get alertsTitle => 'ประกาศ';
+
+  @override
+  String get filterAll => 'ทั้งหมด';
+
+  @override
+  String get alertsEmpty => 'ยังไม่มีประกาศ';
+
+  @override
   String get navHome => 'หน้าแรก';
 
   @override

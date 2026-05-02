@@ -139,6 +139,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifRegionalDesc => 'Scams reported in your province';
 
   @override
+  String get alertsTitle => 'Announcements';
+
+  @override
+  String get filterAll => 'All';
+
+  @override
+  String get alertsEmpty => 'No announcements yet.';
+
+  @override
   String get navHome => 'Home';
 
   @override

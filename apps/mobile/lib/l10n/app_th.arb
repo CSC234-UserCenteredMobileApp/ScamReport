@@ -53,6 +53,10 @@
   "notifRegional": "การแจ้งเตือนตามภูมิภาค",
   "notifRegionalDesc": "การหลอกลวงที่รายงานในจังหวัดของคุณ",
 
+  "alertsTitle": "ประกาศ",
+  "filterAll": "ทั้งหมด",
+  "alertsEmpty": "ยังไม่มีประกาศ",
+
   "navHome": "หน้าแรก",
   "navFeed": "ฟีด",
   "navReport": "รายงาน",

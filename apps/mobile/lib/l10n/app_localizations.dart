@@ -350,6 +350,24 @@ abstract class AppLocalizations {
   /// **'Scams reported in your province'**
   String get notifRegionalDesc;
 
+  /// No description provided for @alertsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcements'**
+  String get alertsTitle;
+
+  /// No description provided for @filterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get filterAll;
+
+  /// No description provided for @alertsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No announcements yet.'**
+  String get alertsEmpty;
+
   /// No description provided for @navHome.
   ///
   /// In en, this message translates to:
