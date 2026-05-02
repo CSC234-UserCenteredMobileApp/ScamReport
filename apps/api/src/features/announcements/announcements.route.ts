@@ -45,11 +45,13 @@ export const announcementsRoute = new Elysia()
         return status(404, { message: 'Not found' });
       }
 
+      const excerpt = row.body.slice(0, 120).trimEnd() + (row.body.length > 120 ? '…' : '');
       return {
         item: {
           id: row.id,
           title: row.title,
           body: row.body,
+          excerpt,
           category: row.category,
           slug: row.slug,
           publishedAt: (row.publishedAt ?? row.createdAt).toISOString(),

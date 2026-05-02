@@ -25,6 +25,7 @@ export const AnnouncementDetail = Type.Object({
   id: Type.String({ format: 'uuid' }),
   title: Type.String(),
   body: Type.String(),
+  excerpt: Type.String(),
   category: AnnouncementCategory,
   publishedAt: Type.String({ format: 'date-time' }),
   slug: Type.String(),
