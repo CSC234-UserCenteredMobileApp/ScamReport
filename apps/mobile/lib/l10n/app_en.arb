@@ -68,5 +68,12 @@
   "navReport": "Report",
   "navModerate": "Moderate",
   "navAlerts": "Alerts",
-  "navMe": "Me"
+  "navMe": "Me",
+
+  "feedTitle": "Verified feed",
+  "feedFilterAll": "All",
+  "feedNoReports": "No reports yet — be the first to submit one.",
+  "feedStatTotal": "TOTAL",
+  "feedStatThisWeek": "THIS WEEK",
+  "feedStatTopType": "TOP TYPE"
 }

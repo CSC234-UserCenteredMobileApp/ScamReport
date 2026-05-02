@@ -58,5 +58,12 @@
   "navReport": "รายงาน",
   "navModerate": "กลั่นกรอง",
   "navAlerts": "แจ้งเตือน",
-  "navMe": "ฉัน"
+  "navMe": "ฉัน",
+
+  "feedTitle": "ฟีดที่ตรวจสอบแล้ว",
+  "feedFilterAll": "ทั้งหมด",
+  "feedNoReports": "ยังไม่มีรายงาน — เป็นคนแรกที่ส่ง",
+  "feedStatTotal": "ยอดรวม",
+  "feedStatThisWeek": "สัปดาห์นี้",
+  "feedStatTopType": "ประเภทหลัก"
 }
