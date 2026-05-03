@@ -531,16 +531,365 @@ class DraftsCompanion extends UpdateCompanion<Draft> {
   }
 }
 
+class $SmsAlertsTable extends SmsAlerts
+    with TableInfo<$SmsAlertsTable, SmsAlert> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SmsAlertsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _senderMaskedMeta =
+      const VerificationMeta('senderMasked');
+  @override
+  late final GeneratedColumn<String> senderMasked = GeneratedColumn<String>(
+      'sender_masked', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _bodyExcerptMeta =
+      const VerificationMeta('bodyExcerpt');
+  @override
+  late final GeneratedColumn<String> bodyExcerpt = GeneratedColumn<String>(
+      'body_excerpt', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _verdictMeta =
+      const VerificationMeta('verdict');
+  @override
+  late final GeneratedColumn<String> verdict = GeneratedColumn<String>(
+      'verdict', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _detectedAtMeta =
+      const VerificationMeta('detectedAt');
+  @override
+  late final GeneratedColumn<DateTime> detectedAt = GeneratedColumn<DateTime>(
+      'detected_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _isReadMeta = const VerificationMeta('isRead');
+  @override
+  late final GeneratedColumn<bool> isRead = GeneratedColumn<bool>(
+      'is_read', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_read" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, senderMasked, bodyExcerpt, verdict, detectedAt, isRead];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sms_alerts';
+  @override
+  VerificationContext validateIntegrity(Insertable<SmsAlert> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('sender_masked')) {
+      context.handle(
+          _senderMaskedMeta,
+          senderMasked.isAcceptableOrUnknown(
+              data['sender_masked']!, _senderMaskedMeta));
+    } else if (isInserting) {
+      context.missing(_senderMaskedMeta);
+    }
+    if (data.containsKey('body_excerpt')) {
+      context.handle(
+          _bodyExcerptMeta,
+          bodyExcerpt.isAcceptableOrUnknown(
+              data['body_excerpt']!, _bodyExcerptMeta));
+    } else if (isInserting) {
+      context.missing(_bodyExcerptMeta);
+    }
+    if (data.containsKey('verdict')) {
+      context.handle(_verdictMeta,
+          verdict.isAcceptableOrUnknown(data['verdict']!, _verdictMeta));
+    } else if (isInserting) {
+      context.missing(_verdictMeta);
+    }
+    if (data.containsKey('detected_at')) {
+      context.handle(
+          _detectedAtMeta,
+          detectedAt.isAcceptableOrUnknown(
+              data['detected_at']!, _detectedAtMeta));
+    } else if (isInserting) {
+      context.missing(_detectedAtMeta);
+    }
+    if (data.containsKey('is_read')) {
+      context.handle(_isReadMeta,
+          isRead.isAcceptableOrUnknown(data['is_read']!, _isReadMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SmsAlert map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SmsAlert(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      senderMasked: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sender_masked'])!,
+      bodyExcerpt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}body_excerpt'])!,
+      verdict: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}verdict'])!,
+      detectedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}detected_at'])!,
+      isRead: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_read'])!,
+    );
+  }
+
+  @override
+  $SmsAlertsTable createAlias(String alias) {
+    return $SmsAlertsTable(attachedDatabase, alias);
+  }
+}
+
+class SmsAlert extends DataClass implements Insertable<SmsAlert> {
+  final int id;
+  final String senderMasked;
+  final String bodyExcerpt;
+  final String verdict;
+  final DateTime detectedAt;
+  final bool isRead;
+  const SmsAlert(
+      {required this.id,
+      required this.senderMasked,
+      required this.bodyExcerpt,
+      required this.verdict,
+      required this.detectedAt,
+      required this.isRead});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['sender_masked'] = Variable<String>(senderMasked);
+    map['body_excerpt'] = Variable<String>(bodyExcerpt);
+    map['verdict'] = Variable<String>(verdict);
+    map['detected_at'] = Variable<DateTime>(detectedAt);
+    map['is_read'] = Variable<bool>(isRead);
+    return map;
+  }
+
+  SmsAlertsCompanion toCompanion(bool nullToAbsent) {
+    return SmsAlertsCompanion(
+      id: Value(id),
+      senderMasked: Value(senderMasked),
+      bodyExcerpt: Value(bodyExcerpt),
+      verdict: Value(verdict),
+      detectedAt: Value(detectedAt),
+      isRead: Value(isRead),
+    );
+  }
+
+  factory SmsAlert.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SmsAlert(
+      id: serializer.fromJson<int>(json['id']),
+      senderMasked: serializer.fromJson<String>(json['senderMasked']),
+      bodyExcerpt: serializer.fromJson<String>(json['bodyExcerpt']),
+      verdict: serializer.fromJson<String>(json['verdict']),
+      detectedAt: serializer.fromJson<DateTime>(json['detectedAt']),
+      isRead: serializer.fromJson<bool>(json['isRead']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'senderMasked': serializer.toJson<String>(senderMasked),
+      'bodyExcerpt': serializer.toJson<String>(bodyExcerpt),
+      'verdict': serializer.toJson<String>(verdict),
+      'detectedAt': serializer.toJson<DateTime>(detectedAt),
+      'isRead': serializer.toJson<bool>(isRead),
+    };
+  }
+
+  SmsAlert copyWith(
+          {int? id,
+          String? senderMasked,
+          String? bodyExcerpt,
+          String? verdict,
+          DateTime? detectedAt,
+          bool? isRead}) =>
+      SmsAlert(
+        id: id ?? this.id,
+        senderMasked: senderMasked ?? this.senderMasked,
+        bodyExcerpt: bodyExcerpt ?? this.bodyExcerpt,
+        verdict: verdict ?? this.verdict,
+        detectedAt: detectedAt ?? this.detectedAt,
+        isRead: isRead ?? this.isRead,
+      );
+  SmsAlert copyWithCompanion(SmsAlertsCompanion data) {
+    return SmsAlert(
+      id: data.id.present ? data.id.value : this.id,
+      senderMasked: data.senderMasked.present
+          ? data.senderMasked.value
+          : this.senderMasked,
+      bodyExcerpt:
+          data.bodyExcerpt.present ? data.bodyExcerpt.value : this.bodyExcerpt,
+      verdict: data.verdict.present ? data.verdict.value : this.verdict,
+      detectedAt:
+          data.detectedAt.present ? data.detectedAt.value : this.detectedAt,
+      isRead: data.isRead.present ? data.isRead.value : this.isRead,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SmsAlert(')
+          ..write('id: $id, ')
+          ..write('senderMasked: $senderMasked, ')
+          ..write('bodyExcerpt: $bodyExcerpt, ')
+          ..write('verdict: $verdict, ')
+          ..write('detectedAt: $detectedAt, ')
+          ..write('isRead: $isRead')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, senderMasked, bodyExcerpt, verdict, detectedAt, isRead);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SmsAlert &&
+          other.id == this.id &&
+          other.senderMasked == this.senderMasked &&
+          other.bodyExcerpt == this.bodyExcerpt &&
+          other.verdict == this.verdict &&
+          other.detectedAt == this.detectedAt &&
+          other.isRead == this.isRead);
+}
+
+class SmsAlertsCompanion extends UpdateCompanion<SmsAlert> {
+  final Value<int> id;
+  final Value<String> senderMasked;
+  final Value<String> bodyExcerpt;
+  final Value<String> verdict;
+  final Value<DateTime> detectedAt;
+  final Value<bool> isRead;
+  const SmsAlertsCompanion({
+    this.id = const Value.absent(),
+    this.senderMasked = const Value.absent(),
+    this.bodyExcerpt = const Value.absent(),
+    this.verdict = const Value.absent(),
+    this.detectedAt = const Value.absent(),
+    this.isRead = const Value.absent(),
+  });
+  SmsAlertsCompanion.insert({
+    this.id = const Value.absent(),
+    required String senderMasked,
+    required String bodyExcerpt,
+    required String verdict,
+    required DateTime detectedAt,
+    this.isRead = const Value.absent(),
+  })  : senderMasked = Value(senderMasked),
+        bodyExcerpt = Value(bodyExcerpt),
+        verdict = Value(verdict),
+        detectedAt = Value(detectedAt);
+  static Insertable<SmsAlert> custom({
+    Expression<int>? id,
+    Expression<String>? senderMasked,
+    Expression<String>? bodyExcerpt,
+    Expression<String>? verdict,
+    Expression<DateTime>? detectedAt,
+    Expression<bool>? isRead,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (senderMasked != null) 'sender_masked': senderMasked,
+      if (bodyExcerpt != null) 'body_excerpt': bodyExcerpt,
+      if (verdict != null) 'verdict': verdict,
+      if (detectedAt != null) 'detected_at': detectedAt,
+      if (isRead != null) 'is_read': isRead,
+    });
+  }
+
+  SmsAlertsCompanion copyWith(
+      {Value<int>? id,
+      Value<String>? senderMasked,
+      Value<String>? bodyExcerpt,
+      Value<String>? verdict,
+      Value<DateTime>? detectedAt,
+      Value<bool>? isRead}) {
+    return SmsAlertsCompanion(
+      id: id ?? this.id,
+      senderMasked: senderMasked ?? this.senderMasked,
+      bodyExcerpt: bodyExcerpt ?? this.bodyExcerpt,
+      verdict: verdict ?? this.verdict,
+      detectedAt: detectedAt ?? this.detectedAt,
+      isRead: isRead ?? this.isRead,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (senderMasked.present) {
+      map['sender_masked'] = Variable<String>(senderMasked.value);
+    }
+    if (bodyExcerpt.present) {
+      map['body_excerpt'] = Variable<String>(bodyExcerpt.value);
+    }
+    if (verdict.present) {
+      map['verdict'] = Variable<String>(verdict.value);
+    }
+    if (detectedAt.present) {
+      map['detected_at'] = Variable<DateTime>(detectedAt.value);
+    }
+    if (isRead.present) {
+      map['is_read'] = Variable<bool>(isRead.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SmsAlertsCompanion(')
+          ..write('id: $id, ')
+          ..write('senderMasked: $senderMasked, ')
+          ..write('bodyExcerpt: $bodyExcerpt, ')
+          ..write('verdict: $verdict, ')
+          ..write('detectedAt: $detectedAt, ')
+          ..write('isRead: $isRead')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $CacheEntriesTable cacheEntries = $CacheEntriesTable(this);
   late final $DraftsTable drafts = $DraftsTable(this);
+  late final $SmsAlertsTable smsAlerts = $SmsAlertsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [cacheEntries, drafts];
+  List<DatabaseSchemaEntity> get allSchemaEntities =>
+      [cacheEntries, drafts, smsAlerts];
 }
 
 typedef $$CacheEntriesTableCreateCompanionBuilder = CacheEntriesCompanion
@@ -839,6 +1188,181 @@ typedef $$DraftsTableProcessedTableManager = ProcessedTableManager<
     (Draft, BaseReferences<_$AppDatabase, $DraftsTable, Draft>),
     Draft,
     PrefetchHooks Function()>;
+typedef $$SmsAlertsTableCreateCompanionBuilder = SmsAlertsCompanion Function({
+  Value<int> id,
+  required String senderMasked,
+  required String bodyExcerpt,
+  required String verdict,
+  required DateTime detectedAt,
+  Value<bool> isRead,
+});
+typedef $$SmsAlertsTableUpdateCompanionBuilder = SmsAlertsCompanion Function({
+  Value<int> id,
+  Value<String> senderMasked,
+  Value<String> bodyExcerpt,
+  Value<String> verdict,
+  Value<DateTime> detectedAt,
+  Value<bool> isRead,
+});
+
+class $$SmsAlertsTableFilterComposer
+    extends Composer<_$AppDatabase, $SmsAlertsTable> {
+  $$SmsAlertsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get senderMasked => $composableBuilder(
+      column: $table.senderMasked, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get bodyExcerpt => $composableBuilder(
+      column: $table.bodyExcerpt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get verdict => $composableBuilder(
+      column: $table.verdict, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get detectedAt => $composableBuilder(
+      column: $table.detectedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isRead => $composableBuilder(
+      column: $table.isRead, builder: (column) => ColumnFilters(column));
+}
+
+class $$SmsAlertsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SmsAlertsTable> {
+  $$SmsAlertsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get senderMasked => $composableBuilder(
+      column: $table.senderMasked,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get bodyExcerpt => $composableBuilder(
+      column: $table.bodyExcerpt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get verdict => $composableBuilder(
+      column: $table.verdict, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get detectedAt => $composableBuilder(
+      column: $table.detectedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isRead => $composableBuilder(
+      column: $table.isRead, builder: (column) => ColumnOrderings(column));
+}
+
+class $$SmsAlertsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SmsAlertsTable> {
+  $$SmsAlertsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get senderMasked => $composableBuilder(
+      column: $table.senderMasked, builder: (column) => column);
+
+  GeneratedColumn<String> get bodyExcerpt => $composableBuilder(
+      column: $table.bodyExcerpt, builder: (column) => column);
+
+  GeneratedColumn<String> get verdict =>
+      $composableBuilder(column: $table.verdict, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get detectedAt => $composableBuilder(
+      column: $table.detectedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isRead =>
+      $composableBuilder(column: $table.isRead, builder: (column) => column);
+}
+
+class $$SmsAlertsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $SmsAlertsTable,
+    SmsAlert,
+    $$SmsAlertsTableFilterComposer,
+    $$SmsAlertsTableOrderingComposer,
+    $$SmsAlertsTableAnnotationComposer,
+    $$SmsAlertsTableCreateCompanionBuilder,
+    $$SmsAlertsTableUpdateCompanionBuilder,
+    (SmsAlert, BaseReferences<_$AppDatabase, $SmsAlertsTable, SmsAlert>),
+    SmsAlert,
+    PrefetchHooks Function()> {
+  $$SmsAlertsTableTableManager(_$AppDatabase db, $SmsAlertsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SmsAlertsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SmsAlertsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SmsAlertsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String> senderMasked = const Value.absent(),
+            Value<String> bodyExcerpt = const Value.absent(),
+            Value<String> verdict = const Value.absent(),
+            Value<DateTime> detectedAt = const Value.absent(),
+            Value<bool> isRead = const Value.absent(),
+          }) =>
+              SmsAlertsCompanion(
+            id: id,
+            senderMasked: senderMasked,
+            bodyExcerpt: bodyExcerpt,
+            verdict: verdict,
+            detectedAt: detectedAt,
+            isRead: isRead,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required String senderMasked,
+            required String bodyExcerpt,
+            required String verdict,
+            required DateTime detectedAt,
+            Value<bool> isRead = const Value.absent(),
+          }) =>
+              SmsAlertsCompanion.insert(
+            id: id,
+            senderMasked: senderMasked,
+            bodyExcerpt: bodyExcerpt,
+            verdict: verdict,
+            detectedAt: detectedAt,
+            isRead: isRead,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$SmsAlertsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $SmsAlertsTable,
+    SmsAlert,
+    $$SmsAlertsTableFilterComposer,
+    $$SmsAlertsTableOrderingComposer,
+    $$SmsAlertsTableAnnotationComposer,
+    $$SmsAlertsTableCreateCompanionBuilder,
+    $$SmsAlertsTableUpdateCompanionBuilder,
+    (SmsAlert, BaseReferences<_$AppDatabase, $SmsAlertsTable, SmsAlert>),
+    SmsAlert,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -847,4 +1371,6 @@ class $AppDatabaseManager {
       $$CacheEntriesTableTableManager(_db, _db.cacheEntries);
   $$DraftsTableTableManager get drafts =>
       $$DraftsTableTableManager(_db, _db.drafts);
+  $$SmsAlertsTableTableManager get smsAlerts =>
+      $$SmsAlertsTableTableManager(_db, _db.smsAlerts);
 }
