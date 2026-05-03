@@ -68,7 +68,7 @@ class AppLocalizationsTh extends AppLocalizations {
   String get categoryPlatformUpdate => 'อัปเดตแพลตฟอร์ม';
 
   @override
-  String get categorySmsAlert => 'การแจ้งเตือน SMS';
+  String get categorySmsAlert => 'สแกน SMS';
 
   @override
   String reportCountLabel(int count) {
@@ -303,4 +303,33 @@ class AppLocalizationsTh extends AppLocalizations {
   String adminAiScore(int score, String level) {
     return 'ความเชื่อมั่น AI: $score% ($level)';
   }
+
+  @override
+  String get smsSmishingDetectionLabel => 'ตรวจจับ SMS หลอกลวง';
+
+  @override
+  String get smsSmishingDetectionDesc =>
+      'ตรวจสอบข้อความขาเข้าเพื่อหาการหลอกลวง';
+
+  @override
+  String get smsConsentTitle => 'เปิดใช้การสแกน SMS?';
+
+  @override
+  String get smsConsentBody =>
+      'ScamReport จะอ่าน SMS ขาเข้าและส่งเนื้อหาไปยังเซิร์ฟเวอร์เพื่อตรวจสอบการหลอกลวง ข้อความของคุณจะไม่ถูกจัดเก็บบนเซิร์ฟเวอร์ คุณสามารถปิดใช้งานได้ทุกเมื่อ';
+
+  @override
+  String get smsConsentAgree => 'ยอมรับและดำเนินการต่อ';
+
+  @override
+  String get smsPermissionDenied => 'ต้องการสิทธิ์ SMS เพื่อสแกนข้อความ';
+
+  @override
+  String get smsScanTitle => 'พบ SMS น่าสงสัย';
+
+  @override
+  String get smsScanScamTitle => 'พบ SMS หลอกลวง';
+
+  @override
+  String get view => 'ดู';
 }

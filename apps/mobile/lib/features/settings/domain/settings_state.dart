@@ -6,18 +6,21 @@ class SettingsState {
     required this.language,
     required this.phoneScamAlerts,
     required this.smsPhishingAlerts,
+    required this.smsScanning,
   });
 
   final ThemeMode themeMode;
   final String language; // 'en' | 'th'
   final bool phoneScamAlerts;
   final bool smsPhishingAlerts;
+  final bool smsScanning;
 
   static const SettingsState defaults = SettingsState(
     themeMode: ThemeMode.system,
     language: 'th',
     phoneScamAlerts: true,
     smsPhishingAlerts: true,
+    smsScanning: false,
   );
 
   SettingsState copyWith({
@@ -25,12 +28,14 @@ class SettingsState {
     String? language,
     bool? phoneScamAlerts,
     bool? smsPhishingAlerts,
+    bool? smsScanning,
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
       language: language ?? this.language,
       phoneScamAlerts: phoneScamAlerts ?? this.phoneScamAlerts,
       smsPhishingAlerts: smsPhishingAlerts ?? this.smsPhishingAlerts,
+      smsScanning: smsScanning ?? this.smsScanning,
     );
   }
 }

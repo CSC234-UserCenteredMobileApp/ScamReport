@@ -215,7 +215,7 @@ abstract class AppLocalizations {
   /// No description provided for @categorySmsAlert.
   ///
   /// In en, this message translates to:
-  /// **'SMS Alert'**
+  /// **'SMS Scan'**
   String get categorySmsAlert;
 
   /// No description provided for @reportCountLabel.
@@ -655,6 +655,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'AI confidence: {score}% ({level})'**
   String adminAiScore(int score, String level);
+
+  /// No description provided for @smsSmishingDetectionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'SMS smishing detection'**
+  String get smsSmishingDetectionLabel;
+
+  /// No description provided for @smsSmishingDetectionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan incoming messages for scams'**
+  String get smsSmishingDetectionDesc;
+
+  /// No description provided for @smsConsentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable SMS scanning?'**
+  String get smsConsentTitle;
+
+  /// No description provided for @smsConsentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'ScamReport will read incoming SMS and send the content to our servers to check for scams. No messages are stored on our servers. You can disable this at any time.'**
+  String get smsConsentBody;
+
+  /// No description provided for @smsConsentAgree.
+  ///
+  /// In en, this message translates to:
+  /// **'Agree & Continue'**
+  String get smsConsentAgree;
+
+  /// No description provided for @smsPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'SMS permission is required to scan messages'**
+  String get smsPermissionDenied;
+
+  /// No description provided for @smsScanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspicious SMS detected'**
+  String get smsScanTitle;
+
+  /// No description provided for @smsScanScamTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scam SMS detected'**
+  String get smsScanScamTitle;
+
+  /// No description provided for @view.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get view;
 }
 
 class _AppLocalizationsDelegate
