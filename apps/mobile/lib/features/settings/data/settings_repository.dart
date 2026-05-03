@@ -8,6 +8,7 @@ const _keyLanguage = 'settings_language';
 const _keyPhoneScam = 'notif_phone_scam';
 const _keySmsPhishing = 'notif_sms_phishing';
 const _keySmsScanning = 'feature_sms_scanning';
+const _keyConsentSmsScanning = 'sms_scan_consent_given';
 
 class SettingsRepository {
   const SettingsRepository(this._prefs);
@@ -30,6 +31,12 @@ class SettingsRepository {
       smsScanning: _prefs.getBool(_keySmsScanning) ?? false,
     );
   }
+
+  bool get smsScanConsentGiven =>
+      _prefs.getBool(_keyConsentSmsScanning) ?? false;
+
+  Future<void> setSmsScanConsentGiven() =>
+      _prefs.setBool(_keyConsentSmsScanning, true);
 
   Future<void> save(SettingsState state) async {
     final themeRaw = switch (state.themeMode) {

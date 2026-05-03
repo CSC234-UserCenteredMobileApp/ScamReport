@@ -70,7 +70,7 @@ class _PreferencesSection extends ConsumerWidget {
               ),
               if (showSms) ...[
                 const Divider(height: 1, indent: 16, endIndent: 16),
-                _SmsToggleTile(settings: settings, ref: ref),
+                _SmsToggleTile(settings: settings),
               ],
             ],
           ),
@@ -121,14 +121,13 @@ class _PrefRow extends StatelessWidget {
   }
 }
 
-class _SmsToggleTile extends StatelessWidget {
-  const _SmsToggleTile({required this.settings, required this.ref});
+class _SmsToggleTile extends ConsumerWidget {
+  const _SmsToggleTile({required this.settings});
 
   final SettingsState settings;
-  final WidgetRef ref;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
       child: SwitchListTile(
@@ -148,25 +147,25 @@ class _SmsToggleTile extends StatelessWidget {
               ),
         ),
         value: settings.smsScanning,
-        onChanged: (v) => _onToggle(context, v),
+        onChanged: (v) => _onToggle(context, ref, v),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       ),
     );
   }
 
-  Future<void> _onToggle(BuildContext context, bool enable) async {
+  Future<void> _onToggle(BuildContext context, WidgetRef ref, bool enable) async {
     if (!enable) {
       await ref.read(settingsProvider.notifier).save(settings.copyWith(smsScanning: false));
       return;
     }
 
-    final prefs = ref.read(sharedPreferencesProvider).requireValue;
-    final consentGiven = prefs.getBool('sms_scan_consent_given') ?? false;
+    final settingsRepo = ref.read(settingsRepositoryProvider);
+    final consentGiven = settingsRepo.smsScanConsentGiven;
     if (!consentGiven) {
       if (!context.mounted) return;
       final agreed = await _showSmsConsentDialog(context);
       if (!agreed || !context.mounted) return;
-      await prefs.setBool('sms_scan_consent_given', true);
+      await settingsRepo.setSmsScanConsentGiven();
     }
 
     final status = await Permission.sms.request();
