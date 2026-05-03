@@ -14,7 +14,9 @@
       "WebSearch",
       "Bash(git *)",
       "Bash(flutter gen-l10n *)",
-      "Bash(python3 -m scripts /home/symphony/Documents/projects/ScamReport/CLAUDE.md)"
+      "Bash(python3 -m scripts /home/symphony/Documents/projects/ScamReport/CLAUDE.md)",
+      "Bash(rm /home/symphony/Documents/projects/ScamReport/docs/sprint-2.md)",
+      "Bash(rm -rf /home/symphony/Documents/projects/ScamReport/docs/presentations/)"
     ]
   }
 }
