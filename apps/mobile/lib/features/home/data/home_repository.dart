@@ -14,7 +14,8 @@ class HomeRepository {
     return HomeStats(
       verifiedTotal: data['verifiedTotal'] as int,
       newThisWeek: data['newThisWeek'] as int,
-      topScamType: data['topScamType'] as String,
+      topScamTypeLabelEn: data['topScamTypeLabelEn'] as String,
+      topScamTypeLabelTh: data['topScamTypeLabelTh'] as String,
     );
   }
 

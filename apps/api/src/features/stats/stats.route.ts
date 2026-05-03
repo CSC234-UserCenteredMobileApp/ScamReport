@@ -22,16 +22,18 @@ export const statsRoute = new Elysia().get(
       }),
     ]);
 
-    let topScamType = 'Unknown';
+    let topScamTypeLabelEn = 'Unknown';
+    let topScamTypeLabelTh = 'ไม่ทราบ';
     const [topEntry] = topGroup;
     if (topEntry !== undefined) {
       const scamType = await prisma.scamType.findUnique({
         where: { id: topEntry.scamTypeId },
       });
-      topScamType = scamType?.labelEn ?? 'Unknown';
+      topScamTypeLabelEn = scamType?.labelEn ?? 'Unknown';
+      topScamTypeLabelTh = scamType?.labelTh ?? 'ไม่ทราบ';
     }
 
-    return { data: { verifiedTotal, newThisWeek, topScamType } };
+    return { data: { verifiedTotal, newThisWeek, topScamTypeLabelEn, topScamTypeLabelTh } };
   },
   { response: HomeStatsResponse },
 );

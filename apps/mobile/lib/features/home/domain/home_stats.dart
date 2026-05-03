@@ -2,9 +2,11 @@ class HomeStats {
   const HomeStats({
     required this.verifiedTotal,
     required this.newThisWeek,
-    required this.topScamType,
+    required this.topScamTypeLabelEn,
+    required this.topScamTypeLabelTh,
   });
   final int verifiedTotal;
   final int newThisWeek;
-  final String topScamType;
+  final String topScamTypeLabelEn;
+  final String topScamTypeLabelTh;
 }
