@@ -2,6 +2,7 @@ package com.example.mobile
 
 import android.content.IntentFilter
 import android.provider.Telephony
+import androidx.core.content.ContextCompat
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
@@ -16,10 +17,13 @@ class MainActivity : FlutterActivity() {
         EventChannel(flutterEngine.dartExecutor.binaryMessenger, "com.scamreport/sms_events")
             .setStreamHandler(object : EventChannel.StreamHandler {
                 override fun onListen(arguments: Any?, sink: EventChannel.EventSink) {
+                    smsReceiver?.let { unregisterReceiver(it) }
                     smsReceiver = SmsReceiver(sink).also { receiver ->
-                        registerReceiver(
+                        ContextCompat.registerReceiver(
+                            this@MainActivity,
                             receiver,
                             IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION),
+                            ContextCompat.RECEIVER_NOT_EXPORTED,
                         )
                     }
                 }
