@@ -15,9 +15,8 @@ final smsScanRepositoryProvider = Provider<SmsScanRepository>((ref) {
 });
 
 /// Processes incoming SMS events through /check.
-/// Returns the new SmsAlert when verdict is scam/suspicious; null otherwise.
-/// Returns Stream.empty() when smsScanning is disabled.
-final smsScannerProvider = StreamProvider<SmsAlert?>((ref) {
+/// Returns the new SmsAlert when verdict is scam/suspicious. Emits nothing for safe/unknown verdicts or when disabled.
+final smsScannerProvider = StreamProvider<SmsAlert>((ref) {
   final settings = ref.watch(settingsProvider).valueOrNull;
   if (settings == null || !settings.smsScanning) return const Stream.empty();
 
@@ -33,5 +32,5 @@ final smsScannerProvider = StreamProvider<SmsAlert?>((ref) {
 /// Rebuilds whenever smsScannerProvider emits (new alert stored).
 final smsAlertsProvider = FutureProvider<List<SmsAlert>>((ref) async {
   ref.watch(smsScannerProvider);
-  return ref.read(smsScanRepositoryProvider).listAlerts();
+  return ref.watch(smsScanRepositoryProvider).listAlerts();
 });
