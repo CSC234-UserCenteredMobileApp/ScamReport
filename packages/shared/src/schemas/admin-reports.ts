@@ -41,6 +41,7 @@ export const AdminQueueItem = Type.Object({
   priorityFlag: Type.Boolean(),
   evidenceCount: Type.Integer({ minimum: 0 }),
   lastRemarkByAdmin: Type.Union([Type.String(), Type.Null()]),
+  reporterHandle: Type.String(),
 });
 export type AdminQueueItem = Static<typeof AdminQueueItem>;
 
@@ -78,6 +79,7 @@ export const AdminReportDetail = Type.Object({
   aiScore: Type.Union([Type.Integer({ minimum: 0, maximum: 100 }), Type.Null()]),
   aiConfidence: Type.Union([AiConfidence, Type.Null()]),
   auditTrail: Type.Array(ModerationRecord),
+  reporterHandle: Type.String(),
 });
 export type AdminReportDetail = Static<typeof AdminReportDetail>;
 

@@ -31,6 +31,7 @@ export async function getQueue(scamTypeCode?: string): Promise<{
         status: true,
         priorityFlag: true,
         createdAt: true,
+        reporterId: true,
         scamType: { select: { code: true, labelEn: true, labelTh: true } },
         _count: { select: { evidenceFiles: true } },
         moderations: {
@@ -56,6 +57,7 @@ export async function getQueue(scamTypeCode?: string): Promise<{
     priorityFlag: r.priorityFlag,
     evidenceCount: r._count.evidenceFiles,
     lastRemarkByAdmin: r.moderations[0]?.remark ?? null,
+    reporterHandle: `User_${(r.reporterId ?? 'anon').substring(0, 4)}`,
   }));
 
   return { items, pendingCount, flaggedCount };
@@ -79,6 +81,7 @@ export async function getDetail(reportId: string): Promise<AdminReportDetail | n
       targetIdentifier: true,
       targetIdentifierKind: true,
       targetIdentifierNormalized: true,
+      reporterId: true,
       createdAt: true,
       scamType: { select: { code: true, labelEn: true, labelTh: true } },
       evidenceFiles: {
@@ -140,6 +143,7 @@ export async function getDetail(reportId: string): Promise<AdminReportDetail | n
     aiScore,
     aiConfidence,
     auditTrail,
+    reporterHandle: `User_${(report.reporterId ?? 'anon').substring(0, 4)}`,
   };
 }
 
