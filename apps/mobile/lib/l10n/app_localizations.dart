@@ -463,6 +463,192 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'TOP TYPE'**
   String get feedStatTopType;
+
+  /// No description provided for @modQueueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderation queue'**
+  String get modQueueTitle;
+
+  /// No description provided for @modQueueEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Queue is empty — nice work!'**
+  String get modQueueEmpty;
+
+  /// No description provided for @modStatPending.
+  ///
+  /// In en, this message translates to:
+  /// **'PENDING'**
+  String get modStatPending;
+
+  /// No description provided for @modStatFlagged.
+  ///
+  /// In en, this message translates to:
+  /// **'FLAGGED'**
+  String get modStatFlagged;
+
+  /// No description provided for @modStatAvgAge.
+  ///
+  /// In en, this message translates to:
+  /// **'AVG AGE'**
+  String get modStatAvgAge;
+
+  /// No description provided for @modStatAvgAgeHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h'**
+  String modStatAvgAgeHours(int hours);
+
+  /// No description provided for @modSortOldestFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest first'**
+  String get modSortOldestFirst;
+
+  /// No description provided for @modSortNewestFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest first'**
+  String get modSortNewestFirst;
+
+  /// No description provided for @modFilterPriorityFlag.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority flag'**
+  String get modFilterPriorityFlag;
+
+  /// No description provided for @modEvidenceCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} evidence'**
+  String modEvidenceCount(int count);
+
+  /// No description provided for @modReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get modReview;
+
+  /// No description provided for @modTeamNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Team note: {note}'**
+  String modTeamNote(String note);
+
+  /// No description provided for @adminReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review report'**
+  String get adminReviewTitle;
+
+  /// No description provided for @adminReviewApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get adminReviewApprove;
+
+  /// No description provided for @adminReviewReject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get adminReviewReject;
+
+  /// No description provided for @adminReviewFlag.
+  ///
+  /// In en, this message translates to:
+  /// **'Flag'**
+  String get adminReviewFlag;
+
+  /// No description provided for @adminReviewUnflag.
+  ///
+  /// In en, this message translates to:
+  /// **'Unflag'**
+  String get adminReviewUnflag;
+
+  /// No description provided for @adminReviewRemark.
+  ///
+  /// In en, this message translates to:
+  /// **'Remark'**
+  String get adminReviewRemark;
+
+  /// No description provided for @adminReviewRemarkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Required — will be visible in the audit trail'**
+  String get adminReviewRemarkHint;
+
+  /// No description provided for @adminReviewConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm {action}'**
+  String adminReviewConfirm(String action);
+
+  /// No description provided for @adminReviewApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved.'**
+  String get adminReviewApproved;
+
+  /// No description provided for @adminReviewRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected.'**
+  String get adminReviewRejected;
+
+  /// No description provided for @adminReviewFlagged.
+  ///
+  /// In en, this message translates to:
+  /// **'Flagged for discussion.'**
+  String get adminReviewFlagged;
+
+  /// No description provided for @adminReviewUnflagged.
+  ///
+  /// In en, this message translates to:
+  /// **'Flag removed.'**
+  String get adminReviewUnflagged;
+
+  /// No description provided for @adminReviewSubmittedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted by {handle} • {date}'**
+  String adminReviewSubmittedBy(String handle, String date);
+
+  /// No description provided for @adminLabelDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'DESCRIPTION'**
+  String get adminLabelDescription;
+
+  /// No description provided for @adminLabelTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'TARGET IDENTIFIER'**
+  String get adminLabelTarget;
+
+  /// No description provided for @adminLabelEvidence.
+  ///
+  /// In en, this message translates to:
+  /// **'EVIDENCE'**
+  String get adminLabelEvidence;
+
+  /// No description provided for @adminLabelAuditTrail.
+  ///
+  /// In en, this message translates to:
+  /// **'AUDIT TRAIL'**
+  String get adminLabelAuditTrail;
+
+  /// No description provided for @adminAuditSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted'**
+  String get adminAuditSubmitted;
+
+  /// No description provided for @adminAiScore.
+  ///
+  /// In en, this message translates to:
+  /// **'AI confidence: {score}% ({level})'**
+  String adminAiScore(int score, String level);
 }
 
 class _AppLocalizationsDelegate

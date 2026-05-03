@@ -14,6 +14,8 @@ import '../../features/feed/presentation/feed_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/legal/presentation/privacy_screen.dart';
 import '../../features/legal/presentation/terms_screen.dart';
+import '../../features/moderation/presentation/admin_review_screen.dart';
+import '../../features/moderation/presentation/mod_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../di/auth.dart';
 import '../widgets/app_shell.dart';
@@ -79,11 +81,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               builder: (_, __) => Consumer(
                 builder: (context, ref, _) {
                   final user = ref.watch(currentUserProvider).valueOrNull;
-                  if (user?.isAdmin == true) {
-                    return const Scaffold(
-                      body: Center(child: Text('Mod queue — coming soon')),
-                    );
-                  }
+                  if (user?.isAdmin == true) return const ModScreen();
                   if (user == null) {
                     return Scaffold(
                       appBar: AppBar(title: const Text('Ask AI')),
@@ -101,6 +99,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   );
                 },
               ),
+              routes: [
+                GoRoute(
+                  path: 'review/:id',
+                  builder: (_, s) =>
+                      AdminReviewScreen(reportId: s.pathParameters['id']!),
+                ),
+              ],
             ),
           ]),
           // 3 — Alerts
