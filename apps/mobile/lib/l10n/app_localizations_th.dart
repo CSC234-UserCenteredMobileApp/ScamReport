@@ -68,6 +68,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get categoryPlatformUpdate => 'อัปเดตแพลตฟอร์ม';
 
   @override
+  String get categorySmsAlert => 'การแจ้งเตือน SMS';
+
+  @override
   String reportCountLabel(int count) {
     return '$count รายงาน';
   }

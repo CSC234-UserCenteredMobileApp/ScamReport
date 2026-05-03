@@ -30,6 +30,7 @@
   "categoryFraudAlert": "Fraud Alert",
   "categoryTips": "Tips",
   "categoryPlatformUpdate": "Platform Update",
+  "categorySmsAlert": "SMS Alert",
 
   "reportCountLabel": "{count} reports",
   "@reportCountLabel": {

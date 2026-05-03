@@ -25,6 +25,7 @@
   "categoryFraudAlert": "การแจ้งเตือนฉ้อโกง",
   "categoryTips": "เคล็ดลับ",
   "categoryPlatformUpdate": "อัปเดตแพลตฟอร์ม",
+  "categorySmsAlert": "การแจ้งเตือน SMS",
 
   "reportCountLabel": "{count} รายงาน",
 

@@ -212,6 +212,12 @@ abstract class AppLocalizations {
   /// **'Platform Update'**
   String get categoryPlatformUpdate;
 
+  /// No description provided for @categorySmsAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'SMS Alert'**
+  String get categorySmsAlert;
+
   /// No description provided for @reportCountLabel.
   ///
   /// In en, this message translates to:

@@ -68,6 +68,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoryPlatformUpdate => 'Platform Update';
 
   @override
+  String get categorySmsAlert => 'SMS Alert';
+
+  @override
   String reportCountLabel(int count) {
     return '$count reports';
   }

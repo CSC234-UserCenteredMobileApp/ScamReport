@@ -84,6 +84,8 @@ class AlertsScreen extends ConsumerWidget {
         return context.l10n.categoryTips;
       case AlertCategory.platformUpdate:
         return context.l10n.categoryPlatformUpdate;
+      case AlertCategory.smsAlert:
+        return context.l10n.categorySmsAlert;
     }
   }
 }
@@ -247,6 +249,11 @@ class _AlertListItem extends StatelessWidget {
         iconFg = verdict.unknown.fg;
         iconData = Icons.info_outline;
         chipLabel = context.l10n.categoryPlatformUpdate;
+      case AlertCategory.smsAlert:
+        iconBg = verdict.unknown.bg;
+        iconFg = verdict.unknown.fg;
+        iconData = Icons.info_outline;
+        chipLabel = context.l10n.categorySmsAlert;
     }
 
     return Card(
