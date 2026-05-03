@@ -1,4 +1,4 @@
-enum AlertCategory { fraudAlert, tips, platformUpdate }
+enum AlertCategory { fraudAlert, tips, platformUpdate, smsAlert }
 
 class RecentAlert {
   const RecentAlert({
