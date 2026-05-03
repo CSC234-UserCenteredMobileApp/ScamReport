@@ -133,5 +133,7 @@
   "smsPermissionDenied": "SMS permission is required to scan messages",
   "smsScanTitle": "Suspicious SMS detected",
   "smsScanScamTitle": "Scam SMS detected",
-  "view": "View"
+  "view": "View",
+  "verdictScam": "Scam",
+  "verdictSuspicious": "Suspicious"
 }

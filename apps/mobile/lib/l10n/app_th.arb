@@ -123,5 +123,7 @@
   "smsPermissionDenied": "ต้องการสิทธิ์ SMS เพื่อสแกนข้อความ",
   "smsScanTitle": "พบ SMS น่าสงสัย",
   "smsScanScamTitle": "พบ SMS หลอกลวง",
-  "view": "ดู"
+  "view": "ดู",
+  "verdictScam": "หลอกลวง",
+  "verdictSuspicious": "น่าสงสัย"
 }

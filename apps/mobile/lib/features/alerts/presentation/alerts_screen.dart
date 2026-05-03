@@ -256,7 +256,7 @@ class _AlertListItem extends StatelessWidget {
         iconBg = isScam ? verdict.scam.bg : verdict.suspicious.bg;
         iconFg = isScam ? verdict.scam.fg : verdict.suspicious.fg;
         iconData = Icons.sms_failed_outlined;
-        chipLabel = isScam ? 'Scam' : 'Suspicious';
+        chipLabel = isScam ? context.l10n.verdictScam : context.l10n.verdictSuspicious;
         onTap = null; // no detail screen in v1
     }
 

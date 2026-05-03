@@ -332,4 +332,10 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get view => 'ดู';
+
+  @override
+  String get verdictScam => 'หลอกลวง';
+
+  @override
+  String get verdictSuspicious => 'น่าสงสัย';
 }

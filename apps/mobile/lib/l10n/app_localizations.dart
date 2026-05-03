@@ -709,6 +709,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View'**
   String get view;
+
+  /// No description provided for @verdictScam.
+  ///
+  /// In en, this message translates to:
+  /// **'Scam'**
+  String get verdictScam;
+
+  /// No description provided for @verdictSuspicious.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspicious'**
+  String get verdictSuspicious;
 }
 
 class _AppLocalizationsDelegate
