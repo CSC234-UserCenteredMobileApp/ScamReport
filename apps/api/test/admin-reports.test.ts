@@ -18,6 +18,16 @@ mock.module('../src/core/firebase/admin', () => ({
   getFirebaseAdmin: () => ({}),
 }));
 
+mock.module('../src/core/db/client', () => ({
+  getPrisma: () => ({
+    report: {
+      findMany: async () => [],
+      findUnique: async () => null,
+      count: async () => 0,
+    },
+  }),
+}));
+
 beforeAll(() => {
   mockDecoded = null;
   shouldThrow = false;

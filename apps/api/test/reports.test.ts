@@ -1,5 +1,14 @@
-import { describe, expect, test } from 'bun:test';
+import { describe, expect, mock, test } from 'bun:test';
 import { app } from '../src/index';
+
+mock.module('../src/core/db/client', () => ({
+  getPrisma: () => ({
+    report: {
+      findMany: async () => [],
+      count: async () => 0,
+    },
+  }),
+}));
 
 describe('GET /reports', () => {
   test('returns 422 for limit below minimum', async () => {
