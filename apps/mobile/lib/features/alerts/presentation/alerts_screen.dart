@@ -20,6 +20,7 @@ class AlertsScreen extends ConsumerWidget {
     AlertCategory.fraudAlert,
     AlertCategory.tips,
     AlertCategory.platformUpdate,
+    AlertCategory.smsAlert,
   ];
 
   @override
@@ -232,6 +233,7 @@ class _AlertListItem extends StatelessWidget {
     final Color iconFg;
     final IconData iconData;
     final String chipLabel;
+    VoidCallback? onTap = () => context.push('/alerts/${alert.id}');
 
     switch (alert.category) {
       case AlertCategory.fraudAlert:
@@ -250,15 +252,17 @@ class _AlertListItem extends StatelessWidget {
         iconData = Icons.info_outline;
         chipLabel = context.l10n.categoryPlatformUpdate;
       case AlertCategory.smsAlert:
-        iconBg = verdict.unknown.bg;
-        iconFg = verdict.unknown.fg;
-        iconData = Icons.info_outline;
-        chipLabel = context.l10n.categorySmsAlert;
+        final isScam = alert.verdict == 'scam';
+        iconBg = isScam ? verdict.scam.bg : verdict.suspicious.bg;
+        iconFg = isScam ? verdict.scam.fg : verdict.suspicious.fg;
+        iconData = Icons.sms_failed_outlined;
+        chipLabel = isScam ? 'Scam' : 'Suspicious';
+        onTap = null; // no detail screen in v1
     }
 
     return Card(
       child: InkWell(
-        onTap: () => context.push('/alerts/${alert.id}'),
+        onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -350,6 +354,17 @@ class _AlertItemBody extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
+        if (alert.senderMasked != null &&
+            alert.senderMasked != alert.title) ...[
+          const SizedBox(height: 2),
+          Text(
+            alert.senderMasked!,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
         const SizedBox(height: 2),
         Text(
           alert.excerpt,

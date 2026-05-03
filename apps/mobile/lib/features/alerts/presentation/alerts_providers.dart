@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api_client.dart';
 import '../../home/domain/recent_alert.dart';
+import '../../sms_scan/presentation/sms_scan_providers.dart';
 import '../data/alerts_api_client.dart';
 import '../data/alerts_repository_impl.dart';
 import '../domain/alert.dart';
@@ -33,12 +34,28 @@ final alertDetailProvider =
 final selectedCategoryProvider = StateProvider<AlertCategory?>((ref) => null);
 
 /// Alerts filtered by [selectedCategoryProvider].
+/// - `null` (All): merges API alerts + SMS alerts, sorted by publishedAt desc.
+/// - `AlertCategory.smsAlert`: returns only drift-sourced SMS alerts.
+/// - Other category: API alerts filtered to that category only.
 final filteredAlertsProvider = Provider<AsyncValue<List<Alert>>>((ref) {
-  final alertsAsync = ref.watch(alertsProvider);
   final category = ref.watch(selectedCategoryProvider);
-  return alertsAsync.whenData(
-    (alerts) => category == null
-        ? alerts
-        : alerts.where((a) => a.category == category).toList(),
-  );
+  final alertsAsync = ref.watch(alertsProvider);
+  final smsAsync = ref.watch(smsAlertsProvider);
+
+  if (category == AlertCategory.smsAlert) {
+    return smsAsync.whenData(
+      (smsAlerts) => smsAlerts.map(Alert.fromSmsAlert).toList(),
+    );
+  }
+
+  return alertsAsync.whenData((alerts) {
+    if (category == null) {
+      final smsAlerts =
+          smsAsync.valueOrNull?.map(Alert.fromSmsAlert).toList() ?? [];
+      final combined = [...alerts, ...smsAlerts]
+        ..sort((a, b) => b.publishedAt.compareTo(a.publishedAt));
+      return combined;
+    }
+    return alerts.where((a) => a.category == category).toList();
+  });
 });
