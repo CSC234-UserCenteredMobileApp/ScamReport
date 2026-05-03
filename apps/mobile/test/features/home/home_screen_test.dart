@@ -40,7 +40,8 @@ http.Client _happyClient() {
           'data': {
             'verifiedTotal': 2184,
             'newThisWeek': 36,
-            'topScamType': 'SMS phishing',
+            'topScamTypeLabelEn': 'SMS phishing',
+            'topScamTypeLabelTh': 'SMS phishing',
           },
         }),
         200,
