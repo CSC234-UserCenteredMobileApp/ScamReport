@@ -36,6 +36,7 @@ class AlertsScreen extends ConsumerWidget {
             slivers: [
               SliverAppBar(
                 title: Text(context.l10n.alertsTitle),
+                centerTitle: true,
                 pinned: false,
                 floating: true,
               ),

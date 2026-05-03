@@ -7,7 +7,6 @@ const _keyTheme = 'settings_theme';
 const _keyLanguage = 'settings_language';
 const _keyPhoneScam = 'notif_phone_scam';
 const _keySmsPhishing = 'notif_sms_phishing';
-const _keyRegional = 'notif_regional';
 
 class SettingsRepository {
   const SettingsRepository(this._prefs);
@@ -27,7 +26,6 @@ class SettingsRepository {
       language: _prefs.getString(_keyLanguage) ?? 'th',
       phoneScamAlerts: _prefs.getBool(_keyPhoneScam) ?? true,
       smsPhishingAlerts: _prefs.getBool(_keySmsPhishing) ?? true,
-      regionalAlerts: _prefs.getBool(_keyRegional) ?? false,
     );
   }
 
@@ -42,7 +40,6 @@ class SettingsRepository {
       _prefs.setString(_keyLanguage, state.language),
       _prefs.setBool(_keyPhoneScam, state.phoneScamAlerts),
       _prefs.setBool(_keySmsPhishing, state.smsPhishingAlerts),
-      _prefs.setBool(_keyRegional, state.regionalAlerts),
     ]);
   }
 }

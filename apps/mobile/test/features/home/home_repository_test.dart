@@ -21,14 +21,16 @@ void main() {
             'data': {
               'verifiedTotal': 100,
               'newThisWeek': 10,
-              'topScamType': 'phishing',
+              'topScamTypeLabelEn': 'Phishing',
+              'topScamTypeLabelTh': 'ฟิชชิ่ง',
             },
           });
 
       final stats = await repo.getStats();
       expect(stats.verifiedTotal, 100);
       expect(stats.newThisWeek, 10);
-      expect(stats.topScamType, 'phishing');
+      expect(stats.topScamTypeLabelEn, 'Phishing');
+      expect(stats.topScamTypeLabelTh, 'ฟิชชิ่ง');
     });
   });
 

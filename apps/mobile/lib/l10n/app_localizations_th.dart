@@ -195,4 +195,109 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get feedStatTopType => 'ประเภทหลัก';
+
+  @override
+  String get modQueueTitle => 'คิวตรวจสอบ';
+
+  @override
+  String get modQueueEmpty => 'คิวว่างเปล่า — ดีมาก!';
+
+  @override
+  String get modStatPending => 'รอดำเนินการ';
+
+  @override
+  String get modStatFlagged => 'ถูกตั้งสถานะ';
+
+  @override
+  String get modStatAvgAge => 'อายุเฉลี่ย';
+
+  @override
+  String modStatAvgAgeHours(int hours) {
+    return '$hours ชม.';
+  }
+
+  @override
+  String get modSortOldestFirst => 'เก่าที่สุดก่อน';
+
+  @override
+  String get modSortNewestFirst => 'ใหม่ที่สุดก่อน';
+
+  @override
+  String get modFilterPriorityFlag => 'ธงลำดับความสำคัญ';
+
+  @override
+  String modEvidenceCount(int count) {
+    return '$count หลักฐาน';
+  }
+
+  @override
+  String get modReview => 'ตรวจสอบ';
+
+  @override
+  String modTeamNote(String note) {
+    return 'บันทึกทีม: $note';
+  }
+
+  @override
+  String get adminReviewTitle => 'ตรวจสอบรายงาน';
+
+  @override
+  String get adminReviewApprove => 'อนุมัติ';
+
+  @override
+  String get adminReviewReject => 'ปฏิเสธ';
+
+  @override
+  String get adminReviewFlag => 'ตั้งสถานะ';
+
+  @override
+  String get adminReviewUnflag => 'ยกเลิกสถานะ';
+
+  @override
+  String get adminReviewRemark => 'หมายเหตุ';
+
+  @override
+  String get adminReviewRemarkHint => 'จำเป็น — จะปรากฏในบันทึกการตรวจสอบ';
+
+  @override
+  String adminReviewConfirm(String action) {
+    return 'ยืนยัน$action';
+  }
+
+  @override
+  String get adminReviewApproved => 'อนุมัติแล้ว';
+
+  @override
+  String get adminReviewRejected => 'ปฏิเสธแล้ว';
+
+  @override
+  String get adminReviewFlagged => 'ตั้งสถานะเพื่อหารือแล้ว';
+
+  @override
+  String get adminReviewUnflagged => 'ยกเลิกสถานะแล้ว';
+
+  @override
+  String adminReviewSubmittedBy(String handle, String date) {
+    return 'ส่งโดย $handle • $date';
+  }
+
+  @override
+  String get adminLabelDescription => 'คำอธิบาย';
+
+  @override
+  String get adminLabelTarget => 'ตัวระบุเป้าหมาย';
+
+  @override
+  String get adminLabelEvidence => 'หลักฐาน';
+
+  @override
+  String get adminLabelAuditTrail => 'บันทึกการตรวจสอบ';
+
+  @override
+  String get adminAuditSubmitted => 'ส่งแล้ว';
+
+  @override
+  String adminAiScore(int score, String level) {
+    return 'ความเชื่อมั่น AI: $score% ($level)';
+  }
 }

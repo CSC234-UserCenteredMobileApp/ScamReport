@@ -194,4 +194,110 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get feedStatTopType => 'TOP TYPE';
+
+  @override
+  String get modQueueTitle => 'Moderation queue';
+
+  @override
+  String get modQueueEmpty => 'Queue is empty — nice work!';
+
+  @override
+  String get modStatPending => 'PENDING';
+
+  @override
+  String get modStatFlagged => 'FLAGGED';
+
+  @override
+  String get modStatAvgAge => 'AVG AGE';
+
+  @override
+  String modStatAvgAgeHours(int hours) {
+    return '${hours}h';
+  }
+
+  @override
+  String get modSortOldestFirst => 'Oldest first';
+
+  @override
+  String get modSortNewestFirst => 'Newest first';
+
+  @override
+  String get modFilterPriorityFlag => 'Priority flag';
+
+  @override
+  String modEvidenceCount(int count) {
+    return '$count evidence';
+  }
+
+  @override
+  String get modReview => 'Review';
+
+  @override
+  String modTeamNote(String note) {
+    return 'Team note: $note';
+  }
+
+  @override
+  String get adminReviewTitle => 'Review report';
+
+  @override
+  String get adminReviewApprove => 'Approve';
+
+  @override
+  String get adminReviewReject => 'Reject';
+
+  @override
+  String get adminReviewFlag => 'Flag';
+
+  @override
+  String get adminReviewUnflag => 'Unflag';
+
+  @override
+  String get adminReviewRemark => 'Remark';
+
+  @override
+  String get adminReviewRemarkHint =>
+      'Required — will be visible in the audit trail';
+
+  @override
+  String adminReviewConfirm(String action) {
+    return 'Confirm $action';
+  }
+
+  @override
+  String get adminReviewApproved => 'Approved.';
+
+  @override
+  String get adminReviewRejected => 'Rejected.';
+
+  @override
+  String get adminReviewFlagged => 'Flagged for discussion.';
+
+  @override
+  String get adminReviewUnflagged => 'Flag removed.';
+
+  @override
+  String adminReviewSubmittedBy(String handle, String date) {
+    return 'Submitted by $handle • $date';
+  }
+
+  @override
+  String get adminLabelDescription => 'DESCRIPTION';
+
+  @override
+  String get adminLabelTarget => 'TARGET IDENTIFIER';
+
+  @override
+  String get adminLabelEvidence => 'EVIDENCE';
+
+  @override
+  String get adminLabelAuditTrail => 'AUDIT TRAIL';
+
+  @override
+  String get adminAuditSubmitted => 'Submitted';
+
+  @override
+  String adminAiScore(int score, String level) {
+    return 'AI confidence: $score% ($level)';
+  }
 }

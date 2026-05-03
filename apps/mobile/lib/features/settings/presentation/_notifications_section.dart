@@ -8,7 +8,7 @@ class _NotificationsSection extends ConsumerWidget {
     final settingsAsync = ref.watch(settingsProvider);
 
     return settingsAsync.when(
-      loading: () => const _SettingsSkeleton(height: 172),
+      loading: () => const _SettingsSkeleton(height: 116),
       error: (_, __) => const SizedBox.shrink(),
       data: (settings) => Card(
         margin: EdgeInsets.zero,
@@ -34,15 +34,6 @@ class _NotificationsSection extends ConsumerWidget {
               onChanged: (v) => ref
                   .read(settingsProvider.notifier)
                   .save(settings.copyWith(smsPhishingAlerts: v)),
-            ),
-            const Divider(height: 1, indent: 16, endIndent: 16),
-            _NotifTile(
-              title: context.l10n.notifRegional,
-              subtitle: context.l10n.notifRegionalDesc,
-              value: settings.regionalAlerts,
-              onChanged: (v) => ref
-                  .read(settingsProvider.notifier)
-                  .save(settings.copyWith(regionalAlerts: v)),
               isLast: true,
             ),
           ],

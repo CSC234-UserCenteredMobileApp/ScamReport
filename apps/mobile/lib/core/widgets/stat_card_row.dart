@@ -31,7 +31,9 @@ class StatCardRow extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: StatCard(
-            value: stats.topScamType,
+            value: Localizations.localeOf(context).languageCode == 'th'
+                ? stats.topScamTypeLabelTh
+                : stats.topScamTypeLabelEn,
             label: context.l10n.statTopScamType,
             valueColor: theme.colorScheme.onSurface,
             maxLines: 2,
