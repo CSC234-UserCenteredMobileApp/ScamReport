@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -24,6 +26,7 @@ class SmsAlertOverlayWrapper extends ConsumerStatefulWidget {
 class _SmsAlertOverlayWrapperState
     extends ConsumerState<SmsAlertOverlayWrapper> {
   OverlayEntry? _entry;
+  Timer? _timer;
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +38,7 @@ class _SmsAlertOverlayWrapperState
   }
 
   void _showBanner(BuildContext context, SmsAlert alert) {
+    _timer?.cancel();
     _entry?.remove();
     _entry = OverlayEntry(
       builder: (_) => SmsAlertBanner(
@@ -49,17 +53,19 @@ class _SmsAlertOverlayWrapperState
       ),
     );
     Overlay.of(context).insert(_entry!);
-    Future.delayed(const Duration(seconds: 6), _dismiss);
+    _timer = Timer(const Duration(seconds: 6), _dismiss);
   }
 
   void _dismiss() {
+    _timer?.cancel();
+    _timer = null;
     _entry?.remove();
     _entry = null;
   }
 
   @override
   void dispose() {
-    _entry?.remove();
+    _dismiss();
     super.dispose();
   }
 }
