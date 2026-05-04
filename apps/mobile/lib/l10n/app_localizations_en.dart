@@ -300,4 +300,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String adminAiScore(int score, String level) {
     return 'AI confidence: $score% ($level)';
   }
+
+  @override
+  String get reportDetailVerified => 'Verified';
+
+  @override
+  String reportDetailVerifiedOn(String date) {
+    return 'Verified $date';
+  }
+
+  @override
+  String get reportDetailIdentifierLabel => 'REPORTED IDENTIFIER';
+
+  @override
+  String get reportDetailWhatHappened => 'WHAT HAPPENED';
+
+  @override
+  String get reportDetailEvidence => 'EVIDENCE';
+
+  @override
+  String get reportDetailCta => 'Report a similar scam';
+
+  @override
+  String get reportDetailPrivacyFooter =>
+      'The reporter\'s identity is never shown publicly. Only the scam content above is shared.';
 }
