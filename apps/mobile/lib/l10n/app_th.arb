@@ -127,6 +127,28 @@
   "verdictScam": "หลอกลวง",
   "verdictSuspicious": "น่าสงสัย",
 
+  "checkInputTitle": "ตรวจสอบบางอย่าง",
+  "checkInputHint": "วางหรือพิมพ์หมายเลขโทรศัพท์ ลิงก์ หรือข้อความ",
+  "checkInputPrivacyNote": "เราไม่เก็บข้อมูลที่คุณตรวจสอบ เว้นแต่คุณเลือกรายงาน",
+  "checkInputRunCheck": "เริ่มตรวจสอบ",
+  "checkInputSampleNumber": "ลองด้วยหมายเลข",
+  "checkInputSampleLink": "ลองด้วยลิงก์",
+
+  "verdictChecking": "กำลังตรวจสอบ…",
+  "verdictCheckingSubtitle": "กำลังตรวจสอบรายงานที่ยืนยันแล้ว…",
+  "verdictSafe": "ปลอดภัย",
+  "verdictUnknown": "ไม่ทราบ",
+  "verdictSubtitleScam": "มีรายงานที่ยืนยันแล้วหลายรายการตรงกับรายการนี้",
+  "verdictSubtitleSuspicious": "ตรงกันบางส่วน — โปรดระมัดระวัง",
+  "verdictSubtitleSafe": "ไม่มีรายงานการหลอกลวงที่ยืนยันแล้วสำหรับรายการนี้",
+  "verdictSubtitleUnknown": "เราไม่สามารถจัดประเภทรายการนี้ได้",
+  "verdictYouChecked": "คุณตรวจสอบ",
+  "verdictMatchedReports": "พบรายงานที่ยืนยันแล้ว {count} รายการ",
+  "@verdictMatchedReports": { "placeholders": { "count": { "type": "int" } } },
+  "verdictSeeReports": "ดูรายงานที่ตรงกัน",
+  "verdictReportThis": "รายงานสิ่งนี้",
+  "verdictCachedResult": "ผลลัพธ์ที่แคชไว้",
+
   "reportDetailVerified": "ตรวจสอบแล้ว",
   "reportDetailVerifiedOn": "ตรวจสอบเมื่อ {date}",
   "@reportDetailVerifiedOn": {

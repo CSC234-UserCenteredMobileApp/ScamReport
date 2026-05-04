@@ -722,6 +722,120 @@ abstract class AppLocalizations {
   /// **'Suspicious'**
   String get verdictSuspicious;
 
+  /// No description provided for @checkInputTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check something'**
+  String get checkInputTitle;
+
+  /// No description provided for @checkInputHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste or type a phone number, link, or message'**
+  String get checkInputHint;
+
+  /// No description provided for @checkInputPrivacyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'We never store what you check unless you choose to report it.'**
+  String get checkInputPrivacyNote;
+
+  /// No description provided for @checkInputRunCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Run check'**
+  String get checkInputRunCheck;
+
+  /// No description provided for @checkInputSampleNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a number'**
+  String get checkInputSampleNumber;
+
+  /// No description provided for @checkInputSampleLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a link'**
+  String get checkInputSampleLink;
+
+  /// No description provided for @verdictChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking…'**
+  String get verdictChecking;
+
+  /// No description provided for @verdictCheckingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cross-checking verified reports…'**
+  String get verdictCheckingSubtitle;
+
+  /// No description provided for @verdictSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe'**
+  String get verdictSafe;
+
+  /// No description provided for @verdictUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get verdictUnknown;
+
+  /// No description provided for @verdictSubtitleScam.
+  ///
+  /// In en, this message translates to:
+  /// **'Multiple verified reports match this item.'**
+  String get verdictSubtitleScam;
+
+  /// No description provided for @verdictSubtitleSuspicious.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial match — proceed with caution.'**
+  String get verdictSubtitleSuspicious;
+
+  /// No description provided for @verdictSubtitleSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'No verified scam reports for this item.'**
+  String get verdictSubtitleSafe;
+
+  /// No description provided for @verdictSubtitleUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not classify this item.'**
+  String get verdictSubtitleUnknown;
+
+  /// No description provided for @verdictYouChecked.
+  ///
+  /// In en, this message translates to:
+  /// **'YOU CHECKED'**
+  String get verdictYouChecked;
+
+  /// No description provided for @verdictMatchedReports.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} verified reports matched'**
+  String verdictMatchedReports(int count);
+
+  /// No description provided for @verdictSeeReports.
+  ///
+  /// In en, this message translates to:
+  /// **'See matched reports'**
+  String get verdictSeeReports;
+
+  /// No description provided for @verdictReportThis.
+  ///
+  /// In en, this message translates to:
+  /// **'Report this'**
+  String get verdictReportThis;
+
+  /// No description provided for @verdictCachedResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Cached result'**
+  String get verdictCachedResult;
+
   /// No description provided for @reportDetailVerified.
   ///
   /// In en, this message translates to:
