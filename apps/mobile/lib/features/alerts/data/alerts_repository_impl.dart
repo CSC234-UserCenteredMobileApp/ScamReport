@@ -41,7 +41,7 @@ class AlertsRepositoryImpl implements AlertsRepository {
       case 'platform_update':
         return AlertCategory.platformUpdate;
       default:
-        throw ArgumentError('Unknown AlertCategory value: $value');
+        return AlertCategory.platformUpdate; // fallback for unknown API values
     }
   }
 }

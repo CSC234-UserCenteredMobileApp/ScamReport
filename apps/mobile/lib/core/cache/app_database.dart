@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -28,12 +29,35 @@ class Drafts extends Table {
   DateTimeColumn get updatedAt => dateTime()();
 }
 
-@DriftDatabase(tables: [CacheEntries, Drafts])
+// SMS smishing alerts detected by the on-device classifier.
+// `senderMasked` and `bodyExcerpt` are truncated/masked for privacy.
+class SmsAlerts extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get senderMasked => text()();
+  TextColumn get bodyExcerpt => text()();
+  TextColumn get verdict => text()();
+  DateTimeColumn get detectedAt => dateTime()();
+  BoolColumn get isRead => boolean().withDefault(const Constant(false))();
+}
+
+@DriftDatabase(tables: [CacheEntries, Drafts, SmsAlerts])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
+  @visibleForTesting
+  AppDatabase.forTesting(super.executor);
+
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.createTable(smsAlerts);
+      }
+    },
+  );
 }
 
 LazyDatabase _openConnection() {

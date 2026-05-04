@@ -36,6 +36,11 @@ class AlertCard extends StatelessWidget {
         iconFg = verdict.unknown.fg;
         iconData = Icons.info_outline;
         chipLabel = context.l10n.categoryPlatformUpdate;
+      case AlertCategory.smsAlert:
+        iconBg = verdict.unknown.bg;
+        iconFg = verdict.unknown.fg;
+        iconData = Icons.info_outline;
+        chipLabel = context.l10n.categorySmsAlert;
     }
 
     final dateStr = _formatDate(alert.publishedAt);

@@ -68,6 +68,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoryPlatformUpdate => 'Platform Update';
 
   @override
+  String get categorySmsAlert => 'SMS Scan';
+
+  @override
   String reportCountLabel(int count) {
     return '$count reports';
   }
@@ -300,6 +303,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String adminAiScore(int score, String level) {
     return 'AI confidence: $score% ($level)';
   }
+
+  @override
+  String get smsSmishingDetectionLabel => 'SMS smishing detection';
+
+  @override
+  String get smsSmishingDetectionDesc => 'Scan incoming messages for scams';
+
+  @override
+  String get smsConsentTitle => 'Enable SMS scanning?';
+
+  @override
+  String get smsConsentBody =>
+      'ScamReport will read incoming SMS and send the content to our servers to check for scams. No messages are stored on our servers. You can disable this at any time.';
+
+  @override
+  String get smsConsentAgree => 'Agree & Continue';
+
+  @override
+  String get smsPermissionDenied =>
+      'SMS permission is required to scan messages';
+
+  @override
+  String get smsScanTitle => 'Suspicious SMS detected';
+
+  @override
+  String get smsScanScamTitle => 'Scam SMS detected';
+
+  @override
+  String get view => 'View';
+
+  @override
+  String get verdictScam => 'Scam';
+
+  @override
+  String get verdictSuspicious => 'Suspicious';
 
   @override
   String get reportDetailVerified => 'Verified';

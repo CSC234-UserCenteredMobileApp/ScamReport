@@ -22,3 +22,8 @@ final settingsProvider =
     AsyncNotifierProvider<SettingsNotifier, SettingsState>(
   SettingsNotifier.new,
 );
+
+final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
+  final prefsAsync = ref.watch(sharedPreferencesProvider);
+  return SettingsRepository(prefsAsync.requireValue);
+});

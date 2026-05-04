@@ -25,6 +25,7 @@
   "categoryFraudAlert": "การแจ้งเตือนฉ้อโกง",
   "categoryTips": "เคล็ดลับ",
   "categoryPlatformUpdate": "อัปเดตแพลตฟอร์ม",
+  "categorySmsAlert": "สแกน SMS",
 
   "reportCountLabel": "{count} รายงาน",
 
@@ -113,6 +114,18 @@
   "adminAuditSubmitted": "ส่งแล้ว",
   "adminAiScore": "ความเชื่อมั่น AI: {score}% ({level})",
   "@adminAiScore": { "placeholders": { "score": { "type": "int" }, "level": { "type": "String" } } },
+
+  "smsSmishingDetectionLabel": "ตรวจจับ SMS หลอกลวง",
+  "smsSmishingDetectionDesc": "ตรวจสอบข้อความขาเข้าเพื่อหาการหลอกลวง",
+  "smsConsentTitle": "เปิดใช้การสแกน SMS?",
+  "smsConsentBody": "ScamReport จะอ่าน SMS ขาเข้าและส่งเนื้อหาไปยังเซิร์ฟเวอร์เพื่อตรวจสอบการหลอกลวง ข้อความของคุณจะไม่ถูกจัดเก็บบนเซิร์ฟเวอร์ คุณสามารถปิดใช้งานได้ทุกเมื่อ",
+  "smsConsentAgree": "ยอมรับและดำเนินการต่อ",
+  "smsPermissionDenied": "ต้องการสิทธิ์ SMS เพื่อสแกนข้อความ",
+  "smsScanTitle": "พบ SMS น่าสงสัย",
+  "smsScanScamTitle": "พบ SMS หลอกลวง",
+  "view": "ดู",
+  "verdictScam": "หลอกลวง",
+  "verdictSuspicious": "น่าสงสัย",
 
   "reportDetailVerified": "ตรวจสอบแล้ว",
   "reportDetailVerifiedOn": "ตรวจสอบเมื่อ {date}",

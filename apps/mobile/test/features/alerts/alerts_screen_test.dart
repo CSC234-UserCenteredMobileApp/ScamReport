@@ -9,6 +9,8 @@ import 'package:mobile/features/alerts/domain/alert.dart';
 import 'package:mobile/features/alerts/presentation/alerts_providers.dart';
 import 'package:mobile/features/alerts/presentation/alerts_screen.dart';
 import 'package:mobile/features/home/domain/recent_alert.dart';
+import 'package:mobile/features/sms_scan/domain/sms_alert.dart';
+import 'package:mobile/features/sms_scan/presentation/sms_scan_providers.dart';
 import 'package:mobile/l10n/l10n.dart';
 
 Widget _themed(Widget widget) {
@@ -45,6 +47,11 @@ List<Alert> _fakeAlerts() => [
       ),
     ];
 
+/// Override that resolves to an empty SMS alert list — avoids hitting drift in tests.
+final _emptySmsAlertsOverride = smsAlertsProvider.overrideWith(
+  (ref) async => <SmsAlert>[],
+);
+
 void main() {
   group('AlertsScreen', () {
     testWidgets('shows loading skeletons before data arrives', (tester) async {
@@ -59,6 +66,7 @@ void main() {
             alertsProvider.overrideWith(
               (ref) => Future<List<Alert>>.delayed(const Duration(seconds: 30)),
             ),
+            _emptySmsAlertsOverride,
           ],
           child: _themed(const AlertsScreen()),
         ),
@@ -81,6 +89,7 @@ void main() {
         ProviderScope(
           overrides: [
             alertsProvider.overrideWith((ref) async => _fakeAlerts()),
+            _emptySmsAlertsOverride,
           ],
           child: _themed(const AlertsScreen()),
         ),
@@ -97,6 +106,7 @@ void main() {
         ProviderScope(
           overrides: [
             alertsProvider.overrideWith((ref) async => <Alert>[]),
+            _emptySmsAlertsOverride,
           ],
           child: _themed(const AlertsScreen()),
         ),
@@ -112,6 +122,7 @@ void main() {
         ProviderScope(
           overrides: [
             httpClientProvider.overrideWithValue(_errorClient()),
+            _emptySmsAlertsOverride,
           ],
           child: _themed(const AlertsScreen()),
         ),
@@ -133,6 +144,7 @@ void main() {
         ProviderScope(
           overrides: [
             alertsProvider.overrideWith((ref) async => _fakeAlerts()),
+            _emptySmsAlertsOverride,
           ],
           child: _themed(const AlertsScreen()),
         ),
@@ -151,6 +163,53 @@ void main() {
       // Only fraudAlert card remains.
       expect(find.text('Fake Bank Alert'), findsOneWidget);
       expect(find.text('Quick Safety Tip'), findsNothing);
+    });
+
+    testWidgets('SMS Scan filter chip shows sms alerts only', (tester) async {
+      tester.view.physicalSize = const Size(1080, 1920);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final fakeSmsAlerts = [
+        SmsAlert(
+          id: 1,
+          senderMasked: 'XXXX-1234',
+          bodyExcerpt: 'You won a prize!',
+          verdict: 'scam',
+          detectedAt: DateTime.utc(2026, 4, 25),
+          isRead: false,
+        ),
+      ];
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            alertsProvider.overrideWith((ref) async => _fakeAlerts()),
+            smsAlertsProvider.overrideWith((ref) async => fakeSmsAlerts),
+          ],
+          child: _themed(const AlertsScreen()),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Scroll the chip bar (horizontal ListView) to make "SMS Scan" visible.
+      final chipBarScrollable = find.descendant(
+        of: find.byType(ListView),
+        matching: find.byType(Scrollable),
+      );
+      await tester.scrollUntilVisible(
+        find.widgetWithText(FilterChip, 'SMS Scan'),
+        200,
+        scrollable: chipBarScrollable,
+      );
+      await tester.tap(find.widgetWithText(FilterChip, 'SMS Scan'));
+      await tester.pumpAndSettle();
+
+      // Only the SMS alert is shown; regular alerts are hidden.
+      expect(find.text('XXXX-1234'), findsOneWidget);
+      expect(find.text('Fake Bank Alert'), findsNothing);
     });
   });
 }

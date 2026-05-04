@@ -30,6 +30,7 @@
   "categoryFraudAlert": "Fraud Alert",
   "categoryTips": "Tips",
   "categoryPlatformUpdate": "Platform Update",
+  "categorySmsAlert": "SMS Scan",
 
   "reportCountLabel": "{count} reports",
   "@reportCountLabel": {
@@ -123,6 +124,18 @@
   "adminAuditSubmitted": "Submitted",
   "adminAiScore": "AI confidence: {score}% ({level})",
   "@adminAiScore": { "placeholders": { "score": { "type": "int" }, "level": { "type": "String" } } },
+
+  "smsSmishingDetectionLabel": "SMS smishing detection",
+  "smsSmishingDetectionDesc": "Scan incoming messages for scams",
+  "smsConsentTitle": "Enable SMS scanning?",
+  "smsConsentBody": "ScamReport will read incoming SMS and send the content to our servers to check for scams. No messages are stored on our servers. You can disable this at any time.",
+  "smsConsentAgree": "Agree & Continue",
+  "smsPermissionDenied": "SMS permission is required to scan messages",
+  "smsScanTitle": "Suspicious SMS detected",
+  "smsScanScamTitle": "Scam SMS detected",
+  "view": "View",
+  "verdictScam": "Scam",
+  "verdictSuspicious": "Suspicious",
 
   "reportDetailVerified": "Verified",
   "reportDetailVerifiedOn": "Verified {date}",

@@ -81,17 +81,22 @@ class _AnnouncementBody extends StatelessWidget {
         chipBg = verdict.unknown.bg;
         chipFg = verdict.unknown.fg;
         chipLabel = context.l10n.categoryPlatformUpdate;
+      case AlertCategory.smsAlert:
+        chipBg = verdict.unknown.bg;
+        chipFg = verdict.unknown.fg;
+        chipLabel = context.l10n.categorySmsAlert;
     }
 
     return Scaffold(
       appBar: AppBar(
         title: Text(alert.title),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.share_outlined),
-            onPressed: () => _shareLink(context, alert.slug),
-            tooltip: context.l10n.shareLink,
-          ),
+          if (alert.slug.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.share_outlined),
+              onPressed: () => _shareLink(context, alert.slug),
+              tooltip: context.l10n.shareLink,
+            ),
         ],
       ),
       body: SingleChildScrollView(
