@@ -152,8 +152,8 @@ export async function runCheck(
   if (type === 'text' || type === 'url') {
     const aiVerdict = await analyzeWithAI(payload, type);
     if (aiVerdict === 'scam' && verdict !== 'scam') verdict = 'scam';
-    else if (aiVerdict === 'suspicious' && verdict === 'safe') verdict = 'suspicious';
-    else if (aiVerdict !== 'unknown' && verdict === 'safe') verdict = aiVerdict;
+    else if (aiVerdict === 'suspicious' && (verdict === 'safe' || verdict === 'unknown')) verdict = 'suspicious';
+    else if (aiVerdict === 'safe' && verdict === 'unknown') verdict = 'safe';
   }
 
   // Write check_log — non-fatal

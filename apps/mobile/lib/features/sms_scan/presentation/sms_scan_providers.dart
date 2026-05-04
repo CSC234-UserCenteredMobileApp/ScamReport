@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api_client.dart';
 import '../../../core/di/cache.dart';
+import '../../../core/di/notifications.dart';
 import '../../settings/presentation/settings_providers.dart';
 import '../data/sms_event_channel.dart';
 import '../data/sms_scan_repository.dart';
@@ -21,10 +22,16 @@ final smsScannerProvider = StreamProvider<SmsAlert>((ref) {
   if (settings == null || !settings.smsScanning) return const Stream.empty();
 
   final repo = ref.watch(smsScanRepositoryProvider);
+  final notifService = ref.watch(notificationServiceProvider);
 
   return ref.watch(smsEventChannelProvider).asyncExpand((event) async* {
     final alert = await repo.processEvent(event);
-    if (alert != null) yield alert;
+    if (alert != null) {
+      if (settings.smsPhishingAlerts) {
+        await notifService.showSmsAlert(alert);
+      }
+      yield alert;
+    }
   });
 });
 

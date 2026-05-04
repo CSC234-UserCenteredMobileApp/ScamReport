@@ -27,7 +27,7 @@ class MainActivity : FlutterActivity() {
                             this@MainActivity,
                             receiver,
                             IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION),
-                            ContextCompat.RECEIVER_NOT_EXPORTED,
+                            ContextCompat.RECEIVER_EXPORTED,
                         )
                     }
                 }
