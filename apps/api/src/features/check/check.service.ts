@@ -1,11 +1,28 @@
-import { createHash } from 'crypto';
 import { getPrisma } from '../../core/db/client';
-import { searchSimilarReports, type SimilarReport } from '../../core/rag/retrieval';
-import type { CheckResponse, Verdict } from '@my-product/shared';
-
-const SCAM_SIMILARITY = 0.85;
-const SUSPICIOUS_SIMILARITY = 0.70;
+import { searchSimilarReports } from '../../core/rag/retrieval';
 import type { CheckResponse, ReportSummary } from '@my-product/shared';
+
+function normalizePhone(raw: string): string {
+  const stripped = raw.replace(/[\s\-\(\)]/g, '');
+  if (/^0\d{8,9}$/.test(stripped)) return '+66' + stripped.slice(1);
+  return stripped;
+}
+
+function normalizeUrl(raw: string): string {
+  try {
+    const url = new URL(raw.startsWith('http') ? raw : 'https://' + raw);
+    return url.hostname.toLowerCase();
+  } catch (_e) {
+    return raw.toLowerCase().trim();
+  }
+}
+
+async function hashInput(text: string): Promise<string> {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
 
 export async function getScamPhones(): Promise<string[]> {
   const prisma = getPrisma();
@@ -17,119 +34,7 @@ export async function getScamPhones(): Promise<string[]> {
     },
     select: { targetIdentifierNormalized: true },
   });
-
-  const phones = [
-    ...new Set(rows.map((r) => r.targetIdentifierNormalized as string)),
-  ];
-  return phones;
-}
-
-export async function checkText(payload: string, userId?: string): Promise<CheckResponse> {
-  const prisma = getPrisma();
-
-  let similar: SimilarReport[] = [];
-  try {
-    similar = await searchSimilarReports(payload, 5);
-  } catch (_e) {
-    // Gemini unavailable - fall back to unknown
-  }
-
-  const topSimilarity = similar[0]?.similarity ?? 0;
-  let verdict: Verdict = 'unknown';
-  if (topSimilarity >= SCAM_SIMILARITY) {
-    verdict = 'scam';
-  } else if (topSimilarity >= SUSPICIOUS_SIMILARITY) {
-    verdict = 'suspicious';
-  }
-
-  const matchedIds = similar
-    .filter((r) => r.similarity >= SUSPICIOUS_SIMILARITY)
-    .map((r) => r.reportId);
-
-  const reports =
-    matchedIds.length > 0
-      ? await prisma.report.findMany({
-          where: { id: { in: matchedIds } },
-          select: {
-            id: true,
-            title: true,
-            verifiedAt: true,
-            scamType: { select: { code: true } },
-          },
-        })
-      : [];
-
-  const matches = reports
-    .filter((r): r is typeof r & { verifiedAt: Date } => r.verifiedAt !== null)
-    .map((r) => ({
-      id: r.id,
-      title: r.title,
-      scamType: r.scamType.code,
-      verifiedAt: r.verifiedAt.toISOString(),
-    }));
-
-  try {
-    await prisma.checkLog.create({
-      data: {
-        userId: userId ?? null,
-        inputKind: 'text',
-        inputNormalized: payload.substring(0, 500),
-        inputHash: createHash('sha256').update(payload).digest('hex'),
-        verdict,
-        matchCount: matches.length,
-      },
-    });
-  } catch (_e) {
-    // Log is best-effort
-  }
-
-  return { verdict, matchedCount: matches.length, matches };
-}
-
-export async function checkPhone(payload: string, userId?: string): Promise<CheckResponse> {
-  const prisma = getPrisma();
-
-  const reports = await prisma.report.findMany({
-    where: {
-      status: 'verified',
-      targetIdentifierKind: 'phone',
-      targetIdentifierNormalized: payload,
-    },
-    select: {
-      id: true,
-      title: true,
-      verifiedAt: true,
-      scamType: { select: { code: true } },
-    },
-    take: 5,
-  });
-
-  const verdict: Verdict = reports.length > 0 ? 'scam' : 'unknown';
-
-  const matches = reports
-    .filter((r): r is typeof r & { verifiedAt: Date } => r.verifiedAt !== null)
-    .map((r) => ({
-function normalizePhone(raw: string): string {
-  const stripped = raw.replace(/[\s\-\(\)]/g, '');
-  // Thai local format 0XX → E.164 +66XX
-  if (/^0\d{8,9}$/.test(stripped)) return '+66' + stripped.slice(1);
-  return stripped;
-}
-
-function normalizeUrl(raw: string): string {
-  try {
-    const url = new URL(raw.startsWith('http') ? raw : 'https://' + raw);
-    return url.hostname.toLowerCase();
-  } catch {
-    return raw.toLowerCase().trim();
-  }
-}
-
-async function hashInput(text: string): Promise<string> {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-  return Array.from(new Uint8Array(buf))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+  return [...new Set(rows.map((r) => r.targetIdentifierNormalized as string))];
 }
 
 export async function runCheck(
@@ -164,84 +69,19 @@ export async function runCheck(
       },
     });
 
-    matches = rows.map((r) => ({
-      id: r.id,
-      title: r.title,
-      scamType: r.scamType.code,
-      verifiedAt: r.verifiedAt.toISOString(),
-    }));
+    matches = rows
+      .filter((r): r is typeof r & { verifiedAt: Date } => r.verifiedAt !== null)
+      .map((r) => ({
+        id: r.id,
+        title: r.title,
+        scamType: r.scamType.code,
+        verifiedAt: r.verifiedAt.toISOString(),
+      }));
 
-  try {
-    await prisma.checkLog.create({
-      data: {
-        userId: userId ?? null,
-        inputKind: 'phone',
-        inputNormalized: payload,
-        inputHash: createHash('sha256').update(payload).digest('hex'),
-        verdict,
-        matchCount: matches.length,
-      },
-    });
-  } catch (_e) {
-    // Log is best-effort
-  }
-
-  return { verdict, matchedCount: matches.length, matches };
-}
-
-export async function checkUrl(payload: string, userId?: string): Promise<CheckResponse> {
-  const prisma = getPrisma();
-
-  let normalized = payload.toLowerCase();
-  try {
-    normalized = new URL(payload).hostname.toLowerCase();
-  } catch (_e) {
-    // Not a valid URL - use lowercased payload
-  }
-
-  const reports = await prisma.report.findMany({
-    where: {
-      status: 'verified',
-      targetIdentifierKind: 'url',
-      targetIdentifierNormalized: normalized,
-    },
-    select: {
-      id: true,
-      title: true,
-      verifiedAt: true,
-      scamType: { select: { code: true } },
-    },
-    take: 5,
-  });
-
-  const verdict: Verdict = reports.length > 0 ? 'scam' : 'unknown';
-
-  const matches = reports
-    .filter((r): r is typeof r & { verifiedAt: Date } => r.verifiedAt !== null)
-    .map((r) => ({
-      id: r.id,
-      title: r.title,
-      scamType: r.scamType.code,
-      verifiedAt: r.verifiedAt.toISOString(),
-    }));
-
-  try {
-    await prisma.checkLog.create({
-      data: {
-        userId: userId ?? null,
-        inputKind: 'url',
-        inputNormalized: normalized,
-        inputHash: createHash('sha256').update(payload).digest('hex'),
-        verdict,
-        matchCount: matches.length,
-      },
-    });
-  } catch (_e) {
-    // Log is best-effort
     if (matches.length >= 1) verdict = 'scam';
   }
 
-  // Phase 2 — semantic fallback for text, or when no identifier match found
+  // Phase 2 — semantic similarity for text, or when no identifier match found
   const needsSemantic = type === 'text' || matches.length === 0;
   if (needsSemantic) {
     try {
@@ -250,7 +90,7 @@ export async function checkUrl(payload: string, userId?: string): Promise<CheckR
       if (top !== undefined && top.similarity >= 0.7) {
         verdict = 'suspicious';
         const topIds = results.slice(0, 3).map((r) => r.reportId);
-        const rows = await prisma.report.findMany({
+        const semanticRows = await prisma.report.findMany({
           where: { id: { in: topIds }, status: 'verified' },
           select: {
             id: true,
@@ -259,18 +99,20 @@ export async function checkUrl(payload: string, userId?: string): Promise<CheckR
             verifiedAt: true,
           },
         });
-        matches = rows.map((r) => ({
-          id: r.id,
-          title: r.title,
-          scamType: r.scamType.code,
-          verifiedAt: r.verifiedAt!.toISOString(),
-        }));
+        matches = semanticRows
+          .filter((r): r is typeof r & { verifiedAt: Date } => r.verifiedAt !== null)
+          .map((r) => ({
+            id: r.id,
+            title: r.title,
+            scamType: r.scamType.code,
+            verifiedAt: r.verifiedAt.toISOString(),
+          }));
       } else {
-        verdict = 'safe';
+        verdict = type === 'text' ? 'unknown' : 'safe';
       }
-    } catch {
+    } catch (_e) {
       // Gemini unavailable or no embeddings — fall back gracefully
-      verdict = type === 'text' ? 'unknown' : verdict;
+      if (type === 'text') verdict = 'unknown';
     }
   }
 
@@ -288,7 +130,7 @@ export async function checkUrl(payload: string, userId?: string): Promise<CheckR
         latencyMs: Date.now() - start,
       },
     });
-  } catch {
+  } catch (_e) {
     // Log write failure must never surface to the caller
   }
 
