@@ -12,7 +12,7 @@ function getClient(): GoogleGenAI {
   return _client;
 }
 
-export const DEFAULT_MODEL = 'gemini-2.0-flash';
+export const DEFAULT_MODEL = 'gemini-2.5-flash';
 // text-embedding-004 discontinued Nov 2025; gemini-embedding-001 is the replacement.
 // outputDimensionality: 768 keeps the vector(768) DB column intact.
 export const EMBEDDING_MODEL = 'gemini-embedding-001';
