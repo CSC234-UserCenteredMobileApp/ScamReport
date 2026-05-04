@@ -6,31 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mobile/features/call_screening/data/call_screening_api_client.dart';
 import 'package:mobile/features/call_screening/data/call_screening_repository_impl.dart';
 
-CallScreeningRepositoryImpl _makeRepo({
-  List<String> phones = const [],
-  Map<String, Object> prefValues = const {},
-}) {
-  final client = MockClient((_) async => http.Response(
-        jsonEncode({
-          'phones': phones,
-          'updatedAt': '2026-05-01T00:00:00.000Z',
-        }),
-        200,
-      ));
-  SharedPreferences.setMockInitialValues(Map<String, Object>.from(prefValues));
-  final prefs = SharedPreferences.getInstance();
-  late SharedPreferences prefsInstance;
-  prefs.then((p) => prefsInstance = p);
-
-  // Synchronous access after future completes in test pump
-  return CallScreeningRepositoryImpl(
-    apiClient: CallScreeningApiClient(
-      client: client,
-      baseUrl: 'http://localhost:3000',
-    ),
-    prefs: prefsInstance,
-  );
-}
 
 void main() {
   group('CallScreeningRepositoryImpl', () {
