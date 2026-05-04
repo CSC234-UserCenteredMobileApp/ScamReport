@@ -340,6 +340,68 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verdictSuspicious => 'Suspicious';
 
   @override
+  String get checkInputTitle => 'Check something';
+
+  @override
+  String get checkInputHint => 'Paste or type a phone number, link, or message';
+
+  @override
+  String get checkInputPrivacyNote =>
+      'We never store what you check unless you choose to report it.';
+
+  @override
+  String get checkInputRunCheck => 'Run check';
+
+  @override
+  String get checkInputSampleNumber => 'Try a number';
+
+  @override
+  String get checkInputSampleLink => 'Try a link';
+
+  @override
+  String get verdictChecking => 'Checking…';
+
+  @override
+  String get verdictCheckingSubtitle => 'Cross-checking verified reports…';
+
+  @override
+  String get verdictSafe => 'Safe';
+
+  @override
+  String get verdictUnknown => 'Unknown';
+
+  @override
+  String get verdictSubtitleScam =>
+      'Multiple verified reports match this item.';
+
+  @override
+  String get verdictSubtitleSuspicious =>
+      'Partial match — proceed with caution.';
+
+  @override
+  String get verdictSubtitleSafe => 'No verified scam reports for this item.';
+
+  @override
+  String get verdictSubtitleUnknown => 'We could not classify this item.';
+
+  @override
+  String get verdictYouChecked => 'YOU CHECKED';
+
+  @override
+  String verdictMatchedReports(int count) {
+    return '$count verified reports matched';
+  }
+
+  @override
+  String get verdictSeeReports => 'See matched reports';
+
+  @override
+  String get verdictReportThis => 'Report this';
+
+  @override
+  String get verdictCachedResult => 'Cached result';
+
+  @override
   String get reportDetailVerified => 'Verified';
 
   @override

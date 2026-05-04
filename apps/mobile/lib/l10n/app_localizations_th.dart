@@ -340,6 +340,68 @@ class AppLocalizationsTh extends AppLocalizations {
   String get verdictSuspicious => 'น่าสงสัย';
 
   @override
+  String get checkInputTitle => 'ตรวจสอบบางอย่าง';
+
+  @override
+  String get checkInputHint => 'วางหรือพิมพ์หมายเลขโทรศัพท์ ลิงก์ หรือข้อความ';
+
+  @override
+  String get checkInputPrivacyNote =>
+      'เราไม่เก็บข้อมูลที่คุณตรวจสอบ เว้นแต่คุณเลือกรายงาน';
+
+  @override
+  String get checkInputRunCheck => 'เริ่มตรวจสอบ';
+
+  @override
+  String get checkInputSampleNumber => 'ลองด้วยหมายเลข';
+
+  @override
+  String get checkInputSampleLink => 'ลองด้วยลิงก์';
+
+  @override
+  String get verdictChecking => 'กำลังตรวจสอบ…';
+
+  @override
+  String get verdictCheckingSubtitle => 'กำลังตรวจสอบรายงานที่ยืนยันแล้ว…';
+
+  @override
+  String get verdictSafe => 'ปลอดภัย';
+
+  @override
+  String get verdictUnknown => 'ไม่ทราบ';
+
+  @override
+  String get verdictSubtitleScam =>
+      'มีรายงานที่ยืนยันแล้วหลายรายการตรงกับรายการนี้';
+
+  @override
+  String get verdictSubtitleSuspicious => 'ตรงกันบางส่วน — โปรดระมัดระวัง';
+
+  @override
+  String get verdictSubtitleSafe =>
+      'ไม่มีรายงานการหลอกลวงที่ยืนยันแล้วสำหรับรายการนี้';
+
+  @override
+  String get verdictSubtitleUnknown => 'เราไม่สามารถจัดประเภทรายการนี้ได้';
+
+  @override
+  String get verdictYouChecked => 'คุณตรวจสอบ';
+
+  @override
+  String verdictMatchedReports(int count) {
+    return 'พบรายงานที่ยืนยันแล้ว $count รายการ';
+  }
+
+  @override
+  String get verdictSeeReports => 'ดูรายงานที่ตรงกัน';
+
+  @override
+  String get verdictReportThis => 'รายงานสิ่งนี้';
+
+  @override
+  String get verdictCachedResult => 'ผลลัพธ์ที่แคชไว้';
+
+  @override
   String get reportDetailVerified => 'ตรวจสอบแล้ว';
 
   @override

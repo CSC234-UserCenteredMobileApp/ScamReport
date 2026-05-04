@@ -92,8 +92,14 @@ class _ClipboardBannerState extends ConsumerState<_ClipboardBanner> {
             ),
             const SizedBox(width: 8),
             FilledButton(
-              onPressed: () =>
-                  context.push('/check-input', extra: {'prefill': value}),
+              onPressed: () => context.push(
+                '/verdict',
+                extra: CheckQuery(
+                  payload: value,
+                  type: detectType(value),
+                  source: 'clipboard',
+                ),
+              ),
               style: FilledButton.styleFrom(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
