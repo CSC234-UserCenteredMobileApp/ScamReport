@@ -2,6 +2,28 @@ import { getPrisma } from '../../core/db/client';
 import { searchSimilarReports } from '../../core/rag/retrieval';
 import type { CheckResponse, ReportSummary } from '@my-product/shared';
 
+function normalizePhone(raw: string): string {
+  const stripped = raw.replace(/[\s\-\(\)]/g, '');
+  if (/^0\d{8,9}$/.test(stripped)) return '+66' + stripped.slice(1);
+  return stripped;
+}
+
+function normalizeUrl(raw: string): string {
+  try {
+    const url = new URL(raw.startsWith('http') ? raw : 'https://' + raw);
+    return url.hostname.toLowerCase();
+  } catch (_e) {
+    return raw.toLowerCase().trim();
+  }
+}
+
+async function hashInput(text: string): Promise<string> {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
 export async function getScamPhones(): Promise<string[]> {
   const prisma = getPrisma();
   const rows = await prisma.report.findMany({
@@ -12,34 +34,7 @@ export async function getScamPhones(): Promise<string[]> {
     },
     select: { targetIdentifierNormalized: true },
   });
-
-  const phones = [
-    ...new Set(rows.map((r) => r.targetIdentifierNormalized as string)),
-  ];
-  return phones;
-}
-
-function normalizePhone(raw: string): string {
-  const stripped = raw.replace(/[\s\-\(\)]/g, '');
-  // Thai local format 0XX → E.164 +66XX
-  if (/^0\d{8,9}$/.test(stripped)) return '+66' + stripped.slice(1);
-  return stripped;
-}
-
-function normalizeUrl(raw: string): string {
-  try {
-    const url = new URL(raw.startsWith('http') ? raw : 'https://' + raw);
-    return url.hostname.toLowerCase();
-  } catch {
-    return raw.toLowerCase().trim();
-  }
-}
-
-async function hashInput(text: string): Promise<string> {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-  return Array.from(new Uint8Array(buf))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+  return [...new Set(rows.map((r) => r.targetIdentifierNormalized as string))];
 }
 
 export async function runCheck(
@@ -74,17 +69,19 @@ export async function runCheck(
       },
     });
 
-    matches = rows.map((r) => ({
-      id: r.id,
-      title: r.title,
-      scamType: r.scamType.code,
-      verifiedAt: r.verifiedAt!.toISOString(),
-    }));
+    matches = rows
+      .filter((r): r is typeof r & { verifiedAt: Date } => r.verifiedAt !== null)
+      .map((r) => ({
+        id: r.id,
+        title: r.title,
+        scamType: r.scamType.code,
+        verifiedAt: r.verifiedAt.toISOString(),
+      }));
 
     if (matches.length >= 1) verdict = 'scam';
   }
 
-  // Phase 2 — semantic fallback for text, or when no identifier match found
+  // Phase 2 — semantic similarity for text, or when no identifier match found
   const needsSemantic = type === 'text' || matches.length === 0;
   if (needsSemantic) {
     try {
@@ -93,7 +90,7 @@ export async function runCheck(
       if (top !== undefined && top.similarity >= 0.7) {
         verdict = 'suspicious';
         const topIds = results.slice(0, 3).map((r) => r.reportId);
-        const rows = await prisma.report.findMany({
+        const semanticRows = await prisma.report.findMany({
           where: { id: { in: topIds }, status: 'verified' },
           select: {
             id: true,
@@ -102,18 +99,20 @@ export async function runCheck(
             verifiedAt: true,
           },
         });
-        matches = rows.map((r) => ({
-          id: r.id,
-          title: r.title,
-          scamType: r.scamType.code,
-          verifiedAt: r.verifiedAt!.toISOString(),
-        }));
+        matches = semanticRows
+          .filter((r): r is typeof r & { verifiedAt: Date } => r.verifiedAt !== null)
+          .map((r) => ({
+            id: r.id,
+            title: r.title,
+            scamType: r.scamType.code,
+            verifiedAt: r.verifiedAt.toISOString(),
+          }));
       } else {
-        verdict = 'safe';
+        verdict = type === 'text' ? 'unknown' : 'safe';
       }
-    } catch {
+    } catch (_e) {
       // Gemini unavailable or no embeddings — fall back gracefully
-      verdict = type === 'text' ? 'unknown' : verdict;
+      if (type === 'text') verdict = 'unknown';
     }
   }
 
@@ -131,7 +130,7 @@ export async function runCheck(
         latencyMs: Date.now() - start,
       },
     });
-  } catch {
+  } catch (_e) {
     // Log write failure must never surface to the caller
   }
 

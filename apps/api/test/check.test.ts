@@ -1,6 +1,10 @@
 import { describe, expect, mock, test } from 'bun:test';
 import { app } from '../src/index';
 
+mock.module('../src/core/firebase/admin', () => ({
+  getFirebaseAdmin: () => ({ name: '[mock]' }),
+}));
+
 mock.module('../src/core/db/client', () => ({
   getPrisma: () => ({
     report: {
@@ -10,6 +14,8 @@ mock.module('../src/core/db/client', () => ({
         { targetIdentifierNormalized: '+66898765432' },
       ],
     },
+    checkLog: { create: async () => ({}) },
+    $queryRaw: async () => [],
   }),
 }));
 
