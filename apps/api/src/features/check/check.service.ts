@@ -1,4 +1,5 @@
 import { getPrisma } from '../../core/db/client';
+import { generateText } from '../../core/gemini/client';
 import { searchSimilarReports } from '../../core/rag/retrieval';
 import type { CheckResponse, ReportSummary } from '@my-product/shared';
 
@@ -22,6 +23,37 @@ async function hashInput(text: string): Promise<string> {
   return Array.from(new Uint8Array(buf))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
+}
+
+async function analyzeWithAI(
+  payload: string,
+  type: 'text' | 'url',
+): Promise<'scam' | 'suspicious' | 'safe' | 'unknown'> {
+  const subject = type === 'url' ? 'URL' : 'SMS message';
+  const context = type === 'url' ? `URL to analyze: ${payload}` : `SMS message body: ${payload}`;
+  const prompt = `You are a scam detection assistant. Analyze the following ${subject} and classify it.
+
+${context}
+
+Respond with ONLY a JSON object in this exact format (no explanation, no markdown):
+{"verdict":"scam"|"suspicious"|"safe","reason":"one sentence"}
+
+Criteria:
+- "scam": clear attempt to defraud (phishing link, urgent money transfer, fake authority)
+- "suspicious": potentially harmful but not certain (unusual request, unfamiliar sender pattern)
+- "safe": normal, benign content`;
+
+  try {
+    const raw = await generateText(prompt);
+    const cleaned = raw.replace(/```json?\n?|```/g, '').trim();
+    const parsed = JSON.parse(cleaned) as { verdict: string };
+    if (['scam', 'suspicious', 'safe'].includes(parsed.verdict)) {
+      return parsed.verdict as 'scam' | 'suspicious' | 'safe';
+    }
+    return 'unknown';
+  } catch (_e) {
+    return 'unknown';
+  }
 }
 
 export async function getScamPhones(): Promise<string[]> {
@@ -114,6 +146,14 @@ export async function runCheck(
       // Gemini unavailable or no embeddings — fall back gracefully
       if (type === 'text') verdict = 'unknown';
     }
+  }
+
+  // Phase 3 — Gemini AI content analysis (always for text/url)
+  if (type === 'text' || type === 'url') {
+    const aiVerdict = await analyzeWithAI(payload, type);
+    if (aiVerdict === 'scam' && verdict !== 'scam') verdict = 'scam';
+    else if (aiVerdict === 'suspicious' && verdict === 'safe') verdict = 'suspicious';
+    else if (aiVerdict !== 'unknown' && verdict === 'safe') verdict = aiVerdict;
   }
 
   // Write check_log — non-fatal

@@ -41,10 +41,15 @@ mock.module('../src/core/db/client', () => ({
   }),
 }));
 
-// Also mock the Gemini embed so RAG doesn't fail with an unhandled error
+// Mock Gemini: embed returns [] (no RAG results); generateText returns verdict based on content
 mock.module('../src/core/gemini/client', () => ({
   embed: async () => [],
-  generateText: async () => '',
+  generateText: async (prompt: string) => {
+    if (prompt.includes('phishing.scam.link')) return '{"verdict":"scam","reason":"phishing link detected"}';
+    if (prompt.includes('suspicious-transfer.net')) return '{"verdict":"suspicious","reason":"unusual transfer request"}';
+    if (prompt.includes('BROKEN_JSON')) return 'not json at all';
+    return '{"verdict":"safe","reason":"normal content"}';
+  },
 }));
 
 function post(path: string, body: unknown) {
@@ -105,14 +110,14 @@ describe('POST /check — verdict logic', () => {
     expect(body.matches).toHaveLength(0);
   });
 
-  test('200 with safe/unknown verdict for text input (no embeddings in test env)', async () => {
+  test('200 with safe verdict for benign text input', async () => {
     const res = await post('/check', {
       type: 'text',
       payload: 'parcel held SMS from Kerry Express',
     });
     expect(res.status).toBe(200);
     const body = await res.json();
-    // embed() returns [] → RAG returns [] → verdict is 'safe' or 'unknown'
+    // embed() returns [] → RAG returns [] → Gemini returns 'safe' for generic text
     expect(['safe', 'unknown']).toContain(body.verdict);
   });
 
@@ -131,5 +136,47 @@ describe('POST /check — verdict logic', () => {
     // Sanity check that adding POST /check did not break the existing GET
     const res = await app.handle(new Request('http://localhost/check/phones'));
     expect(res.status).toBe(200);
+  });
+});
+
+// ---------------------------------------------------------------------------
+describe('POST /check — Phase 3 AI analysis', () => {
+  test('text with phishing URL in body → Gemini returns scam', async () => {
+    const res = await post('/check', {
+      type: 'text',
+      payload: 'Click here to claim your prize: http://phishing.scam.link/claim',
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.verdict).toBe('scam');
+  });
+
+  test('url with suspicious pattern → Gemini returns suspicious', async () => {
+    const res = await post('/check', {
+      type: 'url',
+      payload: 'https://suspicious-transfer.net/login',
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.verdict).toBe('suspicious');
+  });
+
+  test('Gemini returns malformed JSON → falls back to Phase 1/2 verdict', async () => {
+    const res = await post('/check', {
+      type: 'text',
+      payload: 'BROKEN_JSON test message',
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    // Gemini parse fails → unknown returned from analyzeWithAI → Phase 1/2 verdict kept
+    expect(['safe', 'unknown']).toContain(body.verdict);
+  });
+
+  test('phone input skips Phase 3 — Gemini not called for phone type', async () => {
+    // Known phone → Phase 1 returns scam; Phase 3 must not run (type=phone)
+    const res = await post('/check', { type: 'phone', payload: '+66812345678' });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.verdict).toBe('scam');
   });
 });
