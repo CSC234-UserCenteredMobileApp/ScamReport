@@ -159,5 +159,74 @@ void main() {
       expect(find.text('See matched reports'), findsOneWidget);
       expect(find.text('2 verified reports matched'), findsOneWidget);
     });
+
+    testWidgets('error state shows error text + retry button', (tester) async {
+      final router = GoRouter(
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (_, __) => const VerdictScreen(query: _query),
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            checkResultProvider(_query).overrideWith(
+              (_) async => throw Exception('network error'),
+            ),
+          ],
+          child: MaterialApp.router(
+            routerConfig: router,
+            theme: lightTheme(),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Retry'), findsOneWidget);
+    });
+
+    testWidgets('suspicious verdict renders subtitle', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          _query,
+          result: const CheckResult(
+            verdict: 'suspicious',
+            matchedCount: 0,
+            matches: [],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Suspicious'), findsOneWidget);
+      expect(
+        find.text('Partial match — proceed with caution.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('unknown verdict renders subtitle', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          _query,
+          result: const CheckResult(
+            verdict: 'unknown',
+            matchedCount: 0,
+            matches: [],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Unknown'), findsOneWidget);
+      expect(
+        find.text('We could not classify this item.'),
+        findsOneWidget,
+      );
+    });
   });
 }
