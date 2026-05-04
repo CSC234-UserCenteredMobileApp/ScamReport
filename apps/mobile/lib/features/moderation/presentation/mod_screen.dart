@@ -176,14 +176,15 @@ class _ModQueueRow extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: () => context.push('/ask-ai/review/${item.id}'),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (item.isFlagged)
-                Container(
-                  width: 4,
-                  color: theme.colorScheme.tertiary,
-                ),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (item.isFlagged)
+                  Container(
+                    width: 4,
+                    color: theme.colorScheme.tertiary,
+                  ),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(12),
@@ -252,7 +253,8 @@ class _ModQueueRow extends StatelessWidget {
                   ),
                 ),
               ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

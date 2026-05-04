@@ -84,6 +84,17 @@ jobs:
       - name: Run tests with coverage
         run: flutter test --coverage
 
+      - name: Strip generated files from coverage report
+        run: |
+          python3 - <<'EOF'
+          import re, sys
+          content = open('coverage/lcov.info').read()
+          records = re.split(r'(?<=end_of_record)\n', content)
+          keep = [r for r in records if not re.search(
+              r'SF:.*(?:\.g\.dart|app_localizations|/api_types/)', r)]
+          open('coverage/lcov.info', 'w').write('\n'.join(keep))
+          EOF
+
       - name: Enforce mobile line coverage threshold (PRD §6.7 = 80%)
         env:
           THRESHOLD: '80'
