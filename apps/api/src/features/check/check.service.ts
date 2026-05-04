@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 import { getPrisma } from '../../core/db/client';
-import { searchSimilarReports } from '../../core/rag/retrieval';
+import { searchSimilarReports, type SimilarReport } from '../../core/rag/retrieval';
 import type { CheckResponse, Verdict } from '@my-product/shared';
 
 const SCAM_SIMILARITY = 0.85;
@@ -27,20 +27,20 @@ export async function getScamPhones(): Promise<string[]> {
 export async function checkText(payload: string, userId?: string): Promise<CheckResponse> {
   const prisma = getPrisma();
 
-  let similar: Awaited<ReturnType<typeof searchSimilarReports>> = [];
+  let similar: SimilarReport[] = [];
   try {
     similar = await searchSimilarReports(payload, 5);
-  } catch {
-    // Gemini unavailable — fall back to unknown
+  } catch (_e) {
+    // Gemini unavailable - fall back to unknown
   }
 
   const topSimilarity = similar[0]?.similarity ?? 0;
-  const verdict: Verdict =
-    topSimilarity >= SCAM_SIMILARITY
-      ? 'scam'
-      : topSimilarity >= SUSPICIOUS_SIMILARITY
-        ? 'suspicious'
-        : 'unknown';
+  let verdict: Verdict = 'unknown';
+  if (topSimilarity >= SCAM_SIMILARITY) {
+    verdict = 'scam';
+  } else if (topSimilarity >= SUSPICIOUS_SIMILARITY) {
+    verdict = 'suspicious';
+  }
 
   const matchedIds = similar
     .filter((r) => r.similarity >= SUSPICIOUS_SIMILARITY)
@@ -60,12 +60,12 @@ export async function checkText(payload: string, userId?: string): Promise<Check
       : [];
 
   const matches = reports
-    .filter((r) => r.verifiedAt !== null)
+    .filter((r): r is typeof r & { verifiedAt: Date } => r.verifiedAt !== null)
     .map((r) => ({
       id: r.id,
       title: r.title,
       scamType: r.scamType.code,
-      verifiedAt: r.verifiedAt!.toISOString(),
+      verifiedAt: r.verifiedAt.toISOString(),
     }));
 
   try {
@@ -79,7 +79,7 @@ export async function checkText(payload: string, userId?: string): Promise<Check
         matchCount: matches.length,
       },
     });
-  } catch {
+  } catch (_e) {
     // Log is best-effort
   }
 
@@ -107,7 +107,7 @@ export async function checkPhone(payload: string, userId?: string): Promise<Chec
   const verdict: Verdict = reports.length > 0 ? 'scam' : 'unknown';
 
   const matches = reports
-    .filter((r) => r.verifiedAt !== null)
+    .filter((r): r is typeof r & { verifiedAt: Date } => r.verifiedAt !== null)
     .map((r) => ({
 function normalizePhone(raw: string): string {
   const stripped = raw.replace(/[\s\-\(\)]/g, '');
@@ -168,7 +168,7 @@ export async function runCheck(
       id: r.id,
       title: r.title,
       scamType: r.scamType.code,
-      verifiedAt: r.verifiedAt!.toISOString(),
+      verifiedAt: r.verifiedAt.toISOString(),
     }));
 
   try {
@@ -182,7 +182,7 @@ export async function runCheck(
         matchCount: matches.length,
       },
     });
-  } catch {
+  } catch (_e) {
     // Log is best-effort
   }
 
@@ -195,8 +195,8 @@ export async function checkUrl(payload: string, userId?: string): Promise<CheckR
   let normalized = payload.toLowerCase();
   try {
     normalized = new URL(payload).hostname.toLowerCase();
-  } catch {
-    // Not a valid URL — use lowercased payload
+  } catch (_e) {
+    // Not a valid URL - use lowercased payload
   }
 
   const reports = await prisma.report.findMany({
@@ -217,12 +217,12 @@ export async function checkUrl(payload: string, userId?: string): Promise<CheckR
   const verdict: Verdict = reports.length > 0 ? 'scam' : 'unknown';
 
   const matches = reports
-    .filter((r) => r.verifiedAt !== null)
+    .filter((r): r is typeof r & { verifiedAt: Date } => r.verifiedAt !== null)
     .map((r) => ({
       id: r.id,
       title: r.title,
       scamType: r.scamType.code,
-      verifiedAt: r.verifiedAt!.toISOString(),
+      verifiedAt: r.verifiedAt.toISOString(),
     }));
 
   try {
@@ -236,7 +236,7 @@ export async function checkUrl(payload: string, userId?: string): Promise<CheckR
         matchCount: matches.length,
       },
     });
-  } catch {
+  } catch (_e) {
     // Log is best-effort
     if (matches.length >= 1) verdict = 'scam';
   }
