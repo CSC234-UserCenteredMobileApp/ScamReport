@@ -56,7 +56,7 @@ void main() {
             theme: lightTheme(),
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: VerdictScreen(query: _query),
+            home: const VerdictScreen(query: _query),
           ),
         ),
       );
