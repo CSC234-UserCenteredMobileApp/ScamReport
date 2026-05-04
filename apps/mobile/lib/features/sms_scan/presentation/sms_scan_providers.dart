@@ -22,7 +22,7 @@ final smsScannerProvider = StreamProvider<SmsAlert>((ref) {
 
   final repo = ref.watch(smsScanRepositoryProvider);
 
-  return ref.watch(smsEventChannelProvider.stream).asyncExpand((event) async* {
+  return ref.watch(smsEventChannelProvider).asyncExpand((event) async* {
     final alert = await repo.processEvent(event);
     if (alert != null) yield alert;
   });

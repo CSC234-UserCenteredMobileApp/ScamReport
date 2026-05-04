@@ -10,7 +10,7 @@ class SmsEvent {
 
 const _channel = EventChannel('com.scamreport/sms_events');
 
-final smsEventChannelProvider = StreamProvider<SmsEvent>((ref) {
+final smsEventChannelProvider = Provider<Stream<SmsEvent>>((ref) {
   return _channel.receiveBroadcastStream().map((event) {
     final map = Map<String, dynamic>.from(event as Map);
     return SmsEvent(

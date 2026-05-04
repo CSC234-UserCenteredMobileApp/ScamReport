@@ -38,7 +38,7 @@ void main() {
             200,
           ));
 
-      final event = SmsEvent(sender: '+66812345678', body: 'Click this link now!');
+      const event = SmsEvent(sender: '+66812345678', body: 'Click this link now!');
       final result = await repo.processEvent(event);
 
       expect(result, isNotNull);
@@ -61,7 +61,7 @@ void main() {
             200,
           ));
 
-      final event = SmsEvent(sender: '+66898765432', body: 'Please verify your account');
+      const event = SmsEvent(sender: '+66898765432', body: 'Please verify your account');
       final result = await repo.processEvent(event);
 
       expect(result, isNotNull);
@@ -81,7 +81,7 @@ void main() {
             200,
           ));
 
-      final event = SmsEvent(sender: '+66812345678', body: 'Your OTP is 123456');
+      const event = SmsEvent(sender: '+66812345678', body: 'Your OTP is 123456');
       final result = await repo.processEvent(event);
 
       expect(result, isNull);
@@ -96,7 +96,7 @@ void main() {
             body: any(named: 'body'),
           )).thenAnswer((_) async => http.Response('error', 500));
 
-      final event = SmsEvent(sender: '+66812345678', body: 'Test');
+      const event = SmsEvent(sender: '+66812345678', body: 'Test');
       final result = await repo.processEvent(event);
 
       expect(result, isNull);
