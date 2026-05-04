@@ -6,6 +6,7 @@ import { statsRoute } from './features/stats/stats.route';
 import { announcementsRoute } from './features/announcements/announcements.route';
 import { reportsRoute } from './features/reports/reports.route';
 import { adminReportsRoute } from './features/admin-reports/admin-reports.route';
+import { checkRoute } from './features/check/check.route';
 
 export const app = new Elysia()
   .use(cors())
@@ -14,7 +15,8 @@ export const app = new Elysia()
   .use(statsRoute)
   .use(announcementsRoute)
   .use(reportsRoute)
-  .use(adminReportsRoute);
+  .use(adminReportsRoute)
+  .use(checkRoute);
 
 if (import.meta.main) {
   const port = Number(process.env.PORT ?? 3000);
