@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,6 +12,7 @@ class SmsEvent {
 const _channel = EventChannel('com.scamreport/sms_events');
 
 final smsEventChannelProvider = Provider<Stream<SmsEvent>>((ref) {
+  if (kIsWeb) return const Stream.empty();
   return _channel.receiveBroadcastStream().map((event) {
     final map = Map<String, dynamic>.from(event as Map);
     return SmsEvent(

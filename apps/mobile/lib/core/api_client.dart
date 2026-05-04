@@ -4,9 +4,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
-// Override at launch time. Defaults work for iOS simulator and desktop.
-//   Android emulator:        10.0.2.2 (automatically detected)
-//   Physical Android device: flutter run --dart-define=API_BASE_URL=http://<LAN-ip>:3000
+// Set API_BASE_URL via --dart-define-from-file=config.json (or --dart-define).
+// config.json (gitignored): { "API_BASE_URL": "https://your-api.example.com" }
+// See config.example.json for the template.
+//
+// Fallback defaults (no config file):
+//   Android emulator  → 10.0.2.2:3000
+//   iOS simulator / desktop → localhost:3000
 String get apiBaseUrl {
   const envUrl = String.fromEnvironment('API_BASE_URL');
   if (envUrl.isNotEmpty) return envUrl;
