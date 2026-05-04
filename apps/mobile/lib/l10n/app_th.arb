@@ -112,5 +112,18 @@
   "adminLabelAuditTrail": "บันทึกการตรวจสอบ",
   "adminAuditSubmitted": "ส่งแล้ว",
   "adminAiScore": "ความเชื่อมั่น AI: {score}% ({level})",
-  "@adminAiScore": { "placeholders": { "score": { "type": "int" }, "level": { "type": "String" } } }
+  "@adminAiScore": { "placeholders": { "score": { "type": "int" }, "level": { "type": "String" } } },
+
+  "reportDetailVerified": "ตรวจสอบแล้ว",
+  "reportDetailVerifiedOn": "ตรวจสอบเมื่อ {date}",
+  "@reportDetailVerifiedOn": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "reportDetailIdentifierLabel": "ตัวระบุที่รายงาน",
+  "reportDetailWhatHappened": "สิ่งที่เกิดขึ้น",
+  "reportDetailEvidence": "หลักฐาน",
+  "reportDetailCta": "รายงานการหลอกลวงที่คล้ายกัน",
+  "reportDetailPrivacyFooter": "ตัวตนของผู้รายงานจะไม่ถูกเปิดเผยต่อสาธารณะ มีเพียงเนื้อหาการหลอกลวงข้างต้นที่จะถูกแชร์"
 }
