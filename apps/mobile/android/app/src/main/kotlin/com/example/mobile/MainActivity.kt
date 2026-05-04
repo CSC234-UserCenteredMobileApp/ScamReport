@@ -10,9 +10,13 @@ import io.flutter.plugin.common.EventChannel
 class MainActivity : FlutterActivity() {
 
     private var smsReceiver: SmsReceiver? = null
+    private lateinit var callScreeningChannel: CallScreeningChannel
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+
+        callScreeningChannel = CallScreeningChannel(this)
+        callScreeningChannel.register(flutterEngine)
 
         EventChannel(flutterEngine.dartExecutor.binaryMessenger, "com.scamreport/sms_events")
             .setStreamHandler(object : EventChannel.StreamHandler {

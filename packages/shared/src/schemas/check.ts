@@ -83,3 +83,15 @@ export const CheckResponse = Type.Object(
   { additionalProperties: false },
 );
 export type CheckResponse = Static<typeof CheckResponse>;
+
+// GET /check/phones — device sync for call-screening cache (FR-9.x).
+// Returns all normalized phone numbers from verified scam reports so the
+// Android CallScreeningService can make offline decisions within the 5s window.
+export const PhoneSyncResponse = Type.Object(
+  {
+    phones: Type.Array(Type.String()),
+    updatedAt: Type.String({ format: 'date-time' }),
+  },
+  { additionalProperties: false },
+);
+export type PhoneSyncResponse = Static<typeof PhoneSyncResponse>;

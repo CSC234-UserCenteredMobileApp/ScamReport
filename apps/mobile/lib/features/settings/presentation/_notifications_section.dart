@@ -34,10 +34,44 @@ class _NotificationsSection extends ConsumerWidget {
               onChanged: (v) => ref
                   .read(settingsProvider.notifier)
                   .save(settings.copyWith(smsPhishingAlerts: v)),
-              isLast: true,
             ),
+            const Divider(height: 1, indent: 16, endIndent: 16),
+            const _CallScreeningTile(),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _CallScreeningTile extends StatelessWidget {
+  const _CallScreeningTile();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    const radius = BorderRadius.vertical(bottom: Radius.circular(16));
+    return ClipRRect(
+      borderRadius: radius,
+      child: ListTile(
+        leading: Icon(Icons.phone_in_talk_outlined, color: cs.onSurfaceVariant, size: 22),
+        title: Text(
+          'Call Screening',
+          style: Theme.of(context)
+              .textTheme
+              .bodyMedium
+              ?.copyWith(fontWeight: FontWeight.w600),
+        ),
+        subtitle: Text(
+          'Block known scam callers automatically',
+          style: Theme.of(context)
+              .textTheme
+              .bodySmall
+              ?.copyWith(color: cs.onSurfaceVariant),
+        ),
+        trailing: Icon(Icons.chevron_right, color: cs.onSurfaceVariant),
+        onTap: () => context.push('/me/call-screening'),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       ),
     );
   }
@@ -50,7 +84,6 @@ class _NotifTile extends StatelessWidget {
     required this.value,
     required this.onChanged,
     this.isFirst = false,
-    this.isLast = false,
   });
 
   final String title;
@@ -58,14 +91,12 @@ class _NotifTile extends StatelessWidget {
   final bool value;
   final ValueChanged<bool> onChanged;
   final bool isFirst;
-  final bool isLast;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final radius = BorderRadius.vertical(
       top: isFirst ? const Radius.circular(16) : Radius.zero,
-      bottom: isLast ? const Radius.circular(16) : Radius.zero,
     );
 
     return ClipRRect(

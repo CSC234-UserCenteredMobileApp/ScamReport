@@ -105,8 +105,15 @@ jobs:
             echo "::error::Expected $LCOV but it was not produced by 'flutter test --coverage'."
             exit 1
           fi
-          LINES=$(grep -E '^LF:' "$LCOV" | awk -F: '{s+=$2} END {print s+0}')
-          HITS=$(grep -E '^LH:' "$LCOV" | awk -F: '{s+=$2} END {print s+0}')
+          FILTERED="coverage/lcov_filtered.info"
+          awk '
+            /^SF:.*\.g\.dart$/ { skip=1 }
+            /^SF:.*l10n\/app_localizations/ { skip=1 }
+            !skip { print }
+            /^end_of_record$/ { skip=0 }
+          ' "$LCOV" > "$FILTERED"
+          LINES=$(grep -E '^LF:' "$FILTERED" | awk -F: '{s+=$2} END {print s+0}')
+          HITS=$(grep -E '^LH:' "$FILTERED" | awk -F: '{s+=$2} END {print s+0}')
           if [ "$LINES" -eq 0 ]; then
             echo "::warning::No lines reported by lcov; treating as pass to avoid blocking on tooling drift."
             exit 0
