@@ -17,6 +17,7 @@ import '../../features/legal/presentation/terms_screen.dart';
 import '../../features/moderation/presentation/admin_review_screen.dart';
 import '../../features/moderation/presentation/mod_screen.dart';
 import '../../features/call_screening/presentation/call_screening_screen.dart';
+import '../../features/reports/presentation/report_detail_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../di/auth.dart';
 import '../widgets/app_shell.dart';
@@ -73,6 +74,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             GoRoute(
               path: '/feed',
               builder: (_, __) => const FeedScreen(),
+              routes: [
+                GoRoute(
+                  path: ':id',
+                  builder: (_, s) =>
+                      ReportDetailScreen(id: s.pathParameters['id']!),
+                ),
+              ],
             ),
           ]),
           // 2 — Ask AI / Moderate (admin)
@@ -173,11 +181,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/report-detail/:id',
-        builder: (_, s) => Scaffold(
-          body: Center(
-            child: Text('Report ${s.pathParameters['id']}'),
-          ),
-        ),
+        builder: (_, s) =>
+            ReportDetailScreen(id: s.pathParameters['id']!),
       ),
       GoRoute(
         path: '/my-reports',
