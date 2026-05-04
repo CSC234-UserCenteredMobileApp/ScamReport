@@ -60,11 +60,17 @@ void main() {
     });
 
     testWidgets('visible on Android platform', (tester) async {
+      tester.view.physicalSize = const Size(1080, 1920);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       debugDefaultTargetPlatformOverride = TargetPlatform.android;
       try {
         await tester.pumpWidget(await _buildSettings());
         await tester.pumpAndSettle();
 
+        await tester.ensureVisible(find.text('SMS smishing detection'));
         expect(find.text('SMS smishing detection'), findsOneWidget);
       } finally {
         debugDefaultTargetPlatformOverride = null;
@@ -72,11 +78,17 @@ void main() {
     });
 
     testWidgets('consent dialog shown on first enable', (tester) async {
+      tester.view.physicalSize = const Size(1080, 1920);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       debugDefaultTargetPlatformOverride = TargetPlatform.android;
       try {
         await tester.pumpWidget(await _buildSettings(consentGiven: false));
         await tester.pumpAndSettle();
 
+        await tester.ensureVisible(find.text('SMS smishing detection'));
         await tester.tap(find.text('SMS smishing detection'));
         await tester.pumpAndSettle();
 
@@ -87,11 +99,17 @@ void main() {
     });
 
     testWidgets('consent dialog skipped when already consented', (tester) async {
+      tester.view.physicalSize = const Size(1080, 1920);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       debugDefaultTargetPlatformOverride = TargetPlatform.android;
       try {
         await tester.pumpWidget(await _buildSettings(consentGiven: true));
         await tester.pumpAndSettle();
 
+        await tester.ensureVisible(find.text('SMS smishing detection'));
         await tester.tap(find.text('SMS smishing detection'));
         await tester.pumpAndSettle();
 
