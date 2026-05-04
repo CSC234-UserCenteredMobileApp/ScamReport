@@ -11,7 +11,7 @@ class _PreferencesSection extends ConsumerWidget {
       loading: () => const _SettingsSkeleton(height: 116),
       error: (_, __) => const SizedBox.shrink(),
       data: (settings) {
-        final showSms = !kIsWeb && Platform.isAndroid;
+        final showSms = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
         return Card(
           margin: EdgeInsets.zero,
           shape: const RoundedRectangleBorder(
