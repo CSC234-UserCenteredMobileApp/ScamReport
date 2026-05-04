@@ -11,6 +11,9 @@ import '../../features/sms_scan/presentation/sms_overlay_banner.dart';
 import '../../features/auth/presentation/auth_providers.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
+import '../../features/check/domain/check_result.dart';
+import '../../features/check/presentation/check_input_screen.dart';
+import '../../features/check/presentation/verdict_screen.dart';
 import '../../features/feed/presentation/feed_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/legal/presentation/privacy_screen.dart';
@@ -172,9 +175,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/check-input',
-        builder: (_, __) => const Scaffold(
-          body: Center(child: Text('Check input — coming soon')),
+        builder: (_, s) => CheckInputScreen(
+          initialText: s.uri.queryParameters['text'],
         ),
+      ),
+      GoRoute(
+        path: '/verdict',
+        builder: (_, s) => VerdictScreen(query: s.extra as CheckQuery),
       ),
       GoRoute(
         path: '/announcement-detail/:id',
