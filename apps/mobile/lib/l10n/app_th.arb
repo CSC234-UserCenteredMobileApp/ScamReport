@@ -125,5 +125,18 @@
   "smsScanScamTitle": "พบ SMS หลอกลวง",
   "view": "ดู",
   "verdictScam": "หลอกลวง",
-  "verdictSuspicious": "น่าสงสัย"
+  "verdictSuspicious": "น่าสงสัย",
+
+  "reportDetailVerified": "ตรวจสอบแล้ว",
+  "reportDetailVerifiedOn": "ตรวจสอบเมื่อ {date}",
+  "@reportDetailVerifiedOn": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "reportDetailIdentifierLabel": "ตัวระบุที่รายงาน",
+  "reportDetailWhatHappened": "สิ่งที่เกิดขึ้น",
+  "reportDetailEvidence": "หลักฐาน",
+  "reportDetailCta": "รายงานการหลอกลวงที่คล้ายกัน",
+  "reportDetailPrivacyFooter": "ตัวตนของผู้รายงานจะไม่ถูกเปิดเผยต่อสาธารณะ มีเพียงเนื้อหาการหลอกลวงข้างต้นที่จะถูกแชร์"
 }

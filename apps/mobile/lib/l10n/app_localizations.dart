@@ -721,6 +721,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Suspicious'**
   String get verdictSuspicious;
+
+  /// No description provided for @reportDetailVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get reportDetailVerified;
+
+  /// No description provided for @reportDetailVerifiedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified {date}'**
+  String reportDetailVerifiedOn(String date);
+
+  /// No description provided for @reportDetailIdentifierLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'REPORTED IDENTIFIER'**
+  String get reportDetailIdentifierLabel;
+
+  /// No description provided for @reportDetailWhatHappened.
+  ///
+  /// In en, this message translates to:
+  /// **'WHAT HAPPENED'**
+  String get reportDetailWhatHappened;
+
+  /// No description provided for @reportDetailEvidence.
+  ///
+  /// In en, this message translates to:
+  /// **'EVIDENCE'**
+  String get reportDetailEvidence;
+
+  /// No description provided for @reportDetailCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a similar scam'**
+  String get reportDetailCta;
+
+  /// No description provided for @reportDetailPrivacyFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'The reporter\'s identity is never shown publicly. Only the scam content above is shared.'**
+  String get reportDetailPrivacyFooter;
 }
 
 class _AppLocalizationsDelegate

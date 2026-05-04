@@ -338,4 +338,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get verdictSuspicious => 'Suspicious';
+
+  @override
+  String get reportDetailVerified => 'Verified';
+
+  @override
+  String reportDetailVerifiedOn(String date) {
+    return 'Verified $date';
+  }
+
+  @override
+  String get reportDetailIdentifierLabel => 'REPORTED IDENTIFIER';
+
+  @override
+  String get reportDetailWhatHappened => 'WHAT HAPPENED';
+
+  @override
+  String get reportDetailEvidence => 'EVIDENCE';
+
+  @override
+  String get reportDetailCta => 'Report a similar scam';
+
+  @override
+  String get reportDetailPrivacyFooter =>
+      'The reporter\'s identity is never shown publicly. Only the scam content above is shared.';
 }

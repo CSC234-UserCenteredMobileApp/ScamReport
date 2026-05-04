@@ -23,7 +23,7 @@ class ReportCard extends StatelessWidget {
 
     return Card(
       child: InkWell(
-        onTap: () => context.push('/report-detail/${report.id}'),
+        onTap: () => context.push('/feed/${report.id}'),
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(12),

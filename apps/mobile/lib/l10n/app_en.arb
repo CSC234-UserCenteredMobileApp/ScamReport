@@ -135,5 +135,18 @@
   "smsScanScamTitle": "Scam SMS detected",
   "view": "View",
   "verdictScam": "Scam",
-  "verdictSuspicious": "Suspicious"
+  "verdictSuspicious": "Suspicious",
+
+  "reportDetailVerified": "Verified",
+  "reportDetailVerifiedOn": "Verified {date}",
+  "@reportDetailVerifiedOn": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "reportDetailIdentifierLabel": "REPORTED IDENTIFIER",
+  "reportDetailWhatHappened": "WHAT HAPPENED",
+  "reportDetailEvidence": "EVIDENCE",
+  "reportDetailCta": "Report a similar scam",
+  "reportDetailPrivacyFooter": "The reporter's identity is never shown publicly. Only the scam content above is shared."
 }
