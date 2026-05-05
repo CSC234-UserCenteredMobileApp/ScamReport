@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../l10n/l10n.dart';
 
 const _channel = MethodChannel('com.example.mobile/call_screening');
 
@@ -21,7 +22,7 @@ class PermissionCard extends StatelessWidget {
                 Icon(Icons.info_outline, color: colors.onSecondaryContainer),
                 const SizedBox(width: 8),
                 Text(
-                  'Setup required',
+                  context.l10n.callScreeningSetupTitle,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     color: colors.onSecondaryContainer,
                   ),
@@ -30,7 +31,7 @@ class PermissionCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'ScamReport must be set as call screening app in your Phone app settings.',
+              context.l10n.callScreeningSetupBody,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: colors.onSecondaryContainer,
               ),
@@ -44,7 +45,7 @@ class PermissionCard extends StatelessWidget {
                   // Non-Android environment
                 }
               },
-              child: const Text('set as call screening app'),
+              child: Text(context.l10n.callScreeningSetupAction),
             ),
           ],
         ),

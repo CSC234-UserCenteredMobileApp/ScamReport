@@ -424,4 +424,47 @@ class AppLocalizationsTh extends AppLocalizations {
   @override
   String get reportDetailPrivacyFooter =>
       'ตัวตนของผู้รายงานจะไม่ถูกเปิดเผยต่อสาธารณะ มีเพียงเนื้อหาการหลอกลวงข้างต้นที่จะถูกแชร์';
+
+  @override
+  String get callScreeningTitle => 'กรองสายเรียกเข้า';
+
+  @override
+  String get callScreeningSubtitle =>
+      'แจ้งเตือนเมื่อมีสายจากหมายเลขมิจฉาชีพที่รู้จัก';
+
+  @override
+  String get callScreeningSettingsSubtitle =>
+      'แจ้งเตือนสายมิจฉาชีพที่รู้จักโดยอัตโนมัติ';
+
+  @override
+  String get callScreeningUnsupported =>
+      'การกรองสายเรียกเข้าต้องใช้ Android 10 ขึ้นไป';
+
+  @override
+  String get callScreeningNoBlocked => 'ยังไม่มีสายที่ถูกกรอง';
+
+  @override
+  String callScreeningBlockedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'กรอง $count สาย',
+      one: 'กรอง $count สาย',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get callScreeningSetupTitle => 'ต้องตั้งค่าก่อน';
+
+  @override
+  String get callScreeningSetupBody =>
+      'ต้องตั้ง ScamReport เป็นแอปกรองสายในการตั้งค่าแอปโทรศัพท์ของคุณ';
+
+  @override
+  String get callScreeningSetupAction => 'ตั้งเป็นแอปกรองสาย';
+
+  @override
+  String get callScreeningSyncFailed =>
+      'ไม่สามารถอัปเดตรายการโทรศัพท์ — จะใช้ข้อมูลที่แคชไว้';
 }

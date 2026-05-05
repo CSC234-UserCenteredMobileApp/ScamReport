@@ -25,6 +25,7 @@ class CallScreeningRepositoryImpl implements CallScreeningRepository {
 
   @override
   Future<List<BlockedCall>> getBlockedCalls() async {
+    await prefs.reload(); // re-read from disk — Kotlin service writes natively
     final raw = prefs.getString(_keyBlocked) ?? '[]';
     final list = jsonDecode(raw) as List;
     return list

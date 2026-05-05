@@ -877,6 +877,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The reporter\'s identity is never shown publicly. Only the scam content above is shared.'**
   String get reportDetailPrivacyFooter;
+
+  /// No description provided for @callScreeningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Call Screening'**
+  String get callScreeningTitle;
+
+  /// No description provided for @callScreeningSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Warn you about incoming calls from known scam numbers'**
+  String get callScreeningSubtitle;
+
+  /// No description provided for @callScreeningSettingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Warn about known scam callers automatically'**
+  String get callScreeningSettingsSubtitle;
+
+  /// No description provided for @callScreeningUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Call screening requires Android 10 or later.'**
+  String get callScreeningUnsupported;
+
+  /// No description provided for @callScreeningNoBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'No screened calls yet.'**
+  String get callScreeningNoBlocked;
+
+  /// No description provided for @callScreeningBlockedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} call screened} other{{count} calls screened}}'**
+  String callScreeningBlockedCount(int count);
+
+  /// No description provided for @callScreeningSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup required'**
+  String get callScreeningSetupTitle;
+
+  /// No description provided for @callScreeningSetupBody.
+  ///
+  /// In en, this message translates to:
+  /// **'ScamReport must be set as call screening app in your Phone app settings.'**
+  String get callScreeningSetupBody;
+
+  /// No description provided for @callScreeningSetupAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as call screening app'**
+  String get callScreeningSetupAction;
+
+  /// No description provided for @callScreeningSyncFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update phone list — cached data will be used'**
+  String get callScreeningSyncFailed;
 }
 
 class _AppLocalizationsDelegate
