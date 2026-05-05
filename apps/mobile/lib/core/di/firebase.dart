@@ -63,6 +63,7 @@ Future<bool> initializeFirebase() async {
       'enable_clipboard_scanner': false,
       'enable_share_target': false,
       'enable_ai_search': false,
+      'enable_call_screening': true,
     });
     unawaited(remoteConfig.fetchAndActivate());
   } catch (e, st) {

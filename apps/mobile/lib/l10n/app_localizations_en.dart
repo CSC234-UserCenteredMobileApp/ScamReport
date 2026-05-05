@@ -424,4 +424,47 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get reportDetailPrivacyFooter =>
       'The reporter\'s identity is never shown publicly. Only the scam content above is shared.';
+
+  @override
+  String get callScreeningTitle => 'Call Screening';
+
+  @override
+  String get callScreeningSubtitle =>
+      'Warn you about incoming calls from known scam numbers';
+
+  @override
+  String get callScreeningSettingsSubtitle =>
+      'Warn about known scam callers automatically';
+
+  @override
+  String get callScreeningUnsupported =>
+      'Call screening requires Android 10 or later.';
+
+  @override
+  String get callScreeningNoBlocked => 'No screened calls yet.';
+
+  @override
+  String callScreeningBlockedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count calls screened',
+      one: '$count call screened',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get callScreeningSetupTitle => 'Setup required';
+
+  @override
+  String get callScreeningSetupBody =>
+      'ScamReport must be set as call screening app in your Phone app settings.';
+
+  @override
+  String get callScreeningSetupAction => 'Set as call screening app';
+
+  @override
+  String get callScreeningSyncFailed =>
+      'Could not update phone list — cached data will be used';
 }

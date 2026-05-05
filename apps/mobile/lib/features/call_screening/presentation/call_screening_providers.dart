@@ -43,9 +43,34 @@ final callScreeningIsDefaultProvider = FutureProvider<bool>((ref) async {
   }
 });
 
-final callScreeningEnabledProvider = StateProvider<bool>((ref) => false);
+final callScreeningEnabledProvider =
+    AsyncNotifierProvider<CallScreeningEnabledNotifier, bool>(
+  CallScreeningEnabledNotifier.new,
+);
 
-final blockedCallsProvider = FutureProvider<List<BlockedCall>>((ref) async {
+class CallScreeningEnabledNotifier extends AsyncNotifier<bool> {
+  @override
+  Future<bool> build() async {
+    final repo = await ref.watch(callScreeningRepositoryProvider.future);
+    return repo.isEnabled();
+  }
+
+  Future<void> setEnabled(bool v) async {
+    final repo = await ref.read(callScreeningRepositoryProvider.future);
+    await repo.setEnabled(v);
+    state = AsyncData(v);
+    if (v) {
+      try {
+        await repo.syncPhoneList();
+      } catch (_) {
+        rethrow;
+      }
+    }
+  }
+}
+
+final blockedCallsProvider =
+    FutureProvider.autoDispose<List<BlockedCall>>((ref) async {
   final repo = await ref.watch(callScreeningRepositoryProvider.future);
   return repo.getBlockedCalls();
 });

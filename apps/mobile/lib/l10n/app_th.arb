@@ -160,5 +160,21 @@
   "reportDetailWhatHappened": "สิ่งที่เกิดขึ้น",
   "reportDetailEvidence": "หลักฐาน",
   "reportDetailCta": "รายงานการหลอกลวงที่คล้ายกัน",
-  "reportDetailPrivacyFooter": "ตัวตนของผู้รายงานจะไม่ถูกเปิดเผยต่อสาธารณะ มีเพียงเนื้อหาการหลอกลวงข้างต้นที่จะถูกแชร์"
+  "reportDetailPrivacyFooter": "ตัวตนของผู้รายงานจะไม่ถูกเปิดเผยต่อสาธารณะ มีเพียงเนื้อหาการหลอกลวงข้างต้นที่จะถูกแชร์",
+
+  "callScreeningTitle": "กรองสายเรียกเข้า",
+  "callScreeningSubtitle": "แจ้งเตือนเมื่อมีสายจากหมายเลขมิจฉาชีพที่รู้จัก",
+  "callScreeningSettingsSubtitle": "แจ้งเตือนสายมิจฉาชีพที่รู้จักโดยอัตโนมัติ",
+  "callScreeningUnsupported": "การกรองสายเรียกเข้าต้องใช้ Android 10 ขึ้นไป",
+  "callScreeningNoBlocked": "ยังไม่มีสายที่ถูกกรอง",
+  "callScreeningBlockedCount": "{count, plural, one{กรอง {count} สาย} other{กรอง {count} สาย}}",
+  "@callScreeningBlockedCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "callScreeningSetupTitle": "ต้องตั้งค่าก่อน",
+  "callScreeningSetupBody": "ต้องตั้ง ScamReport เป็นแอปกรองสายในการตั้งค่าแอปโทรศัพท์ของคุณ",
+  "callScreeningSetupAction": "ตั้งเป็นแอปกรองสาย",
+  "callScreeningSyncFailed": "ไม่สามารถอัปเดตรายการโทรศัพท์ — จะใช้ข้อมูลที่แคชไว้"
 }

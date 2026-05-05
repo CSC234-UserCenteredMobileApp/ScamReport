@@ -170,5 +170,21 @@
   "reportDetailWhatHappened": "WHAT HAPPENED",
   "reportDetailEvidence": "EVIDENCE",
   "reportDetailCta": "Report a similar scam",
-  "reportDetailPrivacyFooter": "The reporter's identity is never shown publicly. Only the scam content above is shared."
+  "reportDetailPrivacyFooter": "The reporter's identity is never shown publicly. Only the scam content above is shared.",
+
+  "callScreeningTitle": "Call Screening",
+  "callScreeningSubtitle": "Warn you about incoming calls from known scam numbers",
+  "callScreeningSettingsSubtitle": "Warn about known scam callers automatically",
+  "callScreeningUnsupported": "Call screening requires Android 10 or later.",
+  "callScreeningNoBlocked": "No screened calls yet.",
+  "callScreeningBlockedCount": "{count, plural, one{{count} call screened} other{{count} calls screened}}",
+  "@callScreeningBlockedCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "callScreeningSetupTitle": "Setup required",
+  "callScreeningSetupBody": "ScamReport must be set as call screening app in your Phone app settings.",
+  "callScreeningSetupAction": "Set as call screening app",
+  "callScreeningSyncFailed": "Could not update phone list — cached data will be used"
 }

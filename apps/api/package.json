@@ -8,7 +8,8 @@
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "seed:call-screening": "bun run prisma/seed-call-screening.ts"
   },
   "dependencies": {
     "elysia": "^1.2.0",

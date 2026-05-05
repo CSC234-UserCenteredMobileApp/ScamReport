@@ -6,6 +6,8 @@ class _NotificationsSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settingsAsync = ref.watch(settingsProvider);
+    final showCallScreening =
+        !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
 
     return settingsAsync.when(
       loading: () => const _SettingsSkeleton(height: 116),
@@ -35,8 +37,10 @@ class _NotificationsSection extends ConsumerWidget {
                   .read(settingsProvider.notifier)
                   .save(settings.copyWith(smsPhishingAlerts: v)),
             ),
-            const Divider(height: 1, indent: 16, endIndent: 16),
-            const _CallScreeningTile(),
+            if (showCallScreening) ...[
+              const Divider(height: 1, indent: 16, endIndent: 16),
+              const _CallScreeningTile(),
+            ],
           ],
         ),
       ),
@@ -56,14 +60,14 @@ class _CallScreeningTile extends StatelessWidget {
       child: ListTile(
         leading: Icon(Icons.phone_in_talk_outlined, color: cs.onSurfaceVariant, size: 22),
         title: Text(
-          'Call Screening',
+          context.l10n.callScreeningTitle,
           style: Theme.of(context)
               .textTheme
               .bodyMedium
               ?.copyWith(fontWeight: FontWeight.w600),
         ),
         subtitle: Text(
-          'Block known scam callers automatically',
+          context.l10n.callScreeningSettingsSubtitle,
           style: Theme.of(context)
               .textTheme
               .bodySmall
