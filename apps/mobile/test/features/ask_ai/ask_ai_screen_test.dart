@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/features/ask_ai/domain/ask_ai_repository.dart';
+import 'package:mobile/features/ask_ai/domain/entities/ai_draft.dart';
 import 'package:mobile/features/ask_ai/domain/entities/chat_message.dart';
 import 'package:mobile/features/ask_ai/domain/entities/conversation.dart';
 import 'package:mobile/features/ask_ai/domain/entities/turn_outcome.dart';
 import 'package:mobile/features/ask_ai/domain/use_cases/send_turn.dart';
+import 'package:mobile/features/ask_ai/domain/use_cases/submit_drafted_report.dart';
 import 'package:mobile/features/ask_ai/presentation/ask_ai_providers.dart';
 import 'package:mobile/features/ask_ai/presentation/ask_ai_screen.dart';
 
@@ -61,11 +63,29 @@ class _StubRepo implements AskAiRepository {
   }
 }
 
-Widget _wrap(_StubRepo repo) {
+class _StubSubmit implements SubmitDraftedReport {
+  final List<String> calls = [];
+  @override
+  Future<({String reportId, DateTime createdAt})> call({
+    required AiDraft draft,
+    required String sourceConversationId,
+    String? clientSubmissionId,
+  }) async {
+    calls.add(sourceConversationId);
+    return (
+      reportId: 'rep-${calls.length}',
+      createdAt: DateTime(2026, 5, 7),
+    );
+  }
+}
+
+Widget _wrap(_StubRepo repo, {_StubSubmit? submit}) {
+  final stubSubmit = submit ?? _StubSubmit();
   return ProviderScope(
     overrides: [
       askAiRepositoryProvider.overrideWithValue(repo),
       sendTurnUseCaseProvider.overrideWith((ref) => SendTurnUseCase(repo)),
+      submitDraftedReportProvider.overrideWithValue(stubSubmit),
     ],
     child: const MaterialApp(home: AskAiScreen()),
   );

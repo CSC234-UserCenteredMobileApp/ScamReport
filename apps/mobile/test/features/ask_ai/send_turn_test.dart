@@ -6,8 +6,8 @@ import 'package:mobile/features/ask_ai/domain/entities/turn_outcome.dart';
 import 'package:mobile/features/ask_ai/domain/use_cases/send_turn.dart';
 
 class _FakeRepo implements AskAiRepository {
-  _FakeRepo({this.createConvId = 'new-convo-id'});
-  final String createConvId;
+  _FakeRepo();
+  final String createConvId = 'new-convo-id';
   int createCalls = 0;
   String? sendConversationId;
   String? sendContent;

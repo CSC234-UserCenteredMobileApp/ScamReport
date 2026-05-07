@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../domain/entities/ai_draft.dart';
 import '../domain/entities/chat_message.dart';
 import 'ask_ai_providers.dart';
+import 'widgets/consent_card.dart';
+import 'widgets/draft_editor_sheet.dart';
 
 /// Ask AI conversational chat screen (P-09 / FR-4.x). Text-only in v1;
 /// attachments + inline consent + draft editor land in PR-4 / PR-5.
@@ -38,6 +42,23 @@ class _AskAiScreenState extends ConsumerState<AskAiScreen> {
     }
   }
 
+  Future<void> _openEditor(AiDraft current) async {
+    final updated = await showModalBottomSheet<AiDraft>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => DraftEditorSheet(initial: current),
+    );
+    if (updated != null) {
+      ref.read(askAiChatControllerProvider.notifier).updateDraft(updated);
+    }
+  }
+
+  Future<void> _askRedraft() async {
+    await ref
+        .read(askAiChatControllerProvider.notifier)
+        .sendMessage('Please redraft the report based on what we discussed.');
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(askAiChatControllerProvider);
@@ -66,13 +87,40 @@ class _AskAiScreenState extends ConsumerState<AskAiScreen> {
                       horizontal: 16,
                       vertical: 12,
                     ),
-                    itemCount: state.messages.length + (state.isSending ? 1 : 0),
+                    itemCount: state.messages.length +
+                        (state.isSending ? 1 : 0) +
+                        (state.canOfferReport ? 1 : 0) +
+                        (state.submittedReportId != null ? 1 : 0),
                     itemBuilder: (context, i) {
-                      if (i == state.messages.length && state.isSending) {
+                      final base = state.messages.length;
+                      if (i < base) {
+                        return _MessageBubble(message: state.messages[i]);
+                      }
+                      var offset = i - base;
+                      if (state.isSending && offset == 0) {
                         return const _TypingIndicator();
                       }
-                      final m = state.messages[i];
-                      return _MessageBubble(message: m);
+                      if (state.isSending) offset--;
+                      if (state.canOfferReport && offset == 0) {
+                        return ConsentCard(
+                          draft: state.activeDraft!,
+                          isSubmitting: state.isSubmitting,
+                          onEdit: () => _openEditor(state.activeDraft!),
+                          onAskRedraft: () => _askRedraft(),
+                          onSubmit: () => ref
+                              .read(askAiChatControllerProvider.notifier)
+                              .submitActiveDraft(),
+                        );
+                      }
+                      if (state.canOfferReport) offset--;
+                      if (state.submittedReportId != null && offset == 0) {
+                        return _SubmittedBanner(
+                          reportId: state.submittedReportId!,
+                          onOpen: () =>
+                              context.go('/report-detail/${state.submittedReportId}'),
+                        );
+                      }
+                      return const SizedBox.shrink();
                     },
                   ),
           ),
@@ -248,6 +296,52 @@ class _TypingIndicator extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SubmittedBanner extends StatelessWidget {
+  const _SubmittedBanner({required this.reportId, required this.onOpen});
+  final String reportId;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      key: const Key('askAiSubmittedBanner'),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      color: theme.colorScheme.primaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Icon(Icons.check_circle, color: theme.colorScheme.onPrimaryContainer),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Report submitted',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: theme.colorScheme.onPrimaryContainer,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    'Track it in My Reports.',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            TextButton(onPressed: onOpen, child: const Text('Open')),
+          ],
         ),
       ),
     );
