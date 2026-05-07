@@ -7,8 +7,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/alerts/presentation/alerts_screen.dart';
 import '../../features/alerts/presentation/announcement_detail_screen.dart';
+import '../../features/ask_ai/presentation/ask_ai_screen.dart';
 import '../../features/sms_scan/presentation/sms_overlay_banner.dart';
 import '../../features/auth/presentation/auth_providers.dart';
+import '../feature_flags/feature_flags.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/check/domain/check_result.dart';
@@ -103,15 +105,21 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                       body: EmptyGate(
                         icon: Icons.auto_awesome_outlined,
                         heading: 'Sign in to use Ask AI',
-                        body: 'Ask AI helps you identify scams and get guidance on what to do next.',
+                        body:
+                            'Ask AI helps you identify scams and get guidance on what to do next.',
                         primaryLabel: 'Sign in or register',
                         onPrimary: () => context.push('/login'),
                       ),
                     );
                   }
-                  return const Scaffold(
-                    body: Center(child: Text('Ask AI — coming soon')),
-                  );
+                  final enabled = ref.watch(featureFlagProvider('enable_ask_ai'));
+                  if (!enabled) {
+                    return Scaffold(
+                      appBar: AppBar(title: const Text('Ask AI')),
+                      body: const Center(child: Text('Ask AI — coming soon')),
+                    );
+                  }
+                  return const AskAiScreen();
                 },
               ),
               routes: [
