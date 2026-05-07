@@ -16,11 +16,18 @@ const UUID = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
 const UUID2 = '6ba7b811-9dad-11d1-80b4-00c04fd430c8';
 const DT = '2026-05-07T00:00:00.000Z';
 
+const evidenceMeta = {
+  storagePath: 'evidence/abc.jpg',
+  kind: 'image' as const,
+  mimeType: 'image/jpeg',
+  sizeBytes: 12_345,
+};
+
 const baseReport = {
   title: 'Fake Kerry parcel SMS',
   description: 'I received an SMS claiming a parcel was held; the link asked for OTP.',
   scamTypeCode: 'phishing_sms',
-  evidenceFileIds: [],
+  evidenceFiles: [],
 };
 
 describe('CreateReportRequest', () => {
@@ -48,20 +55,45 @@ describe('CreateReportRequest', () => {
     ).toBe(true);
   });
 
-  test('accepts up to 5 evidence file ids', () => {
+  test('accepts up to 5 evidence files', () => {
     expect(
       Value.Check(CreateReportRequest, {
         ...baseReport,
-        evidenceFileIds: [UUID, UUID2, UUID, UUID2, UUID],
+        evidenceFiles: [evidenceMeta, evidenceMeta, evidenceMeta, evidenceMeta, evidenceMeta],
       }),
     ).toBe(true);
   });
 
-  test('rejects more than 5 evidence file ids', () => {
+  test('rejects more than 5 evidence files', () => {
     expect(
       Value.Check(CreateReportRequest, {
         ...baseReport,
-        evidenceFileIds: [UUID, UUID2, UUID, UUID2, UUID, UUID2],
+        evidenceFiles: [
+          evidenceMeta,
+          evidenceMeta,
+          evidenceMeta,
+          evidenceMeta,
+          evidenceMeta,
+          evidenceMeta,
+        ],
+      }),
+    ).toBe(false);
+  });
+
+  test('rejects evidence file with invalid kind', () => {
+    expect(
+      Value.Check(CreateReportRequest, {
+        ...baseReport,
+        evidenceFiles: [{ ...evidenceMeta, kind: 'video' }],
+      }),
+    ).toBe(false);
+  });
+
+  test('rejects evidence file with zero sizeBytes', () => {
+    expect(
+      Value.Check(CreateReportRequest, {
+        ...baseReport,
+        evidenceFiles: [{ ...evidenceMeta, sizeBytes: 0 }],
       }),
     ).toBe(false);
   });
@@ -85,15 +117,6 @@ describe('CreateReportRequest', () => {
       Value.Check(CreateReportRequest, {
         ...baseReport,
         targetIdentifierKind: 'email',
-      }),
-    ).toBe(false);
-  });
-
-  test('rejects non-uuid evidence file id', () => {
-    expect(
-      Value.Check(CreateReportRequest, {
-        ...baseReport,
-        evidenceFileIds: ['not-a-uuid'],
       }),
     ).toBe(false);
   });
@@ -124,17 +147,22 @@ describe('CreateReportResponse', () => {
 
 describe('EvidenceUploadResponse', () => {
   test('accepts upload response', () => {
-    expect(
-      Value.Check(EvidenceUploadResponse, {
-        evidenceFileId: UUID,
-        storagePath: 'evidence/abc.jpg',
-      }),
-    ).toBe(true);
+    expect(Value.Check(EvidenceUploadResponse, evidenceMeta)).toBe(true);
   });
 
   test('rejects empty storagePath', () => {
     expect(
-      Value.Check(EvidenceUploadResponse, { evidenceFileId: UUID, storagePath: '' }),
+      Value.Check(EvidenceUploadResponse, { ...evidenceMeta, storagePath: '' }),
     ).toBe(false);
+  });
+
+  test('rejects pdf-kind / image-mimetype mismatch — schema does not enforce; sanity that both fields are surfaced', () => {
+    expect(
+      Value.Check(EvidenceUploadResponse, {
+        ...evidenceMeta,
+        kind: 'pdf',
+        mimeType: 'application/pdf',
+      }),
+    ).toBe(true);
   });
 });
