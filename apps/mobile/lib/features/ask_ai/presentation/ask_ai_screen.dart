@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../l10n/l10n.dart';
 import '../data/attachment_picker.dart';
 import '../domain/entities/ai_draft.dart';
+import '../domain/entities/chat_attachment.dart';
 import '../domain/entities/chat_message.dart';
 import '../domain/failures.dart';
 import 'ask_ai_providers.dart';
@@ -321,7 +322,10 @@ class _MessageBubble extends StatelessWidget {
     final bg = isUser
         ? theme.colorScheme.primary
         : theme.colorScheme.surfaceContainerHighest;
-    final fg = isUser ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface;
+    final fg =
+        isUser ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface;
+    final hasContent = message.content.trim().isNotEmpty;
+    final hasAttachments = message.attachments.isNotEmpty;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Align(
@@ -336,13 +340,88 @@ class _MessageBubble extends StatelessWidget {
               color: bg,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Text(
-              message.content,
-              style: theme.textTheme.bodyMedium?.copyWith(color: fg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (hasAttachments)
+                  Padding(
+                    padding: EdgeInsets.only(bottom: hasContent ? 8 : 0),
+                    child: Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: [
+                        for (final a in message.attachments)
+                          _BubbleAttachment(attachment: a, onPrimary: isUser),
+                      ],
+                    ),
+                  ),
+                if (hasContent)
+                  Text(
+                    message.content,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: fg),
+                  ),
+              ],
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _BubbleAttachment extends StatelessWidget {
+  const _BubbleAttachment({required this.attachment, required this.onPrimary});
+  final ChatAttachment attachment;
+  final bool onPrimary;
+
+  bool get _isImage => attachment.mimeType.startsWith('image/');
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final url = attachment.signedUrl;
+    final placeholder = Container(
+      width: 160,
+      height: 160,
+      color: theme.colorScheme.surfaceContainerHighest,
+      alignment: Alignment.center,
+      child: Icon(
+        _isImage ? Icons.broken_image_outlined : Icons.picture_as_pdf_outlined,
+        size: 32,
+        color: theme.colorScheme.onSurfaceVariant,
+      ),
+    );
+    if (_isImage && url != null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Image.network(
+          url,
+          width: 160,
+          height: 160,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => placeholder,
+          loadingBuilder: (ctx, child, progress) {
+            if (progress == null) return child;
+            return SizedBox(
+              width: 160,
+              height: 160,
+              child: Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: onPrimary
+                      ? theme.colorScheme.onPrimary
+                      : theme.colorScheme.primary,
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+    // PDF or signing failed.
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: placeholder,
     );
   }
 }
