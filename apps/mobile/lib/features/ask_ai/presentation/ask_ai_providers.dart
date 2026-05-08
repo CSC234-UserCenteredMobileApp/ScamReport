@@ -10,6 +10,7 @@ import '../data/submit_drafted_report_impl.dart';
 import '../domain/ask_ai_repository.dart';
 import '../domain/entities/ai_draft.dart';
 import '../domain/entities/chat_message.dart';
+import '../domain/entities/conversation.dart';
 import '../domain/entities/turn_outcome.dart';
 import '../domain/use_cases/send_turn.dart';
 import '../domain/use_cases/submit_drafted_report.dart';
@@ -42,6 +43,11 @@ final submitDraftedReportProvider = Provider<SubmitDraftedReport>((ref) {
 
 final attachmentPickerProvider = Provider<AttachmentPicker>((ref) {
   return AttachmentPicker();
+});
+
+final conversationListProvider =
+    FutureProvider.autoDispose<List<ConversationSummary>>((ref) async {
+  return ref.watch(askAiRepositoryProvider).listConversations();
 });
 
 /// In-memory chat state. PR-6 will hydrate from /ask-ai/conversations on
@@ -197,6 +203,23 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
 
   void reset() {
     state = AskAiChatState();
+  }
+
+  /// Load a past conversation into the chat panel. Replaces the current
+  /// messages list and clears any staged attachments / drafts (those are
+  /// per-session and don't survive a swap).
+  Future<void> loadConversation(AskAiRepository repo, String conversationId) async {
+    state = state.copyWith(isSending: true, clearError: true);
+    try {
+      final detail = await repo.getConversation(conversationId);
+      state = AskAiChatState(
+        conversationId: detail.id,
+        messages: detail.messages,
+        submittedReportId: detail.linkedReportId,
+      );
+    } catch (err) {
+      state = state.copyWith(isSending: false, error: err);
+    }
   }
 }
 

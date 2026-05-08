@@ -7,6 +7,7 @@ import '../domain/entities/ai_draft.dart';
 import '../domain/entities/chat_message.dart';
 import '../domain/failures.dart';
 import 'ask_ai_providers.dart';
+import 'conversations_drawer.dart';
 import 'widgets/attachment_chip.dart';
 import 'widgets/consent_card.dart';
 import 'widgets/draft_editor_sheet.dart';
@@ -104,6 +105,7 @@ class _AskAiScreenState extends ConsumerState<AskAiScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      drawer: const ConversationsDrawer(),
       appBar: AppBar(
         title: const Row(
           mainAxisSize: MainAxisSize.min,
@@ -113,6 +115,15 @@ class _AskAiScreenState extends ConsumerState<AskAiScreen> {
             _BetaBadge(),
           ],
         ),
+        actions: [
+          IconButton(
+            key: const Key('askAiNewChat'),
+            tooltip: 'New chat',
+            icon: const Icon(Icons.add_comment_outlined),
+            onPressed: () =>
+                ref.read(askAiChatControllerProvider.notifier).reset(),
+          ),
+        ],
       ),
       body: Column(
         children: [
