@@ -32,6 +32,15 @@ class _StubRepo implements AskAiRepository {
   Future<List<ConversationSummary>> listConversations() async => const [];
 
   @override
+  Future<TurnOutcome> sendMessageWithAttachments(
+    String conversationId,
+    String content,
+    List attachments,
+  ) {
+    throw UnimplementedError();
+  }
+
+  @override
   Future<TurnOutcome> sendMessage(
     String conversationId,
     String content, {

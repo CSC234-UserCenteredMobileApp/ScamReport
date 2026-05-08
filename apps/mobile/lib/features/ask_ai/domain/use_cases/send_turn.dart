@@ -12,17 +12,15 @@ class SendTurnUseCase {
   Future<({String conversationId, TurnOutcome outcome})> call({
     String? conversationId,
     required String content,
-    List<String> attachmentIds = const [],
+    List<TurnAttachment> attachments = const [],
   }) async {
     if (content.trim().isEmpty) {
       throw ArgumentError('content must not be empty');
     }
     final id = conversationId ?? await _repo.createConversation();
-    final outcome = await _repo.sendMessage(
-      id,
-      content,
-      attachmentIds: attachmentIds,
-    );
+    final outcome = attachments.isEmpty
+        ? await _repo.sendMessage(id, content)
+        : await _repo.sendMessageWithAttachments(id, content, attachments);
     return (conversationId: id, outcome: outcome);
   }
 }

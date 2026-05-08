@@ -4,6 +4,7 @@ import '../../../core/api_client.dart';
 import '../../../core/di/auth.dart';
 import '../data/ask_ai_api_client.dart';
 import '../data/ask_ai_repository_impl.dart';
+import '../data/attachment_picker.dart';
 import '../data/reports_submit_api.dart';
 import '../data/submit_drafted_report_impl.dart';
 import '../domain/ask_ai_repository.dart';
@@ -39,6 +40,10 @@ final submitDraftedReportProvider = Provider<SubmitDraftedReport>((ref) {
   return SubmitDraftedReportImpl(ref.watch(reportsSubmitApiProvider));
 });
 
+final attachmentPickerProvider = Provider<AttachmentPicker>((ref) {
+  return AttachmentPicker();
+});
+
 /// In-memory chat state. PR-6 will hydrate from /ask-ai/conversations on
 /// drawer open; for v1 a fresh chat session starts empty each launch but
 /// every turn is persisted server-side, so re-opening a conversation by
@@ -49,11 +54,14 @@ class AskAiChatState {
     this.messages = const [],
     this.lastOutcome,
     this.activeDraft,
+    this.stagedAttachments = const [],
     this.isSending = false,
     this.isSubmitting = false,
     this.submittedReportId,
     this.error,
   });
+
+  final List<StagedAttachment> stagedAttachments;
 
   final String? conversationId;
   final List<ChatMessage> messages;
@@ -76,6 +84,7 @@ class AskAiChatState {
     List<ChatMessage>? messages,
     TurnOutcome? lastOutcome,
     AiDraft? activeDraft,
+    List<StagedAttachment>? stagedAttachments,
     bool? isSending,
     bool? isSubmitting,
     String? submittedReportId,
@@ -90,6 +99,7 @@ class AskAiChatState {
       messages: messages ?? this.messages,
       lastOutcome: clearOutcome ? null : (lastOutcome ?? this.lastOutcome),
       activeDraft: clearDraft ? null : (activeDraft ?? this.activeDraft),
+      stagedAttachments: stagedAttachments ?? this.stagedAttachments,
       isSending: isSending ?? this.isSending,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       submittedReportId: clearSubmittedReport
@@ -106,14 +116,37 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
   final SendTurnUseCase _sendTurn;
   final SubmitDraftedReport _submit;
 
+  void stageAttachment(StagedAttachment a) {
+    if (state.stagedAttachments.length >= maxAttachmentsPerMessage) return;
+    state = state.copyWith(
+      stagedAttachments: [...state.stagedAttachments, a],
+      clearError: true,
+    );
+  }
+
+  void removeStagedAttachment(int index) {
+    final list = [...state.stagedAttachments];
+    if (index < 0 || index >= list.length) return;
+    list.removeAt(index);
+    state = state.copyWith(stagedAttachments: list);
+  }
+
   Future<void> sendMessage(String content) async {
     final trimmed = content.trim();
     if (trimmed.isEmpty || state.isSending) return;
     state = state.copyWith(isSending: true, clearError: true);
     try {
+      final attachments = state.stagedAttachments
+          .map((s) => TurnAttachment(
+                bytes: s.bytes,
+                mimeType: s.mimeType,
+                filename: s.filename,
+              ))
+          .toList(growable: false);
       final result = await _sendTurn(
         conversationId: state.conversationId,
         content: trimmed,
+        attachments: attachments,
       );
       // Reset the active draft to whatever Gemini just produced — the user
       // might have tweaked an old draft and is now asking the AI to redraft.
@@ -126,6 +159,7 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
         ],
         lastOutcome: result.outcome,
         activeDraft: result.outcome.draft,
+        stagedAttachments: const [],
         isSending: false,
         clearDraft: result.outcome.draft == null,
       );

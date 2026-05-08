@@ -2,6 +2,7 @@ import '../domain/ask_ai_repository.dart';
 import '../domain/entities/conversation.dart';
 import '../domain/entities/turn_outcome.dart';
 import 'ask_ai_api_client.dart';
+import 'attachment_picker.dart';
 
 class AskAiRepositoryImpl implements AskAiRepository {
   AskAiRepositoryImpl(this._api);
@@ -29,4 +30,20 @@ class AskAiRepositoryImpl implements AskAiRepository {
     List<String> attachmentIds = const [],
   }) =>
       _api.sendMessage(conversationId, content, attachmentIds: attachmentIds);
+
+  @override
+  Future<TurnOutcome> sendMessageWithAttachments(
+    String conversationId,
+    String content,
+    List<TurnAttachment> attachments,
+  ) {
+    final staged = attachments
+        .map((a) => StagedAttachment(
+              bytes: a.bytes,
+              mimeType: a.mimeType,
+              filename: a.filename,
+            ))
+        .toList(growable: false);
+    return _api.sendMessageMultipart(conversationId, content, staged);
+  }
 }

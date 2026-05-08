@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../data/attachment_picker.dart';
 import '../domain/entities/ai_draft.dart';
 import '../domain/entities/chat_message.dart';
+import '../domain/failures.dart';
 import 'ask_ai_providers.dart';
+import 'widgets/attachment_chip.dart';
 import 'widgets/consent_card.dart';
 import 'widgets/draft_editor_sheet.dart';
 
@@ -57,6 +60,42 @@ class _AskAiScreenState extends ConsumerState<AskAiScreen> {
     await ref
         .read(askAiChatControllerProvider.notifier)
         .sendMessage('Please redraft the report based on what we discussed.');
+  }
+
+  Future<void> _pickAttachment() async {
+    final picker = ref.read(attachmentPickerProvider);
+    final controller = ref.read(askAiChatControllerProvider.notifier);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final picked = await showModalBottomSheet<StagedAttachment>(
+        context: context,
+        builder: (sheetCtx) => SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_camera_outlined),
+                title: const Text('Take photo'),
+                onTap: () async {
+                  final a = await picker.pickFromCamera();
+                  if (sheetCtx.mounted) Navigator.of(sheetCtx).pop(a);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined),
+                title: const Text('Choose from gallery'),
+                onTap: () async {
+                  final a = await picker.pickFromGallery();
+                  if (sheetCtx.mounted) Navigator.of(sheetCtx).pop(a);
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+      if (picked != null) controller.stageAttachment(picked);
+    } on AskAiFailure catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(e.message)));
+    }
   }
 
   @override
@@ -136,38 +175,76 @@ class _AskAiScreenState extends ConsumerState<AskAiScreen> {
             ),
           SafeArea(
             top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: TextField(
-                      key: const Key('askAiComposer'),
-                      controller: _controller,
-                      enabled: !state.isSending,
-                      minLines: 1,
-                      maxLines: 4,
-                      maxLength: 4000,
-                      decoration: const InputDecoration(
-                        hintText: 'Tell me what happened…',
-                        counterText: '',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(12)),
-                        ),
-                      ),
-                      textInputAction: TextInputAction.send,
-                      onSubmitted: (_) => _send(),
+            child: Column(
+              children: [
+                if (state.stagedAttachments.isNotEmpty)
+                  SizedBox(
+                    key: const Key('askAiStagedRow'),
+                    height: 80,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      itemCount: state.stagedAttachments.length,
+                      itemBuilder: (_, i) {
+                        final s = state.stagedAttachments[i];
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: AttachmentChip(
+                            bytes: s.bytes,
+                            mimeType: s.mimeType,
+                            onRemove: () => ref
+                                .read(askAiChatControllerProvider.notifier)
+                                .removeStagedAttachment(i),
+                          ),
+                        );
+                      },
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  IconButton.filled(
-                    key: const Key('askAiSendButton'),
-                    onPressed: state.isSending ? null : _send,
-                    icon: const Icon(Icons.send_rounded),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      IconButton(
+                        key: const Key('askAiAttachButton'),
+                        onPressed: state.isSending ||
+                                state.stagedAttachments.length >=
+                                    maxAttachmentsPerMessage
+                            ? null
+                            : _pickAttachment,
+                        icon: const Icon(Icons.attach_file_rounded),
+                        tooltip: 'Attach a file',
+                      ),
+                      Expanded(
+                        child: TextField(
+                          key: const Key('askAiComposer'),
+                          controller: _controller,
+                          enabled: !state.isSending,
+                          minLines: 1,
+                          maxLines: 4,
+                          maxLength: 4000,
+                          decoration: const InputDecoration(
+                            hintText: 'Tell me what happened…',
+                            counterText: '',
+                            border: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(12)),
+                            ),
+                          ),
+                          textInputAction: TextInputAction.send,
+                          onSubmitted: (_) => _send(),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton.filled(
+                        key: const Key('askAiSendButton'),
+                        onPressed: state.isSending ? null : _send,
+                        icon: const Icon(Icons.send_rounded),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],

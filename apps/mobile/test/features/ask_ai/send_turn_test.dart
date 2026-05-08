@@ -34,6 +34,15 @@ class _FakeRepo implements AskAiRepository {
   Future<void> deleteConversation(String conversationId) async {}
 
   @override
+  Future<TurnOutcome> sendMessageWithAttachments(
+    String conversationId,
+    String content,
+    List attachments,
+  ) {
+    throw UnimplementedError();
+  }
+
+  @override
   Future<TurnOutcome> sendMessage(
     String conversationId,
     String content, {

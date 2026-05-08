@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 import '../../../core/api_client.dart';
 import '../domain/entities/ai_draft.dart';
@@ -10,6 +12,7 @@ import '../domain/entities/chat_message.dart';
 import '../domain/entities/conversation.dart';
 import '../domain/entities/turn_outcome.dart';
 import '../domain/failures.dart';
+import 'attachment_picker.dart';
 
 /// Thin HTTP wrapper around the /ask-ai/* endpoints. Maps JSON shapes from
 /// `packages/shared` into domain entities. Authentication is per-request:
@@ -121,6 +124,42 @@ class AskAiApiClient {
       headers: headers,
       body: jsonEncode({'content': content, 'attachmentIds': attachmentIds}),
     );
+    if (res.statusCode != 200) _throwForStatus(res);
+    final body = jsonDecode(res.body) as Map<String, dynamic>;
+    return _turnFromJson(body);
+  }
+
+  Future<TurnOutcome> sendMessageMultipart(
+    String conversationId,
+    String content,
+    List<StagedAttachment> attachments,
+  ) async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) throw const AskAiUnauthorizedFailure();
+    final token = await user.getIdToken();
+    if (token == null || token.isEmpty) throw const AskAiUnauthorizedFailure();
+
+    final req = http.MultipartRequest(
+      'POST',
+      Uri.parse(
+        '$apiBaseUrl/ask-ai/conversations/$conversationId/messages/multipart',
+      ),
+    );
+    req.headers['Authorization'] = 'Bearer $token';
+    req.fields['content'] = content;
+    for (var i = 0; i < attachments.length && i < 3; i++) {
+      final a = attachments[i];
+      req.files.add(
+        http.MultipartFile.fromBytes(
+          'file$i',
+          Uint8List.fromList(a.bytes),
+          filename: a.filename,
+          contentType: MediaType.parse(a.mimeType),
+        ),
+      );
+    }
+    final streamed = await _http.send(req);
+    final res = await http.Response.fromStream(streamed);
     if (res.statusCode != 200) _throwForStatus(res);
     final body = jsonDecode(res.body) as Map<String, dynamic>;
     return _turnFromJson(body);
