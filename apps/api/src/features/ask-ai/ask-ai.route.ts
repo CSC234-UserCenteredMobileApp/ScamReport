@@ -134,10 +134,6 @@ export const askAiRoute = new Elysia({ prefix: '/ask-ai' })
       try {
         const b = body as Record<string, unknown>;
         const content = typeof b.content === 'string' ? b.content : '';
-        if (content.trim().length === 0) {
-          set.status = 400;
-          return { error: 'content is required', code: 'missing_content' };
-        }
         const attachments: AttachmentUploadInput[] = [];
         for (let i = 0; i < MAX_ATTACHMENTS_PER_MESSAGE; i++) {
           const f = b[`file${i}`];
@@ -151,6 +147,12 @@ export const askAiRoute = new Elysia({ prefix: '/ask-ai' })
               mimeType: (f as File).type,
             });
           }
+        }
+        // Allow image-only messages: reject only when BOTH the text and
+        // every file slot are empty.
+        if (content.trim().length === 0 && attachments.length === 0) {
+          set.status = 400;
+          return { error: 'content or files required', code: 'missing_content' };
         }
         const uid = await resolveInternalUserId(user!.uid, user!.email);
         return await handleTurn(uid, params.id, content, attachments);
@@ -169,7 +171,9 @@ export const askAiRoute = new Elysia({ prefix: '/ask-ai' })
     {
       params: idParam,
       body: t.Object({
-        content: t.String({ minLength: 1, maxLength: 4000 }),
+        // Allow empty content here; the handler enforces "content OR
+        // files required" so image-only sends work.
+        content: t.String({ maxLength: 4000 }),
         file0: t.Optional(t.Any()),
         file1: t.Optional(t.Any()),
         file2: t.Optional(t.Any()),

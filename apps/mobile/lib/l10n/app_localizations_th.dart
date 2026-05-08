@@ -637,4 +637,7 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get askAiEvidenceCapReached => 'แนบได้สูงสุด 5 ไฟล์';
+
+  @override
+  String get askAiRetry => 'ลองอีกครั้ง';
 }

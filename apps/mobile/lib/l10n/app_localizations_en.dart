@@ -638,4 +638,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get askAiEvidenceCapReached => 'Maximum 5 files.';
+
+  @override
+  String get askAiRetry => 'Retry';
 }

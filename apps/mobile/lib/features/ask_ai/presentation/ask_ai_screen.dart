@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../l10n/l10n.dart';
 import '../data/attachment_picker.dart';
 import '../domain/entities/ai_draft.dart';
+import '../domain/entities/chat_attachment.dart';
 import '../domain/entities/chat_message.dart';
 import '../domain/failures.dart';
 import 'ask_ai_providers.dart';
@@ -35,7 +36,10 @@ class _AskAiScreenState extends ConsumerState<AskAiScreen> {
 
   Future<void> _send() async {
     final content = _controller.text;
-    if (content.trim().isEmpty) return;
+    final state = ref.read(askAiChatControllerProvider);
+    // Allow image-only sends: skip the early return when staged attachments
+    // are present.
+    if (content.trim().isEmpty && state.stagedAttachments.isEmpty) return;
     _controller.clear();
     await ref.read(askAiChatControllerProvider.notifier).sendMessage(content);
     if (_scrollController.hasClients) {
@@ -188,10 +192,30 @@ class _AskAiScreenState extends ConsumerState<AskAiScreen> {
             Container(
               width: double.infinity,
               color: theme.colorScheme.errorContainer,
-              padding: const EdgeInsets.all(12),
-              child: Text(
-                l.askAiSendFailed,
-                style: TextStyle(color: theme.colorScheme.onErrorContainer),
+              padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l.askAiSendFailed,
+                      style:
+                          TextStyle(color: theme.colorScheme.onErrorContainer),
+                    ),
+                  ),
+                  if (state.lastFailedAttempt != null)
+                    TextButton(
+                      key: const Key('askAiRetryButton'),
+                      onPressed: () => ref
+                          .read(askAiChatControllerProvider.notifier)
+                          .retryLastFailedSend(),
+                      child: Text(
+                        l.askAiRetry,
+                        style: TextStyle(
+                            color: theme.colorScheme.onErrorContainer,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                ],
               ),
             ),
           SafeArea(
@@ -333,7 +357,10 @@ class _MessageBubble extends StatelessWidget {
     final bg = isUser
         ? theme.colorScheme.primary
         : theme.colorScheme.surfaceContainerHighest;
-    final fg = isUser ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface;
+    final fg =
+        isUser ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface;
+    final hasContent = message.content.trim().isNotEmpty;
+    final hasAttachments = message.attachments.isNotEmpty;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Align(
@@ -348,13 +375,125 @@ class _MessageBubble extends StatelessWidget {
               color: bg,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Text(
-              message.content,
-              style: theme.textTheme.bodyMedium?.copyWith(color: fg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (hasAttachments)
+                  Padding(
+                    padding: EdgeInsets.only(bottom: hasContent ? 8 : 0),
+                    child: Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: [
+                        for (final a in message.attachments)
+                          _BubbleAttachment(attachment: a, onPrimary: isUser),
+                      ],
+                    ),
+                  ),
+                if (hasContent)
+                  Text(
+                    message.content,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: fg),
+                  ),
+              ],
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _BubbleAttachment extends StatefulWidget {
+  const _BubbleAttachment({required this.attachment, required this.onPrimary});
+  final ChatAttachment attachment;
+  final bool onPrimary;
+
+  @override
+  State<_BubbleAttachment> createState() => _BubbleAttachmentState();
+}
+
+class _BubbleAttachmentState extends State<_BubbleAttachment> {
+  // Hoisted MemoryImage so optimistic bubbles don't redecode the file on
+  // every rebuild during the in-flight send (same pattern AttachmentChip
+  // uses in iter-2).
+  late final ImageProvider? _localProvider =
+      widget.attachment.localBytes != null &&
+              widget.attachment.mimeType.startsWith('image/')
+          ? MemoryImage(widget.attachment.localBytes!)
+          : null;
+
+  @override
+  void dispose() {
+    _localProvider?.evict();
+    super.dispose();
+  }
+
+  bool get _isImage => widget.attachment.mimeType.startsWith('image/');
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final url = widget.attachment.signedUrl;
+    final placeholder = Container(
+      width: 160,
+      height: 160,
+      color: theme.colorScheme.surfaceContainerHighest,
+      alignment: Alignment.center,
+      child: Icon(
+        _isImage ? Icons.broken_image_outlined : Icons.picture_as_pdf_outlined,
+        size: 32,
+        color: theme.colorScheme.onSurfaceVariant,
+      ),
+    );
+
+    // Optimistic bubble — render local bytes via the hoisted provider.
+    if (_localProvider != null) {
+      return RepaintBoundary(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Image(
+            image: _localProvider,
+            width: 160,
+            height: 160,
+            fit: BoxFit.cover,
+            gaplessPlayback: true,
+            errorBuilder: (_, __, ___) => placeholder,
+          ),
+        ),
+      );
+    }
+
+    if (_isImage && url != null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Image.network(
+          url,
+          width: 160,
+          height: 160,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => placeholder,
+          loadingBuilder: (ctx, child, progress) {
+            if (progress == null) return child;
+            return SizedBox(
+              width: 160,
+              height: 160,
+              child: Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: widget.onPrimary
+                      ? theme.colorScheme.onPrimary
+                      : theme.colorScheme.primary,
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: placeholder,
     );
   }
 }
