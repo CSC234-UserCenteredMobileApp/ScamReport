@@ -15,9 +15,12 @@ import {
   createConversation,
   deleteConversation,
   getConversation,
+  handleTurnJson,
   handleTurn,
   listConversations,
+  type AttachmentUploadInput,
 } from './ask-ai.service';
+import { AskAiAttachmentError, MAX_ATTACHMENTS_PER_MESSAGE } from './ask-ai.limits';
 
 const idParam = t.Object({ id: t.String({ format: 'uuid' }) });
 const errorBody = t.Object({ error: t.String(), code: t.String() });
@@ -82,9 +85,9 @@ export const askAiRoute = new Elysia({ prefix: '/ask-ai' })
     '/conversations/:id/messages',
     async ({ params, body, user, set }) => {
       try {
-        return await handleTurn(user!.uid, params.id, body);
+        return await handleTurnJson(user!.uid, params.id, body);
       } catch (err) {
-        if (err instanceof AskAiError) {
+        if (err instanceof AskAiError || err instanceof AskAiAttachmentError) {
           set.status = err.status;
           return { error: err.message, code: err.code };
         }
@@ -98,6 +101,61 @@ export const askAiRoute = new Elysia({ prefix: '/ask-ai' })
         200: AskAiTurnResponse,
         400: errorBody,
         404: errorBody,
+      },
+    },
+  )
+  // Multipart variant for attachments. The text content lives in the
+  // `content` form field; up to MAX_ATTACHMENTS_PER_MESSAGE files come in
+  // as `file0` / `file1` / `file2`. Single endpoint instead of a separate
+  // staging upload because evidence_files / ai_message_attachments rows
+  // require their parent message id (NOT NULL FK).
+  .post(
+    '/conversations/:id/messages/multipart',
+    async ({ params, body, user, set }) => {
+      try {
+        const b = body as Record<string, unknown>;
+        const content = typeof b.content === 'string' ? b.content : '';
+        if (content.trim().length === 0) {
+          set.status = 400;
+          return { error: 'content is required', code: 'missing_content' };
+        }
+        const attachments: AttachmentUploadInput[] = [];
+        for (let i = 0; i < MAX_ATTACHMENTS_PER_MESSAGE; i++) {
+          const f = b[`file${i}`];
+          if (
+            f &&
+            typeof (f as File).arrayBuffer === 'function' &&
+            (f as File).size > 0
+          ) {
+            attachments.push({
+              bytes: new Uint8Array(await (f as File).arrayBuffer()),
+              mimeType: (f as File).type,
+            });
+          }
+        }
+        return await handleTurn(user!.uid, params.id, content, attachments);
+      } catch (err) {
+        if (err instanceof AskAiError || err instanceof AskAiAttachmentError) {
+          set.status = err.status;
+          return { error: err.message, code: err.code };
+        }
+        throw err;
+      }
+    },
+    {
+      params: idParam,
+      body: t.Object({
+        content: t.String({ minLength: 1, maxLength: 4000 }),
+        file0: t.Optional(t.Any()),
+        file1: t.Optional(t.Any()),
+        file2: t.Optional(t.Any()),
+      }),
+      response: {
+        200: AskAiTurnResponse,
+        400: errorBody,
+        404: errorBody,
+        413: errorBody,
+        415: errorBody,
       },
     },
   );

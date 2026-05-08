@@ -99,34 +99,63 @@ export async function loadMessages(
   }));
 }
 
+export interface AttachmentRowInput {
+  storagePath: string;
+  mimeType: string;
+  sizeBytes: number;
+}
+
 export async function insertUserMessage(
   conversationId: string,
   content: string,
+  attachments: AttachmentRowInput[] = [],
 ): Promise<PersistedMessage> {
   const prisma = getPrisma();
-  const row = await prisma.aiMessage.create({
-    data: {
-      conversationId,
-      role: 'user',
-      content,
-      intentDetected: false,
-    },
-    select: {
-      id: true,
-      role: true,
-      content: true,
-      intentDetected: true,
-      createdAt: true,
-    },
+  return prisma.$transaction(async (tx) => {
+    const row = await tx.aiMessage.create({
+      data: {
+        conversationId,
+        role: 'user',
+        content,
+        intentDetected: false,
+      },
+      select: {
+        id: true,
+        role: true,
+        content: true,
+        intentDetected: true,
+        createdAt: true,
+      },
+    });
+    const attRows: PersistedMessage['attachments'] = [];
+    if (attachments.length > 0) {
+      for (const a of attachments) {
+        const att = await tx.aiMessageAttachment.create({
+          data: {
+            messageId: row.id,
+            storagePath: a.storagePath,
+            mimeType: a.mimeType,
+            sizeBytes: BigInt(a.sizeBytes),
+          },
+          select: {
+            id: true,
+            storagePath: true,
+            mimeType: true,
+            sizeBytes: true,
+          },
+        });
+        attRows.push(att);
+      }
+    }
+    return {
+      id: row.id,
+      role: 'user' as const,
+      content: row.content,
+      intentDetected: row.intentDetected,
+      createdAt: row.createdAt,
+      attachments: attRows,
+    };
   });
-  return {
-    id: row.id,
-    role: 'user',
-    content: row.content,
-    intentDetected: row.intentDetected,
-    createdAt: row.createdAt,
-    attachments: [],
-  };
 }
 
 export async function insertAssistantMessage(

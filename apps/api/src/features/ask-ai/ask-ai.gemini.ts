@@ -2,7 +2,12 @@
 // builder, single entry point `runTurn`. Kept separate from service.ts so
 // service.ts focuses on persistence + orchestration.
 
-import { generateStructured, GeminiStructuredParseError } from '../../core/gemini/client';
+import {
+  generateMultimodal,
+  generateStructured,
+  GeminiStructuredParseError,
+  inlinePart,
+} from '../../core/gemini/client';
 import type { AskAiDraft } from '@my-product/shared';
 
 // JSON Schema (subset Gemini accepts) describing the model's output. Mirrors
@@ -95,10 +100,16 @@ export type SimilarReportSummary = {
   verifiedAt: string | null;
 };
 
+export type GeminiInlineAttachment = {
+  bytes: Uint8Array;
+  mimeType: string;
+};
+
 export type GeminiTurnInput = {
   history: Array<{ role: 'user' | 'assistant'; content: string }>;
   similarReports: SimilarReportSummary[];
   latestUserMessage: string;
+  attachments?: GeminiInlineAttachment[];
 };
 
 export type GeminiTurnOutput = {
@@ -151,10 +162,29 @@ const FALLBACK_OUTPUT: GeminiTurnOutput = {
  * structured-output failures and Gemini transport failures both collapse to
  * `FALLBACK_OUTPUT` with a clear assistant reply. Errors are logged so the
  * structured-parse failure rate is observable in production.
+ *
+ * When `input.attachments` is present, switches to generateMultimodal so the
+ * model can reason over the user's screenshot / PDF alongside their text.
  */
 export async function runTurn(input: GeminiTurnInput): Promise<GeminiTurnOutput> {
   const prompt = buildPrompt(input);
   try {
+    if (input.attachments && input.attachments.length > 0) {
+      const parts = [
+        { text: prompt },
+        ...input.attachments.map((a) => inlinePart(a.bytes, a.mimeType)),
+      ];
+      const { parsed } = await generateMultimodal<GeminiTurnOutput>(parts, {
+        responseSchema: RESPONSE_SCHEMA,
+      });
+      if (!parsed) {
+        throw new GeminiStructuredParseError(
+          'Gemini multimodal returned no parsed output',
+          '',
+        );
+      }
+      return normaliseOutput(parsed, input);
+    }
     const result = await generateStructured<GeminiTurnOutput>(prompt, RESPONSE_SCHEMA);
     return normaliseOutput(result, input);
   } catch (err) {

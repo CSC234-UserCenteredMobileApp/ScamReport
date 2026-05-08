@@ -64,6 +64,24 @@ mock.module('../src/core/firebase/messaging', () => ({
   sendFcmToUser: async () => {},
 }));
 
+let storageUploadCalls: Array<{ bucket: string; path: string; bytes: number }> = [];
+mock.module('../src/core/supabase/storage', () => ({
+  uploadFile: async (
+    bucket: string,
+    path: string,
+    body: ArrayBuffer | Uint8Array,
+  ) => {
+    storageUploadCalls.push({
+      bucket,
+      path,
+      bytes: body instanceof Uint8Array ? body.byteLength : (body as ArrayBuffer).byteLength,
+    });
+    return { path };
+  },
+  getSignedUrl: async () => 'https://signed.example/url',
+  deleteFile: async () => {},
+}));
+
 // Embedding + RAG retrieval — return zero matches by default.
 mock.module('../src/core/gemini/client', () => ({
   embed: async () => Array(768).fill(0.01),
@@ -78,7 +96,14 @@ mock.module('../src/core/gemini/client', () => ({
       super(msg);
     }
   },
-  generateMultimodal: async () => ({ text: '', parsed: null }),
+  generateMultimodal: async <T>(_parts: unknown, _opts: unknown) => {
+    const out = geminiStub({ multimodal: true }) as { text: string };
+    try {
+      return { text: out.text, parsed: JSON.parse(out.text) as T };
+    } catch {
+      return { text: out.text, parsed: null as T | null };
+    }
+  },
   inlinePart: () => ({ inlineData: { data: '', mimeType: '' } }),
   __setGeminiClientForTest: () => {},
   DEFAULT_MODEL: 'gemini-2.5-flash',
@@ -127,45 +152,95 @@ mock.module('../src/core/db/client', () => ({
         role: string;
         content: string;
         intentDetected: boolean;
-      } }) => {
-        const row = {
-          id:
-            data.role === 'user'
-              ? '22222222-2222-2222-2222-222222222222'
-              : '33333333-3333-3333-3333-333333333333',
-          role: data.role,
-          content: data.content,
-          intentDetected: data.intentDetected,
-          createdAt: new Date('2026-05-07T00:00:01Z'),
-          attachments: [] as Array<{
-            id: string;
-            storagePath: string;
-            mimeType: string;
-            sizeBytes: bigint;
-          }>,
+      } }) => createAiMessageRow(data),
+    },
+    aiMessageAttachment: {
+      create: async ({ data }: {
+        data: {
+          messageId: string;
+          storagePath: string;
+          mimeType: string;
+          sizeBytes: bigint;
         };
-        if (data.role === 'user') {
-          insertedUserMessages.push({
-            conversationId: data.conversationId,
-            content: data.content,
-          });
-        } else {
-          insertedAssistantMessages.push({
-            conversationId: data.conversationId,
-            content: data.content,
-            intentDetected: data.intentDetected,
-          });
-        }
-        mockMessages.push(row);
-        return row;
-      },
+      }) => ({
+        id: '99999999-9999-9999-9999-999999999999',
+        storagePath: data.storagePath,
+        mimeType: data.mimeType,
+        sizeBytes: data.sizeBytes,
+      }),
     },
     report: {
       findMany: async () => [],
     },
     $queryRaw: async () => [],
+    $transaction: async (fn: (tx: unknown) => Promise<unknown>) => {
+      const tx = {
+        aiMessage: {
+          create: async ({ data }: { data: {
+            conversationId: string;
+            role: string;
+            content: string;
+            intentDetected: boolean;
+          } }) => createAiMessageRow(data),
+        },
+        aiMessageAttachment: {
+          create: async ({ data }: {
+            data: {
+              messageId: string;
+              storagePath: string;
+              mimeType: string;
+              sizeBytes: bigint;
+            };
+          }) => ({
+            id: '99999999-9999-9999-9999-999999999999',
+            storagePath: data.storagePath,
+            mimeType: data.mimeType,
+            sizeBytes: data.sizeBytes,
+          }),
+        },
+      };
+      return fn(tx);
+    },
   }),
 }));
+
+function createAiMessageRow(data: {
+  conversationId: string;
+  role: string;
+  content: string;
+  intentDetected: boolean;
+}) {
+  const row = {
+    id:
+      data.role === 'user'
+        ? '22222222-2222-2222-2222-222222222222'
+        : '33333333-3333-3333-3333-333333333333',
+    role: data.role,
+    content: data.content,
+    intentDetected: data.intentDetected,
+    createdAt: new Date('2026-05-07T00:00:01Z'),
+    attachments: [] as Array<{
+      id: string;
+      storagePath: string;
+      mimeType: string;
+      sizeBytes: bigint;
+    }>,
+  };
+  if (data.role === 'user') {
+    insertedUserMessages.push({
+      conversationId: data.conversationId,
+      content: data.content,
+    });
+  } else {
+    insertedAssistantMessages.push({
+      conversationId: data.conversationId,
+      content: data.content,
+      intentDetected: data.intentDetected,
+    });
+  }
+  mockMessages.push(row);
+  return row;
+}
 
 const { app } = await import('../src/index');
 
@@ -419,7 +494,7 @@ describe('POST /ask-ai/conversations/:id/messages', () => {
     expect(res.status).toBe(422);
   });
 
-  test('400 when attachments are passed (PR-3 v1 is text-only)', async () => {
+  test('400 when attachmentIds are passed via JSON endpoint (use multipart)', async () => {
     mockDecoded = { uid: 'user-1', email: 'u@example.com' };
     const res = await app.handle(
       jsonReq(`/ask-ai/conversations/${VALID_CONV_ID}/messages`, {
@@ -433,7 +508,7 @@ describe('POST /ask-ai/conversations/:id/messages', () => {
     );
     expect(res.status).toBe(400);
     const body = (await res.json()) as { code: string };
-    expect(body.code).toBe('attachments_unsupported');
+    expect(body.code).toBe('use_multipart');
   });
 
   test('happy path: persists user msg + assistant msg + returns turn', async () => {
@@ -542,5 +617,102 @@ describe('POST /ask-ai/conversations/:id/messages', () => {
       }),
     );
     expect(res.status).toBe(404);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// POST /ask-ai/conversations/:id/messages/multipart
+// ---------------------------------------------------------------------------
+
+function multipartReq(token: string, fields: Record<string, string | File>) {
+  const fd = new FormData();
+  for (const [k, v] of Object.entries(fields)) {
+    fd.append(k, v as Blob | string);
+  }
+  return new Request(
+    `http://localhost/ask-ai/conversations/${VALID_CONV_ID}/messages/multipart`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: fd,
+    },
+  );
+}
+
+describe('POST /ask-ai/conversations/:id/messages/multipart', () => {
+  beforeEach(() => {
+    storageUploadCalls = [];
+    mockConversation = {
+      id: VALID_CONV_ID,
+      userId: 'user-1',
+      createdAt: new Date('2026-05-07T00:00:00Z'),
+      lastMessageAt: new Date('2026-05-07T00:00:00Z'),
+      linkedReportId: null,
+    };
+  });
+
+  test('uploads attachment + persists message + returns turn', async () => {
+    mockDecoded = { uid: 'user-1', email: 'u@example.com' };
+    const file = new File([new Uint8Array([1, 2, 3, 4])], 'screen.jpg', {
+      type: 'image/jpeg',
+    });
+    const res = await app.handle(
+      multipartReq('tok', {
+        content: 'I got this SMS — see screenshot',
+        file0: file,
+      }),
+    );
+    expect(res.status).toBe(200);
+    expect(storageUploadCalls).toHaveLength(1);
+    expect(storageUploadCalls[0]?.bucket).toBe('chat-attachments');
+    expect(storageUploadCalls[0]?.path.startsWith(`${VALID_CONV_ID}/`)).toBe(true);
+  });
+
+  test('413 when attachment is over the 10MB limit', async () => {
+    mockDecoded = { uid: 'user-1', email: 'u@example.com' };
+    const big = new Uint8Array(11 * 1024 * 1024);
+    const file = new File([big], 'big.png', { type: 'image/png' });
+    const res = await app.handle(
+      multipartReq('tok', { content: 'big file', file0: file }),
+    );
+    expect(res.status).toBe(413);
+    const body = (await res.json()) as { code: string };
+    expect(body.code).toBe('attachment_too_large');
+  });
+
+  test('415 when MIME type is unsupported', async () => {
+    mockDecoded = { uid: 'user-1', email: 'u@example.com' };
+    const file = new File([new Uint8Array([1, 2])], 'a.exe', {
+      type: 'application/octet-stream',
+    });
+    const res = await app.handle(
+      multipartReq('tok', { content: 'unsupported', file0: file }),
+    );
+    expect(res.status).toBe(415);
+    const body = (await res.json()) as { code: string };
+    expect(body.code).toBe('unsupported_media_type');
+  });
+
+  test('400 when content is empty even if a file is attached', async () => {
+    mockDecoded = { uid: 'user-1', email: 'u@example.com' };
+    const file = new File([new Uint8Array([1, 2])], 'a.jpg', { type: 'image/jpeg' });
+    const res = await app.handle(
+      multipartReq('tok', { content: '', file0: file }),
+    );
+    expect([400, 422]).toContain(res.status);
+  });
+
+  test('401 when unauthenticated', async () => {
+    const file = new File([new Uint8Array([1, 2])], 'a.jpg', { type: 'image/jpeg' });
+    const fd = new FormData();
+    fd.append('content', 'hi');
+    fd.append('file0', file);
+    const res = await app.handle(
+      new Request(
+        `http://localhost/ask-ai/conversations/${VALID_CONV_ID}/messages/multipart`,
+        { method: 'POST', body: fd },
+      ),
+    );
+    expect(res.status).toBe(401);
   });
 });
