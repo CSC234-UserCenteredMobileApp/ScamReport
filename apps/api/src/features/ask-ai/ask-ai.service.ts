@@ -21,6 +21,7 @@ import {
   ATTACHMENTS_BUCKET,
   AskAiAttachmentError,
   MAX_ATTACHMENTS_PER_MESSAGE,
+  assertWithinDailyTurnCap,
   extFromMime,
   validateAttachment,
 } from './ask-ai.limits';
@@ -103,6 +104,10 @@ export async function handleTurn(
   if (!conv) {
     throw new AskAiError('Conversation not found', 404, 'not_found');
   }
+
+  // Daily turn cap — enforced before doing any expensive work (Gemini call,
+  // Supabase upload). Throws 429 on cap.
+  await assertWithinDailyTurnCap(userId);
 
   if (attachments.length > MAX_ATTACHMENTS_PER_MESSAGE) {
     throw new AskAiAttachmentError(

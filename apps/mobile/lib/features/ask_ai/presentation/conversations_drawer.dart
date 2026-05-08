@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/l10n.dart';
 import '../domain/entities/conversation.dart';
 import 'ask_ai_providers.dart';
 
@@ -13,6 +14,7 @@ class ConversationsDrawer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncList = ref.watch(conversationListProvider);
     final theme = Theme.of(context);
+    final l = context.l10n;
 
     return Drawer(
       child: SafeArea(
@@ -25,14 +27,14 @@ class ConversationsDrawer extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      'Past chats',
+                      l.askAiPastChats,
                       style: theme.textTheme.titleMedium,
                     ),
                   ),
                   IconButton(
                     key: const Key('askAiDrawerRefresh'),
                     icon: const Icon(Icons.refresh),
-                    tooltip: 'Refresh',
+                    tooltip: l.askAiRefresh,
                     onPressed: () => ref.invalidate(conversationListProvider),
                   ),
                 ],
@@ -45,7 +47,7 @@ class ConversationsDrawer extends ConsumerWidget {
                 child: FilledButton.icon(
                   key: const Key('askAiDrawerNewChat'),
                   icon: const Icon(Icons.add),
-                  label: const Text('New chat'),
+                  label: Text(l.askAiNewChat),
                   onPressed: () {
                     ref.read(askAiChatControllerProvider.notifier).reset();
                     Navigator.of(context).pop();
@@ -62,7 +64,7 @@ class ConversationsDrawer extends ConsumerWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Text(
-                      'Could not load conversations.\n$err',
+                      '${l.askAiLoadFailed}\n$err',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: theme.colorScheme.onSurfaceVariant,
@@ -76,7 +78,7 @@ class ConversationsDrawer extends ConsumerWidget {
                       child: Padding(
                         padding: const EdgeInsets.all(24),
                         child: Text(
-                          'No past chats yet. Send a message to start one.',
+                          l.askAiNoConversations,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: theme.colorScheme.onSurfaceVariant,
@@ -108,9 +110,10 @@ class _ConversationTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l = context.l10n;
     return ListTile(
       title: Text(
-        item.preview.isEmpty ? '(no preview)' : item.preview,
+        item.preview.isEmpty ? l.askAiNoPreview : item.preview,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),
@@ -134,17 +137,17 @@ class _ConversationTile extends ConsumerWidget {
         final repo = ref.read(askAiRepositoryProvider);
         final confirm = await showDialog<bool>(
           context: context,
-          builder: (_) => AlertDialog(
-            title: const Text('Delete conversation?'),
-            content: const Text('This cannot be undone.'),
+          builder: (dialogCtx) => AlertDialog(
+            title: Text(l.askAiDeletePrompt),
+            content: Text(l.askAiDeleteIrreversible),
             actions: [
               TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancel'),
+                onPressed: () => Navigator.of(dialogCtx).pop(false),
+                child: Text(l.askAiCancel),
               ),
               FilledButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Delete'),
+                onPressed: () => Navigator.of(dialogCtx).pop(true),
+                child: Text(l.askAiDelete),
               ),
             ],
           ),
@@ -153,8 +156,8 @@ class _ConversationTile extends ConsumerWidget {
           try {
             await repo.deleteConversation(item.id);
             ref.invalidate(conversationListProvider);
-          } catch (e) {
-            messenger.showSnackBar(SnackBar(content: Text('Failed: $e')));
+          } catch (_) {
+            messenger.showSnackBar(SnackBar(content: Text(l.askAiDeleteFailed)));
           }
         }
       },

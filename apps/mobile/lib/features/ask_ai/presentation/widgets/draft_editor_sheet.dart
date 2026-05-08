@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/l10n.dart';
 import '../../domain/entities/ai_draft.dart';
 
 class DraftEditorSheet extends StatefulWidget {
@@ -60,6 +61,7 @@ class _DraftEditorSheetState extends State<DraftEditorSheet> {
   @override
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
+    final l = context.l10n;
     return Padding(
       padding: EdgeInsets.only(bottom: mq.viewInsets.bottom),
       child: SafeArea(
@@ -71,20 +73,21 @@ class _DraftEditorSheetState extends State<DraftEditorSheet> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Edit draft',
+                  l.askAiDraftSheetTitle,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   key: const Key('askAiDraftTitle'),
                   controller: _title,
-                  decoration: const InputDecoration(labelText: 'Title'),
+                  decoration: InputDecoration(labelText: l.askAiDraftFieldTitle),
                   maxLength: 200,
                 ),
                 TextField(
                   key: const Key('askAiDraftDescription'),
                   controller: _description,
-                  decoration: const InputDecoration(labelText: 'Description'),
+                  decoration:
+                      InputDecoration(labelText: l.askAiDraftFieldDescription),
                   minLines: 3,
                   maxLines: 6,
                   maxLength: 2000,
@@ -93,7 +96,8 @@ class _DraftEditorSheetState extends State<DraftEditorSheet> {
                 DropdownButtonFormField<String>(
                   key: const Key('askAiDraftScamType'),
                   initialValue: _scamType,
-                  decoration: const InputDecoration(labelText: 'Scam type'),
+                  decoration:
+                      InputDecoration(labelText: l.askAiDraftFieldScamType),
                   items: [
                     for (final code in DraftEditorSheet._scamTypes)
                       DropdownMenuItem(value: code, child: Text(code)),
@@ -104,8 +108,8 @@ class _DraftEditorSheetState extends State<DraftEditorSheet> {
                 TextField(
                   key: const Key('askAiDraftIdentifier'),
                   controller: _identifier,
-                  decoration: const InputDecoration(
-                    labelText: 'Target identifier (phone / URL)',
+                  decoration: InputDecoration(
+                    labelText: l.askAiDraftFieldIdentifier,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -113,15 +117,18 @@ class _DraftEditorSheetState extends State<DraftEditorSheet> {
                   key: const Key('askAiDraftIdentifierKind'),
                   initialValue: _kind,
                   decoration:
-                      const InputDecoration(labelText: 'Identifier kind'),
-                  items: const [
-                    DropdownMenuItem(value: null, child: Text('—')),
+                      InputDecoration(labelText: l.askAiDraftFieldKind),
+                  items: [
+                    DropdownMenuItem(value: null, child: Text(l.askAiKindNone)),
                     DropdownMenuItem(
-                        value: TargetIdentifierKind.phone, child: Text('Phone')),
+                        value: TargetIdentifierKind.phone,
+                        child: Text(l.askAiKindPhone)),
                     DropdownMenuItem(
-                        value: TargetIdentifierKind.url, child: Text('URL')),
+                        value: TargetIdentifierKind.url,
+                        child: Text(l.askAiKindUrl)),
                     DropdownMenuItem(
-                        value: TargetIdentifierKind.other, child: Text('Other')),
+                        value: TargetIdentifierKind.other,
+                        child: Text(l.askAiKindOther)),
                   ],
                   onChanged: (v) => setState(() => _kind = v),
                 ),
@@ -130,13 +137,13 @@ class _DraftEditorSheetState extends State<DraftEditorSheet> {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Cancel'),
+                      child: Text(l.askAiCancel),
                     ),
                     const Spacer(),
                     FilledButton(
                       key: const Key('askAiDraftSave'),
                       onPressed: _save,
-                      child: const Text('Save'),
+                      child: Text(l.askAiSave),
                     ),
                   ],
                 ),

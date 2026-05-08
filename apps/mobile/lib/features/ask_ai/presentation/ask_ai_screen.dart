@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../l10n/l10n.dart';
 import '../data/attachment_picker.dart';
 import '../domain/entities/ai_draft.dart';
 import '../domain/entities/chat_message.dart';
@@ -58,15 +59,17 @@ class _AskAiScreenState extends ConsumerState<AskAiScreen> {
   }
 
   Future<void> _askRedraft() async {
+    final l = context.l10n;
     await ref
         .read(askAiChatControllerProvider.notifier)
-        .sendMessage('Please redraft the report based on what we discussed.');
+        .sendMessage(l.askAiAskRedraftPrompt);
   }
 
   Future<void> _pickAttachment() async {
     final picker = ref.read(attachmentPickerProvider);
     final controller = ref.read(askAiChatControllerProvider.notifier);
     final messenger = ScaffoldMessenger.of(context);
+    final l = context.l10n;
     try {
       final picked = await showModalBottomSheet<StagedAttachment>(
         context: context,
@@ -75,7 +78,7 @@ class _AskAiScreenState extends ConsumerState<AskAiScreen> {
             children: [
               ListTile(
                 leading: const Icon(Icons.photo_camera_outlined),
-                title: const Text('Take photo'),
+                title: Text(l.askAiAttachCamera),
                 onTap: () async {
                   final a = await picker.pickFromCamera();
                   if (sheetCtx.mounted) Navigator.of(sheetCtx).pop(a);
@@ -83,7 +86,7 @@ class _AskAiScreenState extends ConsumerState<AskAiScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.photo_library_outlined),
-                title: const Text('Choose from gallery'),
+                title: Text(l.askAiAttachGallery),
                 onTap: () async {
                   final a = await picker.pickFromGallery();
                   if (sheetCtx.mounted) Navigator.of(sheetCtx).pop(a);
@@ -104,21 +107,22 @@ class _AskAiScreenState extends ConsumerState<AskAiScreen> {
     final state = ref.watch(askAiChatControllerProvider);
     final theme = Theme.of(context);
 
+    final l = context.l10n;
     return Scaffold(
       drawer: const ConversationsDrawer(),
       appBar: AppBar(
-        title: const Row(
+        title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Ask ScamReport'),
-            SizedBox(width: 8),
-            _BetaBadge(),
+            Text(l.askAiTitle),
+            const SizedBox(width: 8),
+            const _BetaBadge(),
           ],
         ),
         actions: [
           IconButton(
             key: const Key('askAiNewChat'),
-            tooltip: 'New chat',
+            tooltip: l.askAiNewChat,
             icon: const Icon(Icons.add_comment_outlined),
             onPressed: () =>
                 ref.read(askAiChatControllerProvider.notifier).reset(),
@@ -180,7 +184,7 @@ class _AskAiScreenState extends ConsumerState<AskAiScreen> {
               color: theme.colorScheme.errorContainer,
               padding: const EdgeInsets.all(12),
               child: Text(
-                'Couldn\'t send your message. Please try again.',
+                l.askAiSendFailed,
                 style: TextStyle(color: theme.colorScheme.onErrorContainer),
               ),
             ),
@@ -224,7 +228,7 @@ class _AskAiScreenState extends ConsumerState<AskAiScreen> {
                             ? null
                             : _pickAttachment,
                         icon: const Icon(Icons.attach_file_rounded),
-                        tooltip: 'Attach a file',
+                        tooltip: l.askAiAttach,
                       ),
                       Expanded(
                         child: TextField(
@@ -234,10 +238,10 @@ class _AskAiScreenState extends ConsumerState<AskAiScreen> {
                           minLines: 1,
                           maxLines: 4,
                           maxLength: 4000,
-                          decoration: const InputDecoration(
-                            hintText: 'Tell me what happened…',
+                          decoration: InputDecoration(
+                            hintText: l.askAiComposerHint,
                             counterText: '',
-                            border: OutlineInputBorder(
+                            border: const OutlineInputBorder(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(12)),
                             ),
@@ -270,6 +274,7 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l = context.l10n;
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -285,21 +290,15 @@ class _EmptyState extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Hi, I\'m your scam radar.',
-                  style: theme.textTheme.titleMedium,
-                ),
+                Text(l.askAiWelcomeTitle, style: theme.textTheme.titleMedium),
                 const SizedBox(height: 8),
-                Text(
-                  'Tell me what happened — a weird SMS, a suspicious call, a too-good offer — and I\'ll tell you if others have seen it.',
-                  style: theme.textTheme.bodyMedium,
-                ),
+                Text(l.askAiWelcomeBody, style: theme.textTheme.bodyMedium),
               ],
             ),
           ),
           const SizedBox(height: 12),
           Text(
-            'AI can make mistakes · check important info',
+            l.askAiDisclaimer,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -377,7 +376,7 @@ class _TypingIndicator extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'Thinking…',
+                context.l10n.askAiThinking,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -398,6 +397,7 @@ class _SubmittedBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l = context.l10n;
     return Card(
       key: const Key('askAiSubmittedBanner'),
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -413,14 +413,14 @@ class _SubmittedBanner extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Report submitted',
+                    l.askAiSubmittedTitle,
                     style: theme.textTheme.titleSmall?.copyWith(
                       color: theme.colorScheme.onPrimaryContainer,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   Text(
-                    'Track it in My Reports.',
+                    l.askAiSubmittedBody,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onPrimaryContainer,
                     ),
@@ -428,7 +428,7 @@ class _SubmittedBanner extends StatelessWidget {
                 ],
               ),
             ),
-            TextButton(onPressed: onOpen, child: const Text('Open')),
+            TextButton(onPressed: onOpen, child: Text(l.askAiOpen)),
           ],
         ),
       ),
@@ -449,7 +449,7 @@ class _BetaBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        'BETA',
+        context.l10n.askAiBeta,
         style: theme.textTheme.labelSmall?.copyWith(
           color: theme.colorScheme.onPrimaryContainer,
           letterSpacing: 0.6,

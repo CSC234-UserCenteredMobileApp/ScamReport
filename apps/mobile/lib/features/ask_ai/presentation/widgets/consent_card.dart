@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/l10n.dart';
 import '../../domain/entities/ai_draft.dart';
 
 /// Inline consent gate that appears under the latest AI bubble when the AI
@@ -31,6 +32,7 @@ class _ConsentCardState extends State<ConsentCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l = context.l10n;
     final canSubmit = _accepted && !widget.isSubmitting;
     return Card(
       key: const Key('askAiConsentCard'),
@@ -41,7 +43,7 @@ class _ConsentCardState extends State<ConsentCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Submit this report?',
+              l.askAiConsentTitle,
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -53,14 +55,14 @@ class _ConsentCardState extends State<ConsentCard> {
                   key: const Key('askAiConsentEdit'),
                   onPressed: widget.isSubmitting ? null : widget.onEdit,
                   icon: const Icon(Icons.edit_outlined, size: 18),
-                  label: const Text('Edit draft'),
+                  label: Text(l.askAiConsentEdit),
                 ),
                 const SizedBox(width: 8),
                 TextButton.icon(
                   key: const Key('askAiConsentRedraft'),
                   onPressed: widget.isSubmitting ? null : widget.onAskRedraft,
                   icon: const Icon(Icons.refresh, size: 18),
-                  label: const Text('Ask AI to redraft'),
+                  label: Text(l.askAiConsentRedraft),
                 ),
               ],
             ),
@@ -73,13 +75,11 @@ class _ConsentCardState extends State<ConsentCard> {
               onChanged: widget.isSubmitting
                   ? null
                   : (v) => setState(() => _accepted = v ?? false),
-              title: const Text(
-                'I understand and agree.',
-                style: TextStyle(fontWeight: FontWeight.w600),
+              title: Text(
+                l.askAiConsentAgree,
+                style: const TextStyle(fontWeight: FontWeight.w600),
               ),
-              subtitle: const Text(
-                'By submitting, you agree that this report — but never your identity — may be published to the verified feed once approved.',
-              ),
+              subtitle: Text(l.askAiConsentNotice),
             ),
             const SizedBox(height: 8),
             SizedBox(
@@ -94,7 +94,9 @@ class _ConsentCardState extends State<ConsentCard> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.send_rounded),
-                label: Text(widget.isSubmitting ? 'Submitting…' : 'Submit report'),
+                label: Text(
+                  widget.isSubmitting ? l.askAiSubmitting : l.askAiSubmit,
+                ),
               ),
             ),
           ],

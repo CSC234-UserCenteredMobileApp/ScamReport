@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/features/ask_ai/domain/entities/ai_draft.dart';
 import 'package:mobile/features/ask_ai/presentation/widgets/consent_card.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 const _draft = AiDraft(
   title: 'Fake Kerry parcel SMS',
@@ -9,7 +10,11 @@ const _draft = AiDraft(
   scamTypeCode: 'phishing_sms',
 );
 
-Widget _wrap(ConsentCard card) => MaterialApp(home: Scaffold(body: card));
+Widget _wrap(ConsentCard card) => MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Scaffold(body: card),
+    );
 
 void main() {
   testWidgets('submit button is disabled until checkbox is ticked', (tester) async {

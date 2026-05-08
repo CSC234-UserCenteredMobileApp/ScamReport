@@ -35,6 +35,7 @@ let insertedAssistantMessages: Array<{ conversationId: string; content: string; 
 let touchedConversations: string[] = [];
 let deletedConversations: string[] = [];
 let geminiTurnCalls: unknown[] = [];
+let mockTurnCount = 0;
 
 // Default Gemini stub returns a benign response. Tests can override per-case.
 let geminiStub: (input: unknown) => unknown = () => ({
@@ -147,6 +148,7 @@ mock.module('../src/core/db/client', () => ({
     },
     aiMessage: {
       findMany: async () => mockMessages,
+      count: async () => mockTurnCount,
       create: async ({ data }: { data: {
         conversationId: string;
         role: string;
@@ -274,6 +276,7 @@ beforeEach(() => {
   touchedConversations = [];
   deletedConversations = [];
   geminiTurnCalls = [];
+  mockTurnCount = 0;
   geminiStub = () => ({
     text: JSON.stringify({
       reply: 'Hi! Tell me more.',
@@ -617,6 +620,21 @@ describe('POST /ask-ai/conversations/:id/messages', () => {
       }),
     );
     expect(res.status).toBe(404);
+  });
+
+  test('429 when daily turn cap exceeded', async () => {
+    mockDecoded = { uid: 'user-1', email: 'u@example.com' };
+    mockTurnCount = 30; // matches DAILY_TURN_CAP default
+    const res = await app.handle(
+      jsonReq(`/ask-ai/conversations/${VALID_CONV_ID}/messages`, {
+        method: 'POST',
+        token: 'tok',
+        body: { content: 'one more', attachmentIds: [] },
+      }),
+    );
+    expect(res.status).toBe(429);
+    const body = (await res.json()) as { code: string };
+    expect(body.code).toBe('rate_limited');
   });
 });
 

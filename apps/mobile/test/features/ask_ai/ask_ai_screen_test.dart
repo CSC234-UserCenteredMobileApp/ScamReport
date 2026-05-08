@@ -10,6 +10,7 @@ import 'package:mobile/features/ask_ai/domain/use_cases/send_turn.dart';
 import 'package:mobile/features/ask_ai/domain/use_cases/submit_drafted_report.dart';
 import 'package:mobile/features/ask_ai/presentation/ask_ai_providers.dart';
 import 'package:mobile/features/ask_ai/presentation/ask_ai_screen.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 class _StubRepo implements AskAiRepository {
   TurnOutcome? _next;
@@ -96,7 +97,11 @@ Widget _wrap(_StubRepo repo, {_StubSubmit? submit}) {
       sendTurnUseCaseProvider.overrideWith((ref) => SendTurnUseCase(repo)),
       submitDraftedReportProvider.overrideWithValue(stubSubmit),
     ],
-    child: const MaterialApp(home: AskAiScreen()),
+    child: MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: const AskAiScreen(),
+    ),
   );
 }
 
@@ -105,6 +110,7 @@ void main() {
     await tester.pumpWidget(_wrap(_StubRepo()));
     await tester.pumpAndSettle();
 
+    // Default locale resolves to en — strings come from app_en.arb.
     expect(find.text('Ask ScamReport'), findsOneWidget);
     expect(find.text('BETA'), findsOneWidget);
     expect(find.text('Hi, I\'m your scam radar.'), findsOneWidget);

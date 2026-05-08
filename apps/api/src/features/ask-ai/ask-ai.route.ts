@@ -20,7 +20,11 @@ import {
   listConversations,
   type AttachmentUploadInput,
 } from './ask-ai.service';
-import { AskAiAttachmentError, MAX_ATTACHMENTS_PER_MESSAGE } from './ask-ai.limits';
+import {
+  AskAiAttachmentError,
+  AskAiRateLimitError,
+  MAX_ATTACHMENTS_PER_MESSAGE,
+} from './ask-ai.limits';
 
 const idParam = t.Object({ id: t.String({ format: 'uuid' }) });
 const errorBody = t.Object({ error: t.String(), code: t.String() });
@@ -87,7 +91,11 @@ export const askAiRoute = new Elysia({ prefix: '/ask-ai' })
       try {
         return await handleTurnJson(user!.uid, params.id, body);
       } catch (err) {
-        if (err instanceof AskAiError || err instanceof AskAiAttachmentError) {
+        if (
+          err instanceof AskAiError ||
+          err instanceof AskAiAttachmentError ||
+          err instanceof AskAiRateLimitError
+        ) {
           set.status = err.status;
           return { error: err.message, code: err.code };
         }
@@ -101,6 +109,7 @@ export const askAiRoute = new Elysia({ prefix: '/ask-ai' })
         200: AskAiTurnResponse,
         400: errorBody,
         404: errorBody,
+        429: errorBody,
       },
     },
   )
@@ -135,7 +144,11 @@ export const askAiRoute = new Elysia({ prefix: '/ask-ai' })
         }
         return await handleTurn(user!.uid, params.id, content, attachments);
       } catch (err) {
-        if (err instanceof AskAiError || err instanceof AskAiAttachmentError) {
+        if (
+          err instanceof AskAiError ||
+          err instanceof AskAiAttachmentError ||
+          err instanceof AskAiRateLimitError
+        ) {
           set.status = err.status;
           return { error: err.message, code: err.code };
         }
@@ -156,6 +169,7 @@ export const askAiRoute = new Elysia({ prefix: '/ask-ai' })
         404: errorBody,
         413: errorBody,
         415: errorBody,
+        429: errorBody,
       },
     },
   );
