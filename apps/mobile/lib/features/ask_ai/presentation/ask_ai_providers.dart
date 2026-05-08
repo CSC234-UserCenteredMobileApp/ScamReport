@@ -162,7 +162,11 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
 
   Future<void> sendMessage(String content) async {
     final trimmed = content.trim();
-    if (trimmed.isEmpty || state.isSending) return;
+    // Allow image-only sends: empty trimmed content is OK as long as the
+    // user has staged at least one attachment. Reject only when both are
+    // empty or a send is already in flight.
+    if (state.isSending) return;
+    if (trimmed.isEmpty && state.stagedAttachments.isEmpty) return;
     state = state.copyWith(isSending: true, clearError: true);
     try {
       final attachments = state.stagedAttachments
@@ -201,7 +205,16 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
         clearActiveEvidence: true,
       );
     } catch (err) {
-      state = state.copyWith(isSending: false, error: err);
+      // Clear staged attachments on failure too — leaving the chip in the
+      // composer makes it look like the file is "stuck" and confuses retry
+      // (the bytes are still cached in conversationAttachments via the
+      // success-path merge, which never ran here, so the user re-attaches
+      // intentionally).
+      state = state.copyWith(
+        isSending: false,
+        stagedAttachments: const [],
+        error: err,
+      );
     }
   }
 

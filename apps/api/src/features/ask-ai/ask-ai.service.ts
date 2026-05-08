@@ -14,7 +14,7 @@ import type {
   AskAiTurnResponse,
 } from '@my-product/shared';
 import { searchSimilarReports } from '../../core/rag/retrieval';
-import { uploadFile } from '../../core/supabase/storage';
+import { getSignedUrl, uploadFile } from '../../core/supabase/storage';
 import * as repo from './ask-ai.repository';
 import { runTurn } from './ask-ai.gemini';
 import {
@@ -78,7 +78,7 @@ export async function getConversation(
     id: conv.id,
     createdAt: conv.createdAt.toISOString(),
     linkedReportId: conv.linkedReportId,
-    messages: messages.map(toAskAiMessage),
+    messages: await Promise.all(messages.map(toAskAiMessage)),
   };
 }
 
@@ -185,8 +185,8 @@ export async function handleTurn(
   await repo.touchConversation(conversationId);
 
   return {
-    userMessage: toAskAiMessage(userMessage),
-    assistantMessage: toAskAiMessage(assistantMessage),
+    userMessage: await toAskAiMessage(userMessage),
+    assistantMessage: await toAskAiMessage(assistantMessage),
     intentDetected: turn.intentDetected,
     reportable: turn.reportable,
     hasEnoughInfo: turn.hasEnoughInfo,
@@ -213,19 +213,34 @@ export async function handleTurnJson(
   return handleTurn(userId, conversationId, body.content, []);
 }
 
-function toAskAiMessage(m: repo.PersistedMessage): AskAiMessage {
+async function toAskAiMessage(m: repo.PersistedMessage): Promise<AskAiMessage> {
+  const attachments = await Promise.all(
+    m.attachments.map(async (a) => {
+      let signedUrl: string | null = null;
+      try {
+        signedUrl = await getSignedUrl(ATTACHMENTS_BUCKET, a.storagePath, 3600);
+      } catch (err) {
+        // Fall back to null URL — message body still renders. Logged so the
+        // sign-failure rate is observable in production.
+        console.error('[ask-ai] sign-url-failed', {
+          storagePath: a.storagePath,
+          err,
+        });
+      }
+      return {
+        id: a.id,
+        mimeType: a.mimeType,
+        sizeBytes: Number(a.sizeBytes),
+        signedUrl,
+      };
+    }),
+  );
   return {
     id: m.id,
     role: m.role,
     content: m.content,
     intentDetected: m.intentDetected,
     createdAt: m.createdAt.toISOString(),
-    attachments: m.attachments.map((a) => ({
-      id: a.id,
-      mimeType: a.mimeType,
-      sizeBytes: Number(a.sizeBytes),
-      // PR-5 will sign attachment URLs here.
-      signedUrl: null,
-    })),
+    attachments,
   };
 }

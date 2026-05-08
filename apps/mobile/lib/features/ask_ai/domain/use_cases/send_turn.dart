@@ -14,8 +14,10 @@ class SendTurnUseCase {
     required String content,
     List<TurnAttachment> attachments = const [],
   }) async {
-    if (content.trim().isEmpty) {
-      throw ArgumentError('content must not be empty');
+    // Allow image-only sends: empty content is OK as long as at least one
+    // attachment is present. Reject only when both are empty.
+    if (content.trim().isEmpty && attachments.isEmpty) {
+      throw ArgumentError('content or attachments required');
     }
     final id = conversationId ?? await _repo.createConversation();
     final outcome = attachments.isEmpty

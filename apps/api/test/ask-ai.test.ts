@@ -717,12 +717,18 @@ describe('POST /ask-ai/conversations/:id/messages/multipart', () => {
     expect(body.code).toBe('unsupported_media_type');
   });
 
-  test('400 when content is empty even if a file is attached', async () => {
+  test('image-only send (empty content + file) succeeds', async () => {
     mockDecoded = { uid: 'user-1', email: 'u@example.com' };
     const file = new File([new Uint8Array([1, 2])], 'a.jpg', { type: 'image/jpeg' });
     const res = await app.handle(
       multipartReq('tok', { content: '', file0: file }),
     );
+    expect(res.status).toBe(200);
+  });
+
+  test('400 when both content empty and no file attached', async () => {
+    mockDecoded = { uid: 'user-1', email: 'u@example.com' };
+    const res = await app.handle(multipartReq('tok', { content: '' }));
     expect([400, 422]).toContain(res.status);
   });
 
