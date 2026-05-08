@@ -1261,6 +1261,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Maximum 5 files.'**
   String get askAiEvidenceCapReached;
+
+  /// No description provided for @askAiRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get askAiRetry;
 }
 
 class _AppLocalizationsDelegate
