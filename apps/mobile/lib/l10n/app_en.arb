@@ -237,5 +237,12 @@
   "askAiSignInTitle": "Sign in to use Ask AI",
   "askAiSignInBody": "Ask AI helps you identify scams and get guidance on what to do next.",
   "askAiSignInCta": "Sign in or register",
-  "askAiComingSoon": "Ask AI — coming soon"
+  "askAiComingSoon": "Ask AI — coming soon",
+  "askAiEvidenceTitle": "Evidence",
+  "askAiEvidenceAdd": "Add evidence",
+  "askAiEvidenceCount": "{count}/5",
+  "@askAiEvidenceCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "askAiEvidenceCapReached": "Maximum 5 files."
 }

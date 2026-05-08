@@ -623,4 +623,18 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get askAiComingSoon => 'Ask AI — เร็ว ๆ นี้';
+
+  @override
+  String get askAiEvidenceTitle => 'หลักฐาน';
+
+  @override
+  String get askAiEvidenceAdd => 'เพิ่มหลักฐาน';
+
+  @override
+  String askAiEvidenceCount(int count) {
+    return '$count/5';
+  }
+
+  @override
+  String get askAiEvidenceCapReached => 'แนบได้สูงสุด 5 ไฟล์';
 }

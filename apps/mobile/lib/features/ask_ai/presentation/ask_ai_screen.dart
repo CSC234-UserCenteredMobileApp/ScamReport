@@ -48,13 +48,19 @@ class _AskAiScreenState extends ConsumerState<AskAiScreen> {
   }
 
   Future<void> _openEditor(AiDraft current) async {
-    final updated = await showModalBottomSheet<AiDraft>(
+    final state = ref.read(askAiChatControllerProvider);
+    final updated = await showModalBottomSheet<DraftEditorResult>(
       context: context,
       isScrollControlled: true,
-      builder: (_) => DraftEditorSheet(initial: current),
+      builder: (_) => DraftEditorSheet(
+        initial: current,
+        initialEvidence: state.effectiveEvidence,
+      ),
     );
     if (updated != null) {
-      ref.read(askAiChatControllerProvider.notifier).updateDraft(updated);
+      ref
+          .read(askAiChatControllerProvider.notifier)
+          .updateDraft(updated.draft, evidence: updated.evidence);
     }
   }
 
@@ -193,26 +199,32 @@ class _AskAiScreenState extends ConsumerState<AskAiScreen> {
             child: Column(
               children: [
                 if (state.stagedAttachments.isNotEmpty)
-                  SizedBox(
-                    key: const Key('askAiStagedRow'),
-                    height: 80,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      itemCount: state.stagedAttachments.length,
-                      itemBuilder: (_, i) {
-                        final s = state.stagedAttachments[i];
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: AttachmentChip(
-                            bytes: s.bytes,
-                            mimeType: s.mimeType,
-                            onRemove: () => ref
-                                .read(askAiChatControllerProvider.notifier)
-                                .removeStagedAttachment(i),
-                          ),
-                        );
-                      },
+                  RepaintBoundary(
+                    child: SizedBox(
+                      key: const Key('askAiStagedRow'),
+                      height: 80,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        itemCount: state.stagedAttachments.length,
+                        itemBuilder: (_, i) {
+                          final s = state.stagedAttachments[i];
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            // Stable ValueKey on bytes identity so Flutter
+                            // reuses the same _AttachmentChipState (and its
+                            // hoisted MemoryImage) across rebuilds.
+                            child: AttachmentChip(
+                              key: ValueKey(s.bytes),
+                              bytes: s.bytes,
+                              mimeType: s.mimeType,
+                              onRemove: () => ref
+                                  .read(askAiChatControllerProvider.notifier)
+                                  .removeStagedAttachment(i),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
                 Padding(

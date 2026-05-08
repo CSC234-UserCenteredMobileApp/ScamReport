@@ -60,7 +60,9 @@ class AskAiChatState {
     this.messages = const [],
     this.lastOutcome,
     this.activeDraft,
+    this.activeEvidence,
     this.stagedAttachments = const [],
+    this.conversationAttachments = const [],
     this.isSending = false,
     this.isSubmitting = false,
     this.submittedReportId,
@@ -68,6 +70,19 @@ class AskAiChatState {
   });
 
   final List<StagedAttachment> stagedAttachments;
+  // Cumulative cache: every file the user has attached during this session's
+  // chat. Survives the per-turn `stagedAttachments` clear so the editor can
+  // pre-fill its evidence list. Reset on `reset()` and `loadConversation()`.
+  final List<StagedAttachment> conversationAttachments;
+  // Editor-curated evidence. null = user hasn't opened the editor yet, so
+  // submit defaults to conversationAttachments. Non-null (incl. empty) =
+  // user has explicitly chosen what to attach.
+  final List<StagedAttachment>? activeEvidence;
+
+  /// What submitActiveDraft will actually upload. Falls back to the
+  /// conversation cumulative cache when the user hasn't curated yet.
+  List<StagedAttachment> get effectiveEvidence =>
+      activeEvidence ?? conversationAttachments;
 
   final String? conversationId;
   final List<ChatMessage> messages;
@@ -90,7 +105,9 @@ class AskAiChatState {
     List<ChatMessage>? messages,
     TurnOutcome? lastOutcome,
     AiDraft? activeDraft,
+    List<StagedAttachment>? activeEvidence,
     List<StagedAttachment>? stagedAttachments,
+    List<StagedAttachment>? conversationAttachments,
     bool? isSending,
     bool? isSubmitting,
     String? submittedReportId,
@@ -98,6 +115,7 @@ class AskAiChatState {
     bool clearError = false,
     bool clearOutcome = false,
     bool clearDraft = false,
+    bool clearActiveEvidence = false,
     bool clearSubmittedReport = false,
   }) {
     return AskAiChatState(
@@ -105,7 +123,12 @@ class AskAiChatState {
       messages: messages ?? this.messages,
       lastOutcome: clearOutcome ? null : (lastOutcome ?? this.lastOutcome),
       activeDraft: clearDraft ? null : (activeDraft ?? this.activeDraft),
+      activeEvidence: clearActiveEvidence
+          ? null
+          : (activeEvidence ?? this.activeEvidence),
       stagedAttachments: stagedAttachments ?? this.stagedAttachments,
+      conversationAttachments:
+          conversationAttachments ?? this.conversationAttachments,
       isSending: isSending ?? this.isSending,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       submittedReportId: clearSubmittedReport
@@ -156,6 +179,8 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
       );
       // Reset the active draft to whatever Gemini just produced — the user
       // might have tweaked an old draft and is now asking the AI to redraft.
+      // Move the freshly-sent staged attachments into the cumulative
+      // conversation cache so the editor can pre-fill them.
       state = state.copyWith(
         conversationId: result.conversationId,
         messages: [
@@ -166,8 +191,14 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
         lastOutcome: result.outcome,
         activeDraft: result.outcome.draft,
         stagedAttachments: const [],
+        conversationAttachments: [
+          ...state.conversationAttachments,
+          ...state.stagedAttachments,
+        ],
         isSending: false,
         clearDraft: result.outcome.draft == null,
+        // Reset evidence curation on new turn — user might be starting over.
+        clearActiveEvidence: true,
       );
     } catch (err) {
       state = state.copyWith(isSending: false, error: err);
@@ -175,12 +206,19 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
   }
 
   /// Replace the draft fields with user-edited values (DraftEditorSheet).
-  void updateDraft(AiDraft updated) {
-    state = state.copyWith(activeDraft: updated);
+  /// Optionally also overwrites the evidence list curated in the same sheet.
+  void updateDraft(AiDraft updated, {List<StagedAttachment>? evidence}) {
+    state = state.copyWith(
+      activeDraft: updated,
+      activeEvidence: evidence,
+    );
   }
 
   /// Submit the active draft to POST /reports. Sets `submittedReportId` on
   /// success so the chat bubble can announce + deep-link to My Reports.
+  ///
+  /// Evidence list comes from state.effectiveEvidence (editor-curated when
+  /// the user opened the sheet, else the cumulative chat attachments).
   Future<void> submitActiveDraft() async {
     final draft = state.activeDraft;
     final convId = state.conversationId;
@@ -191,6 +229,13 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
         draft: draft,
         sourceConversationId: convId,
         clientSubmissionId: '$convId-${DateTime.now().millisecondsSinceEpoch}',
+        evidenceFiles: state.effectiveEvidence
+            .map((s) => EvidenceFileInput(
+                  bytes: s.bytes,
+                  mimeType: s.mimeType,
+                  filename: s.filename,
+                ))
+            .toList(growable: false),
       );
       state = state.copyWith(
         isSubmitting: false,
