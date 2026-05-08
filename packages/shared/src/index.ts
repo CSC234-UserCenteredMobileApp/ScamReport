@@ -5,3 +5,4 @@ export * from './schemas/stats';
 export * from './schemas/announcements';
 export * from './schemas/reports';
 export * from './schemas/admin-reports';
+export * from './schemas/ask-ai';

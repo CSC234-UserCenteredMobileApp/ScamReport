@@ -1,7 +1,19 @@
 import { Elysia, t } from 'elysia';
-import { ReportDetailResponse, ReportListResponse } from '@my-product/shared';
+import {
+  CreateReportRequest,
+  CreateReportResponse,
+  EvidenceUploadResponse,
+  ReportDetailResponse,
+  ReportListResponse,
+} from '@my-product/shared';
 import { getPrisma } from '../../core/db/client';
 import { getSignedUrl } from '../../core/supabase/storage';
+import { requireAuth } from '../../core/middleware/auth.middleware';
+import {
+  createReport,
+  ReportSubmitError,
+  uploadEvidence,
+} from './reports.service';
 
 export const reportsRoute = new Elysia().get(
   '/reports',
@@ -104,6 +116,74 @@ export const reportsRoute = new Elysia().get(
     response: {
       200: ReportDetailResponse,
       404: t.Object({ error: t.String() }),
+    },
+  },
+)
+// POST /reports/evidence — upload a single evidence file. Returns metadata
+// the client passes back inside CreateReportRequest.evidenceFiles.
+//
+// Body validation lives in the handler (uploadEvidence) rather than the
+// route schema: Elysia 1.x's t.File requires the optional `file-type`
+// package for runtime MIME sniffing, and we want clear 415/413 codes
+// regardless. The Authorization gate runs before body parsing because
+// auth is `requireAuth`'s onBeforeHandle hook.
+.use(requireAuth)
+.post(
+  '/reports/evidence',
+  async ({ body, user, set }) => {
+    const file = (body as { file?: File }).file;
+    if (!file || typeof (file as File).arrayBuffer !== 'function') {
+      set.status = 400;
+      return { error: 'Missing file', code: 'missing_file' };
+    }
+    try {
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const meta = await uploadEvidence(user!.uid, {
+        name: file.name,
+        type: file.type,
+        bytes,
+      });
+      return meta;
+    } catch (err) {
+      if (err instanceof ReportSubmitError) {
+        set.status = err.status;
+        return { error: err.message, code: err.code };
+      }
+      throw err;
+    }
+  },
+  {
+    body: t.Object({
+      file: t.Any(),
+    }),
+    response: {
+      200: EvidenceUploadResponse,
+      400: t.Object({ error: t.String(), code: t.String() }),
+      413: t.Object({ error: t.String(), code: t.String() }),
+      415: t.Object({ error: t.String(), code: t.String() }),
+    },
+  },
+)
+// POST /reports — create a new pending report. Authoritative submit path
+// for both the manual /submit-report screen and Ask AI's drafted submission.
+.post(
+  '/reports',
+  async ({ body, user, set }) => {
+    try {
+      return await createReport(user!.uid, body);
+    } catch (err) {
+      if (err instanceof ReportSubmitError) {
+        set.status = err.status;
+        return { error: err.message, code: err.code };
+      }
+      throw err;
+    }
+  },
+  {
+    body: CreateReportRequest,
+    response: {
+      200: CreateReportResponse,
+      400: t.Object({ error: t.String(), code: t.String() }),
     },
   },
 );

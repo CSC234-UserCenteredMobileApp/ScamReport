@@ -467,4 +467,161 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get callScreeningSyncFailed =>
       'Could not update phone list — cached data will be used';
+
+  @override
+  String get askAiTitle => 'Ask ScamReport';
+
+  @override
+  String get askAiBeta => 'BETA';
+
+  @override
+  String get askAiNewChat => 'New chat';
+
+  @override
+  String get askAiPastChats => 'Past chats';
+
+  @override
+  String get askAiRefresh => 'Refresh';
+
+  @override
+  String get askAiNoConversations =>
+      'No past chats yet. Send a message to start one.';
+
+  @override
+  String get askAiLoadFailed => 'Could not load conversations.';
+
+  @override
+  String get askAiNoPreview => '(no preview)';
+
+  @override
+  String get askAiDeletePrompt => 'Delete conversation?';
+
+  @override
+  String get askAiDeleteIrreversible => 'This cannot be undone.';
+
+  @override
+  String get askAiDelete => 'Delete';
+
+  @override
+  String get askAiCancel => 'Cancel';
+
+  @override
+  String get askAiDeleteFailed => 'Failed to delete conversation.';
+
+  @override
+  String get askAiWelcomeTitle => 'Hi, I\'m your scam radar.';
+
+  @override
+  String get askAiWelcomeBody =>
+      'Tell me what happened — a weird SMS, a suspicious call, a too-good offer — and I\'ll tell you if others have seen it.';
+
+  @override
+  String get askAiDisclaimer => 'AI can make mistakes · check important info';
+
+  @override
+  String get askAiThinking => 'Thinking…';
+
+  @override
+  String get askAiSendFailed =>
+      'Couldn\'t send your message. Please try again.';
+
+  @override
+  String get askAiComposerHint => 'Tell me what happened…';
+
+  @override
+  String get askAiAttach => 'Attach a file';
+
+  @override
+  String get askAiAttachCamera => 'Take photo';
+
+  @override
+  String get askAiAttachGallery => 'Choose from gallery';
+
+  @override
+  String get askAiAttachUnsupported =>
+      'Unsupported file type. Use JPEG, PNG, WebP, GIF, or PDF.';
+
+  @override
+  String get askAiAttachTooLarge => 'File is too large (max 10 MB).';
+
+  @override
+  String get askAiConsentTitle => 'Submit this report?';
+
+  @override
+  String get askAiConsentEdit => 'Edit draft';
+
+  @override
+  String get askAiConsentRedraft => 'Ask AI to redraft';
+
+  @override
+  String get askAiConsentNotice =>
+      'By submitting, you agree that this report — but never your identity — may be published to the verified feed once approved.';
+
+  @override
+  String get askAiConsentAgree => 'I understand and agree.';
+
+  @override
+  String get askAiSubmit => 'Submit report';
+
+  @override
+  String get askAiSubmitting => 'Submitting…';
+
+  @override
+  String get askAiSubmittedTitle => 'Report submitted';
+
+  @override
+  String get askAiSubmittedBody => 'Track it in My Reports.';
+
+  @override
+  String get askAiOpen => 'Open';
+
+  @override
+  String get askAiDraftSheetTitle => 'Edit draft';
+
+  @override
+  String get askAiDraftFieldTitle => 'Title';
+
+  @override
+  String get askAiDraftFieldDescription => 'Description';
+
+  @override
+  String get askAiDraftFieldScamType => 'Scam type';
+
+  @override
+  String get askAiDraftFieldIdentifier => 'Target identifier (phone / URL)';
+
+  @override
+  String get askAiDraftFieldKind => 'Identifier kind';
+
+  @override
+  String get askAiSave => 'Save';
+
+  @override
+  String get askAiKindNone => '—';
+
+  @override
+  String get askAiKindPhone => 'Phone';
+
+  @override
+  String get askAiKindUrl => 'URL';
+
+  @override
+  String get askAiKindOther => 'Other';
+
+  @override
+  String get askAiAskRedraftPrompt =>
+      'Please redraft the report based on what we discussed.';
+
+  @override
+  String get askAiSignInTitle => 'Sign in to use Ask AI';
+
+  @override
+  String get askAiSignInBody =>
+      'Ask AI helps you identify scams and get guidance on what to do next.';
+
+  @override
+  String get askAiSignInCta => 'Sign in or register';
+
+  @override
+  String get askAiComingSoon => 'Ask AI — coming soon';
 }

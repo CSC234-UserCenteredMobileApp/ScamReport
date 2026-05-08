@@ -937,6 +937,306 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not update phone list — cached data will be used'**
   String get callScreeningSyncFailed;
+
+  /// No description provided for @askAiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask ScamReport'**
+  String get askAiTitle;
+
+  /// No description provided for @askAiBeta.
+  ///
+  /// In en, this message translates to:
+  /// **'BETA'**
+  String get askAiBeta;
+
+  /// No description provided for @askAiNewChat.
+  ///
+  /// In en, this message translates to:
+  /// **'New chat'**
+  String get askAiNewChat;
+
+  /// No description provided for @askAiPastChats.
+  ///
+  /// In en, this message translates to:
+  /// **'Past chats'**
+  String get askAiPastChats;
+
+  /// No description provided for @askAiRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get askAiRefresh;
+
+  /// No description provided for @askAiNoConversations.
+  ///
+  /// In en, this message translates to:
+  /// **'No past chats yet. Send a message to start one.'**
+  String get askAiNoConversations;
+
+  /// No description provided for @askAiLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load conversations.'**
+  String get askAiLoadFailed;
+
+  /// No description provided for @askAiNoPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'(no preview)'**
+  String get askAiNoPreview;
+
+  /// No description provided for @askAiDeletePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete conversation?'**
+  String get askAiDeletePrompt;
+
+  /// No description provided for @askAiDeleteIrreversible.
+  ///
+  /// In en, this message translates to:
+  /// **'This cannot be undone.'**
+  String get askAiDeleteIrreversible;
+
+  /// No description provided for @askAiDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get askAiDelete;
+
+  /// No description provided for @askAiCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get askAiCancel;
+
+  /// No description provided for @askAiDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete conversation.'**
+  String get askAiDeleteFailed;
+
+  /// No description provided for @askAiWelcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi, I\'m your scam radar.'**
+  String get askAiWelcomeTitle;
+
+  /// No description provided for @askAiWelcomeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell me what happened — a weird SMS, a suspicious call, a too-good offer — and I\'ll tell you if others have seen it.'**
+  String get askAiWelcomeBody;
+
+  /// No description provided for @askAiDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'AI can make mistakes · check important info'**
+  String get askAiDisclaimer;
+
+  /// No description provided for @askAiThinking.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking…'**
+  String get askAiThinking;
+
+  /// No description provided for @askAiSendFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t send your message. Please try again.'**
+  String get askAiSendFailed;
+
+  /// No description provided for @askAiComposerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell me what happened…'**
+  String get askAiComposerHint;
+
+  /// No description provided for @askAiAttach.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach a file'**
+  String get askAiAttach;
+
+  /// No description provided for @askAiAttachCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get askAiAttachCamera;
+
+  /// No description provided for @askAiAttachGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from gallery'**
+  String get askAiAttachGallery;
+
+  /// No description provided for @askAiAttachUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsupported file type. Use JPEG, PNG, WebP, GIF, or PDF.'**
+  String get askAiAttachUnsupported;
+
+  /// No description provided for @askAiAttachTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'File is too large (max 10 MB).'**
+  String get askAiAttachTooLarge;
+
+  /// No description provided for @askAiConsentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit this report?'**
+  String get askAiConsentTitle;
+
+  /// No description provided for @askAiConsentEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit draft'**
+  String get askAiConsentEdit;
+
+  /// No description provided for @askAiConsentRedraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask AI to redraft'**
+  String get askAiConsentRedraft;
+
+  /// No description provided for @askAiConsentNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'By submitting, you agree that this report — but never your identity — may be published to the verified feed once approved.'**
+  String get askAiConsentNotice;
+
+  /// No description provided for @askAiConsentAgree.
+  ///
+  /// In en, this message translates to:
+  /// **'I understand and agree.'**
+  String get askAiConsentAgree;
+
+  /// No description provided for @askAiSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit report'**
+  String get askAiSubmit;
+
+  /// No description provided for @askAiSubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitting…'**
+  String get askAiSubmitting;
+
+  /// No description provided for @askAiSubmittedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report submitted'**
+  String get askAiSubmittedTitle;
+
+  /// No description provided for @askAiSubmittedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Track it in My Reports.'**
+  String get askAiSubmittedBody;
+
+  /// No description provided for @askAiOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get askAiOpen;
+
+  /// No description provided for @askAiDraftSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit draft'**
+  String get askAiDraftSheetTitle;
+
+  /// No description provided for @askAiDraftFieldTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get askAiDraftFieldTitle;
+
+  /// No description provided for @askAiDraftFieldDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get askAiDraftFieldDescription;
+
+  /// No description provided for @askAiDraftFieldScamType.
+  ///
+  /// In en, this message translates to:
+  /// **'Scam type'**
+  String get askAiDraftFieldScamType;
+
+  /// No description provided for @askAiDraftFieldIdentifier.
+  ///
+  /// In en, this message translates to:
+  /// **'Target identifier (phone / URL)'**
+  String get askAiDraftFieldIdentifier;
+
+  /// No description provided for @askAiDraftFieldKind.
+  ///
+  /// In en, this message translates to:
+  /// **'Identifier kind'**
+  String get askAiDraftFieldKind;
+
+  /// No description provided for @askAiSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get askAiSave;
+
+  /// No description provided for @askAiKindNone.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get askAiKindNone;
+
+  /// No description provided for @askAiKindPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get askAiKindPhone;
+
+  /// No description provided for @askAiKindUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'URL'**
+  String get askAiKindUrl;
+
+  /// No description provided for @askAiKindOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get askAiKindOther;
+
+  /// No description provided for @askAiAskRedraftPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Please redraft the report based on what we discussed.'**
+  String get askAiAskRedraftPrompt;
+
+  /// No description provided for @askAiSignInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to use Ask AI'**
+  String get askAiSignInTitle;
+
+  /// No description provided for @askAiSignInBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask AI helps you identify scams and get guidance on what to do next.'**
+  String get askAiSignInBody;
+
+  /// No description provided for @askAiSignInCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in or register'**
+  String get askAiSignInCta;
+
+  /// No description provided for @askAiComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask AI — coming soon'**
+  String get askAiComingSoon;
 }
 
 class _AppLocalizationsDelegate

@@ -467,4 +467,160 @@ class AppLocalizationsTh extends AppLocalizations {
   @override
   String get callScreeningSyncFailed =>
       'ไม่สามารถอัปเดตรายการโทรศัพท์ — จะใช้ข้อมูลที่แคชไว้';
+
+  @override
+  String get askAiTitle => 'ถาม ScamReport';
+
+  @override
+  String get askAiBeta => 'BETA';
+
+  @override
+  String get askAiNewChat => 'แชทใหม่';
+
+  @override
+  String get askAiPastChats => 'แชทที่ผ่านมา';
+
+  @override
+  String get askAiRefresh => 'รีเฟรช';
+
+  @override
+  String get askAiNoConversations =>
+      'ยังไม่มีแชทเก่า ส่งข้อความเพื่อเริ่มแชทแรก';
+
+  @override
+  String get askAiLoadFailed => 'โหลดบทสนทนาไม่สำเร็จ';
+
+  @override
+  String get askAiNoPreview => '(ไม่มีตัวอย่าง)';
+
+  @override
+  String get askAiDeletePrompt => 'ลบบทสนทนานี้ใช่ไหม?';
+
+  @override
+  String get askAiDeleteIrreversible => 'การลบไม่สามารถย้อนกลับได้';
+
+  @override
+  String get askAiDelete => 'ลบ';
+
+  @override
+  String get askAiCancel => 'ยกเลิก';
+
+  @override
+  String get askAiDeleteFailed => 'ลบบทสนทนาไม่สำเร็จ';
+
+  @override
+  String get askAiWelcomeTitle => 'สวัสดี ฉันคือผู้ช่วยตรวจจับมิจฉาชีพของคุณ';
+
+  @override
+  String get askAiWelcomeBody =>
+      'เล่าให้ฉันฟังว่าเกิดอะไรขึ้น — SMS แปลก ๆ การโทรน่าสงสัย ข้อเสนอที่ดีเกินจริง — แล้วฉันจะดูให้ว่าคนอื่นเคยเจอแบบนี้ไหม';
+
+  @override
+  String get askAiDisclaimer =>
+      'AI อาจผิดพลาดได้ · ตรวจสอบข้อมูลสำคัญด้วยตนเอง';
+
+  @override
+  String get askAiThinking => 'กำลังคิด…';
+
+  @override
+  String get askAiSendFailed => 'ส่งข้อความไม่สำเร็จ กรุณาลองใหม่';
+
+  @override
+  String get askAiComposerHint => 'เล่าให้ฉันฟัง…';
+
+  @override
+  String get askAiAttach => 'แนบไฟล์';
+
+  @override
+  String get askAiAttachCamera => 'ถ่ายรูป';
+
+  @override
+  String get askAiAttachGallery => 'เลือกจากแกลเลอรี';
+
+  @override
+  String get askAiAttachUnsupported =>
+      'ไฟล์ประเภทนี้ไม่รองรับ ใช้ JPEG, PNG, WebP, GIF หรือ PDF';
+
+  @override
+  String get askAiAttachTooLarge => 'ไฟล์ใหญ่เกินไป (สูงสุด 10 MB)';
+
+  @override
+  String get askAiConsentTitle => 'ส่งรายงานนี้ใช่ไหม?';
+
+  @override
+  String get askAiConsentEdit => 'แก้ไขร่าง';
+
+  @override
+  String get askAiConsentRedraft => 'ให้ AI ร่างใหม่';
+
+  @override
+  String get askAiConsentNotice =>
+      'เมื่อส่ง คุณยินยอมให้รายงานนี้ — แต่ไม่รวมตัวตนของคุณ — เผยแพร่ในฟีดที่ตรวจสอบแล้วเมื่อได้รับการอนุมัติ';
+
+  @override
+  String get askAiConsentAgree => 'ฉันเข้าใจและยินยอม';
+
+  @override
+  String get askAiSubmit => 'ส่งรายงาน';
+
+  @override
+  String get askAiSubmitting => 'กำลังส่ง…';
+
+  @override
+  String get askAiSubmittedTitle => 'ส่งรายงานแล้ว';
+
+  @override
+  String get askAiSubmittedBody => 'ติดตามได้ที่หน้ารายงานของฉัน';
+
+  @override
+  String get askAiOpen => 'เปิด';
+
+  @override
+  String get askAiDraftSheetTitle => 'แก้ไขร่าง';
+
+  @override
+  String get askAiDraftFieldTitle => 'หัวข้อ';
+
+  @override
+  String get askAiDraftFieldDescription => 'รายละเอียด';
+
+  @override
+  String get askAiDraftFieldScamType => 'ประเภทการหลอกลวง';
+
+  @override
+  String get askAiDraftFieldIdentifier => 'ตัวระบุเป้าหมาย (เบอร์โทร / URL)';
+
+  @override
+  String get askAiDraftFieldKind => 'ประเภทตัวระบุ';
+
+  @override
+  String get askAiSave => 'บันทึก';
+
+  @override
+  String get askAiKindNone => '—';
+
+  @override
+  String get askAiKindPhone => 'เบอร์โทร';
+
+  @override
+  String get askAiKindUrl => 'URL';
+
+  @override
+  String get askAiKindOther => 'อื่น ๆ';
+
+  @override
+  String get askAiAskRedraftPrompt => 'ช่วยร่างรายงานใหม่จากที่เราคุยกัน';
+
+  @override
+  String get askAiSignInTitle => 'เข้าสู่ระบบเพื่อใช้ Ask AI';
+
+  @override
+  String get askAiSignInBody =>
+      'Ask AI ช่วยให้คุณระบุการหลอกลวงและคำแนะนำในการดำเนินการต่อ';
+
+  @override
+  String get askAiSignInCta => 'เข้าสู่ระบบหรือสมัครสมาชิก';
+
+  @override
+  String get askAiComingSoon => 'Ask AI — เร็ว ๆ นี้';
 }

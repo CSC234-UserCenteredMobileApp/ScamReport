@@ -14,6 +14,7 @@
     "test": "bun run --filter @my-product/api test && bun run --filter @my-product/shared test && cd apps/mobile && flutter test",
     "typecheck": "bun run --filter @my-product/shared typecheck && bun run --filter @my-product/api typecheck",
     "lint": "cd apps/mobile && dart analyze",
+    "lint:fr43": "bash scripts/check-no-verdict-tokens.sh",
     "prisma:generate": "bun run --filter @my-product/api prisma:generate"
   },
   "devDependencies": {
