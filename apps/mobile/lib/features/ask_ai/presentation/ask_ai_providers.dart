@@ -1,14 +1,21 @@
+import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api_client.dart';
 import '../../../core/di/auth.dart';
+import '../../../core/di/cache.dart';
 import '../data/ask_ai_api_client.dart';
+import '../data/ask_ai_persistence.dart';
 import '../data/ask_ai_repository_impl.dart';
+import '../data/ask_ai_state_codec.dart';
 import '../data/attachment_picker.dart';
 import '../data/reports_submit_api.dart';
 import '../data/submit_drafted_report_impl.dart';
 import '../domain/ask_ai_repository.dart';
 import '../domain/entities/ai_draft.dart';
+import '../domain/entities/chat_attachment.dart';
 import '../domain/entities/chat_message.dart';
 import '../domain/entities/conversation.dart';
 import '../domain/entities/turn_outcome.dart';
@@ -45,15 +52,26 @@ final attachmentPickerProvider = Provider<AttachmentPicker>((ref) {
   return AttachmentPicker();
 });
 
+final askAiPersistenceProvider = Provider<AskAiPersistence>((ref) {
+  return AskAiPersistence(ref.watch(appDatabaseProvider));
+});
+
 final conversationListProvider =
     FutureProvider.autoDispose<List<ConversationSummary>>((ref) async {
   return ref.watch(askAiRepositoryProvider).listConversations();
 });
 
-/// In-memory chat state. PR-6 will hydrate from /ask-ai/conversations on
-/// drawer open; for v1 a fresh chat session starts empty each launch but
-/// every turn is persisted server-side, so re-opening a conversation by
-/// id later is possible via getConversation.
+/// A previous send that failed, captured so the retry banner can re-play
+/// the same content + bytes without forcing the user to re-type / re-pick.
+class FailedSendAttempt {
+  FailedSendAttempt({required this.content, required this.attachments});
+  final String content;
+  final List<StagedAttachment> attachments;
+}
+
+/// In-memory chat state. Critical fields (draft, evidence, staged,
+/// conversationAttachments, conversationId) are debounced-persisted to drift
+/// so they survive an app kill — see iter-3 plan.
 class AskAiChatState {
   AskAiChatState({
     this.conversationId,
@@ -67,6 +85,7 @@ class AskAiChatState {
     this.isSubmitting = false,
     this.submittedReportId,
     this.error,
+    this.lastFailedAttempt,
   });
 
   final List<StagedAttachment> stagedAttachments;
@@ -94,6 +113,9 @@ class AskAiChatState {
   final bool isSubmitting;
   final String? submittedReportId;
   final Object? error;
+  // Set when the most recent sendMessage threw — drives the retry banner.
+  // Cleared whenever a new send starts.
+  final FailedSendAttempt? lastFailedAttempt;
 
   bool get canOfferReport =>
       activeDraft != null &&
@@ -112,11 +134,13 @@ class AskAiChatState {
     bool? isSubmitting,
     String? submittedReportId,
     Object? error,
+    FailedSendAttempt? lastFailedAttempt,
     bool clearError = false,
     bool clearOutcome = false,
     bool clearDraft = false,
     bool clearActiveEvidence = false,
     bool clearSubmittedReport = false,
+    bool clearLastFailedAttempt = false,
   }) {
     return AskAiChatState(
       conversationId: conversationId ?? this.conversationId,
@@ -135,15 +159,88 @@ class AskAiChatState {
           ? null
           : (submittedReportId ?? this.submittedReportId),
       error: clearError ? null : (error ?? this.error),
+      lastFailedAttempt: clearLastFailedAttempt
+          ? null
+          : (lastFailedAttempt ?? this.lastFailedAttempt),
     );
   }
 }
 
 class AskAiChatController extends StateNotifier<AskAiChatState> {
-  AskAiChatController(this._sendTurn, this._submit) : super(AskAiChatState());
+  AskAiChatController(
+    this._sendTurn,
+    this._submit,
+    this._persistence,
+    this._repo,
+  ) : super(AskAiChatState()) {
+    _loadFromCache();
+  }
 
   final SendTurnUseCase _sendTurn;
   final SubmitDraftedReport _submit;
+  final AskAiPersistence _persistence;
+  final AskAiRepository _repo;
+  Timer? _saveDebounce;
+
+  static const _saveDelay = Duration(milliseconds: 500);
+
+  Future<void> _loadFromCache() async {
+    final cached = await _persistence.load();
+    if (cached == null) return;
+    // Replay the persisted snapshot. Don't blow away anything the user has
+    // typed in the half-second since launch (rare race).
+    state = state.copyWith(
+      conversationId: cached.conversationId,
+      activeDraft: cached.activeDraft,
+      activeEvidence: cached.activeEvidence,
+      stagedAttachments: cached.stagedAttachments,
+      conversationAttachments: cached.conversationAttachments,
+    );
+    final convId = cached.conversationId;
+    if (convId != null) {
+      // Refresh the message list from the server so the user sees their
+      // saved chat. Failure is non-fatal — the persisted draft + evidence
+      // still surface; we just won't have history loaded.
+      try {
+        final detail = await _repo.getConversation(convId);
+        state = state.copyWith(
+          messages: detail.messages,
+          submittedReportId: detail.linkedReportId,
+        );
+      } catch (_) {
+        // Likely 404 — conversation deleted on the server. Drop the dangling
+        // id so the next send creates a fresh conversation.
+        state = state.copyWith(conversationId: null);
+      }
+    }
+  }
+
+  void _scheduleSave() {
+    _saveDebounce?.cancel();
+    _saveDebounce = Timer(_saveDelay, () {
+      _persistence.save(
+        AskAiPersistedState(
+          conversationId: state.conversationId,
+          activeDraft: state.activeDraft,
+          activeEvidence: state.activeEvidence,
+          stagedAttachments: state.stagedAttachments,
+          conversationAttachments: state.conversationAttachments,
+        ),
+      );
+    });
+  }
+
+  @override
+  set state(AskAiChatState next) {
+    super.state = next;
+    _scheduleSave();
+  }
+
+  @override
+  void dispose() {
+    _saveDebounce?.cancel();
+    super.dispose();
+  }
 
   void stageAttachment(StagedAttachment a) {
     if (state.stagedAttachments.length >= maxAttachmentsPerMessage) return;
@@ -162,14 +259,44 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
 
   Future<void> sendMessage(String content) async {
     final trimmed = content.trim();
-    // Allow image-only sends: empty trimmed content is OK as long as the
-    // user has staged at least one attachment. Reject only when both are
-    // empty or a send is already in flight.
     if (state.isSending) return;
     if (trimmed.isEmpty && state.stagedAttachments.isEmpty) return;
-    state = state.copyWith(isSending: true, clearError: true);
+
+    // Build the optimistic user-bubble + clear the composer chip strip
+    // immediately so the UI never shows the "stuck chip" gap during the
+    // network round-trip.
+    final stagedSnapshot = List<StagedAttachment>.unmodifiable(
+      state.stagedAttachments,
+    );
+    final tempId =
+        'temp-${DateTime.now().microsecondsSinceEpoch}-${state.messages.length}';
+    final optimisticMessage = ChatMessage(
+      id: tempId,
+      role: ChatRole.user,
+      content: trimmed,
+      intentDetected: false,
+      createdAt: DateTime.now(),
+      attachments: [
+        for (final s in stagedSnapshot)
+          ChatAttachment(
+            id: 'temp-att-${s.bytes.hashCode}',
+            mimeType: s.mimeType,
+            sizeBytes: s.sizeBytes,
+            localBytes: s.bytes,
+          ),
+      ],
+    );
+
+    state = state.copyWith(
+      messages: [...state.messages, optimisticMessage],
+      stagedAttachments: const [],
+      isSending: true,
+      clearError: true,
+      clearLastFailedAttempt: true,
+    );
+
     try {
-      final attachments = state.stagedAttachments
+      final attachments = stagedSnapshot
           .map((s) => TurnAttachment(
                 bytes: s.bytes,
                 mimeType: s.mimeType,
@@ -181,41 +308,53 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
         content: trimmed,
         attachments: attachments,
       );
-      // Reset the active draft to whatever Gemini just produced — the user
-      // might have tweaked an old draft and is now asking the AI to redraft.
-      // Move the freshly-sent staged attachments into the cumulative
-      // conversation cache so the editor can pre-fill them.
+      // Replace the optimistic message with the server-returned one (which
+      // has the real id + signedUrl on each attachment), then append the
+      // assistant reply.
+      final swapped = state.messages
+          .where((m) => m.id != tempId)
+          .toList(growable: true)
+        ..add(result.outcome.userMessage)
+        ..add(result.outcome.assistantMessage);
       state = state.copyWith(
         conversationId: result.conversationId,
-        messages: [
-          ...state.messages,
-          result.outcome.userMessage,
-          result.outcome.assistantMessage,
-        ],
+        messages: swapped,
         lastOutcome: result.outcome,
         activeDraft: result.outcome.draft,
-        stagedAttachments: const [],
         conversationAttachments: [
           ...state.conversationAttachments,
-          ...state.stagedAttachments,
+          ...stagedSnapshot,
         ],
         isSending: false,
         clearDraft: result.outcome.draft == null,
-        // Reset evidence curation on new turn — user might be starting over.
         clearActiveEvidence: true,
       );
     } catch (err) {
-      // Clear staged attachments on failure too — leaving the chip in the
-      // composer makes it look like the file is "stuck" and confuses retry
-      // (the bytes are still cached in conversationAttachments via the
-      // success-path merge, which never ran here, so the user re-attaches
-      // intentionally).
+      // Optimistic bubble persists in messages — keeps user's transcript
+      // honest. Capture the attempt so the retry banner can re-play.
       state = state.copyWith(
         isSending: false,
-        stagedAttachments: const [],
         error: err,
+        lastFailedAttempt: FailedSendAttempt(
+          content: trimmed,
+          attachments: stagedSnapshot,
+        ),
       );
     }
+  }
+
+  /// Replays the most recent failed sendMessage. Re-stages the bytes and
+  /// fires sendMessage with the same content. Optimistic bubble from the
+  /// failed attempt stays in the chat list above the retry — user's
+  /// transcript is honest about what they tried.
+  Future<void> retryLastFailedSend() async {
+    final attempt = state.lastFailedAttempt;
+    if (attempt == null || state.isSending) return;
+    state = state.copyWith(
+      stagedAttachments: attempt.attachments,
+      clearError: true,
+    );
+    await sendMessage(attempt.content);
   }
 
   /// Replace the draft fields with user-edited values (DraftEditorSheet).
@@ -227,11 +366,7 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
     );
   }
 
-  /// Submit the active draft to POST /reports. Sets `submittedReportId` on
-  /// success so the chat bubble can announce + deep-link to My Reports.
-  ///
-  /// Evidence list comes from state.effectiveEvidence (editor-curated when
-  /// the user opened the sheet, else the cumulative chat attachments).
+  /// Submit the active draft to POST /reports.
   Future<void> submitActiveDraft() async {
     final draft = state.activeDraft;
     final convId = state.conversationId;
@@ -254,6 +389,10 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
         isSubmitting: false,
         submittedReportId: result.reportId,
       );
+      // Submit succeeded — drop the persisted snapshot so a kill+reopen
+      // doesn't surface a stale draft.
+      _saveDebounce?.cancel();
+      unawaited(_persistence.clear());
     } catch (err) {
       state = state.copyWith(isSubmitting: false, error: err);
     }
@@ -261,11 +400,11 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
 
   void reset() {
     state = AskAiChatState();
+    _saveDebounce?.cancel();
+    unawaited(_persistence.clear());
   }
 
-  /// Load a past conversation into the chat panel. Replaces the current
-  /// messages list and clears any staged attachments / drafts (those are
-  /// per-session and don't survive a swap).
+  /// Load a past conversation into the chat panel.
   Future<void> loadConversation(AskAiRepository repo, String conversationId) async {
     state = state.copyWith(isSending: true, clearError: true);
     try {
@@ -275,6 +414,10 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
         messages: detail.messages,
         submittedReportId: detail.linkedReportId,
       );
+      // Different conversation — drop any stale persisted snapshot from a
+      // previous session.
+      _saveDebounce?.cancel();
+      unawaited(_persistence.clear());
     } catch (err) {
       state = state.copyWith(isSending: false, error: err);
     }
@@ -286,5 +429,11 @@ final askAiChatControllerProvider =
   return AskAiChatController(
     ref.watch(sendTurnUseCaseProvider),
     ref.watch(submitDraftedReportProvider),
+    ref.watch(askAiPersistenceProvider),
+    ref.watch(askAiRepositoryProvider),
   );
 });
+
+// Helper used by tests + bubble widgets — keeps `Uint8List` import here so
+// the entity file stays minimal.
+typedef OptimisticBytes = Uint8List;

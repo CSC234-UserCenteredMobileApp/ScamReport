@@ -234,5 +234,6 @@
   "@askAiEvidenceCount": {
     "placeholders": { "count": { "type": "int" } }
   },
-  "askAiEvidenceCapReached": "แนบได้สูงสุด 5 ไฟล์"
+  "askAiEvidenceCapReached": "แนบได้สูงสุด 5 ไฟล์",
+  "askAiRetry": "ลองอีกครั้ง"
 }

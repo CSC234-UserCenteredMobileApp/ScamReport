@@ -192,10 +192,30 @@ class _AskAiScreenState extends ConsumerState<AskAiScreen> {
             Container(
               width: double.infinity,
               color: theme.colorScheme.errorContainer,
-              padding: const EdgeInsets.all(12),
-              child: Text(
-                l.askAiSendFailed,
-                style: TextStyle(color: theme.colorScheme.onErrorContainer),
+              padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l.askAiSendFailed,
+                      style:
+                          TextStyle(color: theme.colorScheme.onErrorContainer),
+                    ),
+                  ),
+                  if (state.lastFailedAttempt != null)
+                    TextButton(
+                      key: const Key('askAiRetryButton'),
+                      onPressed: () => ref
+                          .read(askAiChatControllerProvider.notifier)
+                          .retryLastFailedSend(),
+                      child: Text(
+                        l.askAiRetry,
+                        style: TextStyle(
+                            color: theme.colorScheme.onErrorContainer,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                ],
               ),
             ),
           SafeArea(
@@ -384,17 +404,37 @@ class _MessageBubble extends StatelessWidget {
   }
 }
 
-class _BubbleAttachment extends StatelessWidget {
+class _BubbleAttachment extends StatefulWidget {
   const _BubbleAttachment({required this.attachment, required this.onPrimary});
   final ChatAttachment attachment;
   final bool onPrimary;
 
-  bool get _isImage => attachment.mimeType.startsWith('image/');
+  @override
+  State<_BubbleAttachment> createState() => _BubbleAttachmentState();
+}
+
+class _BubbleAttachmentState extends State<_BubbleAttachment> {
+  // Hoisted MemoryImage so optimistic bubbles don't redecode the file on
+  // every rebuild during the in-flight send (same pattern AttachmentChip
+  // uses in iter-2).
+  late final ImageProvider? _localProvider =
+      widget.attachment.localBytes != null &&
+              widget.attachment.mimeType.startsWith('image/')
+          ? MemoryImage(widget.attachment.localBytes!)
+          : null;
+
+  @override
+  void dispose() {
+    _localProvider?.evict();
+    super.dispose();
+  }
+
+  bool get _isImage => widget.attachment.mimeType.startsWith('image/');
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final url = attachment.signedUrl;
+    final url = widget.attachment.signedUrl;
     final placeholder = Container(
       width: 160,
       height: 160,
@@ -406,6 +446,24 @@ class _BubbleAttachment extends StatelessWidget {
         color: theme.colorScheme.onSurfaceVariant,
       ),
     );
+
+    // Optimistic bubble — render local bytes via the hoisted provider.
+    if (_localProvider != null) {
+      return RepaintBoundary(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Image(
+            image: _localProvider,
+            width: 160,
+            height: 160,
+            fit: BoxFit.cover,
+            gaplessPlayback: true,
+            errorBuilder: (_, __, ___) => placeholder,
+          ),
+        ),
+      );
+    }
+
     if (_isImage && url != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(10),
@@ -423,7 +481,7 @@ class _BubbleAttachment extends StatelessWidget {
               child: Center(
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: onPrimary
+                  color: widget.onPrimary
                       ? theme.colorScheme.onPrimary
                       : theme.colorScheme.primary,
                 ),

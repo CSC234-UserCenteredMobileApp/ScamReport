@@ -244,5 +244,6 @@
   "@askAiEvidenceCount": {
     "placeholders": { "count": { "type": "int" } }
   },
-  "askAiEvidenceCapReached": "Maximum 5 files."
+  "askAiEvidenceCapReached": "Maximum 5 files.",
+  "askAiRetry": "Retry"
 }
