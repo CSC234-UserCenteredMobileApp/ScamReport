@@ -113,6 +113,12 @@ mock.module('../src/core/gemini/client', () => ({
 
 mock.module('../src/core/db/client', () => ({
   getPrisma: () => ({
+    user: {
+      // resolveInternalUserId returns this id; tests then pretend it equals
+      // the Firebase UID so existing mockConversation rows can match.
+      upsert: async ({ where }: { where: { firebaseUid: string } }) =>
+        ({ id: where.firebaseUid }),
+    },
     aiConversation: {
       create: async ({ data }: { data: { userId: string } }) => {
         createdConversationCalls++;

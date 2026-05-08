@@ -7,6 +7,7 @@ import {
   ReportListResponse,
 } from '@my-product/shared';
 import { getPrisma } from '../../core/db/client';
+import { resolveInternalUserId } from '../../core/lib/resolve-user';
 import { getSignedUrl } from '../../core/supabase/storage';
 import { requireAuth } from '../../core/middleware/auth.middleware';
 import {
@@ -138,7 +139,8 @@ export const reportsRoute = new Elysia().get(
     }
     try {
       const bytes = new Uint8Array(await file.arrayBuffer());
-      const meta = await uploadEvidence(user!.uid, {
+      const uid = await resolveInternalUserId(user!.uid, user!.email);
+      const meta = await uploadEvidence(uid, {
         name: file.name,
         type: file.type,
         bytes,
@@ -170,7 +172,8 @@ export const reportsRoute = new Elysia().get(
   '/reports',
   async ({ body, user, set }) => {
     try {
-      return await createReport(user!.uid, body);
+      const uid = await resolveInternalUserId(user!.uid, user!.email);
+      return await createReport(uid, body);
     } catch (err) {
       if (err instanceof ReportSubmitError) {
         set.status = err.status;
