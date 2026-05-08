@@ -57,6 +57,10 @@ mock.module('../src/core/supabase/storage', () => ({
 
 mock.module('../src/core/db/client', () => ({
   getPrisma: () => ({
+    user: {
+      upsert: async ({ where }: { where: { firebaseUid: string } }) =>
+        ({ id: where.firebaseUid }),
+    },
     scamType: {
       findUnique: async () => mockScamType,
     },

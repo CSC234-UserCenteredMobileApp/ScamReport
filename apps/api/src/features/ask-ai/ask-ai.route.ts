@@ -10,6 +10,7 @@ import {
   AskAiTurnResponse,
 } from '@my-product/shared';
 import { requireAuth } from '../../core/middleware/auth.middleware';
+import { resolveInternalUserId } from '../../core/lib/resolve-user';
 import {
   AskAiError,
   createConversation,
@@ -33,14 +34,20 @@ export const askAiRoute = new Elysia({ prefix: '/ask-ai' })
   .use(requireAuth)
   .post(
     '/conversations',
-    async ({ user }) => createConversation(user!.uid),
+    async ({ user }) => {
+      const uid = await resolveInternalUserId(user!.uid, user!.email);
+      return createConversation(uid);
+    },
     {
       response: { 200: AskAiCreateConversationResponse },
     },
   )
   .get(
     '/conversations',
-    async ({ user }) => listConversations(user!.uid),
+    async ({ user }) => {
+      const uid = await resolveInternalUserId(user!.uid, user!.email);
+      return listConversations(uid);
+    },
     {
       response: { 200: AskAiConversationListResponse },
     },
@@ -49,7 +56,8 @@ export const askAiRoute = new Elysia({ prefix: '/ask-ai' })
     '/conversations/:id',
     async ({ params, user, set }) => {
       try {
-        return await getConversation(user!.uid, params.id);
+        const uid = await resolveInternalUserId(user!.uid, user!.email);
+        return await getConversation(uid, params.id);
       } catch (err) {
         if (err instanceof AskAiError) {
           set.status = err.status;
@@ -67,7 +75,8 @@ export const askAiRoute = new Elysia({ prefix: '/ask-ai' })
     '/conversations/:id',
     async ({ params, user, set }) => {
       try {
-        await deleteConversation(user!.uid, params.id);
+        const uid = await resolveInternalUserId(user!.uid, user!.email);
+        await deleteConversation(uid, params.id);
         return { ok: true as const };
       } catch (err) {
         if (err instanceof AskAiError) {
@@ -89,7 +98,8 @@ export const askAiRoute = new Elysia({ prefix: '/ask-ai' })
     '/conversations/:id/messages',
     async ({ params, body, user, set }) => {
       try {
-        return await handleTurnJson(user!.uid, params.id, body);
+        const uid = await resolveInternalUserId(user!.uid, user!.email);
+        return await handleTurnJson(uid, params.id, body);
       } catch (err) {
         if (
           err instanceof AskAiError ||
@@ -142,7 +152,8 @@ export const askAiRoute = new Elysia({ prefix: '/ask-ai' })
             });
           }
         }
-        return await handleTurn(user!.uid, params.id, content, attachments);
+        const uid = await resolveInternalUserId(user!.uid, user!.email);
+        return await handleTurn(uid, params.id, content, attachments);
       } catch (err) {
         if (
           err instanceof AskAiError ||
