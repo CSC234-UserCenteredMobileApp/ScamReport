@@ -65,6 +65,7 @@ class _StubSubmit implements SubmitDraftedReport {
     required AiDraft draft,
     required String sourceConversationId,
     String? clientSubmissionId,
+    List<EvidenceFileInput> evidenceFiles = const [],
   }) async {
     return (reportId: 'rep-1', createdAt: DateTime(2026, 5, 7));
   }

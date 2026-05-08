@@ -624,4 +624,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get askAiComingSoon => 'Ask AI — coming soon';
+
+  @override
+  String get askAiEvidenceTitle => 'Evidence';
+
+  @override
+  String get askAiEvidenceAdd => 'Add evidence';
+
+  @override
+  String askAiEvidenceCount(int count) {
+    return '$count/5';
+  }
+
+  @override
+  String get askAiEvidenceCapReached => 'Maximum 5 files.';
 }

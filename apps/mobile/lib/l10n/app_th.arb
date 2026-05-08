@@ -227,5 +227,12 @@
   "askAiSignInTitle": "เข้าสู่ระบบเพื่อใช้ Ask AI",
   "askAiSignInBody": "Ask AI ช่วยให้คุณระบุการหลอกลวงและคำแนะนำในการดำเนินการต่อ",
   "askAiSignInCta": "เข้าสู่ระบบหรือสมัครสมาชิก",
-  "askAiComingSoon": "Ask AI — เร็ว ๆ นี้"
+  "askAiComingSoon": "Ask AI — เร็ว ๆ นี้",
+  "askAiEvidenceTitle": "หลักฐาน",
+  "askAiEvidenceAdd": "เพิ่มหลักฐาน",
+  "askAiEvidenceCount": "{count}/5",
+  "@askAiEvidenceCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "askAiEvidenceCapReached": "แนบได้สูงสุด 5 ไฟล์"
 }

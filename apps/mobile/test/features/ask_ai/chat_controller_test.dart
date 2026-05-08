@@ -73,6 +73,7 @@ class _StubSubmit implements SubmitDraftedReport {
     required AiDraft draft,
     required String sourceConversationId,
     String? clientSubmissionId,
+    List<EvidenceFileInput> evidenceFiles = const [],
   }) async {
     if (throws) throw Exception('submit failed');
     capturedConversationId = sourceConversationId;

@@ -1237,6 +1237,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ask AI — coming soon'**
   String get askAiComingSoon;
+
+  /// No description provided for @askAiEvidenceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Evidence'**
+  String get askAiEvidenceTitle;
+
+  /// No description provided for @askAiEvidenceAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add evidence'**
+  String get askAiEvidenceAdd;
+
+  /// No description provided for @askAiEvidenceCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}/5'**
+  String askAiEvidenceCount(int count);
+
+  /// No description provided for @askAiEvidenceCapReached.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum 5 files.'**
+  String get askAiEvidenceCapReached;
 }
 
 class _AppLocalizationsDelegate
