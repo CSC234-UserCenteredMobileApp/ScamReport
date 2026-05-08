@@ -97,10 +97,10 @@ Widget _wrap(_StubRepo repo, {_StubSubmit? submit}) {
       sendTurnUseCaseProvider.overrideWith((ref) => SendTurnUseCase(repo)),
       submitDraftedReportProvider.overrideWithValue(stubSubmit),
     ],
-    child: MaterialApp(
+    child: const MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const AskAiScreen(),
+      home: AskAiScreen(),
     ),
   );
 }

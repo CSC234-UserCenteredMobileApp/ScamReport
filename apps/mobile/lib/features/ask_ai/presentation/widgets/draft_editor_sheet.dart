@@ -95,7 +95,8 @@ class _DraftEditorSheetState extends State<DraftEditorSheet> {
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
                   key: const Key('askAiDraftScamType'),
-                  initialValue: _scamType,
+                  // ignore: deprecated_member_use
+                  value: _scamType,
                   decoration:
                       InputDecoration(labelText: l.askAiDraftFieldScamType),
                   items: [
@@ -115,7 +116,8 @@ class _DraftEditorSheetState extends State<DraftEditorSheet> {
                 const SizedBox(height: 8),
                 DropdownButtonFormField<TargetIdentifierKind?>(
                   key: const Key('askAiDraftIdentifierKind'),
-                  initialValue: _kind,
+                  // ignore: deprecated_member_use
+                  value: _kind,
                   decoration:
                       InputDecoration(labelText: l.askAiDraftFieldKind),
                   items: [
