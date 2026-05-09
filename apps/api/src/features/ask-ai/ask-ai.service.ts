@@ -192,6 +192,7 @@ export async function handleTurn(
     hasEnoughInfo: turn.hasEnoughInfo,
     draft: turn.draft,
     similarReportIds: turn.similarReportIds,
+    missingFacts: turn.missingFacts,
   };
 }
 

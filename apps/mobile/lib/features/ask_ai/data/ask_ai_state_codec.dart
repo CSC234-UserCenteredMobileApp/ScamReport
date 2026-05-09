@@ -13,6 +13,7 @@ class AskAiPersistedState {
     this.activeEvidence,
     this.stagedAttachments = const [],
     this.conversationAttachments = const [],
+    this.userEditedDraft = false,
     DateTime? savedAt,
   }) : savedAt = savedAt ?? DateTime.now();
 
@@ -21,6 +22,7 @@ class AskAiPersistedState {
   final List<StagedAttachment>? activeEvidence;
   final List<StagedAttachment> stagedAttachments;
   final List<StagedAttachment> conversationAttachments;
+  final bool userEditedDraft;
   final DateTime savedAt;
 
   /// True when none of the persisted fields hold meaningful state. Caller
@@ -51,6 +53,7 @@ class AskAiStateCodec {
       'conversationAttachments': state.conversationAttachments
           .map(_attachmentToJson)
           .toList(growable: false),
+      'userEditedDraft': state.userEditedDraft,
       'savedAt': state.savedAt.toIso8601String(),
     });
   }
@@ -70,6 +73,7 @@ class AskAiStateCodec {
             _attachmentsFromJson(j['stagedAttachments']) ?? const [],
         conversationAttachments:
             _attachmentsFromJson(j['conversationAttachments']) ?? const [],
+        userEditedDraft: j['userEditedDraft'] as bool? ?? false,
         savedAt: DateTime.tryParse(j['savedAt'] as String? ?? '') ??
             DateTime.now(),
       );

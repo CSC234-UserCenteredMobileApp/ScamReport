@@ -105,7 +105,7 @@ describe('AskAiTurnResponse', () => {
   };
   const assistantMessage = { ...baseMessage, id: UUID2, role: 'assistant' as const };
 
-  test('accepts a not-reportable turn', () => {
+  test('accepts a not-reportable turn (with missingFacts)', () => {
     expect(
       Value.Check(AskAiTurnResponse, {
         userMessage: baseMessage,
@@ -115,11 +115,12 @@ describe('AskAiTurnResponse', () => {
         hasEnoughInfo: false,
         draft: null,
         similarReportIds: [],
+        missingFacts: ['description', 'targetIdentifier', 'scamTypeCue', 'userAction'],
       }),
     ).toBe(true);
   });
 
-  test('accepts a reportable turn with draft', () => {
+  test('accepts a reportable turn with draft and empty missingFacts', () => {
     expect(
       Value.Check(AskAiTurnResponse, {
         userMessage: baseMessage,
@@ -129,8 +130,24 @@ describe('AskAiTurnResponse', () => {
         hasEnoughInfo: true,
         draft: validDraft,
         similarReportIds: [UUID],
+        missingFacts: [],
       }),
     ).toBe(true);
+  });
+
+  test('rejects unknown missingFacts value', () => {
+    expect(
+      Value.Check(AskAiTurnResponse, {
+        userMessage: baseMessage,
+        assistantMessage,
+        intentDetected: false,
+        reportable: false,
+        hasEnoughInfo: false,
+        draft: null,
+        similarReportIds: [],
+        missingFacts: ['nope'],
+      }),
+    ).toBe(false);
   });
 
   test('rejects more than 5 similarReportIds', () => {
@@ -143,6 +160,7 @@ describe('AskAiTurnResponse', () => {
         hasEnoughInfo: false,
         draft: null,
         similarReportIds: [UUID, UUID2, UUID, UUID2, UUID, UUID2],
+        missingFacts: [],
       }),
     ).toBe(false);
   });

@@ -235,6 +235,10 @@ class AskAiApiClient {
       similarReportIds:
           (j['similarReportIds'] as List? ?? const []).cast<String>(),
       draft: _draftFromJson(j['draft'] as Map<String, dynamic>?),
+      // Default to empty list when older servers don't include the field —
+      // mobile's fallback is "no question pending".
+      missingFacts:
+          (j['missingFacts'] as List? ?? const []).cast<String>(),
     );
   }
 }
