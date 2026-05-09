@@ -110,6 +110,14 @@ export type AskAiTurnRequest = Static<typeof AskAiTurnRequest>;
 // server-derived flags from the structured Gemini call. draft is set when
 // reportable && hasEnoughInfo. similarReportIds are the verified-report
 // matches surfaced by the AI bubble inline.
+export const AskAiMissingFact = Type.Union([
+  Type.Literal('description'),
+  Type.Literal('targetIdentifier'),
+  Type.Literal('scamTypeCue'),
+  Type.Literal('userAction'),
+]);
+export type AskAiMissingFact = Static<typeof AskAiMissingFact>;
+
 export const AskAiTurnResponse = Type.Object({
   userMessage: AskAiMessage,
   assistantMessage: AskAiMessage,
@@ -118,5 +126,8 @@ export const AskAiTurnResponse = Type.Object({
   hasEnoughInfo: Type.Boolean(),
   draft: Type.Union([AskAiDraft, Type.Null()]),
   similarReportIds: Type.Array(Type.String({ format: 'uuid' }), { maxItems: 5 }),
+  // The four required facts the AI must collect before it can draft. Empty
+  // ⇔ hasEnoughInfo=true. Drives AI question rigor (iter-4 plan).
+  missingFacts: Type.Array(AskAiMissingFact, { maxItems: 4, default: [] }),
 });
 export type AskAiTurnResponse = Static<typeof AskAiTurnResponse>;

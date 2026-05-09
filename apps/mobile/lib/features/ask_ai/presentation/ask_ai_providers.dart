@@ -86,6 +86,7 @@ class AskAiChatState {
     this.submittedReportId,
     this.error,
     this.lastFailedAttempt,
+    this.userEditedDraft = false,
   });
 
   final List<StagedAttachment> stagedAttachments;
@@ -116,6 +117,11 @@ class AskAiChatState {
   // Set when the most recent sendMessage threw — drives the retry banner.
   // Cleared whenever a new send starts.
   final FailedSendAttempt? lastFailedAttempt;
+  // True once the user has touched the draft via the editor sheet. Sticky:
+  // sendMessage success will NOT replace `activeDraft` while this is true,
+  // so an "Ask AI to redraft" turn doesn't overwrite the user's edits.
+  // Reset on submit success / reset() / different-conversation load.
+  final bool userEditedDraft;
 
   bool get canOfferReport =>
       activeDraft != null &&
@@ -135,6 +141,7 @@ class AskAiChatState {
     String? submittedReportId,
     Object? error,
     FailedSendAttempt? lastFailedAttempt,
+    bool? userEditedDraft,
     bool clearError = false,
     bool clearOutcome = false,
     bool clearDraft = false,
@@ -162,6 +169,7 @@ class AskAiChatState {
       lastFailedAttempt: clearLastFailedAttempt
           ? null
           : (lastFailedAttempt ?? this.lastFailedAttempt),
+      userEditedDraft: userEditedDraft ?? this.userEditedDraft,
     );
   }
 }
@@ -195,6 +203,7 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
       activeEvidence: cached.activeEvidence,
       stagedAttachments: cached.stagedAttachments,
       conversationAttachments: cached.conversationAttachments,
+      userEditedDraft: cached.userEditedDraft,
     );
     final convId = cached.conversationId;
     if (convId != null) {
@@ -225,6 +234,7 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
           activeEvidence: state.activeEvidence,
           stagedAttachments: state.stagedAttachments,
           conversationAttachments: state.conversationAttachments,
+          userEditedDraft: state.userEditedDraft,
         ),
       );
     });
@@ -316,18 +326,25 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
           .toList(growable: true)
         ..add(result.outcome.userMessage)
         ..add(result.outcome.assistantMessage);
+      // Redraft preservation rules (iter-4):
+      //  • If the user has edited the draft (`userEditedDraft`), keep
+      //    `activeDraft` exactly as-is — the AI just refines reasoning, the
+      //    user owns the fields.
+      //  • Don't reset `activeEvidence` on every turn. The user's curated
+      //    evidence list survives across redrafts; it only resets on
+      //    submit / reset / loadConversation (see those handlers).
+      final keepEdits = state.userEditedDraft;
       state = state.copyWith(
         conversationId: result.conversationId,
         messages: swapped,
         lastOutcome: result.outcome,
-        activeDraft: result.outcome.draft,
+        activeDraft: keepEdits ? state.activeDraft : result.outcome.draft,
         conversationAttachments: [
           ...state.conversationAttachments,
           ...stagedSnapshot,
         ],
         isSending: false,
-        clearDraft: result.outcome.draft == null,
-        clearActiveEvidence: true,
+        clearDraft: !keepEdits && result.outcome.draft == null,
       );
     } catch (err) {
       // Optimistic bubble persists in messages — keeps user's transcript
@@ -359,10 +376,13 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
 
   /// Replace the draft fields with user-edited values (DraftEditorSheet).
   /// Optionally also overwrites the evidence list curated in the same sheet.
+  /// Sets `userEditedDraft=true` so subsequent AI turns won't overwrite the
+  /// user's title/description/etc.
   void updateDraft(AiDraft updated, {List<StagedAttachment>? evidence}) {
     state = state.copyWith(
       activeDraft: updated,
       activeEvidence: evidence,
+      userEditedDraft: true,
     );
   }
 
@@ -388,6 +408,7 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
       state = state.copyWith(
         isSubmitting: false,
         submittedReportId: result.reportId,
+        userEditedDraft: false,
       );
       // Submit succeeded — drop the persisted snapshot so a kill+reopen
       // doesn't surface a stale draft.
@@ -405,19 +426,37 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
   }
 
   /// Load a past conversation into the chat panel.
+  ///
+  /// Iter-4: peek at the persisted snapshot first. If it belongs to the
+  /// conversation we're loading, restore the user's draft + evidence +
+  /// conversationAttachments alongside the freshly-loaded messages — so
+  /// tapping a chat in the drawer doesn't wipe a draft the user is still
+  /// working on. If the snapshot is for a different conversation, drop it
+  /// and start fresh.
   Future<void> loadConversation(AskAiRepository repo, String conversationId) async {
     state = state.copyWith(isSending: true, clearError: true);
     try {
       final detail = await repo.getConversation(conversationId);
-      state = AskAiChatState(
-        conversationId: detail.id,
-        messages: detail.messages,
-        submittedReportId: detail.linkedReportId,
-      );
-      // Different conversation — drop any stale persisted snapshot from a
-      // previous session.
-      _saveDebounce?.cancel();
-      unawaited(_persistence.clear());
+      final snapshot = await _persistence.load();
+      if (snapshot != null && snapshot.conversationId == detail.id) {
+        state = AskAiChatState(
+          conversationId: detail.id,
+          messages: detail.messages,
+          submittedReportId: detail.linkedReportId,
+          activeDraft: snapshot.activeDraft,
+          activeEvidence: snapshot.activeEvidence,
+          conversationAttachments: snapshot.conversationAttachments,
+        );
+        // Don't clear — the next state change will save a fresh snapshot.
+      } else {
+        state = AskAiChatState(
+          conversationId: detail.id,
+          messages: detail.messages,
+          submittedReportId: detail.linkedReportId,
+        );
+        _saveDebounce?.cancel();
+        unawaited(_persistence.clear());
+      }
     } catch (err) {
       state = state.copyWith(isSending: false, error: err);
     }

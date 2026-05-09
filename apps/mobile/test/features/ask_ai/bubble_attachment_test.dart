@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobile/features/ask_ai/data/ask_ai_persistence.dart';
+import 'package:mobile/features/ask_ai/data/ask_ai_state_codec.dart';
 import 'package:mobile/features/ask_ai/domain/ask_ai_repository.dart';
 import 'package:mobile/features/ask_ai/domain/entities/ai_draft.dart';
 import 'package:mobile/features/ask_ai/domain/entities/chat_attachment.dart';
@@ -82,11 +84,21 @@ ChatMessage _assistantMessage() => ChatMessage(
       createdAt: DateTime(2026, 5, 7),
     );
 
+class _NoopPersistence implements AskAiPersistence {
+  @override
+  Future<AskAiPersistedState?> load() async => null;
+  @override
+  Future<void> save(AskAiPersistedState state) async {}
+  @override
+  Future<void> clear() async {}
+}
+
 Widget _wrap(_StubRepo repo) => ProviderScope(
       overrides: [
         askAiRepositoryProvider.overrideWithValue(repo),
         sendTurnUseCaseProvider.overrideWith((ref) => SendTurnUseCase(repo)),
         submitDraftedReportProvider.overrideWithValue(_StubSubmit()),
+        askAiPersistenceProvider.overrideWithValue(_NoopPersistence()),
       ],
       child: const MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,

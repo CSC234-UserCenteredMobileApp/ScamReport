@@ -6,10 +6,21 @@ import 'package:mobile/features/ask_ai/domain/entities/conversation.dart';
 import 'package:mobile/features/ask_ai/domain/entities/turn_outcome.dart';
 import 'package:mobile/features/ask_ai/domain/use_cases/send_turn.dart';
 import 'package:mobile/features/ask_ai/domain/use_cases/submit_drafted_report.dart';
+import 'package:mobile/features/ask_ai/data/ask_ai_persistence.dart';
+import 'package:mobile/features/ask_ai/data/ask_ai_state_codec.dart';
 import 'package:mobile/features/ask_ai/domain/entities/ai_draft.dart';
 import 'package:mobile/features/ask_ai/presentation/ask_ai_providers.dart';
 import 'package:mobile/features/ask_ai/presentation/conversations_drawer.dart';
 import 'package:mobile/l10n/app_localizations.dart';
+
+class _NoopPersistence implements AskAiPersistence {
+  @override
+  Future<AskAiPersistedState?> load() async => null;
+  @override
+  Future<void> save(AskAiPersistedState state) async {}
+  @override
+  Future<void> clear() async {}
+}
 
 class _StubRepo implements AskAiRepository {
   _StubRepo({this.list = const [], this.shouldThrowList = false});
@@ -77,6 +88,7 @@ Widget _wrap(_StubRepo repo) {
       askAiRepositoryProvider.overrideWithValue(repo),
       sendTurnUseCaseProvider.overrideWith((ref) => SendTurnUseCase(repo)),
       submitDraftedReportProvider.overrideWithValue(_StubSubmit()),
+      askAiPersistenceProvider.overrideWithValue(_NoopPersistence()),
     ],
     child: const MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
