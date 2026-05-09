@@ -235,5 +235,17 @@
     "placeholders": { "count": { "type": "int" } }
   },
   "askAiEvidenceCapReached": "แนบได้สูงสุด 5 ไฟล์",
-  "askAiRetry": "ลองอีกครั้ง"
+  "askAiRetry": "ลองอีกครั้ง",
+
+  "searchTitle": "ค้นหา",
+  "searchInputHint": "ค้นหาด้วยชื่อเรื่อง ประเภทหลอกลวง หรือรายละเอียด…",
+  "searchEmptyPrompt": "พิมพ์บางอย่างเพื่อค้นหารายงานที่ยืนยันแล้ว",
+  "searchNoResults": "ไม่พบรายงานที่ตรงกับการค้นหาของคุณ",
+  "searchFilterTitle": "กรอง & จัดเรียง",
+  "searchFilterReset": "รีเซ็ต",
+  "searchFilterApply": "นำไปใช้",
+  "searchFilterSortLabel": "จัดเรียงตาม",
+  "searchFilterSortLatest": "ยืนยันล่าสุด",
+  "searchFilterSortReporters": "ผู้รายงานมากที่สุด",
+  "searchFilterScamTypeLabel": "ประเภทหลอกลวง"
 }

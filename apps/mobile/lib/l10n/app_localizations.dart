@@ -1267,6 +1267,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retry'**
   String get askAiRetry;
+
+  /// No description provided for @searchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get searchTitle;
+
+  /// No description provided for @searchInputHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by title, scam type, or description…'**
+  String get searchInputHint;
+
+  /// No description provided for @searchEmptyPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Type something to search verified reports.'**
+  String get searchEmptyPrompt;
+
+  /// No description provided for @searchNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No reports matched your search.'**
+  String get searchNoResults;
+
+  /// No description provided for @searchFilterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter & Sort'**
+  String get searchFilterTitle;
+
+  /// No description provided for @searchFilterReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get searchFilterReset;
+
+  /// No description provided for @searchFilterApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get searchFilterApply;
+
+  /// No description provided for @searchFilterSortLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort by'**
+  String get searchFilterSortLabel;
+
+  /// No description provided for @searchFilterSortLatest.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest verified'**
+  String get searchFilterSortLatest;
+
+  /// No description provided for @searchFilterSortReporters.
+  ///
+  /// In en, this message translates to:
+  /// **'Most reported'**
+  String get searchFilterSortReporters;
+
+  /// No description provided for @searchFilterScamTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Scam type'**
+  String get searchFilterScamTypeLabel;
 }
 
 class _AppLocalizationsDelegate

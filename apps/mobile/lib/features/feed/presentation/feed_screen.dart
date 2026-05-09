@@ -57,37 +57,51 @@ class _FeedBody extends ConsumerWidget {
               error: (_, __) => _ErrorRow(
                 onRetry: () => ref.invalidate(homeStatsProvider),
               ),
-              data: (stats) => Row(
+              data: (stats) => Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
-                    child: StatCard(
-                      value: _formatNumber(stats.verifiedTotal),
-                      label: context.l10n.feedStatTotal,
-                      valueColor: Theme.of(context).colorScheme.onSurface,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: StatCard(
+                          value: _formatNumber(stats.verifiedTotal),
+                          label: context.l10n.feedStatTotal,
+                          valueColor: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: StatCard(
+                          value: '+${stats.newThisWeek}',
+                          label: context.l10n.feedStatThisWeek,
+                          valueColor: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: StatCard(
-                      value: '+${stats.newThisWeek}',
-                      label: context.l10n.feedStatThisWeek,
-                      valueColor: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: StatCard(
-                      value: Localizations.localeOf(context).languageCode == 'th'
-                          ? stats.topScamTypeLabelTh
-                          : stats.topScamTypeLabelEn,
-                      label: context.l10n.feedStatTopType,
-                      valueColor: Theme.of(context).colorScheme.onSurface,
-                      maxLines: 2,
-                    ),
+                  const SizedBox(height: 8),
+                  StatCard(
+                    value: Localizations.localeOf(context).languageCode == 'th'
+                        ? stats.topScamTypeLabelTh
+                        : stats.topScamTypeLabelEn,
+                    label: context.l10n.feedStatTopType,
+                    valueColor: Theme.of(context).colorScheme.onSurface,
+                    maxLines: 2,
+                    valueStyle: Theme.of(context).textTheme.titleMedium,
                   ),
                 ],
               ),
             ),
+          ),
+        ),
+
+        const SliverToBoxAdapter(child: SizedBox(height: 12)),
+
+        // Search tile
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: _SearchTile(onTap: () => context.push('/search')),
           ),
         ),
 
@@ -315,6 +329,46 @@ class _ErrorRow extends StatelessWidget {
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
+      ),
+    );
+  }
+}
+
+class _SearchTile extends StatelessWidget {
+  const _SearchTile({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Material(
+      color: theme.colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: theme.dividerColor),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.auto_awesome_outlined, size: 20,
+                  color: theme.colorScheme.primary),
+              const SizedBox(width: 8),
+              Text(
+                context.l10n.searchTitle,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -6,6 +6,7 @@ import {
   ReportDetailResponse,
   ReportListResponse,
 } from '@my-product/shared';
+import type { Prisma } from '../../generated/prisma/client';
 import { getPrisma } from '../../core/db/client';
 import { resolveInternalUserId } from '../../core/lib/resolve-user';
 import { getSignedUrl } from '../../core/supabase/storage';
@@ -21,9 +22,27 @@ export const reportsRoute = new Elysia().get(
   async ({ query }) => {
     const prisma = getPrisma();
     const limit = Math.min(query.limit ?? 10, 50);
+    const q = query.q?.trim();
+    const codes = query.scamTypeCodes
+      ? query.scamTypeCodes.split(',').map((c) => c.trim()).filter(Boolean)
+      : [];
+    const sortBy = query.sortBy ?? 'latest';
+
+    const where: Prisma.ReportWhereInput = { status: 'verified' };
+    if (q) {
+      where.OR = [
+        { title: { contains: q, mode: 'insensitive' } },
+        { description: { contains: q, mode: 'insensitive' } },
+        { scamType: { labelEn: { contains: q, mode: 'insensitive' } } },
+        { scamType: { labelTh: { contains: q, mode: 'insensitive' } } },
+      ];
+    }
+    if (codes.length > 0) {
+      where.scamType = { code: { in: codes } };
+    }
 
     const rows = await prisma.report.findMany({
-      where: { status: 'verified' },
+      where,
       orderBy: { verifiedAt: 'desc' },
       take: limit,
       include: { scamType: true },
@@ -53,10 +72,19 @@ export const reportsRoute = new Elysia().get(
       }),
     );
 
+    if (sortBy === 'reportCount') {
+      items.sort((a, b) => b.reportCount - a.reportCount);
+    }
+
     return { items };
   },
   {
-    query: t.Object({ limit: t.Optional(t.Integer({ minimum: 1, maximum: 50 })) }),
+    query: t.Object({
+      limit: t.Optional(t.Integer({ minimum: 1, maximum: 50 })),
+      q: t.Optional(t.String({ maxLength: 200 })),
+      scamTypeCodes: t.Optional(t.String()),
+      sortBy: t.Optional(t.Union([t.Literal('latest'), t.Literal('reportCount')])),
+    }),
     response: ReportListResponse,
   },
 )
