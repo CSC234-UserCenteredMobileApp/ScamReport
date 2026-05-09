@@ -8,6 +8,11 @@ build/
 .env.*
 !.env.example
 
+# --- Test / coverage artefacts ---
+coverage/
+**/coverage/
+*.lcov
+
 # --- Flutter dart-define config (copy config.example.json, never commit) ---
 apps/mobile/config.json
 apps/mobile/config.*.json
