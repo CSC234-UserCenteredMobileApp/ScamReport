@@ -6,9 +6,10 @@ import '../../l10n/l10n.dart';
 import '../theme/app_theme.dart';
 
 class ReportCard extends StatelessWidget {
-  const ReportCard({super.key, required this.report});
+  const ReportCard({super.key, required this.report, this.onTap});
 
   final RecentReport report;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +24,7 @@ class ReportCard extends StatelessWidget {
 
     return Card(
       child: InkWell(
-        onTap: () => context.push('/feed/${report.id}'),
+        onTap: onTap ?? () => context.push('/feed/${report.id}'),
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(12),

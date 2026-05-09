@@ -8,6 +8,7 @@ import { reportsRoute } from './features/reports/reports.route';
 import { adminReportsRoute } from './features/admin-reports/admin-reports.route';
 import { checkRoute } from './features/check/check.route';
 import { askAiRoute } from './features/ask-ai/ask-ai.route';
+import { scamTypesRoute } from './features/scam-types/scam-types.route';
 
 export const app = new Elysia()
   .use(cors())
@@ -18,7 +19,8 @@ export const app = new Elysia()
   .use(reportsRoute)
   .use(adminReportsRoute)
   .use(checkRoute)
-  .use(askAiRoute);
+  .use(askAiRoute)
+  .use(scamTypesRoute);
 
 if (import.meta.main) {
   const port = Number(process.env.PORT ?? 3000);

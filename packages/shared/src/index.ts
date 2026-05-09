@@ -6,3 +6,4 @@ export * from './schemas/announcements';
 export * from './schemas/reports';
 export * from './schemas/admin-reports';
 export * from './schemas/ask-ai';
+export * from './schemas/scam-types';

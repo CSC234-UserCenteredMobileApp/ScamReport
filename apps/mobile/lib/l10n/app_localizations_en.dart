@@ -641,4 +641,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get askAiRetry => 'Retry';
+
+  @override
+  String get searchTitle => 'Search';
+
+  @override
+  String get searchInputHint => 'Search by title, scam type, or description…';
+
+  @override
+  String get searchEmptyPrompt => 'Type something to search verified reports.';
+
+  @override
+  String get searchNoResults => 'No reports matched your search.';
+
+  @override
+  String get searchFilterTitle => 'Filter & Sort';
+
+  @override
+  String get searchFilterReset => 'Reset';
+
+  @override
+  String get searchFilterApply => 'Apply';
+
+  @override
+  String get searchFilterSortLabel => 'Sort by';
+
+  @override
+  String get searchFilterSortLatest => 'Latest verified';
+
+  @override
+  String get searchFilterSortReporters => 'Most reported';
+
+  @override
+  String get searchFilterScamTypeLabel => 'Scam type';
 }
