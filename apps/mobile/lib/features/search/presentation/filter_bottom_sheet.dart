@@ -1,3 +1,4 @@
+// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -66,28 +67,29 @@ class _FilterSheet extends ConsumerWidget {
                 children: [
                   _SectionLabel(l10n.searchFilterSortLabel),
                   const SizedBox(height: 8),
-                  RadioGroup<String>(
-                    groupValue: sortBy,
-                    onChanged: (v) =>
-                        ref.read(searchSortByProvider.notifier).state = v!,
-                    child: Column(
-                      children: [
-                        RadioListTile<String>(
-                          contentPadding: EdgeInsets.zero,
-                          dense: true,
-                          title: Text(l10n.searchFilterSortLatest,
-                              style: const TextStyle(fontSize: 14)),
-                          value: 'latest',
-                        ),
-                        RadioListTile<String>(
-                          contentPadding: EdgeInsets.zero,
-                          dense: true,
-                          title: Text(l10n.searchFilterSortReporters,
-                              style: const TextStyle(fontSize: 14)),
-                          value: 'reportCount',
-                        ),
-                      ],
-                    ),
+                  Column(
+                    children: [
+                      RadioListTile<String>(
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                        title: Text(l10n.searchFilterSortLatest,
+                            style: const TextStyle(fontSize: 14)),
+                        value: 'latest',
+                        groupValue: sortBy,
+                        onChanged: (v) =>
+                            ref.read(searchSortByProvider.notifier).state = v!,
+                      ),
+                      RadioListTile<String>(
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                        title: Text(l10n.searchFilterSortReporters,
+                            style: const TextStyle(fontSize: 14)),
+                        value: 'reportCount',
+                        groupValue: sortBy,
+                        onChanged: (v) =>
+                            ref.read(searchSortByProvider.notifier).state = v!,
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 20),
                   _SectionLabel(l10n.searchFilterScamTypeLabel),
