@@ -8,18 +8,19 @@ const AnnouncementStatus = Type.Union([
 ]);
 type AnnouncementStatus = Static<typeof AnnouncementStatus>;
 
+// slug is server-derived from title; clients do not send it.
 export const CreateAnnouncementRequest = Type.Object({
   title: Type.String({ minLength: 1, maxLength: 200 }),
-  body: Type.String({ minLength: 1 }),
+  body: Type.String({ minLength: 1, maxLength: 5000 }),
   category: AnnouncementCategory,
 });
 export type CreateAnnouncementRequest = Static<typeof CreateAnnouncementRequest>;
 
 export const UpdateAnnouncementRequest = Type.Object({
   title: Type.Optional(Type.String({ minLength: 1, maxLength: 200 })),
-  body: Type.Optional(Type.String({ minLength: 1 })),
+  body: Type.Optional(Type.String({ minLength: 1, maxLength: 5000 })),
   category: Type.Optional(AnnouncementCategory),
-});
+}, { minProperties: 1 });
 export type UpdateAnnouncementRequest = Static<typeof UpdateAnnouncementRequest>;
 
 export const AdminAnnouncementListItem = Type.Object({
@@ -58,10 +59,10 @@ export const AdminAnnouncementDetailResponse = Type.Object({
 });
 export type AdminAnnouncementDetailResponse = Static<typeof AdminAnnouncementDetailResponse>;
 
-export const PublishRequest = Type.Object({
+export const PublishAnnouncementRequest = Type.Object({
   pushToFcm: Type.Boolean(),
 });
-export type PublishRequest = Static<typeof PublishRequest>;
+export type PublishAnnouncementRequest = Static<typeof PublishAnnouncementRequest>;
 
 export const AdminAnnouncementActionResponse = Type.Object({
   id: Type.String({ format: 'uuid' }),
