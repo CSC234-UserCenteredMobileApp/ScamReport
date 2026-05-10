@@ -30,6 +30,9 @@ export const AdminEvidenceFile = Type.Object({
 });
 export type AdminEvidenceFile = Static<typeof AdminEvidenceFile>;
 
+// Reporter identity is intentionally absent from every admin-facing payload
+// (PRD v1.2 FR-7.4 + FR-7.8). The reporter linkage is retained server-side in
+// `reports.reporter_id` for legal traceability and FCM fan-out only.
 export const AdminQueueItem = Type.Object({
   id: Type.String({ format: 'uuid' }),
   title: Type.String(),
@@ -41,7 +44,6 @@ export const AdminQueueItem = Type.Object({
   priorityFlag: Type.Boolean(),
   evidenceCount: Type.Integer({ minimum: 0 }),
   lastRemarkByAdmin: Type.Union([Type.String(), Type.Null()]),
-  reporterHandle: Type.String(),
 });
 export type AdminQueueItem = Static<typeof AdminQueueItem>;
 
@@ -79,7 +81,6 @@ export const AdminReportDetail = Type.Object({
   aiScore: Type.Union([Type.Integer({ minimum: 0, maximum: 100 }), Type.Null()]),
   aiConfidence: Type.Union([AiConfidence, Type.Null()]),
   auditTrail: Type.Array(ModerationRecord),
-  reporterHandle: Type.String(),
 });
 export type AdminReportDetail = Static<typeof AdminReportDetail>;
 

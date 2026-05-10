@@ -34,6 +34,7 @@ mock.module('../src/core/gemini/client', () => ({
 let mockFindUniqueReport: Record<string, unknown> | null = null;
 let mockFindManyReports: unknown[] = [];
 let mockQueryRawResults: unknown[] = [];
+let mockUpdateReport: Record<string, unknown> = {};
 
 mock.module('../src/core/db/client', () => ({
   getPrisma: () => ({
@@ -41,7 +42,7 @@ mock.module('../src/core/db/client', () => ({
       findMany: async () => mockFindManyReports,
       findUnique: async () => mockFindUniqueReport,
       count: async () => 0,
-      update: async () => ({ id: VALID_ID, status: 'verified', updatedAt: new Date() }),
+      update: async () => mockUpdateReport,
     },
     moderationAction: {
       create: async () => ({}),
@@ -81,12 +82,27 @@ const MOCK_DETAIL_REPORT = {
   targetIdentifierNormalized: null,
   reporterId: null,
   createdAt: new Date('2026-01-01T00:00:00Z'),
+  updatedAt: new Date('2026-01-01T00:00:00Z'),
+  verifiedAt: null,
+  rejectionRemark: null,
   scamType: { code: 'phone', labelEn: 'Phone Scam', labelTh: 'หลอกลวงโทรศัพท์' },
   evidenceFiles: [],
   moderations: [],
 };
 
 const MOCK_ACTION_REPORT = { id: VALID_ID, reporterId: null };
+
+const ACTION_UPDATE_RESULT = {
+  id: VALID_ID,
+  status: 'verified',
+  updatedAt: new Date('2026-01-02T00:00:00Z'),
+  reporterId: null,
+  title: 'Test scam',
+  createdAt: new Date('2026-01-01T00:00:00Z'),
+  verifiedAt: new Date('2026-01-02T00:00:00Z'),
+  rejectionRemark: null,
+  scamType: { code: 'phone' },
+};
 
 function req(
   path: string,
@@ -101,11 +117,43 @@ function req(
   });
 }
 
+// Recursively walk the response payload looking for any reporter-identifying
+// field. PRD v1.2 FR-7.4 + FR-7.8 — admin clients must never see reporter
+// identity, masked or otherwise. The test asserts presence of the bug at
+// every level of every payload, anti-regression for the demo-grade leak that
+// shipped on `main` before this refactor.
+function findReporterLeak(obj: unknown, path = ''): string | null {
+  if (Array.isArray(obj)) {
+    for (let i = 0; i < obj.length; i++) {
+      const found = findReporterLeak(obj[i], `${path}[${i}]`);
+      if (found) return found;
+    }
+    return null;
+  }
+  if (obj && typeof obj === 'object') {
+    for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
+      // adminId in audit-trail records is admin-to-admin transparency, not
+      // reporter identity — explicitly allowed by FR-7.6.
+      if (k === 'adminId') continue;
+      if (/reporter|reporterhandle|user_/i.test(k)) {
+        return `${path}.${k}`;
+      }
+      const found = findReporterLeak(v, `${path}.${k}`);
+      if (found) return found;
+    }
+  }
+  if (typeof obj === 'string' && /^User_[0-9a-f]/i.test(obj)) {
+    return `${path}=<masked-handle:${obj}>`;
+  }
+  return null;
+}
+
 beforeEach(() => {
   mockDecoded = null;
   mockFindUniqueReport = null;
   mockFindManyReports = [];
   mockQueryRawResults = [];
+  mockUpdateReport = ACTION_UPDATE_RESULT;
 });
 
 afterEach(() => {
@@ -138,14 +186,17 @@ describe('GET /admin/reports/queue', () => {
     expect(body).toHaveProperty('flaggedCount');
   });
 
-  test('200 admin — queue with items includes reporterHandle', async () => {
+  test('200 admin — queue with items omits reporter identity', async () => {
     mockDecoded = ADMIN;
     mockFindManyReports = [MOCK_QUEUE_REPORT];
     const res = await app.handle(req('/admin/reports/queue', { token: 'tok' }));
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.items).toHaveLength(1);
-    expect(body.items[0]).toHaveProperty('reporterHandle');
+    const item = body.items[0];
+    expect(item).not.toHaveProperty('reporterHandle');
+    expect(item).not.toHaveProperty('reporterId');
+    expect(findReporterLeak(body)).toBeNull();
   });
 });
 
@@ -174,7 +225,7 @@ describe('GET /admin/reports/:id', () => {
     expect(res.status).toBe(404);
   });
 
-  test('200 admin — returns report detail with AI score', async () => {
+  test('200 admin — returns detail with AI score and no reporter identity', async () => {
     mockDecoded = ADMIN;
     mockFindUniqueReport = MOCK_DETAIL_REPORT;
     mockQueryRawResults = [
@@ -188,7 +239,9 @@ describe('GET /admin/reports/:id', () => {
     expect(body).toHaveProperty('report');
     expect(body.report).toHaveProperty('aiScore');
     expect(body.report).toHaveProperty('aiConfidence');
-    expect(body.report).toHaveProperty('reporterHandle');
+    expect(body.report).not.toHaveProperty('reporterHandle');
+    expect(body.report).not.toHaveProperty('reporterId');
+    expect(findReporterLeak(body)).toBeNull();
   });
 });
 
@@ -233,7 +286,7 @@ describe('POST /admin/reports/:id/approve', () => {
     expect(res.status).toBe(404);
   });
 
-  test('200 admin — approves report', async () => {
+  test('200 admin — approves report and returns no reporter identity', async () => {
     mockDecoded = ADMIN;
     mockFindUniqueReport = MOCK_ACTION_REPORT;
     const res = await app.handle(
@@ -244,6 +297,7 @@ describe('POST /admin/reports/:id/approve', () => {
     expect(body).toHaveProperty('id');
     expect(body).toHaveProperty('status');
     expect(body).toHaveProperty('updatedAt');
+    expect(findReporterLeak(body)).toBeNull();
   });
 });
 
@@ -274,7 +328,7 @@ describe('POST /admin/reports/:id/approve', () => {
       expect(res.status).toBe(422);
     });
 
-    test(`200 admin — ${action}s report`, async () => {
+    test(`200 admin — ${action}s report and omits reporter identity`, async () => {
       mockDecoded = ADMIN;
       mockFindUniqueReport = MOCK_ACTION_REPORT;
       const res = await app.handle(
@@ -284,6 +338,7 @@ describe('POST /admin/reports/:id/approve', () => {
       const body = await res.json();
       expect(body).toHaveProperty('id');
       expect(body).toHaveProperty('status');
+      expect(findReporterLeak(body)).toBeNull();
     });
   });
 });

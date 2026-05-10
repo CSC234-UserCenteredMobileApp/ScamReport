@@ -1,13 +1,37 @@
-import { getPrisma } from '../../core/db/client';
-import { searchSimilarReports } from '../../core/rag/retrieval';
-import { sendFcmToUser } from '../../core/firebase/messaging';
+// =============================================================================
+// admin-reports.service — moderation orchestration
+// =============================================================================
+//
+// Composes the repo layer (Prisma) with cross-cutting concerns: AI similarity
+// scoring (RAG), FCM push to the reporter on terminal actions, and (in the
+// follow-up commit) the My Reports Firestore mirror.
+//
+// PRD reporter-anonymity rules (FR-7.4 + FR-7.8 + §3.6):
+//   - No reporter identity field appears in any returned payload. The shared
+//     schemas (`AdminQueueItem`, `AdminReportDetail`) enforce this at the type
+//     level; this file enforces it at the data level.
+//   - `reporterId` is read internally only — to deliver FCM (and, in the
+//     follow-up, to write to `my-reports/{uid}/items/{reportId}` in Firestore).
+//     It is never copied into a return value.
+
 import type {
+  AdminEvidenceFile,
   AdminQueueItem,
   AdminReportDetail,
-  AdminEvidenceFile,
-  ModerationRecord,
   AiConfidence,
+  ModerationRecord,
 } from '@my-product/shared';
+import { searchSimilarReports } from '../../core/rag/retrieval';
+import { sendFcmToUser } from '../../core/firebase/messaging';
+import {
+  applyAction as repoApplyAction,
+  countByStatus,
+  countDuplicates,
+  findDetailRow,
+  findQueueRows,
+  type ActionKind,
+  type ActionResult,
+} from './admin-reports.repo';
 
 // ---------------------------------------------------------------------------
 // Queue
@@ -18,35 +42,13 @@ export async function getQueue(scamTypeCode?: string): Promise<{
   pendingCount: number;
   flaggedCount: number;
 }> {
-  const prisma = getPrisma();
-  const scamTypeFilter = scamTypeCode ? { scamType: { code: scamTypeCode } } : {};
-
-  const [reports, pendingCount, flaggedCount] = await Promise.all([
-    prisma.report.findMany({
-      where: { status: { in: ['pending', 'flagged'] }, ...scamTypeFilter },
-      orderBy: [{ priorityFlag: 'desc' }, { createdAt: 'asc' }],
-      select: {
-        id: true,
-        title: true,
-        status: true,
-        priorityFlag: true,
-        createdAt: true,
-        reporterId: true,
-        scamType: { select: { code: true, labelEn: true, labelTh: true } },
-        _count: { select: { evidenceFiles: true } },
-        moderations: {
-          where: { action: 'flag' },
-          orderBy: { createdAt: 'desc' },
-          take: 1,
-          select: { remark: true },
-        },
-      },
-    }),
-    prisma.report.count({ where: { status: 'pending', ...scamTypeFilter } }),
-    prisma.report.count({ where: { status: 'flagged', ...scamTypeFilter } }),
+  const [rows, pendingCount, flaggedCount] = await Promise.all([
+    findQueueRows(scamTypeCode),
+    countByStatus('pending', scamTypeCode),
+    countByStatus('flagged', scamTypeCode),
   ]);
 
-  const items: AdminQueueItem[] = reports.map((r) => ({
+  const items: AdminQueueItem[] = rows.map((r) => ({
     id: r.id,
     title: r.title,
     scamTypeCode: r.scamType.code,
@@ -57,7 +59,6 @@ export async function getQueue(scamTypeCode?: string): Promise<{
     priorityFlag: r.priorityFlag,
     evidenceCount: r._count.evidenceFiles,
     lastRemarkByAdmin: r.moderations[0]?.remark ?? null,
-    reporterHandle: `User_${(r.reporterId ?? 'anon').substring(0, 4)}`,
   }));
 
   return { items, pendingCount, flaggedCount };
@@ -68,44 +69,12 @@ export async function getQueue(scamTypeCode?: string): Promise<{
 // ---------------------------------------------------------------------------
 
 export async function getDetail(reportId: string): Promise<AdminReportDetail | null> {
-  const prisma = getPrisma();
-
-  const report = await prisma.report.findUnique({
-    where: { id: reportId },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      status: true,
-      priorityFlag: true,
-      targetIdentifier: true,
-      targetIdentifierKind: true,
-      targetIdentifierNormalized: true,
-      reporterId: true,
-      createdAt: true,
-      scamType: { select: { code: true, labelEn: true, labelTh: true } },
-      evidenceFiles: {
-        select: { id: true, storagePath: true, kind: true, mimeType: true, sizeBytes: true },
-      },
-      moderations: {
-        orderBy: { createdAt: 'asc' },
-        select: { adminId: true, action: true, remark: true, createdAt: true },
-      },
-    },
-  });
-
+  const report = await findDetailRow(reportId);
   if (!report) return null;
 
-  let duplicateCount = 0;
-  if (report.targetIdentifierNormalized) {
-    duplicateCount = await prisma.report.count({
-      where: {
-        status: 'verified',
-        targetIdentifierNormalized: report.targetIdentifierNormalized,
-        id: { not: reportId },
-      },
-    });
-  }
+  const duplicateCount = report.targetIdentifierNormalized
+    ? await countDuplicates(report.targetIdentifierNormalized, reportId)
+    : 0;
 
   const { aiScore, aiConfidence } = await computeAiScore(
     `${report.title}\n${report.description}`,
@@ -143,12 +112,11 @@ export async function getDetail(reportId: string): Promise<AdminReportDetail | n
     aiScore,
     aiConfidence,
     auditTrail,
-    reporterHandle: `User_${(report.reporterId ?? 'anon').substring(0, 4)}`,
   };
 }
 
 // ---------------------------------------------------------------------------
-// AI score
+// AI score (unchanged from the previous implementation)
 // ---------------------------------------------------------------------------
 
 const TOP_K = 5;
@@ -174,125 +142,82 @@ export async function computeAiScore(text: string): Promise<{
 }
 
 // ---------------------------------------------------------------------------
-// Actions — reporter identity never returned; fetched internally for FCM only
+// Actions — reporter identity used internally for FCM only, never returned
 // ---------------------------------------------------------------------------
 
-type ActionResult = { id: string; status: string; updatedAt: Date };
+export interface PublicActionResult {
+  id: string;
+  status: string;
+  updatedAt: Date;
+}
 
 export async function approveReport(
   reportId: string,
   adminId: string,
   remark: string,
-): Promise<ActionResult | null> {
-  const prisma = getPrisma();
-  const report = await prisma.report.findUnique({
-    where: { id: reportId },
-    select: { id: true, reporterId: true },
+): Promise<PublicActionResult | null> {
+  const result = await repoApplyAction(reportId, adminId, 'approve', remark);
+  if (!result) return null;
+  await pushToReporter(result, {
+    title: 'Your report was verified',
+    body: 'Thank you — your report has been reviewed and verified.',
   });
-  if (!report) return null;
-
-  const [updated] = await prisma.$transaction([
-    prisma.report.update({
-      where: { id: reportId },
-      data: { status: 'verified', verifiedAt: new Date() },
-      select: { id: true, status: true, updatedAt: true },
-    }),
-    prisma.moderationAction.create({
-      data: { reportId, adminId, action: 'approve', remark },
-    }),
-  ]);
-
-  if (report.reporterId) {
-    await sendFcmToUser(report.reporterId, {
-      title: 'Your report was verified',
-      body: 'Thank you — your report has been reviewed and verified.',
-    });
-  }
-
-  return { id: updated.id, status: updated.status, updatedAt: updated.updatedAt };
+  return strip(result);
 }
 
 export async function rejectReport(
   reportId: string,
   adminId: string,
   remark: string,
-): Promise<ActionResult | null> {
-  const prisma = getPrisma();
-  const report = await prisma.report.findUnique({
-    where: { id: reportId },
-    select: { id: true, reporterId: true },
+): Promise<PublicActionResult | null> {
+  const result = await repoApplyAction(reportId, adminId, 'reject', remark);
+  if (!result) return null;
+  await pushToReporter(result, {
+    title: 'Your report was reviewed',
+    body: remark,
   });
-  if (!report) return null;
-
-  const [updated] = await prisma.$transaction([
-    prisma.report.update({
-      where: { id: reportId },
-      data: { status: 'rejected', rejectionRemark: remark },
-      select: { id: true, status: true, updatedAt: true },
-    }),
-    prisma.moderationAction.create({
-      data: { reportId, adminId, action: 'reject', remark },
-    }),
-  ]);
-
-  if (report.reporterId) {
-    await sendFcmToUser(report.reporterId, {
-      title: 'Your report was reviewed',
-      body: remark,
-    });
-  }
-
-  return { id: updated.id, status: updated.status, updatedAt: updated.updatedAt };
+  return strip(result);
 }
 
 export async function flagReport(
   reportId: string,
   adminId: string,
   remark: string,
-): Promise<ActionResult | null> {
-  const prisma = getPrisma();
-  const exists = await prisma.report.findUnique({
-    where: { id: reportId },
-    select: { id: true },
-  });
-  if (!exists) return null;
-
-  const [updated] = await prisma.$transaction([
-    prisma.report.update({
-      where: { id: reportId },
-      data: { status: 'flagged', priorityFlag: true },
-      select: { id: true, status: true, updatedAt: true },
-    }),
-    prisma.moderationAction.create({
-      data: { reportId, adminId, action: 'flag', remark },
-    }),
-  ]);
-
-  return { id: updated.id, status: updated.status, updatedAt: updated.updatedAt };
+): Promise<PublicActionResult | null> {
+  const result = await repoApplyAction(reportId, adminId, 'flag', remark);
+  if (!result) return null;
+  return strip(result);
 }
 
 export async function unflagReport(
   reportId: string,
   adminId: string,
   remark: string,
-): Promise<ActionResult | null> {
-  const prisma = getPrisma();
-  const exists = await prisma.report.findUnique({
-    where: { id: reportId },
-    select: { id: true },
-  });
-  if (!exists) return null;
-
-  const [updated] = await prisma.$transaction([
-    prisma.report.update({
-      where: { id: reportId },
-      data: { status: 'pending', priorityFlag: false },
-      select: { id: true, status: true, updatedAt: true },
-    }),
-    prisma.moderationAction.create({
-      data: { reportId, adminId, action: 'unflag', remark },
-    }),
-  ]);
-
-  return { id: updated.id, status: updated.status, updatedAt: updated.updatedAt };
+): Promise<PublicActionResult | null> {
+  const result = await repoApplyAction(reportId, adminId, 'unflag', remark);
+  if (!result) return null;
+  return strip(result);
 }
+
+// ---------------------------------------------------------------------------
+// Internals
+// ---------------------------------------------------------------------------
+
+async function pushToReporter(
+  result: ActionResult,
+  notification: { title: string; body: string },
+): Promise<void> {
+  if (!result.reporterId) return;
+  await sendFcmToUser(result.reporterId, notification);
+}
+
+function strip(result: ActionResult): PublicActionResult {
+  return {
+    id: result.id,
+    status: result.status,
+    updatedAt: result.updatedAt,
+  };
+}
+
+// Re-export for the route file's type annotations.
+export type { ActionKind };
