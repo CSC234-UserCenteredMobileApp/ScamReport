@@ -17,3 +17,14 @@ export const AuthSyncResponse = Type.Object({
   user: AuthUser,
 });
 export type AuthSyncResponse = Static<typeof AuthSyncResponse>;
+
+export const DeleteAccountResponse = Type.Object({
+  requestedAt: Type.String({ format: 'date-time' }),
+  purgeDueAt: Type.String({ format: 'date-time' }),
+});
+export type DeleteAccountResponse = Static<typeof DeleteAccountResponse>;
+
+export const CancelDeletionResponse = Type.Object({
+  message: Type.String(),
+});
+export type CancelDeletionResponse = Static<typeof CancelDeletionResponse>;
