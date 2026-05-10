@@ -241,6 +241,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String modAgeHours(int hours) {
+    return '${hours}h';
+  }
+
+  @override
+  String modAgeMinutes(int minutes) {
+    return '${minutes}m';
+  }
+
+  @override
   String get adminReviewTitle => 'Review report';
 
   @override
@@ -285,6 +295,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String adminReviewSubmittedOn(String date) {
+    return 'Submitted $date';
+  }
+
+  @override
   String get adminLabelDescription => 'DESCRIPTION';
 
   @override
@@ -303,6 +318,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String adminAiScore(int score, String level) {
     return 'AI confidence: $score% ($level)';
   }
+
+  @override
+  String get noEvidence => 'No evidence files.';
+
+  @override
+  String get auditTrailEmpty => 'No actions yet.';
 
   @override
   String get smsSmishingDetectionLabel => 'SMS smishing detection';

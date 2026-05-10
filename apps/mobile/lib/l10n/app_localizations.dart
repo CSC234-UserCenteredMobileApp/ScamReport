@@ -542,6 +542,18 @@ abstract class AppLocalizations {
   /// **'Team note: {note}'**
   String modTeamNote(String note);
 
+  /// No description provided for @modAgeHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h'**
+  String modAgeHours(int hours);
+
+  /// No description provided for @modAgeMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m'**
+  String modAgeMinutes(int minutes);
+
   /// No description provided for @adminReviewTitle.
   ///
   /// In en, this message translates to:
@@ -620,6 +632,12 @@ abstract class AppLocalizations {
   /// **'Submitted by {handle} • {date}'**
   String adminReviewSubmittedBy(String handle, String date);
 
+  /// No description provided for @adminReviewSubmittedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted {date}'**
+  String adminReviewSubmittedOn(String date);
+
   /// No description provided for @adminLabelDescription.
   ///
   /// In en, this message translates to:
@@ -655,6 +673,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'AI confidence: {score}% ({level})'**
   String adminAiScore(int score, String level);
+
+  /// No description provided for @noEvidence.
+  ///
+  /// In en, this message translates to:
+  /// **'No evidence files.'**
+  String get noEvidence;
+
+  /// No description provided for @auditTrailEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No actions yet.'**
+  String get auditTrailEmpty;
 
   /// No description provided for @smsSmishingDetectionLabel.
   ///
