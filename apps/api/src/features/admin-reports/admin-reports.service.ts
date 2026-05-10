@@ -23,6 +23,7 @@ import type {
 } from '@my-product/shared';
 import { searchSimilarReports } from '../../core/rag/retrieval';
 import { sendFcmToUser } from '../../core/firebase/messaging';
+import { mirrorMyReport } from '../../sync/firestore_sync';
 import {
   applyAction as repoApplyAction,
   countByStatus,
@@ -162,6 +163,7 @@ export async function approveReport(
     title: 'Your report was verified',
     body: 'Thank you — your report has been reviewed and verified.',
   });
+  await mirrorReporterView(result);
   return strip(result);
 }
 
@@ -176,6 +178,7 @@ export async function rejectReport(
     title: 'Your report was reviewed',
     body: remark,
   });
+  await mirrorReporterView(result);
   return strip(result);
 }
 
@@ -186,6 +189,7 @@ export async function flagReport(
 ): Promise<PublicActionResult | null> {
   const result = await repoApplyAction(reportId, adminId, 'flag', remark);
   if (!result) return null;
+  await mirrorReporterView(result);
   return strip(result);
 }
 
@@ -196,6 +200,7 @@ export async function unflagReport(
 ): Promise<PublicActionResult | null> {
   const result = await repoApplyAction(reportId, adminId, 'unflag', remark);
   if (!result) return null;
+  await mirrorReporterView(result);
   return strip(result);
 }
 
@@ -209,6 +214,32 @@ async function pushToReporter(
 ): Promise<void> {
   if (!result.reporterId) return;
   await sendFcmToUser(result.reporterId, notification);
+}
+
+// Push the post-action row to the My Reports Firestore mirror so the
+// reporter's listener sees the new state without polling. The reporter-
+// facing `flagged → pending` mapping (FR-6.1) is applied inside
+// `firestore_sync.toReporterStatus` — pass the real DB status through.
+// Mirror failure is logged + swallowed by `mirrorMyReport`; the admin's
+// 200 response still ships even if Firestore is unreachable.
+async function mirrorReporterView(result: ActionResult): Promise<void> {
+  if (!result.reporterId) return;
+  await mirrorMyReport({
+    id: result.id,
+    reporterId: result.reporterId,
+    title: result.title,
+    status: result.status as
+      | 'pending'
+      | 'verified'
+      | 'rejected'
+      | 'flagged'
+      | 'withdrawn',
+    scamTypeCode: result.scamTypeCode,
+    createdAt: result.createdAt,
+    updatedAt: result.updatedAt,
+    verifiedAt: result.verifiedAt,
+    rejectionRemark: result.rejectionRemark,
+  });
 }
 
 function strip(result: ActionResult): PublicActionResult {
