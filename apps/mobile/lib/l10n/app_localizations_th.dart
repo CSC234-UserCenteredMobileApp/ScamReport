@@ -475,6 +475,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get askAiBeta => 'BETA';
 
   @override
+  String get askAiViewDraft => 'ดูร่างรายงาน';
+
+  @override
   String get askAiNewChat => 'แชทใหม่';
 
   @override

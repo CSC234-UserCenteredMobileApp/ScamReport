@@ -950,6 +950,12 @@ abstract class AppLocalizations {
   /// **'BETA'**
   String get askAiBeta;
 
+  /// No description provided for @askAiViewDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'View draft'**
+  String get askAiViewDraft;
+
   /// No description provided for @askAiNewChat.
   ///
   /// In en, this message translates to:

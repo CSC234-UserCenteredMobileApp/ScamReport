@@ -55,6 +55,9 @@ class _StubRepo implements AskAiRepository {
     if (holdCompleter != null) return holdCompleter!.future;
     return next ?? _basic(content);
   }
+
+  @override
+  Future<void> upsertDraft(String conversationId, PersistedDraft? payload) async {}
 }
 
 class _StubSubmit implements SubmitDraftedReport {
@@ -73,13 +76,17 @@ class _StubPersistence implements AskAiPersistence {
   int saveCalls = 0;
   int clearCalls = 0;
   @override
-  Future<AskAiPersistedState?> load() async => loaded;
+  Future<AskAiPersistedState?> load([String? userId]) async => loaded;
   @override
   Future<void> save(AskAiPersistedState state) async {
     saveCalls++;
   }
   @override
   Future<void> clear() async {
+    clearCalls++;
+  }
+  @override
+  Future<void> clearForUser(String userId) async {
     clearCalls++;
   }
 }
@@ -191,15 +198,12 @@ void main() {
     expect(state.messages.where((m) => m.id == 'real-user'), hasLength(1));
   });
 
-  test('hydrate-on-construct restores cached snapshot', () async {
+  test('hydrate-on-construct restores cached composer state', () async {
+    // iter-5: drafts now sync server-side; drift snapshot only carries
+    // composer state (conversationId + stagedAttachments).
     final stub = _StubPersistence()
       ..loaded = AskAiPersistedState(
         conversationId: null,
-        activeDraft: const AiDraft(
-          title: 'A drafted title here',
-          description: 'A drafted description here that is long.',
-          scamTypeCode: 'phishing_sms',
-        ),
         stagedAttachments: [
           StagedAttachment(
             bytes: Uint8List.fromList([9, 9]),
@@ -216,7 +220,6 @@ void main() {
     // Allow the async _loadFromCache microtask to run.
     await Future<void>.delayed(const Duration(milliseconds: 50));
     final state = container.read(askAiChatControllerProvider);
-    expect(state.activeDraft?.title, 'A drafted title here');
     expect(state.stagedAttachments, hasLength(1));
   });
 }

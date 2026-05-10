@@ -6,9 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'l10n/l10n.dart';
 
+import 'core/di/auth.dart';
 import 'core/di/firebase.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'features/ask_ai/presentation/ask_ai_providers.dart';
 import 'features/settings/presentation/settings_providers.dart';
 
 Future<void> main() async {
@@ -33,6 +35,19 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(goRouterProvider);
     final settings = ref.watch(settingsProvider).valueOrNull;
+
+    // Sign-out drift hygiene: when authState becomes null, purge the Ask AI
+    // composer snapshot so the next account doesn't see this device's stale
+    // chat state. iter-5 multi-device hardening.
+    ref.listen<AsyncValue<dynamic>>(authStateProvider, (prev, next) {
+      final wasSignedIn = prev?.valueOrNull != null;
+      final isSignedOut = next.valueOrNull == null;
+      if (wasSignedIn && isSignedOut) {
+        final persistence = ref.read(askAiPersistenceProvider);
+        // ignore the future — purge is best-effort + idempotent.
+        persistence.clearForUser(prev?.valueOrNull?.uid as String? ?? '');
+      }
+    });
 
     return MaterialApp.router(
       title: 'ScamReport',
