@@ -100,6 +100,7 @@ class ReportsSubmitApi {
     required String sourceConversationId,
     String? clientSubmissionId,
     List<EvidenceMetadata> evidenceFiles = const [],
+    List<String> promotedEvidenceAttachmentIds = const [],
   }) async {
     final token = await _bearer();
     final res = await _http.post(
@@ -120,6 +121,8 @@ class ReportsSubmitApi {
         'sourceConversationId': sourceConversationId,
         if (clientSubmissionId != null)
           'clientSubmissionId': clientSubmissionId,
+        if (promotedEvidenceAttachmentIds.isNotEmpty)
+          'promotedEvidenceAttachmentIds': promotedEvidenceAttachmentIds,
       }),
     );
 

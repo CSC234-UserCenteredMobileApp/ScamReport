@@ -85,6 +85,12 @@ export const CreateReportRequest = Type.Object({
   clientSubmissionId: Type.Optional(Type.String({ minLength: 1, maxLength: 128 })),
   // When provided, the server links ai_conversations.linked_report_id → new report.
   sourceConversationId: Type.Optional(Type.String({ format: 'uuid' })),
+  // Chat-attachment IDs (ai_message_attachments.id) the user curated as evidence
+  // in a restored draft. Server copies each from chat-attachments → evidence
+  // bucket and inserts an evidence_files row in the same transaction. iter-5.
+  promotedEvidenceAttachmentIds: Type.Optional(
+    Type.Array(Type.String({ format: 'uuid' }), { maxItems: 5 }),
+  ),
 });
 export type CreateReportRequest = Static<typeof CreateReportRequest>;
 

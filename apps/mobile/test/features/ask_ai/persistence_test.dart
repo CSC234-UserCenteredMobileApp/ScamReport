@@ -6,15 +6,9 @@ import 'package:mobile/core/cache/app_database.dart';
 import 'package:mobile/features/ask_ai/data/ask_ai_persistence.dart';
 import 'package:mobile/features/ask_ai/data/ask_ai_state_codec.dart';
 import 'package:mobile/features/ask_ai/data/attachment_picker.dart';
-import 'package:mobile/features/ask_ai/domain/entities/ai_draft.dart';
 
-const _draft = AiDraft(
-  title: 'Fake Kerry parcel SMS',
-  description: 'I received an SMS asking me to click a link.',
-  scamTypeCode: 'phishing_sms',
-  targetIdentifier: 'kerry-th.net',
-  targetIdentifierKind: TargetIdentifierKind.url,
-);
+// iter-5: drafts + evidence sync server-side. Drift only persists composer
+// state (conversationId + stagedAttachments + conversationAttachments).
 
 StagedAttachment _staged([int seed = 0]) => StagedAttachment(
       bytes: Uint8List.fromList([seed, 0xDE, 0xAD]),
@@ -23,28 +17,27 @@ StagedAttachment _staged([int seed = 0]) => StagedAttachment(
     );
 
 void main() {
-  group('AskAiStateCodec', () {
-    test('round-trips draft + evidence + attachments', () {
+  group('AskAiStateCodec (v=2)', () {
+    test('round-trips composer state', () {
       final original = AskAiPersistedState(
         conversationId: 'conv-1',
-        activeDraft: _draft,
-        activeEvidence: [_staged(1), _staged(2)],
+        userId: 'firebase-uid-A',
         stagedAttachments: [_staged(3)],
         conversationAttachments: [_staged(4)],
       );
       final encoded = AskAiStateCodec.encode(original);
       final decoded = AskAiStateCodec.decode(encoded)!;
       expect(decoded.conversationId, 'conv-1');
-      expect(decoded.activeDraft?.title, _draft.title);
-      expect(decoded.activeEvidence, hasLength(2));
-      expect(decoded.activeEvidence!.first.bytes, _staged(1).bytes);
+      expect(decoded.userId, 'firebase-uid-A');
       expect(decoded.stagedAttachments, hasLength(1));
+      expect(decoded.stagedAttachments.first.bytes, _staged(3).bytes);
       expect(decoded.conversationAttachments, hasLength(1));
     });
 
-    test('rejects version mismatch', () {
-      const corrupt = '{"v": 999, "conversationId": "x"}';
-      expect(AskAiStateCodec.decode(corrupt), isNull);
+    test('rejects v=1 payloads (iter-4 codec)', () {
+      const legacy =
+          '{"v": 1, "conversationId": "x", "activeDraft": null, "stagedAttachments": []}';
+      expect(AskAiStateCodec.decode(legacy), isNull);
     });
 
     test('rejects malformed JSON', () {
@@ -55,11 +48,13 @@ void main() {
       expect(AskAiPersistedState().isEmpty, isTrue);
       expect(AskAiPersistedState(conversationId: 'c').isEmpty, isFalse);
       expect(
-          AskAiPersistedState(activeEvidence: [_staged()]).isEmpty, isFalse);
+        AskAiPersistedState(stagedAttachments: [_staged()]).isEmpty,
+        isFalse,
+      );
     });
   });
 
-  group('AskAiPersistence', () {
+  group('AskAiPersistence (uid-scoped)', () {
     late AppDatabase db;
     late AskAiPersistence persistence;
 
@@ -79,14 +74,24 @@ void main() {
     test('save then load round-trips', () async {
       final original = AskAiPersistedState(
         conversationId: 'conv-1',
-        activeDraft: _draft,
+        userId: 'uid-A',
         stagedAttachments: [_staged(1)],
       );
       await persistence.save(original);
-      final loaded = await persistence.load();
+      final loaded = await persistence.load('uid-A');
       expect(loaded, isNotNull);
       expect(loaded!.conversationId, 'conv-1');
       expect(loaded.stagedAttachments, hasLength(1));
+    });
+
+    test('load with foreign uid wipes the row', () async {
+      await persistence.save(AskAiPersistedState(
+        conversationId: 'a',
+        userId: 'uid-A',
+      ));
+      expect(await persistence.load('uid-B'), isNull);
+      // Row was cleared.
+      expect(await persistence.load('uid-A'), isNull);
     });
 
     test('save with empty state deletes the row', () async {
@@ -96,9 +101,12 @@ void main() {
       expect(await persistence.load(), isNull);
     });
 
-    test('clear deletes the row', () async {
-      await persistence.save(AskAiPersistedState(conversationId: 'c'));
-      await persistence.clear();
+    test('clearForUser purges the row', () async {
+      await persistence.save(AskAiPersistedState(
+        conversationId: 'c',
+        userId: 'uid-A',
+      ));
+      await persistence.clearForUser('uid-A');
       expect(await persistence.load(), isNull);
     });
 
@@ -107,7 +115,6 @@ void main() {
       await persistence.save(AskAiPersistedState(conversationId: 'b'));
       final loaded = await persistence.load();
       expect(loaded!.conversationId, 'b');
-      // Verify only one row exists.
       final all = await db.select(db.drafts).get();
       expect(all.where((r) => r.type == 'ask_ai_state').length, 1);
     });
@@ -122,7 +129,6 @@ void main() {
             ),
           );
       expect(await persistence.load(), isNull);
-      // load() also clears the corrupt row.
       final all = await db.select(db.drafts).get();
       expect(all.where((r) => r.type == 'ask_ai_state'), isEmpty);
     });

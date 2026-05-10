@@ -20,11 +20,25 @@ class StagedAttachment {
     required this.bytes,
     required this.mimeType,
     required this.filename,
-  });
+    this.chatAttachmentId,
+    this.signedUrl,
+    int? sizeBytesOverride,
+  }) : _sizeBytesOverride = sizeBytesOverride;
   final Uint8List bytes;
   final String mimeType;
   final String filename;
-  int get sizeBytes => bytes.lengthInBytes;
+  // When non-null, this attachment is already persisted in the chat-attachments
+  // bucket as ai_message_attachments[id]. Submit promotes it to the evidence
+  // bucket via `promotedEvidenceAttachmentIds` instead of re-uploading bytes.
+  // iter-5 server-side draft sync.
+  final String? chatAttachmentId;
+  // When non-null, the chip can render this URL instead of decoding `bytes`.
+  // Used for restored evidence whose bytes weren't transferred (signed URL
+  // path lives in the chat-attachments bucket).
+  final String? signedUrl;
+  final int? _sizeBytesOverride;
+  int get sizeBytes => _sizeBytesOverride ?? bytes.lengthInBytes;
+  bool get isRemote => chatAttachmentId != null;
 }
 
 /// Wraps image_picker for the chat composer. v1 supports image attachments

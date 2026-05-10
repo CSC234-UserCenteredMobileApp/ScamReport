@@ -24,8 +24,12 @@ import { randomUUID } from 'node:crypto';
 import { Buffer } from 'node:buffer';
 import type { CreateReportRequest, CreateReportResponse } from '@my-product/shared';
 import { getPrisma } from '../../core/db/client';
-import { uploadFile } from '../../core/supabase/storage';
+import { Prisma } from '../../generated/prisma/client';
+import { copyFile, uploadFile } from '../../core/supabase/storage';
 import { mirrorMyReport } from '../../sync/firestore_sync';
+
+const ATTACHMENTS_BUCKET = 'chat-attachments';
+const MAX_EVIDENCE_PER_REPORT = 5;
 
 export class ReportSubmitError extends Error {
   constructor(
@@ -174,18 +178,96 @@ export async function createReport(
     targetIdentifierKind,
   );
 
+  // Promote any chat-attachment evidence the user curated in a restored draft
+  // — copy bytes from chat-attachments → evidence bucket and convert to
+  // EvidenceMetadata. iter-5 server-side draft sync.
+  const promotedIds = input.promotedEvidenceAttachmentIds ?? [];
+  const promoted: Array<{
+    storagePath: string;
+    kind: 'image' | 'pdf';
+    mimeType: string;
+    sizeBytes: number;
+  }> = [];
+  if (promotedIds.length > 0) {
+    if (!input.sourceConversationId) {
+      throw new ReportSubmitError(
+        'promotedEvidenceAttachmentIds requires sourceConversationId',
+        400,
+        'missing_source_conversation',
+      );
+    }
+    const owned = await prisma.aiMessageAttachment.findMany({
+      where: {
+        id: { in: promotedIds },
+        message: {
+          conversation: {
+            id: input.sourceConversationId,
+            userId: reporterId,
+          },
+        },
+      },
+      select: {
+        id: true,
+        storagePath: true,
+        mimeType: true,
+        sizeBytes: true,
+      },
+    });
+    if (owned.length !== promotedIds.length) {
+      throw new ReportSubmitError(
+        'One or more promotedEvidenceAttachmentIds were not found in the source conversation',
+        400,
+        'invalid_promoted_evidence',
+      );
+    }
+    const byId = new Map(owned.map((r) => [r.id, r]));
+    for (const id of promotedIds) {
+      const src = byId.get(id);
+      if (!src) continue;
+      const ext = extFromMime(src.mimeType);
+      const dstPath = `${reporterId}/${randomUUID()}.${ext}`;
+      await copyFile(ATTACHMENTS_BUCKET, src.storagePath, EVIDENCE_BUCKET, dstPath, {
+        contentType: src.mimeType,
+      });
+      promoted.push({
+        storagePath: dstPath,
+        kind: src.mimeType === 'application/pdf' ? 'pdf' : 'image',
+        mimeType: src.mimeType,
+        sizeBytes: Number(src.sizeBytes),
+      });
+    }
+  }
+
+  const totalEvidenceCount = input.evidenceFiles.length + promoted.length;
+  if (totalEvidenceCount > MAX_EVIDENCE_PER_REPORT) {
+    throw new ReportSubmitError(
+      `Too many evidence files (max ${MAX_EVIDENCE_PER_REPORT})`,
+      400,
+      'too_many_evidence_files',
+    );
+  }
+
   // Atomic insert: report + evidence_files. The 5-row evidence trigger fires
   // on each insert, so even at exactly 5 the trigger should pass (it raises
   // when an *existing* row count >=5; at insert time count is 0..4).
   const reportId = randomUUID();
   const now = new Date();
-  const evidenceCreates = input.evidenceFiles.map((f) => ({
-    reportId,
-    storagePath: f.storagePath,
-    kind: f.kind,
-    mimeType: f.mimeType,
-    sizeBytes: BigInt(f.sizeBytes),
-  }));
+  const evidenceCreates = [
+    ...input.evidenceFiles.map((f) => ({
+      reportId,
+      storagePath: f.storagePath,
+      kind: f.kind,
+      mimeType: f.mimeType,
+      sizeBytes: BigInt(f.sizeBytes),
+    })),
+    ...promoted.map((f) => ({
+      reportId,
+      storagePath: f.storagePath,
+      kind: f.kind,
+      mimeType: f.mimeType,
+      sizeBytes: BigInt(f.sizeBytes),
+    })),
+  ];
 
   const created = await prisma.$transaction(async (tx) => {
     const report = await tx.report.create({
@@ -217,10 +299,11 @@ export async function createReport(
 
     if (input.sourceConversationId) {
       // Only link if the conversation is owned by the same user. We update
-      // conditionally to avoid leaking other users' conversations.
+      // conditionally to avoid leaking other users' conversations. Also
+      // clear the in-progress draft now that it has been submitted.
       await tx.aiConversation.updateMany({
         where: { id: input.sourceConversationId, userId: reporterId },
-        data: { linkedReportId: report.id },
+        data: { linkedReportId: report.id, draftState: Prisma.DbNull },
       });
     }
 

@@ -6,8 +6,10 @@ import {
   AskAiConversationDetail,
   AskAiConversationListResponse,
   AskAiCreateConversationResponse,
+  AskAiLocale,
   AskAiTurnRequest,
   AskAiTurnResponse,
+  AskAiUpsertDraftRequest,
 } from '@my-product/shared';
 import { requireAuth } from '../../core/middleware/auth.middleware';
 import { resolveInternalUserId } from '../../core/lib/resolve-user';
@@ -19,6 +21,7 @@ import {
   handleTurnJson,
   handleTurn,
   listConversations,
+  upsertDraft,
   type AttachmentUploadInput,
 } from './ask-ai.service';
 import {
@@ -134,6 +137,9 @@ export const askAiRoute = new Elysia({ prefix: '/ask-ai' })
       try {
         const b = body as Record<string, unknown>;
         const content = typeof b.content === 'string' ? b.content : '';
+        const localeRaw = typeof b.locale === 'string' ? b.locale : undefined;
+        const locale =
+          localeRaw === 'th' || localeRaw === 'en' ? localeRaw : undefined;
         const attachments: AttachmentUploadInput[] = [];
         for (let i = 0; i < MAX_ATTACHMENTS_PER_MESSAGE; i++) {
           const f = b[`file${i}`];
@@ -155,7 +161,7 @@ export const askAiRoute = new Elysia({ prefix: '/ask-ai' })
           return { error: 'content or files required', code: 'missing_content' };
         }
         const uid = await resolveInternalUserId(user!.uid, user!.email);
-        return await handleTurn(uid, params.id, content, attachments);
+        return await handleTurn(uid, params.id, content, attachments, locale);
       } catch (err) {
         if (
           err instanceof AskAiError ||
@@ -174,6 +180,7 @@ export const askAiRoute = new Elysia({ prefix: '/ask-ai' })
         // Allow empty content here; the handler enforces "content OR
         // files required" so image-only sends work.
         content: t.String({ maxLength: 4000 }),
+        locale: t.Optional(AskAiLocale),
         file0: t.Optional(t.Any()),
         file1: t.Optional(t.Any()),
         file2: t.Optional(t.Any()),
@@ -185,6 +192,37 @@ export const askAiRoute = new Elysia({ prefix: '/ask-ai' })
         413: errorBody,
         415: errorBody,
         429: errorBody,
+      },
+    },
+  )
+  // Per-conversation draft sync (iter-5). Mobile PATCHes the active draft
+  // (with chat-attachment id references for evidence) so it survives across
+  // devices + app kills. Pass null to clear.
+  .patch(
+    '/conversations/:id/draft',
+    async ({ params, body, user, set }) => {
+      try {
+        const uid = await resolveInternalUserId(user!.uid, user!.email);
+        const result = await upsertDraft(uid, params.id, body);
+        return { ok: true as const, draft: result.draft };
+      } catch (err) {
+        if (err instanceof AskAiError) {
+          set.status = err.status;
+          return { error: err.message, code: err.code };
+        }
+        throw err;
+      }
+    },
+    {
+      params: idParam,
+      body: AskAiUpsertDraftRequest,
+      response: {
+        200: t.Object({
+          ok: t.Literal(true),
+          draft: t.Union([AskAiUpsertDraftRequest, t.Null()]),
+        }),
+        400: errorBody,
+        404: errorBody,
       },
     },
   );

@@ -15,11 +15,13 @@ import 'package:mobile/l10n/app_localizations.dart';
 
 class _NoopPersistence implements AskAiPersistence {
   @override
-  Future<AskAiPersistedState?> load() async => null;
+  Future<AskAiPersistedState?> load([String? userId]) async => null;
   @override
   Future<void> save(AskAiPersistedState state) async {}
   @override
   Future<void> clear() async {}
+  @override
+  Future<void> clearForUser(String userId) async {}
 }
 
 class _StubRepo implements AskAiRepository {
@@ -68,6 +70,9 @@ class _StubRepo implements AskAiRepository {
   ) {
     throw UnimplementedError();
   }
+
+  @override
+  Future<void> upsertDraft(String conversationId, PersistedDraft? payload) async {}
 }
 
 class _StubSubmit implements SubmitDraftedReport {

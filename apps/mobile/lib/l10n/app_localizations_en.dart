@@ -488,6 +488,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get askAiBeta => 'BETA';
 
   @override
+  String get askAiViewDraft => 'View draft';
+
+  @override
   String get askAiNewChat => 'New chat';
 
   @override

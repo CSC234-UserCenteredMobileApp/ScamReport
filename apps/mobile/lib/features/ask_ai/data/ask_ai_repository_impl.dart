@@ -46,4 +46,8 @@ class AskAiRepositoryImpl implements AskAiRepository {
         .toList(growable: false);
     return _api.sendMessageMultipart(conversationId, content, staged);
   }
+
+  @override
+  Future<void> upsertDraft(String conversationId, PersistedDraft? payload) =>
+      _api.upsertDraft(conversationId, payload);
 }

@@ -8,7 +8,7 @@ import {
   GeminiStructuredParseError,
   inlinePart,
 } from '../../core/gemini/client';
-import type { AskAiDraft } from '@my-product/shared';
+import type { AskAiDraft, AskAiLocale } from '@my-product/shared';
 
 // JSON Schema (subset Gemini accepts) describing the model's output. Mirrors
 // the AskAiTurnResponse fields except userMessage / assistantMessage (those
@@ -89,7 +89,7 @@ const SYSTEM_PROMPT = `You are ScamReport's "Ask AI" assistant. You help users i
 
 GENERAL RULES
 
-1. Reply in the same language the user wrote in (Thai or English). Default to Thai if uncertain.
+1. Follow the explicit \`RESPOND IN\` directive at the top of the prompt. Reply ENTIRELY in that language — do not switch mid-conversation, even if the user mixes languages. If the directive is missing, mirror the user's most recent message language and default to Thai when truly uncertain.
 2. NEVER label the situation as "Scam", "Safe", "Suspicious", or "Unknown". Those are reserved for the formal POST /check verdict screen, not Ask AI. Describe risk in plain words instead.
 3. Keep replies under 150 words. Use short sentences. Do not bullet-list options unless the user asks for steps.
 4. NEVER ask more than ONE question per turn. Pick the single most useful question.
@@ -169,6 +169,7 @@ export type GeminiTurnInput = {
   similarReports: SimilarReportSummary[];
   latestUserMessage: string;
   attachments?: GeminiInlineAttachment[];
+  locale?: AskAiLocale;
 };
 
 export type MissingFact =
@@ -189,6 +190,13 @@ export type GeminiTurnOutput = {
 
 function buildPrompt(input: GeminiTurnInput): string {
   const lines: string[] = [];
+  if (input.locale) {
+    const lang = input.locale === 'th' ? 'Thai (ภาษาไทย)' : 'English';
+    lines.push(
+      `RESPOND IN: ${lang}. Match this language exactly in every field of your response (reply text and draft fields). Do NOT switch languages mid-conversation.`,
+    );
+    lines.push('');
+  }
   lines.push(SYSTEM_PROMPT);
   lines.push('');
   if (input.similarReports.length > 0) {
@@ -213,16 +221,24 @@ function buildPrompt(input: GeminiTurnInput): string {
   return lines.join('\n');
 }
 
-const FALLBACK_OUTPUT: GeminiTurnOutput = {
-  reply:
-    "I'm having trouble generating a response right now. Please try rephrasing your question, or try again in a moment.",
-  intentDetected: false,
-  hasEnoughInfo: false,
-  reportable: false,
-  draft: null,
-  similarReportIds: [],
-  missingFacts: [],
-};
+function fallbackOutput(locale?: AskAiLocale): GeminiTurnOutput {
+  return {
+    reply:
+      locale === 'th'
+        ? 'ขออภัย ขณะนี้ระบบไม่สามารถสร้างคำตอบได้ กรุณาลองใหม่อีกครั้งในอีกสักครู่'
+        : "I'm having trouble generating a response right now. Please try rephrasing your question, or try again in a moment.",
+    intentDetected: false,
+    hasEnoughInfo: false,
+    reportable: false,
+    draft: null,
+    similarReportIds: [],
+    missingFacts: [],
+  };
+}
+
+// Backwards-compat alias for callers (e.g. the test export). Defaults to
+// English so existing assertions keep passing.
+const FALLBACK_OUTPUT: GeminiTurnOutput = fallbackOutput();
 
 /**
  * Single Gemini turn call. Returns a typed output and never throws —
@@ -260,7 +276,7 @@ export async function runTurn(input: GeminiTurnInput): Promise<GeminiTurnOutput>
     } else {
       console.error('[ask-ai] gemini-transport-failure', { err });
     }
-    return FALLBACK_OUTPUT;
+    return fallbackOutput(input.locale);
   }
 }
 
@@ -318,7 +334,7 @@ function normaliseOutput(
     };
   }
   return {
-    reply: raw.reply ?? FALLBACK_OUTPUT.reply,
+    reply: raw.reply ?? fallbackOutput(input.locale).reply,
     intentDetected: Boolean(raw.intentDetected),
     hasEnoughInfo,
     reportable,

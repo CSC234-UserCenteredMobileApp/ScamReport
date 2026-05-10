@@ -1,59 +1,57 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import '../domain/entities/ai_draft.dart';
 import 'attachment_picker.dart';
 
-/// Persistable snapshot of the parts of `AskAiChatState` that should survive
-/// an app kill. Pure-Dart so this is easy to round-trip in unit tests.
+/// Persistable snapshot of composer state that should survive an app kill.
+///
+/// iter-5: drafts + curated evidence now live SERVER-SIDE (PATCHed via
+/// `/ask-ai/conversations/:id/draft`). Drift only tracks the in-flight
+/// composer state (current conversation + unsent stagedAttachments +
+/// `conversationAttachments` cumulative cache for the editor's pre-fill
+/// UX). Pure-Dart so this is easy to round-trip in unit tests.
 class AskAiPersistedState {
   AskAiPersistedState({
     this.conversationId,
-    this.activeDraft,
-    this.activeEvidence,
+    this.userId,
     this.stagedAttachments = const [],
     this.conversationAttachments = const [],
-    this.userEditedDraft = false,
     DateTime? savedAt,
   }) : savedAt = savedAt ?? DateTime.now();
 
   final String? conversationId;
-  final AiDraft? activeDraft;
-  final List<StagedAttachment>? activeEvidence;
+  // Firebase UID (iter-5 hardening). Drift row keyed by uid in payload so a
+  // sign-out → sign-in-as-different-user doesn't leak the prior user's chat
+  // into the new session.
+  final String? userId;
   final List<StagedAttachment> stagedAttachments;
   final List<StagedAttachment> conversationAttachments;
-  final bool userEditedDraft;
   final DateTime savedAt;
 
   /// True when none of the persisted fields hold meaningful state. Caller
   /// can short-circuit the save to a delete in that case.
   bool get isEmpty =>
       conversationId == null &&
-      activeDraft == null &&
-      (activeEvidence == null || activeEvidence!.isEmpty) &&
       stagedAttachments.isEmpty &&
       conversationAttachments.isEmpty;
 }
 
 class AskAiStateCodec {
-  static const int currentVersion = 1;
+  // Bumped from 1 → 2 in iter-5 (draft + evidence fields removed; userId
+  // added). v=1 payloads decode → version mismatch → row dropped cleanly
+  // by the caller.
+  static const int currentVersion = 2;
 
   static String encode(AskAiPersistedState state) {
     return jsonEncode({
       'v': currentVersion,
       'conversationId': state.conversationId,
-      'activeDraft': state.activeDraft != null
-          ? _draftToJson(state.activeDraft!)
-          : null,
-      'activeEvidence': state.activeEvidence
-          ?.map(_attachmentToJson)
-          .toList(growable: false),
+      'userId': state.userId,
       'stagedAttachments':
           state.stagedAttachments.map(_attachmentToJson).toList(growable: false),
       'conversationAttachments': state.conversationAttachments
           .map(_attachmentToJson)
           .toList(growable: false),
-      'userEditedDraft': state.userEditedDraft,
       'savedAt': state.savedAt.toIso8601String(),
     });
   }
@@ -67,44 +65,17 @@ class AskAiStateCodec {
       if (v != currentVersion) return null;
       return AskAiPersistedState(
         conversationId: j['conversationId'] as String?,
-        activeDraft: _draftFromJson(j['activeDraft'] as Map<String, dynamic>?),
-        activeEvidence: _attachmentsFromJson(j['activeEvidence']),
+        userId: j['userId'] as String?,
         stagedAttachments:
             _attachmentsFromJson(j['stagedAttachments']) ?? const [],
         conversationAttachments:
             _attachmentsFromJson(j['conversationAttachments']) ?? const [],
-        userEditedDraft: j['userEditedDraft'] as bool? ?? false,
         savedAt: DateTime.tryParse(j['savedAt'] as String? ?? '') ??
             DateTime.now(),
       );
     } catch (_) {
       return null;
     }
-  }
-
-  static Map<String, dynamic> _draftToJson(AiDraft d) => {
-        'title': d.title,
-        'description': d.description,
-        'scamTypeCode': d.scamTypeCode,
-        'targetIdentifier': d.targetIdentifier,
-        'targetIdentifierKind': d.targetIdentifierKind?.name,
-      };
-
-  static AiDraft? _draftFromJson(Map<String, dynamic>? j) {
-    if (j == null) return null;
-    final kind = j['targetIdentifierKind'] as String?;
-    return AiDraft(
-      title: j['title'] as String,
-      description: j['description'] as String,
-      scamTypeCode: j['scamTypeCode'] as String,
-      targetIdentifier: j['targetIdentifier'] as String?,
-      targetIdentifierKind: switch (kind) {
-        'phone' => TargetIdentifierKind.phone,
-        'url' => TargetIdentifierKind.url,
-        'other' => TargetIdentifierKind.other,
-        _ => null,
-      },
-    );
   }
 
   static Map<String, dynamic> _attachmentToJson(StagedAttachment a) => {

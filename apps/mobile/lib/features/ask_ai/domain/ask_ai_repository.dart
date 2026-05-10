@@ -36,4 +36,8 @@ abstract class AskAiRepository {
     String content,
     List<TurnAttachment> attachments,
   );
+
+  /// PATCH the per-conversation draft server-side (cross-device sync).
+  /// Pass `null` to clear the draft. iter-5.
+  Future<void> upsertDraft(String conversationId, PersistedDraft? payload);
 }
