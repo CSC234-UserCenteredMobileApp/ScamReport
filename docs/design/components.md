@@ -21,6 +21,8 @@ Tokens always come from `apps/mobile/lib/core/theme/app_theme.dart` (`ColorSchem
 | `BrandHeader` | `apps/mobile/lib/features/home/presentation/_brand_heeeting. Home-only. |
 | `ClipboardBanner` | `apps/mobile/lib/features/home/presentation/_clipboard_banner.dart` | Clipboard detection banner. Home-only. |
 | `_AccountCard` | `apps/mobile/lib/features/settings/presentation/_accidentity card (guest / user / admin). Settings-internal — private class. |
+| `ModQueueRow` | `apps/mobile/lib/core/widgets/mod_queue_row.dart` | Moderation queue row: scam-type chip + age + title + evidence count + Review button. Flagged variant adds a coral-amber left border + team-note line. **Reporter handle is intentionally not rendered** (PRD v1.2 FR-7.4 + FR-7.8 — admin views are fully anonymised). |
+| `AuditTrailRow` | `apps/mobile/lib/core/widgets/audit_trail_row.dart` | Timeline-style audit row: action label + optional admin label + timestamp + remark. Admin label is admin-to-admin transparency (FR-7.6) and is not the anonymised surface. |
 
 ## To build (referenced by screens)
 
@@ -32,9 +34,6 @@ Tokens always come from `apps/mobile/lib/core/theme/app_theme.dart` (`ColorSchem
 | `EvidenceList` | `report-detail`, `admin-review` | List of evidence it 2). Tap to preview (mocked in prototype). |
 | `ConsentBlock` | `register` (built), reused by `submit-report` step 2 | Container with rounded corners holding the consent checkbox(es) + body text. |
 | `StepBar` | `submit-report` | "Step 1 / 2" indicator at top of multi-
-| `ModQueueRow` | `mod` | Type chip + age + title + reporter handle (`User_xxxx`) + N evidence + Review button. Flagged variant adds a pinned border + team note row
-beneath. |
-| `AuditTrailRow` | `admin-review` | Timeline-style row: action label + admin handle + timestamp + remark text. |
 | `Toast` | global | Bottom-of-frame ephemeral message. The prototype u.g., share sheet). |
 
 ## Typography conventions

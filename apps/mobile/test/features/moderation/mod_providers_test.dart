@@ -9,14 +9,13 @@ ModQueueItem _item(String id, DateTime submittedAt, {bool flagged = false}) =>
     ModQueueItem(
       id: id,
       title: 'Report $id',
-      scamTypeCode: 'PHISH',
-      scamTypeLabelEn: 'Phishing',
-      scamTypeLabelTh: 'ฟิชชิง',
+      scamTypeCode: 'phishing_sms',
+      scamTypeLabelEn: 'Phishing SMS',
+      scamTypeLabelTh: 'ฟิชชิง SMS',
       submittedAt: submittedAt,
       status: flagged ? 'flagged' : 'pending',
       priorityFlag: flagged,
       evidenceCount: 1,
-      reporterHandle: '@user',
     );
 
 final _t1 = DateTime.utc(2026, 4, 20, 8);
@@ -107,7 +106,7 @@ void main() {
 
       final items = container.read(modFilteredQueueProvider).requireValue;
       expect(items, hasLength(2));
-      expect(items[0].id, 'r3'); // newer first
+      expect(items[0].id, 'r3');
       expect(items[1].id, 'r1');
     });
 

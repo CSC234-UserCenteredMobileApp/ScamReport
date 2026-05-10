@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/mod_queue_row.dart';
 import '../../../core/widgets/stat_card_row.dart';
 import '../../../l10n/l10n.dart';
 import '../domain/mod_report.dart';
@@ -34,22 +35,24 @@ class ModScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            const SliverPadding(
+              padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
               sliver: SliverToBoxAdapter(child: _ModControls()),
             ),
             filteredAsync.when(
               data: (items) {
                 if (items.isEmpty) {
-                  return SliverFillRemaining(
-                    child: _ModEmpty(),
-                  );
+                  return SliverFillRemaining(child: _ModEmpty());
                 }
                 return SliverPadding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                   sliver: SliverList.builder(
                     itemCount: items.length,
-                    itemBuilder: (context, i) => _ModQueueRow(item: items[i]),
+                    itemBuilder: (context, i) => ModQueueRow(
+                      item: items[i],
+                      onTap: () =>
+                          context.push('/ask-ai/review/${items[i].id}'),
+                    ),
                   ),
                 );
               },
@@ -120,6 +123,8 @@ class _StatsRow extends StatelessWidget {
 }
 
 class _ModControls extends ConsumerWidget {
+  const _ModControls();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final newestFirst = ref.watch(modSortNewestFirstProvider);
@@ -152,161 +157,6 @@ class _ModControls extends ConsumerWidget {
               ref.read(modFilterFlaggedProvider.notifier).state = v,
         ),
       ],
-    );
-  }
-}
-
-class _ModQueueRow extends StatelessWidget {
-  const _ModQueueRow({required this.item});
-
-  final ModQueueItem item;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = context.l10n;
-    final age = DateTime.now().difference(item.submittedAt);
-    final ageLabel = age.inHours >= 1
-        ? '${age.inHours}h'
-        : '${age.inMinutes}m';
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Card(
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () => context.push('/ask-ai/review/${item.id}'),
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (item.isFlagged)
-                  Container(
-                    width: 4,
-                    color: theme.colorScheme.tertiary,
-                  ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          _TypeChip(code: item.scamTypeCode),
-                          const SizedBox(width: 8),
-                          Text(
-                            ageLabel,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        item.title,
-                        style: theme.textTheme.titleMedium,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          _HandlePill(handle: item.reporterHandle),
-                          const SizedBox(width: 8),
-                          Text(
-                            l10n.modEvidenceCount(item.evidenceCount),
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                          const Spacer(),
-                          FilledButton(
-                            onPressed: () =>
-                                context.push('/ask-ai/review/${item.id}'),
-                            style: FilledButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 0,
-                              ),
-                              minimumSize: const Size(0, 32),
-                            ),
-                            child: Text(l10n.modReview),
-                          ),
-                        ],
-                      ),
-                      if (item.isFlagged &&
-                          item.lastRemarkByAdmin != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          l10n.modTeamNote(item.lastRemarkByAdmin!),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.tertiary,
-                            fontStyle: FontStyle.italic,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TypeChip extends StatelessWidget {
-  const _TypeChip({required this.code});
-
-  final String code;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        code.toUpperCase(),
-        style: theme.textTheme.labelSmall?.copyWith(
-          color: theme.colorScheme.onPrimaryContainer,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-    );
-  }
-}
-
-class _HandlePill extends StatelessWidget {
-  const _HandlePill({required this.handle});
-
-  final String handle;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Text(
-        handle,
-        style: theme.textTheme.labelSmall?.copyWith(
-          color: theme.colorScheme.onSurfaceVariant,
-        ),
-      ),
     );
   }
 }

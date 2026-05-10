@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from 'bun:test';
 import { app } from '../src/index';
+import { __setFirestoreForTest } from '../src/sync/firestore_sync';
 
 // ---------------------------------------------------------------------------
 // Firebase mocks
@@ -34,6 +35,7 @@ mock.module('../src/core/gemini/client', () => ({
 let mockFindUniqueReport: Record<string, unknown> | null = null;
 let mockFindManyReports: unknown[] = [];
 let mockQueryRawResults: unknown[] = [];
+let mockUpdateReport: Record<string, unknown> = {};
 
 mock.module('../src/core/db/client', () => ({
   getPrisma: () => ({
@@ -41,7 +43,7 @@ mock.module('../src/core/db/client', () => ({
       findMany: async () => mockFindManyReports,
       findUnique: async () => mockFindUniqueReport,
       count: async () => 0,
-      update: async () => ({ id: VALID_ID, status: 'verified', updatedAt: new Date() }),
+      update: async () => mockUpdateReport,
     },
     moderationAction: {
       create: async () => ({}),
@@ -81,12 +83,49 @@ const MOCK_DETAIL_REPORT = {
   targetIdentifierNormalized: null,
   reporterId: null,
   createdAt: new Date('2026-01-01T00:00:00Z'),
+  updatedAt: new Date('2026-01-01T00:00:00Z'),
+  verifiedAt: null,
+  rejectionRemark: null,
   scamType: { code: 'phone', labelEn: 'Phone Scam', labelTh: 'หลอกลวงโทรศัพท์' },
   evidenceFiles: [],
   moderations: [],
 };
 
-const MOCK_ACTION_REPORT = { id: VALID_ID, reporterId: null };
+const REPORTER_ID = '11111111-1111-1111-1111-111111111111';
+const MOCK_ACTION_REPORT = { id: VALID_ID, reporterId: REPORTER_ID };
+
+const ACTION_UPDATE_RESULT = {
+  id: VALID_ID,
+  status: 'verified',
+  updatedAt: new Date('2026-01-02T00:00:00Z'),
+  reporterId: REPORTER_ID,
+  title: 'Test scam',
+  createdAt: new Date('2026-01-01T00:00:00Z'),
+  verifiedAt: new Date('2026-01-02T00:00:00Z'),
+  rejectionRemark: null,
+  scamType: { code: 'phone' },
+};
+
+// In-memory Firestore stub. The service calls `mirrorMyReport(...)` after
+// every admin action; this records what the mirror would have written so we
+// can assert (a) it was called and (b) the admin-internal `flagged` status
+// is mapped to reporter-facing `pending` per FR-6.1 inside
+// `firestore_sync.toReporterStatus`.
+let firestoreSets: Array<{ path: string; data: Record<string, unknown> }> = [];
+let firestoreDeletes: Array<{ path: string }> = [];
+
+const firestoreStub = {
+  collection: (collPath: string) => ({
+    doc: (id: string) => ({
+      set: async (data: Record<string, unknown>) => {
+        firestoreSets.push({ path: `${collPath}/${id}`, data });
+      },
+      delete: async () => {
+        firestoreDeletes.push({ path: `${collPath}/${id}` });
+      },
+    }),
+  }),
+};
 
 function req(
   path: string,
@@ -101,11 +140,46 @@ function req(
   });
 }
 
+// Recursively walk the response payload looking for any reporter-identifying
+// field. PRD v1.2 FR-7.4 + FR-7.8 — admin clients must never see reporter
+// identity, masked or otherwise. The test asserts presence of the bug at
+// every level of every payload, anti-regression for the demo-grade leak that
+// shipped on `main` before this refactor.
+function findReporterLeak(obj: unknown, path = ''): string | null {
+  if (Array.isArray(obj)) {
+    for (let i = 0; i < obj.length; i++) {
+      const found = findReporterLeak(obj[i], `${path}[${i}]`);
+      if (found) return found;
+    }
+    return null;
+  }
+  if (obj && typeof obj === 'object') {
+    for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
+      // adminId in audit-trail records is admin-to-admin transparency, not
+      // reporter identity — explicitly allowed by FR-7.6.
+      if (k === 'adminId') continue;
+      if (/reporter|reporterhandle|user_/i.test(k)) {
+        return `${path}.${k}`;
+      }
+      const found = findReporterLeak(v, `${path}.${k}`);
+      if (found) return found;
+    }
+  }
+  if (typeof obj === 'string' && /^User_[0-9a-f]/i.test(obj)) {
+    return `${path}=<masked-handle:${obj}>`;
+  }
+  return null;
+}
+
 beforeEach(() => {
   mockDecoded = null;
   mockFindUniqueReport = null;
   mockFindManyReports = [];
   mockQueryRawResults = [];
+  mockUpdateReport = ACTION_UPDATE_RESULT;
+  firestoreSets = [];
+  firestoreDeletes = [];
+  __setFirestoreForTest(firestoreStub);
 });
 
 afterEach(() => {
@@ -113,6 +187,7 @@ afterEach(() => {
   mockFindUniqueReport = null;
   mockFindManyReports = [];
   mockQueryRawResults = [];
+  __setFirestoreForTest(null);
 });
 
 // ---------------------------------------------------------------------------
@@ -138,14 +213,17 @@ describe('GET /admin/reports/queue', () => {
     expect(body).toHaveProperty('flaggedCount');
   });
 
-  test('200 admin — queue with items includes reporterHandle', async () => {
+  test('200 admin — queue with items omits reporter identity', async () => {
     mockDecoded = ADMIN;
     mockFindManyReports = [MOCK_QUEUE_REPORT];
     const res = await app.handle(req('/admin/reports/queue', { token: 'tok' }));
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.items).toHaveLength(1);
-    expect(body.items[0]).toHaveProperty('reporterHandle');
+    const item = body.items[0];
+    expect(item).not.toHaveProperty('reporterHandle');
+    expect(item).not.toHaveProperty('reporterId');
+    expect(findReporterLeak(body)).toBeNull();
   });
 });
 
@@ -174,7 +252,7 @@ describe('GET /admin/reports/:id', () => {
     expect(res.status).toBe(404);
   });
 
-  test('200 admin — returns report detail with AI score', async () => {
+  test('200 admin — returns detail with AI score and no reporter identity', async () => {
     mockDecoded = ADMIN;
     mockFindUniqueReport = MOCK_DETAIL_REPORT;
     mockQueryRawResults = [
@@ -188,7 +266,9 @@ describe('GET /admin/reports/:id', () => {
     expect(body).toHaveProperty('report');
     expect(body.report).toHaveProperty('aiScore');
     expect(body.report).toHaveProperty('aiConfidence');
-    expect(body.report).toHaveProperty('reporterHandle');
+    expect(body.report).not.toHaveProperty('reporterHandle');
+    expect(body.report).not.toHaveProperty('reporterId');
+    expect(findReporterLeak(body)).toBeNull();
   });
 });
 
@@ -233,7 +313,7 @@ describe('POST /admin/reports/:id/approve', () => {
     expect(res.status).toBe(404);
   });
 
-  test('200 admin — approves report', async () => {
+  test('200 admin — approves report and returns no reporter identity', async () => {
     mockDecoded = ADMIN;
     mockFindUniqueReport = MOCK_ACTION_REPORT;
     const res = await app.handle(
@@ -244,12 +324,36 @@ describe('POST /admin/reports/:id/approve', () => {
     expect(body).toHaveProperty('id');
     expect(body).toHaveProperty('status');
     expect(body).toHaveProperty('updatedAt');
+    expect(findReporterLeak(body)).toBeNull();
+  });
+
+  test('200 admin — approve writes verified to my-reports mirror', async () => {
+    mockDecoded = ADMIN;
+    mockFindUniqueReport = MOCK_ACTION_REPORT;
+    mockUpdateReport = { ...ACTION_UPDATE_RESULT, status: 'verified' };
+    await app.handle(
+      req(`/admin/reports/${VALID_ID}/approve`, { method: 'POST', token: 'tok', body: { remark: 'ok' } }),
+    );
+    expect(firestoreSets).toHaveLength(1);
+    const write = firestoreSets[0]!;
+    expect(write.path).toBe(`my-reports/${REPORTER_ID}/items/${VALID_ID}`);
+    expect(write.data.status).toBe('verified');
   });
 });
 
 // ---------------------------------------------------------------------------
-// Spot-check reject / flag / unflag — auth + validation + happy path
-(['reject', 'flag', 'unflag'] as const).forEach((action) => {
+// reject / flag / unflag — auth + validation + happy path + mirror assertion.
+//
+// `expectedReporterStatus` is what the My Reports Firestore mirror should
+// receive after the action, given `firestore_sync.toReporterStatus` maps the
+// admin-internal `flagged` to the reporter-facing `pending` (FR-6.1).
+const ACTION_CASES = [
+  { action: 'reject' as const, dbStatus: 'rejected', mirroredStatus: 'rejected' },
+  { action: 'flag' as const, dbStatus: 'flagged', mirroredStatus: 'pending' },
+  { action: 'unflag' as const, dbStatus: 'pending', mirroredStatus: 'pending' },
+];
+
+ACTION_CASES.forEach(({ action, dbStatus, mirroredStatus }) => {
   describe(`POST /admin/reports/:id/${action}`, () => {
     test('401 unauthenticated', async () => {
       const res = await app.handle(
@@ -274,9 +378,10 @@ describe('POST /admin/reports/:id/approve', () => {
       expect(res.status).toBe(422);
     });
 
-    test(`200 admin — ${action}s report`, async () => {
+    test(`200 admin — ${action}s report and omits reporter identity`, async () => {
       mockDecoded = ADMIN;
       mockFindUniqueReport = MOCK_ACTION_REPORT;
+      mockUpdateReport = { ...ACTION_UPDATE_RESULT, status: dbStatus };
       const res = await app.handle(
         req(`/admin/reports/${VALID_ID}/${action}`, { method: 'POST', token: 'tok', body: { remark: 'team decision' } }),
       );
@@ -284,6 +389,20 @@ describe('POST /admin/reports/:id/approve', () => {
       const body = await res.json();
       expect(body).toHaveProperty('id');
       expect(body).toHaveProperty('status');
+      expect(findReporterLeak(body)).toBeNull();
+    });
+
+    test(`${action} writes ${mirroredStatus} to my-reports mirror`, async () => {
+      mockDecoded = ADMIN;
+      mockFindUniqueReport = MOCK_ACTION_REPORT;
+      mockUpdateReport = { ...ACTION_UPDATE_RESULT, status: dbStatus };
+      await app.handle(
+        req(`/admin/reports/${VALID_ID}/${action}`, { method: 'POST', token: 'tok', body: { remark: 'reason' } }),
+      );
+      expect(firestoreSets).toHaveLength(1);
+      const write = firestoreSets[0]!;
+      expect(write.path).toBe(`my-reports/${REPORTER_ID}/items/${VALID_ID}`);
+      expect(write.data.status).toBe(mirroredStatus);
     });
   });
 });

@@ -1,3 +1,13 @@
+// =============================================================================
+// Moderation domain entities
+// =============================================================================
+//
+// Reporter identity is intentionally absent from every entity in this file
+// (PRD v1.2 FR-7.4 + FR-7.8). Admin views never display the reporter — not as
+// a UUID, not as an email, not as a masked handle. The `reporters` linkage is
+// retained server-side in `reports.reporter_id` for legal traceability and
+// FCM fan-out only; it never crosses the API boundary into mobile entities.
+
 class ModQueueItem {
   const ModQueueItem({
     required this.id,
@@ -9,7 +19,6 @@ class ModQueueItem {
     required this.status,
     required this.priorityFlag,
     required this.evidenceCount,
-    required this.reporterHandle,
     this.lastRemarkByAdmin,
   });
 
@@ -22,7 +31,6 @@ class ModQueueItem {
   final String status;
   final bool priorityFlag;
   final int evidenceCount;
-  final String reporterHandle;
   final String? lastRemarkByAdmin;
 
   bool get isFlagged => status == 'flagged';
@@ -52,6 +60,8 @@ class ModerationAction {
     this.adminId,
   });
 
+  // adminId is admin-to-admin transparency (FR-7.6); not a reporter-identity
+  // surface. Allowed in admin views.
   final String? adminId;
   final String action;
   final String remark;
@@ -75,7 +85,6 @@ class ModReportDetail {
     required this.evidenceFiles,
     required this.duplicateCount,
     required this.auditTrail,
-    required this.reporterHandle,
     this.lastRemarkByAdmin,
     this.aiScore,
     this.aiConfidence,
@@ -96,7 +105,6 @@ class ModReportDetail {
   final List<EvidenceFile> evidenceFiles;
   final int duplicateCount;
   final List<ModerationAction> auditTrail;
-  final String reporterHandle;
   final String? lastRemarkByAdmin;
   final int? aiScore;
   final String? aiConfidence;

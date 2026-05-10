@@ -242,6 +242,16 @@ class AppLocalizationsTh extends AppLocalizations {
   }
 
   @override
+  String modAgeHours(int hours) {
+    return '$hours ชม.';
+  }
+
+  @override
+  String modAgeMinutes(int minutes) {
+    return '$minutes นาที';
+  }
+
+  @override
   String get adminReviewTitle => 'ตรวจสอบรายงาน';
 
   @override
@@ -280,8 +290,8 @@ class AppLocalizationsTh extends AppLocalizations {
   String get adminReviewUnflagged => 'ยกเลิกสถานะแล้ว';
 
   @override
-  String adminReviewSubmittedBy(String handle, String date) {
-    return 'ส่งโดย $handle • $date';
+  String adminReviewSubmittedOn(String date) {
+    return 'ส่งเมื่อ $date';
   }
 
   @override
@@ -297,12 +307,15 @@ class AppLocalizationsTh extends AppLocalizations {
   String get adminLabelAuditTrail => 'บันทึกการตรวจสอบ';
 
   @override
-  String get adminAuditSubmitted => 'ส่งแล้ว';
-
-  @override
   String adminAiScore(int score, String level) {
     return 'ความเชื่อมั่น AI: $score% ($level)';
   }
+
+  @override
+  String get noEvidence => 'ไม่มีไฟล์หลักฐาน';
+
+  @override
+  String get auditTrailEmpty => 'ยังไม่มีการดำเนินการ';
 
   @override
   String get smsSmishingDetectionLabel => 'ตรวจจับ SMS หลอกลวง';

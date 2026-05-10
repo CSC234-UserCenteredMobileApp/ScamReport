@@ -7,29 +7,35 @@ import 'package:mobile/features/moderation/presentation/mod_providers.dart';
 import 'package:mobile/features/moderation/presentation/mod_screen.dart';
 import 'package:mobile/l10n/l10n.dart';
 
-Widget _wrap(Widget widget, {List<Override> overrides = const []}) {
+Widget _wrap(
+  Widget widget, {
+  List<Override> overrides = const [],
+  Locale locale = const Locale('en'),
+}) {
   return ProviderScope(
     overrides: overrides,
     child: MaterialApp(
       theme: lightTheme(),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      locale: locale,
       home: widget,
     ),
   );
 }
 
-ModQueueItem _item(String id, {bool flagged = false}) => ModQueueItem(
+ModQueueItem _item(String id, {bool flagged = false, String? lastRemark}) =>
+    ModQueueItem(
       id: id,
       title: 'Scam Report $id',
-      scamTypeCode: 'PHISH',
-      scamTypeLabelEn: 'Phishing',
-      scamTypeLabelTh: 'ฟิชชิง',
-      submittedAt: DateTime.utc(2026, 4, 20, 10),
+      scamTypeCode: 'phishing_sms',
+      scamTypeLabelEn: 'Phishing SMS',
+      scamTypeLabelTh: 'ฟิชชิง SMS',
+      submittedAt: DateTime.now().subtract(const Duration(hours: 2)),
       status: flagged ? 'flagged' : 'pending',
       priorityFlag: flagged,
       evidenceCount: 2,
-      reporterHandle: '@testuser',
+      lastRemarkByAdmin: lastRemark,
     );
 
 ModQueueData _queue([int count = 2]) => ModQueueData(
@@ -39,6 +45,11 @@ ModQueueData _queue([int count = 2]) => ModQueueData(
     );
 
 void main() {
+  setUpAll(() {
+    // Larger surface keeps the IntrinsicHeight queue rows from overflowing
+    // the test viewport.
+  });
+
   group('ModScreen', () {
     testWidgets('shows skeleton rows while loading', (tester) async {
       tester.view.physicalSize = const Size(1080, 1920);
@@ -60,7 +71,7 @@ void main() {
 
       await tester.pump();
 
-      // 4 skeleton containers visible during loading.
+      // Skeleton placeholder boxes render during loading.
       expect(
         find.byWidgetPredicate(
           (w) => w is Container && w.decoration is BoxDecoration,
@@ -92,7 +103,81 @@ void main() {
       expect(find.text('Scam Report r2'), findsOneWidget);
     });
 
-    testWidgets('shows empty-state text when filtered list is empty', (tester) async {
+    testWidgets('renders English scam-type label by default', (tester) async {
+      tester.view.physicalSize = const Size(1080, 1920);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final queue = _queue(1);
+      await tester.pumpWidget(_wrap(
+        const ModScreen(),
+        overrides: [
+          modQueueProvider.overrideWith((ref) async => queue),
+          modFilteredQueueProvider.overrideWith(
+            (ref) => AsyncValue.data(queue.items),
+          ),
+        ],
+      ));
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('Phishing SMS'), findsOneWidget);
+    });
+
+    testWidgets('renders Thai scam-type label when locale is th',
+        (tester) async {
+      tester.view.physicalSize = const Size(1080, 1920);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final queue = _queue(1);
+      await tester.pumpWidget(_wrap(
+        const ModScreen(),
+        overrides: [
+          modQueueProvider.overrideWith((ref) async => queue),
+          modFilteredQueueProvider.overrideWith(
+            (ref) => AsyncValue.data(queue.items),
+          ),
+        ],
+        locale: const Locale('th'),
+      ));
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('ฟิชชิง SMS'), findsOneWidget);
+    });
+
+    testWidgets(
+      'never renders reporter identity (FR-7.4 anti-regression)',
+      (tester) async {
+        tester.view.physicalSize = const Size(1080, 1920);
+        tester.view.devicePixelRatio = 2.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        final queue = _queue(2);
+        await tester.pumpWidget(_wrap(
+          const ModScreen(),
+          overrides: [
+            modQueueProvider.overrideWith((ref) async => queue),
+            modFilteredQueueProvider.overrideWith(
+              (ref) => AsyncValue.data(queue.items),
+            ),
+          ],
+        ));
+
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('User_'), findsNothing);
+        expect(find.textContaining('@user'), findsNothing);
+        expect(find.textContaining('@testuser'), findsNothing);
+      },
+    );
+
+    testWidgets('shows empty-state text when filtered list is empty',
+        (tester) async {
       tester.view.physicalSize = const Size(1080, 1920);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -102,7 +187,11 @@ void main() {
         const ModScreen(),
         overrides: [
           modQueueProvider.overrideWith(
-            (ref) async => const ModQueueData(items: [], pendingCount: 0, flaggedCount: 0),
+            (ref) async => const ModQueueData(
+              items: [],
+              pendingCount: 0,
+              flaggedCount: 0,
+            ),
           ),
           modFilteredQueueProvider.overrideWith(
             (ref) => const AsyncValue.data([]),
@@ -133,13 +222,18 @@ void main() {
       expect(find.textContaining('Exception'), findsOneWidget);
     });
 
-    testWidgets('renders report items with type code chip', (tester) async {
+    testWidgets('flagged variant renders team note', (tester) async {
       tester.view.physicalSize = const Size(1080, 1920);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      final queue = _queue(1);
+      final flagged = _item('r1', flagged: true, lastRemark: 'Need consensus');
+      final queue = ModQueueData(
+        items: [flagged],
+        pendingCount: 0,
+        flaggedCount: 1,
+      );
       await tester.pumpWidget(_wrap(
         const ModScreen(),
         overrides: [
@@ -152,10 +246,7 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Type code chip renders in uppercase.
-      expect(find.text('PHISH'), findsOneWidget);
-      // Reporter handle visible.
-      expect(find.text('@testuser'), findsOneWidget);
+      expect(find.textContaining('Need consensus'), findsOneWidget);
     });
   });
 }

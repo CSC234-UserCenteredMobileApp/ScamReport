@@ -41,6 +41,10 @@ class ModRepositoryImpl implements ModRepository {
   Future<void> unflag(String id, String remark) =>
       _api.postAction(id, 'unflag', remark);
 
+  // Reporter identity is intentionally not extracted from the JSON envelope
+  // (PRD v1.2 FR-7.4 + FR-7.8). Even if a future server bug regressed and
+  // included `reporterHandle`/`reporterId`, this mapper would silently drop
+  // them — no path to the UI exists.
   ModQueueItem _mapItem(Map<String, dynamic> m) => ModQueueItem(
         id: m['id'] as String,
         title: m['title'] as String,
@@ -51,7 +55,6 @@ class ModRepositoryImpl implements ModRepository {
         status: m['status'] as String,
         priorityFlag: m['priorityFlag'] as bool,
         evidenceCount: m['evidenceCount'] as int,
-        reporterHandle: m['reporterHandle'] as String,
         lastRemarkByAdmin: m['lastRemarkByAdmin'] as String?,
       );
 
@@ -64,7 +67,7 @@ class ModRepositoryImpl implements ModRepository {
         submittedAt: DateTime.parse(m['submittedAt'] as String),
         status: m['status'] as String,
         priorityFlag: m['priorityFlag'] as bool,
-        evidenceCount: m['evidenceCount'] as int,
+        evidenceCount: (m['evidenceFiles'] as List<dynamic>?)?.length ?? 0,
         description: m['description'] as String,
         targetIdentifier: m['targetIdentifier'] as String?,
         targetIdentifierKind: m['targetIdentifierKind'] as String?,
@@ -75,7 +78,6 @@ class ModRepositoryImpl implements ModRepository {
         auditTrail: (m['auditTrail'] as List<dynamic>)
             .map((e) => _mapAction(e as Map<String, dynamic>))
             .toList(),
-        reporterHandle: m['reporterHandle'] as String,
         lastRemarkByAdmin: m['lastRemarkByAdmin'] as String?,
         aiScore: m['aiScore'] as int?,
         aiConfidence: m['aiConfidence'] as String?,
