@@ -290,11 +290,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminReviewUnflagged => 'Flag removed.';
 
   @override
-  String adminReviewSubmittedBy(String handle, String date) {
-    return 'Submitted by $handle • $date';
-  }
-
-  @override
   String adminReviewSubmittedOn(String date) {
     return 'Submitted $date';
   }
@@ -310,9 +305,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminLabelAuditTrail => 'AUDIT TRAIL';
-
-  @override
-  String get adminAuditSubmitted => 'Submitted';
 
   @override
   String adminAiScore(int score, String level) {

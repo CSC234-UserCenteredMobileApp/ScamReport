@@ -290,11 +290,6 @@ class AppLocalizationsTh extends AppLocalizations {
   String get adminReviewUnflagged => 'ยกเลิกสถานะแล้ว';
 
   @override
-  String adminReviewSubmittedBy(String handle, String date) {
-    return 'ส่งโดย $handle • $date';
-  }
-
-  @override
   String adminReviewSubmittedOn(String date) {
     return 'ส่งเมื่อ $date';
   }
@@ -310,9 +305,6 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get adminLabelAuditTrail => 'บันทึกการตรวจสอบ';
-
-  @override
-  String get adminAuditSubmitted => 'ส่งแล้ว';
 
   @override
   String adminAiScore(int score, String level) {

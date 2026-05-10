@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/widgets/audit_trail_row.dart';
 import '../../../l10n/l10n.dart';
 import '../domain/mod_report.dart';
+import '../domain/mod_repository.dart';
 import 'mod_providers.dart';
 
 class AdminReviewScreen extends ConsumerWidget {
@@ -40,6 +42,10 @@ class _ReviewBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
+    final locale = Localizations.localeOf(context);
+    final scamTypeLabel = locale.languageCode == 'th'
+        ? report.scamTypeLabelTh
+        : report.scamTypeLabelEn;
     final dateStr = DateFormat.yMMMd().format(report.submittedAt);
 
     return Stack(
@@ -59,7 +65,7 @@ class _ReviewBody extends ConsumerWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _TypeChip(code: report.scamTypeCode),
+                  _ScamTypeChip(label: scamTypeLabel),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -70,8 +76,11 @@ class _ReviewBody extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 6),
+              // Reporter identity is intentionally absent (PRD v1.2 FR-7.4 +
+              // FR-7.8). The previous "Submitted by User_xxxx" row is gone;
+              // a date-only meta line replaces it.
               Text(
-                l10n.adminReviewSubmittedBy(report.reporterHandle, dateStr),
+                l10n.adminReviewSubmittedOn(dateStr),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -102,11 +111,10 @@ class _ReviewBody extends ConsumerWidget {
                     '${l10n.adminLabelEvidence} (${report.evidenceFiles.length})',
               ),
               const SizedBox(height: 4),
-              ...report.evidenceFiles
-                  .map((f) => _EvidenceRow(file: f)),
+              ...report.evidenceFiles.map((f) => _EvidenceRow(file: f)),
               if (report.evidenceFiles.isEmpty)
                 Text(
-                  '—',
+                  l10n.noEvidence,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -114,18 +122,22 @@ class _ReviewBody extends ConsumerWidget {
               const SizedBox(height: 16),
               _SectionLabel(label: l10n.adminLabelAuditTrail),
               const SizedBox(height: 4),
-              _AuditTrailRow(
-                action: l10n.adminAuditSubmitted,
-                remark: report.reporterHandle,
-                at: report.submittedAt,
-              ),
-              ...report.auditTrail.map(
-                (a) => _AuditTrailRow(
-                  action: a.action,
-                  remark: a.remark,
-                  at: a.createdAt,
+              if (report.auditTrail.isEmpty)
+                Text(
+                  l10n.auditTrailEmpty,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                )
+              else
+                ...report.auditTrail.map(
+                  (a) => AuditTrailRow(
+                    action: a.action,
+                    at: a.createdAt,
+                    remark: a.remark,
+                    adminLabel: a.adminId,
+                  ),
                 ),
-              ),
             ],
           ),
         ),
@@ -149,12 +161,11 @@ class _ActionBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final repo = ref.read(modRepositoryProvider);
     final enabled = report.isPending || report.isFlagged;
 
     Future<void> doAction(
       String label,
-      Future<void> Function(String remark) action,
+      Future<void> Function(ModRepository repo, String remark) action,
       String toast,
     ) async {
       final remark = await showDialog<String>(
@@ -162,8 +173,9 @@ class _ActionBar extends ConsumerWidget {
         builder: (_) => _RemarkDialog(actionLabel: label),
       );
       if (remark == null || !context.mounted) return;
+      final repo = ref.read(modRepositoryProvider);
       try {
-        await action(remark);
+        await action(repo, remark);
         ref.invalidate(modQueueProvider);
         ref.invalidate(modDetailProvider(reportId));
         if (context.mounted) {
@@ -189,7 +201,7 @@ class _ActionBar extends ConsumerWidget {
               onPressed: enabled
                   ? () => doAction(
                         l10n.adminReviewReject,
-                        (r) => repo.reject(reportId, r),
+                        (repo, r) => repo.reject(reportId, r),
                         l10n.adminReviewRejected,
                       )
                   : null,
@@ -212,13 +224,13 @@ class _ActionBar extends ConsumerWidget {
                       if (report.isFlagged) {
                         doAction(
                           l10n.adminReviewUnflag,
-                          (r) => repo.unflag(reportId, r),
+                          (repo, r) => repo.unflag(reportId, r),
                           l10n.adminReviewUnflagged,
                         );
                       } else {
                         doAction(
                           l10n.adminReviewFlag,
-                          (r) => repo.flag(reportId, r),
+                          (repo, r) => repo.flag(reportId, r),
                           l10n.adminReviewFlagged,
                         );
                       }
@@ -245,7 +257,7 @@ class _ActionBar extends ConsumerWidget {
               onPressed: enabled
                   ? () => doAction(
                         l10n.adminReviewApprove,
-                        (r) => repo.approve(reportId, r),
+                        (repo, r) => repo.approve(reportId, r),
                         l10n.adminReviewApproved,
                       )
                   : null,
@@ -293,7 +305,7 @@ class _RemarkDialogState extends State<_RemarkDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(null),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
         FilledButton(
           onPressed: () {
@@ -325,22 +337,22 @@ class _SectionLabel extends StatelessWidget {
   }
 }
 
-class _TypeChip extends StatelessWidget {
-  const _TypeChip({required this.code});
+class _ScamTypeChip extends StatelessWidget {
+  const _ScamTypeChip({required this.label});
 
-  final String code;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         color: theme.colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
-        code.toUpperCase(),
+        label,
         style: theme.textTheme.labelSmall?.copyWith(
           color: theme.colorScheme.onPrimaryContainer,
           fontWeight: FontWeight.w700,
@@ -374,57 +386,6 @@ class _EvidenceRow extends StatelessWidget {
               style: theme.textTheme.bodySmall,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AuditTrailRow extends StatelessWidget {
-  const _AuditTrailRow({
-    required this.action,
-    required this.remark,
-    required this.at,
-  });
-
-  final String action;
-  final String remark;
-  final DateTime at;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 6,
-            height: 6,
-            margin: const EdgeInsets.only(top: 5, right: 8),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.outline,
-              shape: BoxShape.circle,
-            ),
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${action.toUpperCase()} — $remark',
-                  style: theme.textTheme.bodySmall,
-                ),
-                Text(
-                  DateFormat.yMMMd().add_jm().format(at),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
             ),
           ),
         ],

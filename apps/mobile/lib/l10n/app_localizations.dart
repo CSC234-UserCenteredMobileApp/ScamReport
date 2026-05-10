@@ -626,12 +626,6 @@ abstract class AppLocalizations {
   /// **'Flag removed.'**
   String get adminReviewUnflagged;
 
-  /// No description provided for @adminReviewSubmittedBy.
-  ///
-  /// In en, this message translates to:
-  /// **'Submitted by {handle} • {date}'**
-  String adminReviewSubmittedBy(String handle, String date);
-
   /// No description provided for @adminReviewSubmittedOn.
   ///
   /// In en, this message translates to:
@@ -661,12 +655,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'AUDIT TRAIL'**
   String get adminLabelAuditTrail;
-
-  /// No description provided for @adminAuditSubmitted.
-  ///
-  /// In en, this message translates to:
-  /// **'Submitted'**
-  String get adminAuditSubmitted;
 
   /// No description provided for @adminAiScore.
   ///

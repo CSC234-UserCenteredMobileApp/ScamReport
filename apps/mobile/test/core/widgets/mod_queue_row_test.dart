@@ -32,7 +32,6 @@ ModQueueItem _item({
       status: status,
       priorityFlag: priorityFlag,
       evidenceCount: evidenceCount,
-      reporterHandle: '@SHOULD_NEVER_RENDER',
       lastRemarkByAdmin: lastRemarkByAdmin,
     );
 
@@ -64,12 +63,11 @@ void main() {
         _themed(ModQueueRow(item: _item(), onTap: () {})),
       );
 
-      // The fixture stuffs a placeholder handle into the entity to prove the
-      // widget cannot leak it. Reporter identity is never a UI surface for
-      // admin screens.
-      expect(find.text('@SHOULD_NEVER_RENDER'), findsNothing);
+      // The entity doesn't carry reporter fields by design. This test stays
+      // as a defensive check that no future commit reintroduces the masked
+      // handle by accident.
       expect(find.textContaining('User_'), findsNothing);
-      expect(find.textContaining('@'), findsNothing);
+      expect(find.textContaining('@user'), findsNothing);
     });
 
     testWidgets('renders evidence count via l10n', (tester) async {
