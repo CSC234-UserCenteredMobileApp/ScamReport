@@ -46,9 +46,12 @@ mock.module('../src/core/gemini/client', () => ({
   generateText: async () => '',
 }));
 
-mock.module('../src/sync/firestore_sync', () => ({
-  mirrorMyReport: async () => {},
-}));
+// Don't mock ../src/sync/firestore_sync — Bun's mock.module is process-global,
+// so registering a stub here would corrupt firestore-sync.test.ts which
+// imports mirrorMyReport directly. The real mirrorMyReport call from
+// createReport gracefully no-ops because we mock firebase/admin to return
+// an empty object — the resulting throw is caught + logged inside the
+// mirror module and never affects the response shape.
 
 mock.module('../src/core/supabase/storage', () => ({
   uploadFile: async () => ({}),
