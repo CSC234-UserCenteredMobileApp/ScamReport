@@ -167,7 +167,7 @@ export async function updateAnnouncement(
 
   const row = await prisma.announcement.update({
     where: { id },
-    data: { ...data } as never,
+    data: { ...data, updatedAt: new Date() } as never,
     select: detailSelect,
   });
   return toDetail(row);
@@ -179,13 +179,13 @@ export async function updateAnnouncement(
 
 export async function deleteAnnouncement(
   id: string,
-): Promise<'ok' | 'not_found' | 'locked'> {
+): Promise<'ok' | 'locked' | null> {
   const prisma = getPrisma();
   const existing = await prisma.announcement.findUnique({
     where: { id },
     select: { id: true, status: true },
   });
-  if (!existing) return 'not_found';
+  if (!existing) return null;
   if (existing.status === 'published') return 'locked';
 
   await prisma.announcement.delete({ where: { id } });
@@ -202,12 +202,14 @@ export async function publishAnnouncement(
 ): Promise<AdminAnnouncementDetail | null> {
   const prisma = getPrisma();
   try {
+    // Re-publish is intentional — resets publishedAt and re-broadcasts if pushToFcm=true.
     const row = await prisma.announcement.update({
       where: { id },
       data: {
         status: 'published',
         publishedAt: new Date(),
         updatedAt: new Date(),
+        // pushedToFcmAt records when broadcast was attempted, not confirmed delivery.
         ...(pushToFcm ? { pushedToFcmAt: new Date() } : {}),
       },
       select: detailSelect,

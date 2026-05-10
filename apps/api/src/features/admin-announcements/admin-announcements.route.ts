@@ -94,7 +94,7 @@ export const adminAnnouncementsRoute = new Elysia({ prefix: '/admin/announcement
     '/:id',
     async ({ params, set }) => {
       const result = await deleteAnnouncement(params.id);
-      if (result === 'not_found') {
+      if (result === null) {
         set.status = 404;
         return { error: 'Not found' };
       }
