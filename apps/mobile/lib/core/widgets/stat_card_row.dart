@@ -11,33 +11,37 @@ class StatCardRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(
-          child: StatCard(
-            value: _formatNumber(stats.verifiedTotal),
-            label: context.l10n.statVerifiedReports,
-            valueColor: theme.colorScheme.onSurface,
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: StatCard(
+                value: _formatNumber(stats.verifiedTotal),
+                label: context.l10n.statVerifiedReports,
+                valueColor: theme.colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: StatCard(
+                value: '+${stats.newThisWeek}',
+                label: context.l10n.statNewThisWeek,
+                valueColor: theme.colorScheme.primary,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: StatCard(
-            value: '+${stats.newThisWeek}',
-            label: context.l10n.statNewThisWeek,
-            valueColor: theme.colorScheme.primary,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: StatCard(
-            value: Localizations.localeOf(context).languageCode == 'th'
-                ? stats.topScamTypeLabelTh
-                : stats.topScamTypeLabelEn,
-            label: context.l10n.statTopScamType,
-            valueColor: theme.colorScheme.onSurface,
-            maxLines: 2,
-          ),
+        const SizedBox(height: 8),
+        StatCard(
+          value: Localizations.localeOf(context).languageCode == 'th'
+              ? stats.topScamTypeLabelTh
+              : stats.topScamTypeLabelEn,
+          label: context.l10n.statTopScamType,
+          valueColor: theme.colorScheme.onSurface,
+          maxLines: 2,
+          valueStyle: theme.textTheme.titleMedium,
         ),
       ],
     );
@@ -51,25 +55,27 @@ class StatCard extends StatelessWidget {
     required this.label,
     required this.valueColor,
     this.maxLines = 1,
+    this.valueStyle,
   });
 
   final String value;
   final String label;
   final Color valueColor;
   final int maxLines;
+  final TextStyle? valueStyle;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               value,
-              style: theme.textTheme.titleLarge?.copyWith(
+              style: (valueStyle ?? theme.textTheme.titleLarge)?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: valueColor,
               ),
@@ -110,13 +116,17 @@ class StatCardRowSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
+    return const Column(
       children: [
-        Expanded(child: _SkeletonBox(height: 88)),
-        SizedBox(width: 8),
-        Expanded(child: _SkeletonBox(height: 88)),
-        SizedBox(width: 8),
-        Expanded(child: _SkeletonBox(height: 88)),
+        Row(
+          children: [
+            Expanded(child: _SkeletonBox(height: 100)),
+            SizedBox(width: 8),
+            Expanded(child: _SkeletonBox(height: 100)),
+          ],
+        ),
+        SizedBox(height: 8),
+        _SkeletonBox(height: 100),
       ],
     );
   }

@@ -112,7 +112,7 @@ class _ErrorRow extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// _SearchSection — search TextField + Ask AI button
+// _SearchSection — search TextField + quick-action tiles + report button
 // ---------------------------------------------------------------------------
 class _SearchSection extends StatelessWidget {
   const _SearchSection();

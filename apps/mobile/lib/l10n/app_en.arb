@@ -246,5 +246,17 @@
     "placeholders": { "count": { "type": "int" } }
   },
   "askAiEvidenceCapReached": "Maximum 5 files.",
-  "askAiRetry": "Retry"
+  "askAiRetry": "Retry",
+
+  "searchTitle": "Search",
+  "searchInputHint": "Search by title, scam type, or description…",
+  "searchEmptyPrompt": "Type something to search verified reports.",
+  "searchNoResults": "No reports matched your search.",
+  "searchFilterTitle": "Filter & Sort",
+  "searchFilterReset": "Reset",
+  "searchFilterApply": "Apply",
+  "searchFilterSortLabel": "Sort by",
+  "searchFilterSortLatest": "Latest verified",
+  "searchFilterSortReporters": "Most reported",
+  "searchFilterScamTypeLabel": "Scam type"
 }

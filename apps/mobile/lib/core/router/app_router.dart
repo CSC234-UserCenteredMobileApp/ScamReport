@@ -25,6 +25,7 @@ import '../../features/moderation/presentation/admin_review_screen.dart';
 import '../../features/moderation/presentation/mod_screen.dart';
 import '../../features/call_screening/presentation/call_screening_screen.dart';
 import '../../features/reports/presentation/report_detail_screen.dart';
+import '../../features/search/presentation/search_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../di/auth.dart';
 import '../widgets/app_shell.dart';
@@ -208,6 +209,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           body: Center(child: Text('My reports — coming soon')),
         ),
       ),
+      GoRoute(path: '/search', builder: (_, __) => const SearchScreen()),
       GoRoute(path: '/privacy', builder: (_, __) => const PrivacyScreen()),
       GoRoute(path: '/terms',   builder: (_, __) => const TermsScreen()),
     ],

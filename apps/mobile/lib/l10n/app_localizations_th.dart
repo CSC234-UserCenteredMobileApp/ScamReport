@@ -643,4 +643,38 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get askAiRetry => 'ลองอีกครั้ง';
+
+  @override
+  String get searchTitle => 'ค้นหา';
+
+  @override
+  String get searchInputHint =>
+      'ค้นหาด้วยชื่อเรื่อง ประเภทหลอกลวง หรือรายละเอียด…';
+
+  @override
+  String get searchEmptyPrompt => 'พิมพ์บางอย่างเพื่อค้นหารายงานที่ยืนยันแล้ว';
+
+  @override
+  String get searchNoResults => 'ไม่พบรายงานที่ตรงกับการค้นหาของคุณ';
+
+  @override
+  String get searchFilterTitle => 'กรอง & จัดเรียง';
+
+  @override
+  String get searchFilterReset => 'รีเซ็ต';
+
+  @override
+  String get searchFilterApply => 'นำไปใช้';
+
+  @override
+  String get searchFilterSortLabel => 'จัดเรียงตาม';
+
+  @override
+  String get searchFilterSortLatest => 'ยืนยันล่าสุด';
+
+  @override
+  String get searchFilterSortReporters => 'ผู้รายงานมากที่สุด';
+
+  @override
+  String get searchFilterScamTypeLabel => 'ประเภทหลอกลวง';
 }
