@@ -158,7 +158,17 @@ class _AccountSection extends StatelessWidget {
           ),
           if (!isGuest) ...[
             const Divider(height: 1, indent: 16, endIndent: 16),
+            if (user!.isAdmin) ...[
+              _NavTile(
+                icon: Icons.campaign_outlined,
+                title: 'Manage Announcements',
+                onTap: () => context.push('/admin/announcements'),
+              ),
+              const Divider(height: 1, indent: 16, endIndent: 16),
+            ],
             const _SignOutTile(),
+            const Divider(height: 1, indent: 16, endIndent: 16),
+            const _DeleteAccountTile(),
           ],
         ],
       ),
@@ -217,9 +227,7 @@ class _SignOutTile extends StatelessWidget {
     final verdict = Theme.of(context).extension<VerdictPalette>()!;
 
     return ClipRRect(
-      borderRadius: const BorderRadius.vertical(
-        bottom: Radius.circular(16),
-      ),
+      borderRadius: BorderRadius.zero,
       child: ListTile(
         leading: Icon(Icons.logout, color: verdict.scam.accent, size: 22),
         title: Text(
@@ -258,6 +266,73 @@ class _SignOutTile extends StatelessWidget {
               backgroundColor: Theme.of(ctx).extension<VerdictPalette>()!.scam.accent,
             ),
             child: Text(l10n.signOut),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DeleteAccountTile extends ConsumerWidget {
+  const _DeleteAccountTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    final verdict = Theme.of(context).extension<VerdictPalette>()!;
+
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(
+        bottom: Radius.circular(16),
+      ),
+      child: ListTile(
+        leading: Icon(
+          Icons.delete_forever_outlined,
+          color: verdict.scam.accent,
+          size: 22,
+        ),
+        title: Text(
+          'Delete account',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: verdict.scam.accent,
+                fontWeight: FontWeight.w500,
+              ),
+        ),
+        trailing: Icon(Icons.chevron_right, color: cs.onSurfaceVariant),
+        onTap: () => _showDeleteDialog(context, ref),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      ),
+    );
+  }
+
+  void _showDeleteDialog(BuildContext context, WidgetRef ref) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete account?'),
+        content: const Text(
+          'Your account will be permanently deleted after 7 days. '
+          'All your reports and data will be lost.\n\n'
+          'You will be signed out immediately.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              await ref
+                  .read(deleteAccountProvider.notifier)
+                  .requestDeletion();
+              // _AuthRefreshNotifier in app_router handles redirect to /login
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor:
+                  Theme.of(ctx).extension<VerdictPalette>()!.scam.accent,
+            ),
+            child: const Text('Delete account'),
           ),
         ],
       ),
