@@ -690,4 +690,20 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get searchFilterScamTypeLabel => 'ประเภทหลอกลวง';
+
+  @override
+  String get manageAnnouncements => 'จัดการประกาศ';
+
+  @override
+  String get deleteAccount => 'ลบบัญชี';
+
+  @override
+  String get deleteAccountDialogTitle => 'ลบบัญชีใช่ไหม?';
+
+  @override
+  String get deleteAccountDialogContent =>
+      'บัญชีของคุณจะถูกลบถาวรภายใน 7 วัน ข้อมูลและรายงานทั้งหมดจะสูญหาย\n\nคุณจะถูกออกจากระบบทันที';
+
+  @override
+  String get deleteAccountFailed => 'ไม่สามารถส่งคำขอลบบัญชีได้ กรุณาลองใหม่';
 }

@@ -253,5 +253,11 @@
   "searchFilterSortLabel": "จัดเรียงตาม",
   "searchFilterSortLatest": "ยืนยันล่าสุด",
   "searchFilterSortReporters": "ผู้รายงานมากที่สุด",
-  "searchFilterScamTypeLabel": "ประเภทหลอกลวง"
+  "searchFilterScamTypeLabel": "ประเภทหลอกลวง",
+
+  "manageAnnouncements": "จัดการประกาศ",
+  "deleteAccount": "ลบบัญชี",
+  "deleteAccountDialogTitle": "ลบบัญชีใช่ไหม?",
+  "deleteAccountDialogContent": "บัญชีของคุณจะถูกลบถาวรภายใน 7 วัน ข้อมูลและรายงานทั้งหมดจะสูญหาย\n\nคุณจะถูกออกจากระบบทันที",
+  "deleteAccountFailed": "ไม่สามารถส่งคำขอลบบัญชีได้ กรุณาลองใหม่"
 }

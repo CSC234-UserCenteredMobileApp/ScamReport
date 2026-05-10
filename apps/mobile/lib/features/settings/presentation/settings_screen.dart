@@ -161,7 +161,7 @@ class _AccountSection extends StatelessWidget {
             if (user!.isAdmin) ...[
               _NavTile(
                 icon: Icons.campaign_outlined,
-                title: 'Manage Announcements',
+                title: context.l10n.manageAnnouncements,
                 onTap: () => context.push('/admin/announcements'),
               ),
               const Divider(height: 1, indent: 16, endIndent: 16),
@@ -281,6 +281,14 @@ class _DeleteAccountTile extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final verdict = Theme.of(context).extension<VerdictPalette>()!;
 
+    ref.listen<AsyncValue<void>>(deleteAccountProvider, (_, next) {
+      if (next is AsyncError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.deleteAccountFailed)),
+        );
+      }
+    });
+
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(
         bottom: Radius.circular(16),
@@ -292,7 +300,7 @@ class _DeleteAccountTile extends ConsumerWidget {
           size: 22,
         ),
         title: Text(
-          'Delete account',
+          context.l10n.deleteAccount,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: verdict.scam.accent,
                 fontWeight: FontWeight.w500,
@@ -306,19 +314,16 @@ class _DeleteAccountTile extends ConsumerWidget {
   }
 
   void _showDeleteDialog(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete account?'),
-        content: const Text(
-          'Your account will be permanently deleted after 7 days. '
-          'All your reports and data will be lost.\n\n'
-          'You will be signed out immediately.',
-        ),
+        title: Text(l10n.deleteAccountDialogTitle),
+        content: Text(l10n.deleteAccountDialogContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () async {
@@ -332,7 +337,7 @@ class _DeleteAccountTile extends ConsumerWidget {
               backgroundColor:
                   Theme.of(ctx).extension<VerdictPalette>()!.scam.accent,
             ),
-            child: const Text('Delete account'),
+            child: Text(l10n.deleteAccount),
           ),
         ],
       ),
