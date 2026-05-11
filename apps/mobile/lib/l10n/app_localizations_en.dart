@@ -690,4 +690,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchFilterScamTypeLabel => 'Scam type';
+
+  @override
+  String get manageAnnouncements => 'Manage Announcements';
+
+  @override
+  String get deleteAccount => 'Delete account';
+
+  @override
+  String get deleteAccountDialogTitle => 'Delete account?';
+
+  @override
+  String get deleteAccountDialogContent =>
+      'Your account will be permanently deleted after 7 days. All your reports and data will be lost.\n\nYou will be signed out immediately.';
+
+  @override
+  String get deleteAccountFailed =>
+      'Could not request deletion. Please try again.';
 }

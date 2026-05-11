@@ -26,6 +26,8 @@ import '../../features/moderation/presentation/mod_screen.dart';
 import '../../features/call_screening/presentation/call_screening_screen.dart';
 import '../../features/reports/presentation/report_detail_screen.dart';
 import '../../features/search/presentation/search_screen.dart';
+import '../../features/announcement_editor/presentation/admin_announcements_screen.dart';
+import '../../features/announcement_editor/presentation/announcement_editor_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../di/auth.dart';
 import '../widgets/app_shell.dart';
@@ -212,6 +214,24 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/search', builder: (_, __) => const SearchScreen()),
       GoRoute(path: '/privacy', builder: (_, __) => const PrivacyScreen()),
       GoRoute(path: '/terms',   builder: (_, __) => const TermsScreen()),
+
+      // Admin announcement management — full-screen, no bottom nav.
+      // /new MUST be declared before /:id/edit so GoRouter doesn't parse
+      // the literal "new" as a path parameter.
+      GoRoute(
+        path: '/admin/announcements',
+        builder: (_, __) => const AdminAnnouncementsScreen(),
+      ),
+      GoRoute(
+        path: '/admin/announcements/new',
+        builder: (_, __) => const AnnouncementEditorScreen(announcementId: null),
+      ),
+      GoRoute(
+        path: '/admin/announcements/:id/edit',
+        builder: (_, s) => AnnouncementEditorScreen(
+          announcementId: s.pathParameters['id'],
+        ),
+      ),
     ],
   );
 });
