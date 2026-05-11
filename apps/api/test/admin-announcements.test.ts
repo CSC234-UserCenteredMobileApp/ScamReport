@@ -4,13 +4,20 @@ import { app } from '../src/index';
 // ---------------------------------------------------------------------------
 // Firebase mocks
 // ---------------------------------------------------------------------------
-let mockDecoded: { uid: string; email: string | null; role?: string } | null = null;
+// `role` here is the role we want `requireRole` to resolve for this caller.
+// It's no longer carried on the Firebase token (real tokens don't have a
+// `role` claim — see `core/middleware/require_role.ts`); the prisma mock
+// below reads from it to fake the `users.role` Postgres lookup.
+let mockDecoded: { uid: string; email: string | null; role?: 'user' | 'admin' } | null = null;
 
 mock.module('firebase-admin/auth', () => ({
   getAuth: () => ({
     verifyIdToken: async () => {
       if (!mockDecoded) throw new Error('mock: no decoded token configured');
-      return mockDecoded;
+      // Real tokens have no `role` claim; strip it before returning so the
+      // middleware can't accidentally start trusting it again.
+      const { role: _role, ...decoded } = mockDecoded;
+      return decoded;
     },
   }),
 }));
@@ -78,8 +85,11 @@ mock.module('../src/core/db/client', () => ({
       },
       delete: async () => ({}),
     },
-    // resolveInternalUserId calls user.upsert to get internal userId from firebaseUid
+    // resolveInternalUserId calls user.upsert to get internal userId from firebaseUid;
+    // requireRole calls user.findUnique to resolve the canonical role from Postgres.
     user: {
+      findUnique: async () =>
+        mockDecoded?.role ? { role: mockDecoded.role } : null,
       upsert: async () => ({ id: AUTHOR_ID }),
     },
     report: {
@@ -99,8 +109,8 @@ mock.module('../src/core/db/client', () => ({
 // ---------------------------------------------------------------------------
 // Constants / helpers
 // ---------------------------------------------------------------------------
-const ADMIN = { uid: 'a1', email: 'a@example.com', role: 'admin' };
-const USER = { uid: 'u1', email: 'u@example.com', role: 'user' };
+const ADMIN = { uid: 'a1', email: 'a@example.com', role: 'admin' as const };
+const USER = { uid: 'u1', email: 'u@example.com', role: 'user' as const };
 
 function req(
   path: string,
