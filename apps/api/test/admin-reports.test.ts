@@ -5,13 +5,20 @@ import { __setFirestoreForTest } from '../src/sync/firestore_sync';
 // ---------------------------------------------------------------------------
 // Firebase mocks
 // ---------------------------------------------------------------------------
-let mockDecoded: { uid: string; email: string | null; role?: string } | null = null;
+// `role` here is the role we want `requireRole` to resolve for this caller.
+// It's no longer carried on the Firebase token (real tokens don't have a
+// `role` claim — see `core/middleware/require_role.ts`); the prisma mock
+// below reads from it to fake the `users.role` Postgres lookup.
+let mockDecoded: { uid: string; email: string | null; role?: 'user' | 'admin' } | null = null;
 
 mock.module('firebase-admin/auth', () => ({
   getAuth: () => ({
     verifyIdToken: async () => {
       if (!mockDecoded) throw new Error('mock: no decoded token configured');
-      return mockDecoded;
+      // Real tokens have no `role` claim; strip it before returning so the
+      // middleware can't accidentally start trusting it again.
+      const { role: _role, ...decoded } = mockDecoded;
+      return decoded;
     },
   }),
 }));
@@ -39,6 +46,16 @@ let mockUpdateReport: Record<string, unknown> = {};
 
 mock.module('../src/core/db/client', () => ({
   getPrisma: () => ({
+    user: {
+      // `requireRole` reads the canonical role from Postgres on every request.
+      // Derive it from the test's `mockDecoded.role` so each test stays a
+      // single assignment. Returns null when there is no decoded token, which
+      // mirrors what would happen in production for an unverified caller —
+      // although in practice the middleware short-circuits before the DB
+      // lookup in that case.
+      findUnique: async () =>
+        mockDecoded?.role ? { role: mockDecoded.role } : null,
+    },
     report: {
       findMany: async () => mockFindManyReports,
       findUnique: async () => mockFindUniqueReport,
@@ -57,8 +74,8 @@ mock.module('../src/core/db/client', () => ({
 // Constants / helpers
 // ---------------------------------------------------------------------------
 const VALID_ID = '00000000-0000-0000-0000-000000000000';
-const ADMIN = { uid: 'a1', email: 'a@example.com', role: 'admin' };
-const USER = { uid: 'u1', email: 'u@example.com', role: 'user' };
+const ADMIN = { uid: 'a1', email: 'a@example.com', role: 'admin' as const };
+const USER = { uid: 'u1', email: 'u@example.com', role: 'user' as const };
 
 const MOCK_QUEUE_REPORT = {
   id: VALID_ID,
