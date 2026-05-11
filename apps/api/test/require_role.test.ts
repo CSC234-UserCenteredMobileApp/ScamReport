@@ -4,9 +4,13 @@ import { Elysia } from 'elysia';
 // Mock the firebase-admin auth surface our middleware uses. The mock has to
 // be installed before requireRole imports the real module, hence the dynamic
 // import inside beforeAll.
-let mockDecoded: { uid: string; email: string | null; role?: string } | null =
-  null;
+let mockDecoded: { uid: string; email: string | null } | null = null;
 let shouldThrow = false;
+
+// Mock the Postgres role lookup. Role is no longer carried on the Firebase
+// token — `requireRole` reads `users.role` via Prisma. Tests stuff a row
+// here, the prisma mock returns it.
+let mockUserRow: { role: 'user' | 'admin' } | null = null;
 
 mock.module('firebase-admin/auth', () => ({
   getAuth: () => ({
@@ -20,6 +24,14 @@ mock.module('firebase-admin/auth', () => ({
 
 mock.module('../src/core/firebase/admin', () => ({
   getFirebaseAdmin: () => ({}),
+}));
+
+mock.module('../src/core/db/client', () => ({
+  getPrisma: () => ({
+    user: {
+      findUnique: async () => mockUserRow,
+    },
+  }),
 }));
 
 let userApp: ReturnType<typeof makeUserApp>;
@@ -50,6 +62,7 @@ beforeAll(async () => {
 
 afterAll(() => {
   mockDecoded = null;
+  mockUserRow = null;
   shouldThrow = false;
 });
 
@@ -80,37 +93,49 @@ describe('requireRole middleware', () => {
   });
 
   test('200 when verified user hits a user-required route', async () => {
-    mockDecoded = { uid: 'u1', email: 'u1@example.com', role: 'user' };
+    mockDecoded = { uid: 'u1', email: 'u1@example.com' };
+    mockUserRow = { role: 'user' };
     const res = await callUser('/user-only', 'valid-token');
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ uid: 'u1', role: 'user' });
   });
 
   test('200 when admin hits a user-required route (admin is superset)', async () => {
-    mockDecoded = { uid: 'a1', email: 'a1@example.com', role: 'admin' };
+    mockDecoded = { uid: 'a1', email: 'a1@example.com' };
+    mockUserRow = { role: 'admin' };
     const res = await callUser('/user-only', 'valid-token');
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ uid: 'a1', role: 'admin' });
   });
 
   test('403 when non-admin hits an admin-required route', async () => {
-    mockDecoded = { uid: 'u1', email: 'u1@example.com', role: 'user' };
+    mockDecoded = { uid: 'u1', email: 'u1@example.com' };
+    mockUserRow = { role: 'user' };
     const res = await callAdmin('/admin-only', 'valid-token');
     expect(res.status).toBe(403);
     expect(await res.json()).toEqual({ error: 'Forbidden' });
   });
 
   test('200 when admin hits an admin-required route', async () => {
-    mockDecoded = { uid: 'a1', email: 'a1@example.com', role: 'admin' };
+    mockDecoded = { uid: 'a1', email: 'a1@example.com' };
+    mockUserRow = { role: 'admin' };
     const res = await callAdmin('/admin-only', 'valid-token');
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ uid: 'a1', role: 'admin' });
   });
 
-  test('defaults to user role when custom claim is missing', async () => {
+  test('defaults to user role when no users row exists', async () => {
     mockDecoded = { uid: 'u2', email: null };
+    mockUserRow = null;
     const res = await callUser('/user-only', 'valid-token');
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ uid: 'u2', role: 'user' });
+  });
+
+  test('403 when no users row exists and route requires admin', async () => {
+    mockDecoded = { uid: 'u3', email: null };
+    mockUserRow = null;
+    const res = await callAdmin('/admin-only', 'valid-token');
+    expect(res.status).toBe(403);
   });
 });

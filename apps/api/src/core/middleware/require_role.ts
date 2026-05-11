@@ -1,6 +1,7 @@
 import { Elysia } from 'elysia';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirebaseAdmin } from '../firebase/admin';
+import { getPrisma } from '../db/client';
 
 export type Role = 'user' | 'admin';
 
@@ -10,22 +11,35 @@ export type AuthUserWithRole = {
   role: Role;
 };
 
-// Verifies the Firebase ID token and reads the `role` custom claim.
-// Returns null when the header is missing, malformed, or fails verification.
+// Verifies the Firebase ID token and resolves the caller's role from the
+// canonical source of truth: the `users.role` enum in Postgres
+// (DATABASE_DESIGN §4.1). Firebase custom claims are intentionally NOT used
+// — admin promotion is a single SQL update, with no token-refresh dance and
+// no dual-write surface.
+//
+// Returns null when the Authorization header is missing/malformed or when
+// `verifyIdToken` throws (expired, malformed, revoked, untrusted issuer).
+// When the token verifies but no `users` row exists yet (e.g. /auth/sync
+// has not run for this account), the caller is treated as a regular `user`
+// — admin-gated endpoints will 403, which is the correct response.
 async function verifyBearerWithRole(
   authHeader: string | undefined,
 ): Promise<AuthUserWithRole | null> {
   if (!authHeader?.startsWith('Bearer ')) return null;
   const token = authHeader.slice('Bearer '.length).trim();
   if (!token) return null;
+  let decoded;
   try {
-    const decoded = await getAuth(getFirebaseAdmin()).verifyIdToken(token);
-    const claimRole = decoded['role'];
-    const role: Role = claimRole === 'admin' ? 'admin' : 'user';
-    return { uid: decoded.uid, email: decoded.email ?? null, role };
+    decoded = await getAuth(getFirebaseAdmin()).verifyIdToken(token);
   } catch {
     return null;
   }
+  const row = await getPrisma().user.findUnique({
+    where: { firebaseUid: decoded.uid },
+    select: { role: true },
+  });
+  const role: Role = row?.role === 'admin' ? 'admin' : 'user';
+  return { uid: decoded.uid, email: decoded.email ?? null, role };
 }
 
 // Compose this on any Elysia route group that must be reachable only by users
