@@ -195,6 +195,7 @@
 
   "askAiTitle": "Ask ScamReport",
   "askAiBeta": "BETA",
+  "askAiViewDraft": "View draft",
   "askAiNewChat": "New chat",
   "askAiPastChats": "Past chats",
   "askAiRefresh": "Refresh",
@@ -262,5 +263,11 @@
   "searchFilterSortLabel": "Sort by",
   "searchFilterSortLatest": "Latest verified",
   "searchFilterSortReporters": "Most reported",
-  "searchFilterScamTypeLabel": "Scam type"
+  "searchFilterScamTypeLabel": "Scam type",
+
+  "manageAnnouncements": "Manage Announcements",
+  "deleteAccount": "Delete account",
+  "deleteAccountDialogTitle": "Delete account?",
+  "deleteAccountDialogContent": "Your account will be permanently deleted after 7 days. All your reports and data will be lost.\n\nYou will be signed out immediately.",
+  "deleteAccountFailed": "Could not request deletion. Please try again."
 }

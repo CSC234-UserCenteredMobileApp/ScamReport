@@ -5,13 +5,17 @@
 import { Buffer } from 'node:buffer';
 import { randomUUID } from 'node:crypto';
 import type {
+  AskAiAttachmentMeta,
   AskAiConversationDetail,
   AskAiConversationListResponse,
   AskAiConversationSummary,
   AskAiCreateConversationResponse,
+  AskAiLocale,
   AskAiMessage,
+  AskAiPersistedDraft,
   AskAiTurnRequest,
   AskAiTurnResponse,
+  AskAiUpsertDraftRequest,
 } from '@my-product/shared';
 import { searchSimilarReports } from '../../core/rag/retrieval';
 import { getSignedUrl, uploadFile } from '../../core/supabase/storage';
@@ -74,12 +78,101 @@ export async function getConversation(
     throw new AskAiError('Conversation not found', 404, 'not_found');
   }
   const messages = await repo.loadMessages(conversationId);
+  const draft = parseDraftState(conv.draftState);
+  let evidenceAttachments: AskAiAttachmentMeta[] = [];
+  if (draft && draft.evidenceAttachmentIds.length > 0) {
+    const rows = await repo.findAttachmentsInConversation(
+      conversationId,
+      draft.evidenceAttachmentIds,
+    );
+    if (rows) {
+      evidenceAttachments = await Promise.all(
+        rows.map(async (a) => ({
+          id: a.id,
+          mimeType: a.mimeType,
+          sizeBytes: Number(a.sizeBytes),
+          signedUrl: await safeSignedUrl(a.storagePath),
+        })),
+      );
+    }
+  }
   return {
     id: conv.id,
     createdAt: conv.createdAt.toISOString(),
     linkedReportId: conv.linkedReportId,
     messages: await Promise.all(messages.map(toAskAiMessage)),
+    draft,
+    evidenceAttachments,
   };
+}
+
+/**
+ * Upsert (or clear with null) the per-conversation draft. Validates ownership
+ * and that any referenced evidence ids belong to messages in this conversation.
+ * iter-5 server-side draft sync.
+ */
+export async function upsertDraft(
+  userId: string,
+  conversationId: string,
+  payload: AskAiUpsertDraftRequest,
+): Promise<{ draft: AskAiPersistedDraft | null }> {
+  const conv = await repo.findConversation(userId, conversationId);
+  if (!conv) {
+    throw new AskAiError('Conversation not found', 404, 'not_found');
+  }
+  if (payload === null) {
+    await repo.writeDraftState(conversationId, null);
+    return { draft: null };
+  }
+  const ids = payload.evidenceAttachmentIds ?? [];
+  if (ids.length > 0) {
+    const owned = await repo.findAttachmentsInConversation(conversationId, ids);
+    if (!owned) {
+      throw new AskAiError(
+        'evidenceAttachmentIds reference attachments not in this conversation',
+        400,
+        'invalid_evidence',
+      );
+    }
+  }
+  await repo.writeDraftState(conversationId, payload);
+  return { draft: payload };
+}
+
+function parseDraftState(value: unknown): AskAiPersistedDraft | null {
+  if (!value || typeof value !== 'object') return null;
+  const v = value as Record<string, unknown>;
+  if (typeof v.title !== 'string' || typeof v.description !== 'string') return null;
+  if (typeof v.scamTypeCode !== 'string') return null;
+  const targetIdentifier =
+    typeof v.targetIdentifier === 'string' ? v.targetIdentifier : null;
+  const tikRaw = v.targetIdentifierKind;
+  const targetIdentifierKind: AskAiPersistedDraft['targetIdentifierKind'] =
+    tikRaw === 'phone' || tikRaw === 'url' || tikRaw === 'other' ? tikRaw : null;
+  const userEditedDraft = Boolean(v.userEditedDraft);
+  const ids = Array.isArray(v.evidenceAttachmentIds)
+    ? (v.evidenceAttachmentIds as unknown[]).filter(
+        (x): x is string => typeof x === 'string',
+      )
+    : [];
+  return {
+    title: v.title,
+    description: v.description,
+    scamTypeCode: v.scamTypeCode,
+    targetIdentifier,
+    targetIdentifierKind,
+    userEditedDraft,
+    evidenceAttachmentIds: ids,
+  };
+}
+
+async function safeSignedUrl(path: string): Promise<string | null> {
+  try {
+    return await getSignedUrl(ATTACHMENTS_BUCKET, path, 3600);
+  } catch (err) {
+    console.error('[ask-ai] sign-url-failed', { storagePath: path, err });
+    return null;
+  }
 }
 
 export async function deleteConversation(userId: string, conversationId: string): Promise<void> {
@@ -99,6 +192,7 @@ export async function handleTurn(
   conversationId: string,
   content: string,
   attachments: AttachmentUploadInput[] = [],
+  locale?: AskAiLocale,
 ): Promise<AskAiTurnResponse> {
   const conv = await repo.findConversation(userId, conversationId);
   if (!conv) {
@@ -174,6 +268,7 @@ export async function handleTurn(
     attachments: attachments.length > 0
       ? attachments.map((a) => ({ bytes: a.bytes, mimeType: a.mimeType }))
       : undefined,
+    locale,
   });
 
   const assistantMessage = await repo.insertAssistantMessage(
@@ -211,7 +306,7 @@ export async function handleTurnJson(
       'use_multipart',
     );
   }
-  return handleTurn(userId, conversationId, body.content, []);
+  return handleTurn(userId, conversationId, body.content, [], body.locale);
 }
 
 async function toAskAiMessage(m: repo.PersistedMessage): Promise<AskAiMessage> {

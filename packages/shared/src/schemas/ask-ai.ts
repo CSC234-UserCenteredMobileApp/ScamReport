@@ -27,6 +27,16 @@ export const AskAiAttachmentMeta = Type.Object({
 });
 export type AskAiAttachmentMeta = Static<typeof AskAiAttachmentMeta>;
 
+// Target-identifier kind. Hoisted above AskAiConversationDetail because the
+// detail's draft sub-schema (iter-5) references it.
+export const AskAiTargetIdentifierKind = Type.Union([
+  Type.Literal('phone'),
+  Type.Literal('url'),
+  Type.Literal('other'),
+  Type.Null(),
+]);
+export type AskAiTargetIdentifierKind = Static<typeof AskAiTargetIdentifierKind>;
+
 export const AskAiMessageRole = Type.Union([
   Type.Literal('user'),
   Type.Literal('assistant'),
@@ -62,6 +72,23 @@ export const AskAiConversationDetail = Type.Object({
   createdAt: Type.String({ format: 'date-time' }),
   linkedReportId: Type.Union([Type.String({ format: 'uuid' }), Type.Null()]),
   messages: Type.Array(AskAiMessage),
+  // Server-persisted active draft for cross-device sync (iter-5). Null when
+  // the user hasn't started a draft for this conversation.
+  draft: Type.Optional(Type.Union([
+    Type.Object({
+      title: Type.String(),
+      description: Type.String(),
+      scamTypeCode: Type.String(),
+      targetIdentifier: Type.Union([Type.String(), Type.Null()]),
+      targetIdentifierKind: AskAiTargetIdentifierKind,
+      userEditedDraft: Type.Boolean(),
+      evidenceAttachmentIds: Type.Array(Type.String({ format: 'uuid' })),
+    }),
+    Type.Null(),
+  ])),
+  // Hydrated metadata for evidenceAttachmentIds — signed URLs so the editor can
+  // render restored evidence without raw bytes.
+  evidenceAttachments: Type.Optional(Type.Array(AskAiAttachmentMeta)),
 });
 export type AskAiConversationDetail = Static<typeof AskAiConversationDetail>;
 
@@ -81,14 +108,6 @@ export type AskAiAttachmentUploadResponse = Static<typeof AskAiAttachmentUploadR
 // AskAiDraft — shape of an AI-drafted report. Mirrors CreateReportRequest
 // payload fields the AI can populate. The submit action posts these fields
 // to /reports (along with consent + sourceConversationId).
-export const AskAiTargetIdentifierKind = Type.Union([
-  Type.Literal('phone'),
-  Type.Literal('url'),
-  Type.Literal('other'),
-  Type.Null(),
-]);
-export type AskAiTargetIdentifierKind = Static<typeof AskAiTargetIdentifierKind>;
-
 export const AskAiDraft = Type.Object({
   title: Type.String({ minLength: 4, maxLength: 200 }),
   description: Type.String({ minLength: 10, maxLength: 2000 }),
@@ -98,12 +117,43 @@ export const AskAiDraft = Type.Object({
 });
 export type AskAiDraft = Static<typeof AskAiDraft>;
 
+// Locale — UI language the user is currently chatting in. Server forwards
+// this to Gemini as a hard "RESPOND IN" rule so the AI doesn't drift between
+// languages. iter-5.
+export const AskAiLocale = Type.Union([
+  Type.Literal('th'),
+  Type.Literal('en'),
+]);
+export type AskAiLocale = Static<typeof AskAiLocale>;
+
 // AskAiTurnRequest — body of POST /ask-ai/conversations/:id/messages.
 export const AskAiTurnRequest = Type.Object({
   content: Type.String({ minLength: 1, maxLength: 4000 }),
   attachmentIds: Type.Array(Type.String({ format: 'uuid' }), { maxItems: 3 }),
+  locale: Type.Optional(AskAiLocale),
 });
 export type AskAiTurnRequest = Static<typeof AskAiTurnRequest>;
+
+// Server-persisted draft. Bytes are NOT stored on the server — `evidenceAttachmentIds`
+// references existing ai_message_attachments.id rows (chat-attachments bucket),
+// which is what the user curated in the editor's evidence section. iter-5 server-sync.
+export const AskAiPersistedDraft = Type.Object({
+  title: Type.String({ minLength: 0, maxLength: 200 }),
+  description: Type.String({ minLength: 0, maxLength: 5000 }),
+  scamTypeCode: Type.String({ maxLength: 64 }),
+  targetIdentifier: Type.Union([Type.String({ maxLength: 512 }), Type.Null()]),
+  targetIdentifierKind: AskAiTargetIdentifierKind,
+  userEditedDraft: Type.Boolean(),
+  evidenceAttachmentIds: Type.Array(Type.String({ format: 'uuid' }), { maxItems: 5, default: [] }),
+});
+export type AskAiPersistedDraft = Static<typeof AskAiPersistedDraft>;
+
+// PATCH /ask-ai/conversations/:id/draft body. Pass null to clear.
+export const AskAiUpsertDraftRequest = Type.Union([
+  AskAiPersistedDraft,
+  Type.Null(),
+]);
+export type AskAiUpsertDraftRequest = Static<typeof AskAiUpsertDraftRequest>;
 
 // AskAiTurnResponse — what /messages returns. The user/assistant messages are
 // persisted Postgres rows. intentDetected/reportable/hasEnoughInfo are

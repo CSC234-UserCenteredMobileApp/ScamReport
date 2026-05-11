@@ -49,6 +49,9 @@ class _StubRepo implements AskAiRepository {
   ) async {
     return next!;
   }
+
+  @override
+  Future<void> upsertDraft(String conversationId, PersistedDraft? payload) async {}
 }
 
 class _StubSubmit implements SubmitDraftedReport {
@@ -86,11 +89,13 @@ ChatMessage _assistantMessage() => ChatMessage(
 
 class _NoopPersistence implements AskAiPersistence {
   @override
-  Future<AskAiPersistedState?> load() async => null;
+  Future<AskAiPersistedState?> load([String? userId]) async => null;
   @override
   Future<void> save(AskAiPersistedState state) async {}
   @override
   Future<void> clear() async {}
+  @override
+  Future<void> clearForUser(String userId) async {}
 }
 
 Widget _wrap(_StubRepo repo) => ProviderScope(

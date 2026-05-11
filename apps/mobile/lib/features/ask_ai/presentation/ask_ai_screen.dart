@@ -130,6 +130,20 @@ class _AskAiScreenState extends ConsumerState<AskAiScreen> {
           ],
         ),
         actions: [
+          // Persistent "View draft" affordance — visible whenever an active
+          // draft exists so the user can re-open the editor without scrolling
+          // back to the AI bubble that produced the draft. iter-5 UX.
+          IconButton(
+            key: const Key('askAiViewDraft'),
+            tooltip: l.askAiViewDraft,
+            icon: const Icon(Icons.description_outlined),
+            color: state.activeDraft != null && !state.isSubmitting
+                ? theme.colorScheme.primary
+                : theme.disabledColor,
+            onPressed: state.activeDraft != null && !state.isSubmitting
+                ? () => _openEditor(state.activeDraft!)
+                : null,
+          ),
           IconButton(
             key: const Key('askAiNewChat'),
             tooltip: l.askAiNewChat,

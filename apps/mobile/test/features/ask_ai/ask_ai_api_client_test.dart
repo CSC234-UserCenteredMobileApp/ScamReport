@@ -7,6 +7,7 @@ import 'package:mobile/features/ask_ai/data/ask_ai_api_client.dart';
 import 'package:mobile/features/ask_ai/data/attachment_picker.dart';
 import 'package:mobile/features/ask_ai/domain/entities/ai_draft.dart';
 import 'package:mobile/features/ask_ai/domain/entities/chat_message.dart';
+import 'package:mobile/features/ask_ai/domain/entities/conversation.dart';
 import 'package:mobile/features/ask_ai/domain/failures.dart';
 import 'package:mocktail/mocktail.dart';
 import 'dart:typed_data';
@@ -428,4 +429,194 @@ void main() {
       );
     });
   });
+
+  group('AskAiApiClient — iter-5 locale passthrough', () {
+    test('sendMessage adds locale field from provider', () async {
+      String? capturedLocale;
+      final api = AskAiApiClient(
+        _StubClient((req) async {
+          final body = jsonDecode(await _readBody(req)) as Map<String, dynamic>;
+          capturedLocale = body['locale'] as String?;
+          return _streamed(
+            200,
+            jsonEncode({
+              'userMessage': {
+                'id': 'a',
+                'role': 'user',
+                'content': 'hi',
+                'intentDetected': false,
+                'createdAt': '2026-05-07T00:00:00Z',
+                'attachments': [],
+              },
+              'assistantMessage': {
+                'id': 'b',
+                'role': 'assistant',
+                'content': 'hi',
+                'intentDetected': false,
+                'createdAt': '2026-05-07T00:00:01Z',
+                'attachments': [],
+              },
+              'intentDetected': false,
+              'reportable': false,
+              'hasEnoughInfo': false,
+              'similarReportIds': [],
+              'missingFacts': [],
+            }),
+          );
+        }),
+        auth,
+        locale: () => 'en',
+      );
+      await api.sendMessage('c-1', 'hi');
+      expect(capturedLocale, 'en');
+    });
+
+    test('sendMessageMultipart adds locale form field', () async {
+      String? capturedLocale;
+      final api = AskAiApiClient(
+        _StubClient((req) async {
+          if (req is http.MultipartRequest) {
+            capturedLocale = req.fields['locale'];
+          }
+          return _streamed(
+            200,
+            jsonEncode({
+              'userMessage': {
+                'id': 'a',
+                'role': 'user',
+                'content': 'hi',
+                'intentDetected': false,
+                'createdAt': '2026-05-07T00:00:00Z',
+                'attachments': [],
+              },
+              'assistantMessage': {
+                'id': 'b',
+                'role': 'assistant',
+                'content': 'hi',
+                'intentDetected': false,
+                'createdAt': '2026-05-07T00:00:01Z',
+                'attachments': [],
+              },
+              'intentDetected': false,
+              'reportable': false,
+              'hasEnoughInfo': false,
+              'similarReportIds': [],
+              'missingFacts': [],
+            }),
+          );
+        }),
+        auth,
+        locale: () => 'th',
+      );
+      await api.sendMessageMultipart('c-1', 'hi', [
+        StagedAttachment(
+          bytes: Uint8List.fromList([1]),
+          mimeType: 'image/jpeg',
+          filename: 'a.jpg',
+        ),
+      ]);
+      expect(capturedLocale, 'th');
+    });
+  });
+
+  group('AskAiApiClient — iter-5 upsertDraft', () {
+    test('PATCHes draft with payload', () async {
+      String? capturedBody;
+      String? capturedMethod;
+      String? capturedPath;
+      final api = AskAiApiClient(
+        _StubClient((req) async {
+          capturedMethod = req.method;
+          capturedPath = req.url.path;
+          capturedBody = await _readBody(req);
+          return _streamed(
+            200,
+            jsonEncode({'ok': true, 'draft': null}),
+          );
+        }),
+        auth,
+      );
+      await api.upsertDraft(
+        'c-1',
+        const PersistedDraft(
+          draft: AiDraft(
+            title: 'My drafted title',
+            description: 'A long enough description here',
+            scamTypeCode: 'phishing_sms',
+            targetIdentifier: 'kerry-th.net',
+            targetIdentifierKind: TargetIdentifierKind.url,
+          ),
+          userEditedDraft: true,
+          evidenceAttachmentIds: ['11111111-1111-4111-1111-111111111111'],
+        ),
+      );
+      expect(capturedMethod, 'PATCH');
+      expect(capturedPath, '/ask-ai/conversations/c-1/draft');
+      final body = jsonDecode(capturedBody!) as Map<String, dynamic>;
+      expect(body['title'], 'My drafted title');
+      expect(body['userEditedDraft'], true);
+      expect(body['evidenceAttachmentIds'], hasLength(1));
+    });
+
+    test('clears draft with null payload', () async {
+      String? capturedBody;
+      final api = AskAiApiClient(
+        _StubClient((req) async {
+          capturedBody = await _readBody(req);
+          return _streamed(200, jsonEncode({'ok': true, 'draft': null}));
+        }),
+        auth,
+      );
+      await api.upsertDraft('c-1', null);
+      expect(capturedBody, 'null');
+    });
+
+    test('parses draft + evidenceAttachments from getConversation', () async {
+      final api = AskAiApiClient(
+        _StubClient((req) async {
+          return _streamed(
+            200,
+            jsonEncode({
+              'id': 'c-1',
+              'createdAt': '2026-05-07T00:00:00Z',
+              'linkedReportId': null,
+              'messages': [],
+              'draft': {
+                'title': 'Server-stored title',
+                'description': 'Server description that is long.',
+                'scamTypeCode': 'phishing_sms',
+                'targetIdentifier': null,
+                'targetIdentifierKind': null,
+                'userEditedDraft': false,
+                'evidenceAttachmentIds': ['aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa'],
+              },
+              'evidenceAttachments': [
+                {
+                  'id': 'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa',
+                  'mimeType': 'image/jpeg',
+                  'sizeBytes': 12345,
+                  'signedUrl': 'https://signed.example/a.jpg',
+                },
+              ],
+            }),
+          );
+        }),
+        auth,
+      );
+      final detail = await api.getConversation('c-1');
+      expect(detail.draft, isNotNull);
+      expect(detail.draft!.draft.title, 'Server-stored title');
+      expect(detail.draft!.evidenceAttachmentIds, hasLength(1));
+      expect(detail.evidenceAttachments, hasLength(1));
+      expect(detail.evidenceAttachments.first.signedUrl, contains('a.jpg'));
+    });
+  });
+}
+
+Future<String> _readBody(http.BaseRequest req) async {
+  if (req is http.Request) return req.body;
+  if (req is http.MultipartRequest) {
+    return req.fields.entries.map((e) => '${e.key}=${e.value}').join('&');
+  }
+  return '';
 }

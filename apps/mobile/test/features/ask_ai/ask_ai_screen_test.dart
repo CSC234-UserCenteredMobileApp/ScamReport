@@ -73,6 +73,9 @@ class _StubRepo implements AskAiRepository {
           similarReportIds: const [],
         );
   }
+
+  @override
+  Future<void> upsertDraft(String conversationId, PersistedDraft? payload) async {}
 }
 
 class _StubSubmit implements SubmitDraftedReport {
@@ -94,11 +97,13 @@ class _StubSubmit implements SubmitDraftedReport {
 
 class _NoopPersistence implements AskAiPersistence {
   @override
-  Future<AskAiPersistedState?> load() async => null;
+  Future<AskAiPersistedState?> load([String? userId]) async => null;
   @override
   Future<void> save(AskAiPersistedState state) async {}
   @override
   Future<void> clear() async {}
+  @override
+  Future<void> clearForUser(String userId) async {}
 }
 
 Widget _wrap(_StubRepo repo, {_StubSubmit? submit}) {
@@ -153,4 +158,14 @@ void main() {
 
     expect(repo.sent, isEmpty);
   });
+
+  testWidgets(
+    'AppBar View-draft icon is disabled when no draft exists',
+    (tester) async {
+      await tester.pumpWidget(_wrap(_StubRepo()));
+      await tester.pumpAndSettle();
+      final btn = tester.widget<IconButton>(find.byKey(const Key('askAiViewDraft')));
+      expect(btn.onPressed, isNull);
+    },
+  );
 }

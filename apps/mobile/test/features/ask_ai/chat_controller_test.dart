@@ -64,6 +64,13 @@ class _StubRepo implements AskAiRepository {
   ) async {
     return next ?? _basicOutcome(content);
   }
+
+  final List<({String conversationId, PersistedDraft? payload})> draftUpserts = [];
+
+  @override
+  Future<void> upsertDraft(String conversationId, PersistedDraft? payload) async {
+    draftUpserts.add((conversationId: conversationId, payload: payload));
+  }
 }
 
 class _StubSubmit implements SubmitDraftedReport {
@@ -110,13 +117,17 @@ class _StubPersistence implements AskAiPersistence {
   int clearCalls = 0;
   AskAiPersistedState? loaded;
   @override
-  Future<AskAiPersistedState?> load() async => loaded;
+  Future<AskAiPersistedState?> load([String? userId]) async => loaded;
   @override
   Future<void> save(AskAiPersistedState state) async {
     saved.add(state);
   }
   @override
   Future<void> clear() async {
+    clearCalls++;
+  }
+  @override
+  Future<void> clearForUser(String userId) async {
     clearCalls++;
   }
 }

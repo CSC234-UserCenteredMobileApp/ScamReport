@@ -52,6 +52,13 @@ class _StubRepo implements AskAiRepository {
     List attachments,
   ) async =>
       next ?? _basic(content, draft: _aiDraft);
+
+  final List<({String conversationId, PersistedDraft? payload})> draftUpserts = [];
+
+  @override
+  Future<void> upsertDraft(String conversationId, PersistedDraft? payload) async {
+    draftUpserts.add((conversationId: conversationId, payload: payload));
+  }
 }
 
 class _StubSubmit implements SubmitDraftedReport {
@@ -70,7 +77,7 @@ class _StubPersistence implements AskAiPersistence {
   int saveCalls = 0;
   int clearCalls = 0;
   @override
-  Future<AskAiPersistedState?> load() async => loaded;
+  Future<AskAiPersistedState?> load([String? userId]) async => loaded;
   @override
   Future<void> save(AskAiPersistedState state) async {
     saveCalls++;
@@ -78,6 +85,11 @@ class _StubPersistence implements AskAiPersistence {
   }
   @override
   Future<void> clear() async {
+    clearCalls++;
+    loaded = null;
+  }
+  @override
+  Future<void> clearForUser(String userId) async {
     clearCalls++;
     loaded = null;
   }
@@ -233,27 +245,22 @@ void main() {
     );
   });
 
-  group('per-conversation restore', () {
+  group('per-conversation restore (server-side)', () {
     test(
-      'loadConversation restores draft + evidence when persisted snapshot id matches',
+      'loadConversation hydrates activeDraft from server detail.draft',
       () async {
-        final stub = _StubPersistence()
-          ..loaded = AskAiPersistedState(
-            conversationId: 'c-9',
-            activeDraft: _userEditedDraft,
-            activeEvidence: [
-              StagedAttachment(
-                bytes: Uint8List.fromList([7]),
-                mimeType: 'image/jpeg',
-                filename: 'r.jpg',
-              ),
-            ],
-          );
+        final stub = _StubPersistence();
         final repo = _StubRepo()
           ..conversationToReturn = ConversationDetail(
             id: 'c-9',
             createdAt: DateTime(2026, 5, 7),
             messages: const [],
+            draft: const PersistedDraft(
+              draft: _userEditedDraft,
+              userEditedDraft: true,
+              evidenceAttachmentIds: [],
+            ),
+            evidenceAttachments: const [],
           );
         final container = _container(repo: repo, persistence: stub);
         addTearDown(container.dispose);
@@ -264,25 +271,21 @@ void main() {
         final state = container.read(askAiChatControllerProvider);
         expect(state.conversationId, 'c-9');
         expect(state.activeDraft?.title, _userEditedDraft.title);
-        expect(state.activeEvidence, hasLength(1));
-        // Did NOT clear — next state change will save a fresh snapshot.
-        expect(stub.clearCalls, 0);
+        expect(state.userEditedDraft, isTrue);
       },
     );
 
     test(
-      'loadConversation drops snapshot + starts fresh when ids differ',
+      'loadConversation with no server draft → state.activeDraft is null',
       () async {
-        final stub = _StubPersistence()
-          ..loaded = AskAiPersistedState(
-            conversationId: 'OTHER-ID',
-            activeDraft: _userEditedDraft,
-          );
+        final stub = _StubPersistence();
         final repo = _StubRepo()
           ..conversationToReturn = ConversationDetail(
             id: 'c-9',
             createdAt: DateTime(2026, 5, 7),
             messages: const [],
+            draft: null,
+            evidenceAttachments: const [],
           );
         final container = _container(repo: repo, persistence: stub);
         addTearDown(container.dispose);
@@ -293,28 +296,7 @@ void main() {
         final state = container.read(askAiChatControllerProvider);
         expect(state.conversationId, 'c-9');
         expect(state.activeDraft, isNull);
-        expect(stub.clearCalls, greaterThanOrEqualTo(1));
       },
     );
-  });
-
-  group('codec round-trip', () {
-    test('userEditedDraft survives encode/decode', () {
-      final original = AskAiPersistedState(
-        conversationId: 'c-1',
-        activeDraft: _userEditedDraft,
-        userEditedDraft: true,
-      );
-      final encoded = AskAiStateCodec.encode(original);
-      final decoded = AskAiStateCodec.decode(encoded)!;
-      expect(decoded.userEditedDraft, isTrue);
-    });
-
-    test('userEditedDraft defaults to false on legacy payload', () {
-      // Older persisted payload without the field.
-      const legacy = '{"v":1,"conversationId":"c-1","savedAt":"2026-05-07T00:00:00Z","stagedAttachments":[],"conversationAttachments":[],"activeDraft":null,"activeEvidence":null}';
-      final decoded = AskAiStateCodec.decode(legacy)!;
-      expect(decoded.userEditedDraft, isFalse);
-    });
   });
 }

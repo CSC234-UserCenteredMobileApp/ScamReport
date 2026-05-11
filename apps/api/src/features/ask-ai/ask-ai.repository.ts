@@ -1,6 +1,7 @@
 // Pure Prisma calls for Ask AI. No business logic — service.ts orchestrates.
 
 import { getPrisma } from '../../core/db/client';
+import { Prisma } from '../../generated/prisma/client';
 
 export interface PersistedMessage {
   id: string;
@@ -33,6 +34,62 @@ export async function findConversation(userId: string, conversationId: string) {
       createdAt: true,
       lastMessageAt: true,
       linkedReportId: true,
+      draftState: true,
+    },
+  });
+}
+
+/**
+ * Verify every id in `attachmentIds` belongs to a message inside the given
+ * conversation. Returns the attachment metadata (storagePath, mimeType,
+ * sizeBytes) for the matched ids — preserving input order. Returns `null` if
+ * one or more ids are missing or owned by a different conversation; callers
+ * should reject the request in that case.
+ */
+export async function findAttachmentsInConversation(
+  conversationId: string,
+  attachmentIds: string[],
+): Promise<
+  | Array<{ id: string; storagePath: string; mimeType: string; sizeBytes: bigint }>
+  | null
+> {
+  if (attachmentIds.length === 0) return [];
+  const prisma = getPrisma();
+  const rows = await prisma.aiMessageAttachment.findMany({
+    where: {
+      id: { in: attachmentIds },
+      message: { conversationId },
+    },
+    select: {
+      id: true,
+      storagePath: true,
+      mimeType: true,
+      sizeBytes: true,
+    },
+  });
+  if (rows.length !== attachmentIds.length) return null;
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  const ordered: typeof rows = [];
+  for (const id of attachmentIds) {
+    const r = byId.get(id);
+    if (!r) return null;
+    ordered.push(r);
+  }
+  return ordered;
+}
+
+export async function writeDraftState(
+  conversationId: string,
+  payload: unknown | null,
+): Promise<void> {
+  const prisma = getPrisma();
+  await prisma.aiConversation.update({
+    where: { id: conversationId },
+    data: {
+      draftState:
+        payload === null
+          ? Prisma.DbNull
+          : (payload as Prisma.InputJsonValue),
     },
   });
 }

@@ -43,6 +43,9 @@ class _FakeRepo implements AskAiRepository {
   }
 
   @override
+  Future<void> upsertDraft(String conversationId, PersistedDraft? payload) async {}
+
+  @override
   Future<TurnOutcome> sendMessage(
     String conversationId,
     String content, {

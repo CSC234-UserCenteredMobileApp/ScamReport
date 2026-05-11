@@ -311,6 +311,9 @@ model AiConversation {
   linkedReportId String?   @map("linked_report_id") @db.Uuid
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   lastMessageAt  DateTime  @default(now()) @map("last_message_at") @db.Timestamptz()
+  /// In-progress AI-drafted report for this conversation (cross-device sync).
+  /// Shape: AskAiPersistedDraft from `@my-product/shared`.
+  draftState     Json?     @map("draft_state") @db.JsonB
 
   user         User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   linkedReport Report?     @relation(fields: [linkedReportId], references: [id], onDelete: SetNull)

@@ -19,10 +19,14 @@ import 'attachment_picker.dart';
 /// we fetch the current Firebase ID token before each call so a refresh
 /// happens inside firebase_auth and we always send a fresh JWT.
 class AskAiApiClient {
-  AskAiApiClient(this._http, this._firebaseAuth);
+  AskAiApiClient(this._http, this._firebaseAuth, {String Function()? locale})
+      : _locale = locale ?? (() => 'th');
 
   final http.Client _http;
   final FirebaseAuth _firebaseAuth;
+  // Returns 'th' or 'en' — read from SettingsState. Server forwards to
+  // Gemini as a hard "RESPOND IN" rule. iter-5 language locking.
+  final String Function() _locale;
 
   Future<Map<String, String>> _authHeaders() async {
     final user = _firebaseAuth.currentUser;
@@ -122,7 +126,11 @@ class AskAiApiClient {
     final res = await _http.post(
       Uri.parse('$apiBaseUrl/ask-ai/conversations/$conversationId/messages'),
       headers: headers,
-      body: jsonEncode({'content': content, 'attachmentIds': attachmentIds}),
+      body: jsonEncode({
+        'content': content,
+        'attachmentIds': attachmentIds,
+        'locale': _locale(),
+      }),
     );
     if (res.statusCode != 200) _throwForStatus(res);
     final body = jsonDecode(res.body) as Map<String, dynamic>;
@@ -147,6 +155,7 @@ class AskAiApiClient {
     );
     req.headers['Authorization'] = 'Bearer $token';
     req.fields['content'] = content;
+    req.fields['locale'] = _locale();
     for (var i = 0; i < attachments.length && i < 3; i++) {
       final a = attachments[i];
       req.files.add(
@@ -199,12 +208,68 @@ class AskAiApiClient {
         .cast<Map<String, dynamic>>()
         .map(_messageFromJson)
         .toList();
+    final draftJson = j['draft'];
+    PersistedDraft? draft;
+    if (draftJson is Map<String, dynamic>) {
+      final ids = (draftJson['evidenceAttachmentIds'] as List? ?? const [])
+          .cast<String>();
+      draft = PersistedDraft(
+        draft: AiDraft(
+          title: draftJson['title'] as String,
+          description: draftJson['description'] as String,
+          scamTypeCode: draftJson['scamTypeCode'] as String,
+          targetIdentifier: draftJson['targetIdentifier'] as String?,
+          targetIdentifierKind:
+              switch (draftJson['targetIdentifierKind'] as String?) {
+            'phone' => TargetIdentifierKind.phone,
+            'url' => TargetIdentifierKind.url,
+            'other' => TargetIdentifierKind.other,
+            _ => null,
+          },
+        ),
+        userEditedDraft: (draftJson['userEditedDraft'] as bool?) ?? false,
+        evidenceAttachmentIds: ids,
+      );
+    }
+    final evidenceAttachments = (j['evidenceAttachments'] as List? ?? const [])
+        .cast<Map<String, dynamic>>()
+        .map(_attachmentFromJson)
+        .toList();
     return ConversationDetail(
       id: j['id'] as String,
       createdAt: DateTime.parse(j['createdAt'] as String),
       messages: messages,
       linkedReportId: j['linkedReportId'] as String?,
+      draft: draft,
+      evidenceAttachments: evidenceAttachments,
     );
+  }
+
+  /// PATCH /ask-ai/conversations/:id/draft — persists the active draft
+  /// server-side so it syncs across devices and survives app kill. Pass
+  /// `null` to clear the server draft. iter-5 cross-device sync.
+  Future<void> upsertDraft(
+    String conversationId,
+    PersistedDraft? payload,
+  ) async {
+    final headers = await _authHeaders();
+    final body = payload == null
+        ? 'null'
+        : jsonEncode({
+            'title': payload.draft.title,
+            'description': payload.draft.description,
+            'scamTypeCode': payload.draft.scamTypeCode,
+            'targetIdentifier': payload.draft.targetIdentifier,
+            'targetIdentifierKind': payload.draft.targetIdentifierKind?.name,
+            'userEditedDraft': payload.userEditedDraft,
+            'evidenceAttachmentIds': payload.evidenceAttachmentIds,
+          });
+    final res = await _http.patch(
+      Uri.parse('$apiBaseUrl/ask-ai/conversations/$conversationId/draft'),
+      headers: headers,
+      body: body,
+    );
+    if (res.statusCode != 200) _throwForStatus(res);
   }
 
   AiDraft? _draftFromJson(Map<String, dynamic>? j) {
