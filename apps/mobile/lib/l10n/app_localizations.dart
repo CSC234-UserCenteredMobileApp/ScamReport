@@ -1435,6 +1435,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not request deletion. Please try again.'**
   String get deleteAccountFailed;
+
+  /// No description provided for @deletionRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletion Requests'**
+  String get deletionRequests;
 }
 
 class _AppLocalizationsDelegate

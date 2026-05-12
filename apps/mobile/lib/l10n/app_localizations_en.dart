@@ -733,4 +733,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deleteAccountFailed =>
       'Could not request deletion. Please try again.';
+
+  @override
+  String get deletionRequests => 'Deletion Requests';
 }

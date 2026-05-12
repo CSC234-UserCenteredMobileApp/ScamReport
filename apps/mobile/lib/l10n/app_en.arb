@@ -278,5 +278,6 @@
   "deleteAccount": "Delete account",
   "deleteAccountDialogTitle": "Delete account?",
   "deleteAccountDialogContent": "Your account will be permanently deleted after 7 days. All your reports and data will be lost.\n\nYou will be signed out immediately.",
-  "deleteAccountFailed": "Could not request deletion. Please try again."
+  "deleteAccountFailed": "Could not request deletion. Please try again.",
+  "deletionRequests": "Deletion Requests"
 }

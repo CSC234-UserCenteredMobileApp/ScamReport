@@ -110,6 +110,14 @@ enum AnnouncementStatus {
   @@map("announcement_stat")
 }
 
+enum DeletionRequestStatus {
+  pending
+  approved
+  rejected
+
+  @@map("deletion_request_status")
+}
+
 enum ConsentKind {
   registration
   first_report_submission
@@ -275,8 +283,25 @@ model Announcement {
   updatedAt     DateTime             @default(now()) @map("updated_at") @db.Timestamptz()
 
   author User? @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  attachments    AnnouncementAttachment[]
 
   @@map("announcements")
+}
+
+/// Image or PDF attachment for an announcement. Bytes live in Supabase Storage.
+model AnnouncementAttachment {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  announcementId String       @map("announcement_id") @db.Uuid
+  storagePath    String       @map("storage_path")
+  kind           String
+  mimeType       String       @map("mime_type")
+  sizeBytes      BigInt       @map("size_bytes")
+  sortOrder      Int          @default(0) @map("sort_order")
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz()
+
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+
+  @@map("announcement_attachments")
 }
 
 /// Per-device push tokens (a user may have multiple Android devices). (DESIGN §4.9)
@@ -367,6 +392,10 @@ model AccountDeletionRequest {
   requestedAt DateTime  @default(now()) @map("requested_at") @db.Timestamptz()
   purgeDueAt  DateTime  @map("purge_due_at") @db.Timestamptz()
   purgedAt    DateTime? @map("purged_at") @db.Timestamptz()
+  status            DeletionRequestStatus @default(pending)
+  reviewedAt        DateTime?             @map("reviewed_at") @db.Timestamptz()
+  reviewedByAdminId String?               @map("reviewed_by_admin_id")
+  rejectionReason   String?               @map("rejection_reason")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
