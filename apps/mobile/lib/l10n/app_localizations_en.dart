@@ -545,6 +545,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'I want to report a suspicious activity, can you help me?';
 
   @override
+  String get askAiSimilarReportsLabel => 'Matched verified reports';
+
+  @override
   String get askAiPastChats => 'Past chats';
 
   @override

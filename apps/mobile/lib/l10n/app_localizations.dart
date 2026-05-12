@@ -1070,6 +1070,12 @@ abstract class AppLocalizations {
   /// **'I want to report a suspicious activity, can you help me?'**
   String get askAiReportSeed;
 
+  /// No description provided for @askAiSimilarReportsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Matched verified reports'**
+  String get askAiSimilarReportsLabel;
+
   /// No description provided for @askAiPastChats.
   ///
   /// In en, this message translates to:

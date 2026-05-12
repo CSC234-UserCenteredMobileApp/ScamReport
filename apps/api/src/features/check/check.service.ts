@@ -1,22 +1,8 @@
 import { getPrisma } from '../../core/db/client';
 import { generateText } from '../../core/gemini/client';
+import { normalizePhone, normalizeUrl } from '../../core/lib/identifier-extractor';
 import { searchSimilarReports } from '../../core/rag/retrieval';
 import type { CheckResponse, ReportSummary } from '@my-product/shared';
-
-function normalizePhone(raw: string): string {
-  const stripped = raw.replace(/[\s\-\(\)]/g, '');
-  if (/^0\d{8,9}$/.test(stripped)) return '+66' + stripped.slice(1);
-  return stripped;
-}
-
-function normalizeUrl(raw: string): string {
-  try {
-    const url = new URL(raw.startsWith('http') ? raw : 'https://' + raw);
-    return url.hostname.toLowerCase();
-  } catch (_e) {
-    return raw.toLowerCase().trim();
-  }
-}
 
 async function hashInput(text: string): Promise<string> {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));

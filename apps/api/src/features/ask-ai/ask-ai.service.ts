@@ -17,6 +17,8 @@ import type {
   AskAiTurnResponse,
   AskAiUpsertDraftRequest,
 } from '@my-product/shared';
+import type { AskAiSimilarReport } from '@my-product/shared';
+import { extractIdentifiers } from '../../core/lib/identifier-extractor';
 import { searchSimilarReports } from '../../core/rag/retrieval';
 import { TOP_K as SIMILAR_REPORTS_TOP_K } from '../../core/ai-score/constants';
 import { getSignedUrl, uploadFile } from '../../core/supabase/storage';
@@ -245,13 +247,41 @@ export async function handleTurn(
     .slice(-HISTORY_TURNS_FOR_PROMPT)
     .map((m) => ({ role: m.role, content: m.content }));
 
-  // Similar verified reports for RAG context.
+  // Similar verified reports for RAG context. Two parallel paths:
+  //   - exact identifier match (phones + URLs in the user message). Cheap
+  //     index lookup; high precision; ordered first so Gemini treats them
+  //     as the most likely reference.
+  //   - semantic similarity via Gemini embedding + pgvector cosine. Wider
+  //     net for free-text questions like "weird parcel SMS".
+  // Both are best-effort — any failure leaves the array shorter; the turn
+  // still produces a reply, just without that flavour of context.
   let similarHydrated: Awaited<ReturnType<typeof repo.hydrateSimilarReports>> = [];
   try {
-    const similar = await searchSimilarReports(content, SIMILAR_REPORTS_TOP_K);
-    similarHydrated = await repo.hydrateSimilarReports(similar.map((s) => s.reportId));
+    const { phones, urls } = extractIdentifiers(content);
+    const normalisedIds = [...phones, ...urls];
+
+    const [exactMatches, semantic] = await Promise.all([
+      normalisedIds.length > 0
+        ? repo.findReportsByIdentifiers(normalisedIds)
+        : Promise.resolve([] as Awaited<ReturnType<typeof repo.findReportsByIdentifiers>>),
+      searchSimilarReports(content, SIMILAR_REPORTS_TOP_K)
+        .then((r) => repo.hydrateSimilarReports(r.map((s) => s.reportId)))
+        .catch((err) => {
+          console.error('[ask-ai] semantic-rag-failure', { err });
+          return [] as Awaited<ReturnType<typeof repo.hydrateSimilarReports>>;
+        }),
+    ]);
+
+    // Merge — exact matches first, then semantic, deduped by report id.
+    const seen = new Set<string>();
+    for (const r of [...exactMatches, ...semantic]) {
+      if (seen.has(r.id) || similarHydrated.length >= SIMILAR_REPORTS_TOP_K) continue;
+      seen.add(r.id);
+      similarHydrated.push(r);
+    }
   } catch (err) {
-    // RAG failure is non-fatal — we just don't pass similar context to Gemini.
+    // Catch-all for unexpected failures (e.g. extractor regex crashes on
+    // pathological input). Keep the chat alive.
     console.error('[ask-ai] rag-failure', { err });
   }
 
@@ -279,6 +309,23 @@ export async function handleTurn(
 
   await repo.touchConversation(conversationId);
 
+  // Hydrate Gemini's curated `similarReportIds` into full cards. Gemini may
+  // echo IDs in any order it judges most relevant; preserve that order.
+  // IDs the model invented (not present in `similarHydrated`) are dropped —
+  // same anti-hallucination guarantee the previous response had.
+  const hydratedById = new Map(similarHydrated.map((r) => [r.id, r]));
+  const similarReports: AskAiSimilarReport[] = turn.similarReportIds
+    .map((id) => hydratedById.get(id))
+    .filter((r): r is NonNullable<typeof r> => Boolean(r))
+    .map((r) => ({
+      id: r.id,
+      title: r.title,
+      scamTypeCode: r.scamTypeCode,
+      scamTypeLabelEn: r.scamTypeLabelEn,
+      scamTypeLabelTh: r.scamTypeLabelTh,
+      verifiedAt: r.verifiedAt,
+    }));
+
   return {
     userMessage: await toAskAiMessage(userMessage),
     assistantMessage: await toAskAiMessage(assistantMessage),
@@ -286,7 +333,7 @@ export async function handleTurn(
     reportable: turn.reportable,
     hasEnoughInfo: turn.hasEnoughInfo,
     draft: turn.draft,
-    similarReportIds: turn.similarReportIds,
+    similarReports,
     missingFacts: turn.missingFacts,
   };
 }

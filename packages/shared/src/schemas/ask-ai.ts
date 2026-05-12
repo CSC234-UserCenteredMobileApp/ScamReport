@@ -158,8 +158,9 @@ export type AskAiUpsertDraftRequest = Static<typeof AskAiUpsertDraftRequest>;
 // AskAiTurnResponse — what /messages returns. The user/assistant messages are
 // persisted Postgres rows. intentDetected/reportable/hasEnoughInfo are
 // server-derived flags from the structured Gemini call. draft is set when
-// reportable && hasEnoughInfo. similarReportIds are the verified-report
-// matches surfaced by the AI bubble inline.
+// reportable && hasEnoughInfo. similarReports are the verified-report
+// matches the AI bubble renders inline (title + type + verifiedAt + tap-
+// through to /report-detail/:id).
 export const AskAiMissingFact = Type.Union([
   Type.Literal('description'),
   Type.Literal('targetIdentifier'),
@@ -168,6 +169,19 @@ export const AskAiMissingFact = Type.Union([
 ]);
 export type AskAiMissingFact = Static<typeof AskAiMissingFact>;
 
+// Compact verified-report card surfaced in the chat. Reporter identity is
+// intentionally absent (FR-7.4 + FR-7.8) — this shape is shown to any
+// authenticated Ask AI user, including guests-elevated-to-user.
+export const AskAiSimilarReport = Type.Object({
+  id: Type.String({ format: 'uuid' }),
+  title: Type.String(),
+  scamTypeCode: Type.String(),
+  scamTypeLabelEn: Type.String(),
+  scamTypeLabelTh: Type.String(),
+  verifiedAt: Type.Union([Type.String({ format: 'date-time' }), Type.Null()]),
+});
+export type AskAiSimilarReport = Static<typeof AskAiSimilarReport>;
+
 export const AskAiTurnResponse = Type.Object({
   userMessage: AskAiMessage,
   assistantMessage: AskAiMessage,
@@ -175,7 +189,7 @@ export const AskAiTurnResponse = Type.Object({
   reportable: Type.Boolean(),
   hasEnoughInfo: Type.Boolean(),
   draft: Type.Union([AskAiDraft, Type.Null()]),
-  similarReportIds: Type.Array(Type.String({ format: 'uuid' }), { maxItems: 5 }),
+  similarReports: Type.Array(AskAiSimilarReport, { maxItems: 5 }),
   // The four required facts the AI must collect before it can draft. Empty
   // ⇔ hasEnoughInfo=true. Drives AI question rigor (iter-4 plan).
   missingFacts: Type.Array(AskAiMissingFact, { maxItems: 4, default: [] }),
