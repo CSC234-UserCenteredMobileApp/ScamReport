@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| **Document Version** | 1.4 |
+| **Document Version** | 1.6 |
 | **Status** | Draft — for team review |
-| **Date issued** | 2026-05-01 |
+| **Date issued** | 2026-05-12 |
 | **Derived from** | PRD v1.3 (2026-05-01), BRD v2.0 (2026-04-23) |
 | **Target backend** | Supabase Postgres 15 + `pgvector` (system of record), Firebase Cloud Firestore (read-only mirror for `alerts` + `my-reports`) |
 
@@ -15,6 +15,20 @@
 ---
 
 ## 0. What Changed
+
+### v1.6 (2026-05-12)
+
+| Area | v1.5 | v1.6 | Why |
+|---|---|---|---|
+| Announcement attachments | Announcements text-only | Added `announcement_attachments` table | Mirror evidence-file pattern for announcement images/PDFs (Supabase Storage bytes, DB metadata). |
+| Account-deletion review workflow | Worker-only purge (`pending → purged`) | Added `status` (`deletion_request_status` enum), `reviewed_at`, `reviewed_by_admin_id`, `rejection_reason` on `account_deletion_requests` | Admin moderation of deletion requests before purge worker runs. |
+| `reports.ai_score` / `ai_confidence` | Computed on-demand inside admin detail handler | Persisted at submit time (still nullable for legacy rows + Gemini failures) | Avoid recomputing on every admin detail load; preserve triage hint across queue restarts. See `apps/api/src/core/ai-score/`. |
+
+### v1.5 (2026-05-10)
+
+| Area | v1.4 | v1.5 | Why |
+|---|---|---|---|
+| Ask AI draft persistence | Drafts client-only | Added `ai_conversations.draft_state` (JSONB) | Cross-device sync of in-progress AI-drafted report. Shape `AskAiPersistedDraft` in `packages/shared/src/schemas/ask-ai.ts`. `evidenceAttachmentIds` inside the JSON references existing `ai_message_attachments.id` rows; raw bytes never stored in this column. |
 
 ### v1.4 (2026-05-01)
 
@@ -113,6 +127,7 @@ CREATE TYPE check_input_kind  AS ENUM ('phone', 'url', 'text');
 CREATE TYPE announcement_cat  AS ENUM ('fraud_alert', 'tips', 'platform_update');
 CREATE TYPE announcement_stat AS ENUM ('draft', 'published', 'unpublished');
 CREATE TYPE consent_kind      AS ENUM ('registration', 'first_report_submission', 'privacy_policy', 'terms_of_service');
+CREATE TYPE deletion_request_status AS ENUM ('pending', 'approved', 'rejected');
 -- device_platform enum REMOVED in v1.1 (Android-only release).
 ```
 
@@ -299,6 +314,25 @@ Admin-published communications (PRD §3.7).
 
 **Trigger duty:** on transition to `published` AND `pushed_to_fcm_at IS NULL`, enqueue a broadcast FCM job that targets every active row in `fcm_devices`, then sets `pushed_to_fcm_at = now()`.
 
+### 4.8.1 `announcement_attachments`
+
+Optional image / PDF attachments on an announcement. Mirrors the `evidence_files` shape but scoped to announcements. Bytes live in Supabase Storage.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `uuid` PK, default `gen_random_uuid()` | |
+| `announcement_id` | `uuid` FK → `announcements(id)` ON DELETE CASCADE | |
+| `storage_path` | `text` NOT NULL | E.g. `announcements/{announcement_id}/{uuid}.jpg`. |
+| `kind` | `text` NOT NULL | Free-form (`image` / `pdf`); not enum-constrained yet — promote to `evidence_kind` if reused. |
+| `mime_type` | `text` NOT NULL | |
+| `size_bytes` | `bigint` NOT NULL | |
+| `sort_order` | `integer` NOT NULL DEFAULT `0` | Author-controlled display order. |
+| `created_at` | `timestamptz` NOT NULL DEFAULT `now()` | |
+
+**No 5-files cap trigger** — admins author announcements and the limit is enforced at the API layer.
+
+**Storage RLS:** bucket policy allows authenticated `SELECT` via signed URL for any published announcement; admins additionally see drafts.
+
 ### 4.9 `fcm_devices`
 
 Per-device push tokens (a user may have multiple Android devices).
@@ -350,6 +384,7 @@ Server-side log of every `POST /check` call (PRD §3.1). Useful for the public f
 | `linked_report_id` | `uuid` FK → `reports(id)` ON DELETE SET NULL | Set when the conversation leads to a report submission via "Report with AI". |
 | `created_at` | `timestamptz` NOT NULL DEFAULT `now()` | |
 | `last_message_at` | `timestamptz` NOT NULL DEFAULT `now()` | |
+| `draft_state` | `jsonb` | In-progress AI-drafted report for this conversation (cross-device sync). Shape `AskAiPersistedDraft` from `packages/shared/src/schemas/ask-ai.ts`. `evidenceAttachmentIds` inside the JSON references existing `ai_message_attachments.id` rows — raw bytes never stored here. |
 
 **Index:** `(user_id, last_message_at DESC)`.
 
@@ -390,8 +425,12 @@ Drives the 7-day purge worker (FR-1.5).
 | `requested_at` | `timestamptz` NOT NULL DEFAULT `now()` | |
 | `purge_due_at` | `timestamptz` NOT NULL | `requested_at + interval '7 days'`. |
 | `purged_at` | `timestamptz` | Set when the worker completes. |
+| `status` | `deletion_request_status` NOT NULL DEFAULT `'pending'` | Admin moderation outcome — `pending` while awaiting review; `approved` lets the purge worker proceed at `purge_due_at`; `rejected` halts the worker. |
+| `reviewed_at` | `timestamptz` | When the admin acted. |
+| `reviewed_by_admin_id` | `text` | Admin `users.id` who reviewed. Not a Prisma FK relation (kept as plain text to mirror moderation audit detachment if the admin is later deleted). |
+| `rejection_reason` | `text` | Required when `status = 'rejected'`; visible to the requesting user. |
 
-When `now() >= purge_due_at`, the worker: anonymises the `users` row (clear PII, keep `id`), nulls out `reporter_id` on the user's pending/withdrawn reports and hard-deletes them, leaves verified reports in place with `reporter_id` already nullable, and deletes any `fcm_devices` rows.
+When `now() >= purge_due_at` **and** `status = 'approved'`, the worker: anonymises the `users` row (clear PII, keep `id`), nulls out `reporter_id` on the user's pending/withdrawn reports and hard-deletes them, leaves verified reports in place with `reporter_id` already nullable, and deletes any `fcm_devices` rows. `pending` requests are skipped (worker waits for admin); `rejected` requests are skipped permanently.
 
 ---
 
