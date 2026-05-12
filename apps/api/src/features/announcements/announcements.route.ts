@@ -23,6 +23,8 @@ export const announcementsRoute = new Elysia()
           excerpt: r.body.slice(0, 120).trimEnd() + (r.body.length > 120 ? '…' : ''),
           category: r.category,
           publishedAt: (r.publishedAt ?? r.createdAt).toISOString(),
+          firstImageStoragePath: null,
+          attachmentCount: 0,
         })),
       };
     },
@@ -55,6 +57,7 @@ export const announcementsRoute = new Elysia()
           category: row.category,
           slug: row.slug,
           publishedAt: (row.publishedAt ?? row.createdAt).toISOString(),
+          attachments: [],
         },
       };
     },

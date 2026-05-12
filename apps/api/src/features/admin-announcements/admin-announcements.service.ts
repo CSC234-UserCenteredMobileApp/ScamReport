@@ -56,6 +56,7 @@ function toDetail(row: {
     publishedAt: row.publishedAt?.toISOString() ?? null,
     pushedToFcmAt: row.pushedToFcmAt?.toISOString() ?? null,
     authorId: row.authorId ?? null,
+    attachments: [],
   };
 }
 

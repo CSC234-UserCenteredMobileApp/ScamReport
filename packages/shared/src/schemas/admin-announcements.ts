@@ -1,6 +1,16 @@
 import { Type, type Static } from '@sinclair/typebox';
 import { AnnouncementCategory } from './announcements';
 
+export const AnnouncementAttachmentSchema = Type.Object({
+  id:          Type.String({ format: 'uuid' }),
+  storagePath: Type.String(),
+  kind:        Type.Union([Type.Literal('image'), Type.Literal('pdf')]),
+  mimeType:    Type.String(),
+  sizeBytes:   Type.Number(),
+  sortOrder:   Type.Number(),
+});
+export type AnnouncementAttachment = Static<typeof AnnouncementAttachmentSchema>;
+
 const AnnouncementStatus = Type.Union([
   Type.Literal('draft'),
   Type.Literal('published'),
@@ -51,6 +61,7 @@ export const AdminAnnouncementDetail = Type.Object({
   publishedAt: Type.Union([Type.String({ format: 'date-time' }), Type.Null()]),
   pushedToFcmAt: Type.Union([Type.String({ format: 'date-time' }), Type.Null()]),
   authorId: Type.Union([Type.String({ format: 'uuid' }), Type.Null()]),
+  attachments: Type.Array(AnnouncementAttachmentSchema),
 });
 export type AdminAnnouncementDetail = Static<typeof AdminAnnouncementDetail>;
 
@@ -70,3 +81,8 @@ export const AdminAnnouncementActionResponse = Type.Object({
   updatedAt: Type.String({ format: 'date-time' }),
 });
 export type AdminAnnouncementActionResponse = Static<typeof AdminAnnouncementActionResponse>;
+
+export const AdminAnnouncementAttachmentResponse = Type.Object({
+  attachment: AnnouncementAttachmentSchema,
+});
+export type AdminAnnouncementAttachmentResponse = Static<typeof AdminAnnouncementAttachmentResponse>;
