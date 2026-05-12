@@ -89,7 +89,7 @@ void main() {
         intentDetected: false,
         reportable: false,
         hasEnoughInfo: false,
-        similarReportIds: const [],
+        similarReports: const [],
       );
       when(() => api.sendMessage('c-1', 'hi')).thenAnswer((_) async => outcome);
       final result = await repo.sendMessage('c-1', 'hi');
@@ -115,7 +115,7 @@ void main() {
         intentDetected: false,
         reportable: false,
         hasEnoughInfo: false,
-        similarReportIds: const [],
+        similarReports: const [],
       );
       when(() => api.sendMessageMultipart(any(), any(), any()))
           .thenAnswer((_) async => outcome);

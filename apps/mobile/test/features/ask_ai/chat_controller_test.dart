@@ -109,7 +109,7 @@ TurnOutcome _basicOutcome(String content) => TurnOutcome(
       intentDetected: false,
       reportable: false,
       hasEnoughInfo: false,
-      similarReportIds: const [],
+      similarReports: const [],
     );
 
 class _StubPersistence implements AskAiPersistence {
@@ -191,7 +191,7 @@ void main() {
           intentDetected: true,
           reportable: true,
           hasEnoughInfo: true,
-          similarReportIds: const [],
+          similarReports: const [],
           draft: const AiDraft(
             title: 'A drafted title here',
             description: 'A drafted description here that is long.',

@@ -13,6 +13,7 @@ import 'conversations_drawer.dart';
 import 'widgets/attachment_chip.dart';
 import 'widgets/consent_card.dart';
 import 'widgets/draft_editor_sheet.dart';
+import 'widgets/similar_report_card.dart';
 
 /// Ask AI conversational chat screen (P-09 / FR-4.x). Text-only in v1;
 /// attachments + inline consent + draft editor land in PR-4 / PR-5.
@@ -410,6 +411,8 @@ class _MessageBubble extends StatelessWidget {
         isUser ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface;
     final hasContent = message.content.trim().isNotEmpty;
     final hasAttachments = message.attachments.isNotEmpty;
+    final hasSimilarReports =
+        message.role == ChatRole.assistant && message.similarReports.isNotEmpty;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Align(
@@ -418,34 +421,54 @@ class _MessageBubble extends StatelessWidget {
           constraints: BoxConstraints(
             maxWidth: MediaQuery.of(context).size.width * 0.78,
           ),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: bg,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (hasAttachments)
-                  Padding(
-                    padding: EdgeInsets.only(bottom: hasContent ? 8 : 0),
-                    child: Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
-                      children: [
-                        for (final a in message.attachments)
-                          _BubbleAttachment(attachment: a, onPrimary: isUser),
-                      ],
-                    ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: bg,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (hasAttachments)
+                      Padding(
+                        padding: EdgeInsets.only(bottom: hasContent ? 8 : 0),
+                        child: Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: [
+                            for (final a in message.attachments)
+                              _BubbleAttachment(
+                                  attachment: a, onPrimary: isUser),
+                          ],
+                        ),
+                      ),
+                    if (hasContent)
+                      Text(
+                        message.content,
+                        style: theme.textTheme.bodyMedium?.copyWith(color: fg),
+                      ),
+                  ],
+                ),
+              ),
+              if (hasSimilarReports) ...[
+                const SizedBox(height: 8),
+                Text(
+                  context.l10n.askAiSimilarReportsLabel,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.4,
                   ),
-                if (hasContent)
-                  Text(
-                    message.content,
-                    style: theme.textTheme.bodyMedium?.copyWith(color: fg),
-                  ),
+                ),
+                const SizedBox(height: 4),
+                for (final r in message.similarReports)
+                  SimilarReportCard(key: ValueKey(r.id), report: r),
               ],
-            ),
+            ],
           ),
         ),
       ),

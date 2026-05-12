@@ -109,7 +109,7 @@ TurnOutcome _basic(String content) => TurnOutcome(
       intentDetected: false,
       reportable: false,
       hasEnoughInfo: false,
-      similarReportIds: const [],
+      similarReports: const [],
     );
 
 ProviderContainer _container({

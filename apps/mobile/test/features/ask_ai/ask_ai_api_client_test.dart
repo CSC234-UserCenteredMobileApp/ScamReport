@@ -251,7 +251,24 @@ void main() {
               'reportable': false,
               'hasEnoughInfo': false,
               'draft': null,
-              'similarReportIds': ['r-1', 'r-2'],
+              'similarReports': [
+                {
+                  'id': 'r-1',
+                  'title': 'Kerry parcel SMS',
+                  'scamTypeCode': 'phishing_sms',
+                  'scamTypeLabelEn': 'Phishing SMS',
+                  'scamTypeLabelTh': 'ฟิชชิง SMS',
+                  'verifiedAt': '2026-05-01T00:00:00Z',
+                },
+                {
+                  'id': 'r-2',
+                  'title': 'K-Bank fake login',
+                  'scamTypeCode': 'phishing_sms',
+                  'scamTypeLabelEn': 'Phishing SMS',
+                  'scamTypeLabelTh': 'ฟิชชิง SMS',
+                  'verifiedAt': null,
+                },
+              ],
             }),
           );
         }),
@@ -259,7 +276,10 @@ void main() {
       );
       final out = await api.sendMessage('c-1', 'hi');
       expect(jsonDecode(sentBody!)['content'], 'hi');
-      expect(out.similarReportIds, ['r-1', 'r-2']);
+      expect(out.similarReports.map((r) => r.id).toList(), ['r-1', 'r-2']);
+      expect(out.similarReports[0].title, 'Kerry parcel SMS');
+      expect(out.similarReports[0].scamTypeLabelEn, 'Phishing SMS');
+      expect(out.similarReports[1].verifiedAt, isNull);
       expect(out.draft, isNull);
     });
 
@@ -294,7 +314,7 @@ void main() {
                   'targetIdentifier': 'kerry-th.net',
                   'targetIdentifierKind': 'url',
                 },
-                'similarReportIds': [],
+                'similarReports': [],
               }),
             )),
         auth,
@@ -340,7 +360,7 @@ void main() {
                     'targetIdentifier': 'x',
                     'targetIdentifierKind': entry.key,
                   },
-                  'similarReportIds': [],
+                  'similarReports': [],
                 }),
               )),
           auth,
@@ -384,7 +404,7 @@ void main() {
               'reportable': false,
               'hasEnoughInfo': false,
               'draft': null,
-              'similarReportIds': [],
+              'similarReports': [],
             }),
           );
         }),
@@ -459,7 +479,7 @@ void main() {
               'intentDetected': false,
               'reportable': false,
               'hasEnoughInfo': false,
-              'similarReportIds': [],
+              'similarReports': [],
               'missingFacts': [],
             }),
           );
@@ -500,7 +520,7 @@ void main() {
               'intentDetected': false,
               'reportable': false,
               'hasEnoughInfo': false,
-              'similarReportIds': [],
+              'similarReports': [],
               'missingFacts': [],
             }),
           );

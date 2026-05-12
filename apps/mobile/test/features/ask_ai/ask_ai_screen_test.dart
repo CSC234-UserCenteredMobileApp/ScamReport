@@ -70,7 +70,7 @@ class _StubRepo implements AskAiRepository {
           intentDetected: false,
           reportable: false,
           hasEnoughInfo: false,
-          similarReportIds: const [],
+          similarReports: const [],
         );
   }
 
