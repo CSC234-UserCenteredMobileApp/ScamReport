@@ -29,6 +29,7 @@ import '../../features/search/presentation/search_screen.dart';
 import '../../features/announcement_editor/presentation/admin_announcements_screen.dart';
 import '../../features/announcement_editor/presentation/announcement_editor_screen.dart';
 import '../../features/deletion_requests/presentation/admin_deletion_requests_screen.dart';
+import '../../features/auth/presentation/forgot_password_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/share_target/presentation/share_target_handler.dart';
 import '../di/auth.dart';
@@ -181,6 +182,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       // -----------------------------------------------------------------------
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
       GoRoute(path: '/register', builder: (_, __) => const RegisterScreen()),
+      GoRoute(path: '/forgot-password', builder: (_, __) => const ForgotPasswordScreen()),
       GoRoute(
         path: '/submit-report',
         builder: (_, __) => const Scaffold(

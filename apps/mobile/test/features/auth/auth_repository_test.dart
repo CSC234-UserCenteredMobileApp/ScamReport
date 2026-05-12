@@ -94,5 +94,18 @@ void main() {
       expect(result, testUser);
       verify(() => mockAuthApi.sync()).called(1);
     });
+
+    test('sendPasswordResetEmail calls firebase sendPasswordResetEmail',
+        () async {
+      when(() => mockFirebaseAuth.sendPasswordResetEmail(
+            email: 'test@example.com',
+          )).thenAnswer((_) async {});
+
+      await repository.sendPasswordResetEmail('test@example.com');
+
+      verify(() => mockFirebaseAuth.sendPasswordResetEmail(
+            email: 'test@example.com',
+          )).called(1);
+    });
   });
 }
