@@ -520,6 +520,10 @@ class AppLocalizationsTh extends AppLocalizations {
   String get askAiNewChat => 'แชทใหม่';
 
   @override
+  String get askAiReportSeed =>
+      'ฉันต้องการรายงานกิจกรรมที่น่าสงสัย ช่วยฉันได้ไหม';
+
+  @override
   String get askAiPastChats => 'แชทที่ผ่านมา';
 
   @override

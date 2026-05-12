@@ -520,6 +520,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get askAiNewChat => 'New chat';
 
   @override
+  String get askAiReportSeed =>
+      'I want to report a suspicious activity, can you help me?';
+
+  @override
   String get askAiPastChats => 'Past chats';
 
   @override

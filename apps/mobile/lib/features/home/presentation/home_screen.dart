@@ -138,7 +138,7 @@ class _SearchSection extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
-              onPressed: () => context.push('/submit-report'),
+              onPressed: () => context.push('/ask-ai?seed=report-intent'),
               icon: const Icon(Icons.flag_outlined, size: 18),
               label: Text(context.l10n.reportAScam),
             ),

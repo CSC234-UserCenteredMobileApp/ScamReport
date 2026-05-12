@@ -24,8 +24,8 @@ Widget _wrap(CheckQuery query, {required CheckResult result}) {
         builder: (_, __) => const Scaffold(body: Text('feed')),
       ),
       GoRoute(
-        path: '/submit-report',
-        builder: (_, __) => const Scaffold(body: Text('submit-report')),
+        path: '/ask-ai',
+        builder: (_, __) => const Scaffold(body: Text('ask-ai-route')),
       ),
     ],
   );
@@ -122,6 +122,26 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Report this'), findsOneWidget);
+    });
+
+    testWidgets('"Report this" routes to /ask-ai with report-intent seed',
+        (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          _query,
+          result: const CheckResult(
+            verdict: 'scam',
+            matchedCount: 1,
+            matches: [],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Report this'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('ask-ai-route'), findsOneWidget);
     });
 
     testWidgets('cached result shows amber "Cached result" banner',

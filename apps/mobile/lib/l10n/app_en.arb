@@ -206,6 +206,7 @@
   "askAiBeta": "BETA",
   "askAiViewDraft": "View draft",
   "askAiNewChat": "New chat",
+  "askAiReportSeed": "I want to report a suspicious activity, can you help me?",
   "askAiPastChats": "Past chats",
   "askAiRefresh": "Refresh",
   "askAiNoConversations": "No past chats yet. Send a message to start one.",

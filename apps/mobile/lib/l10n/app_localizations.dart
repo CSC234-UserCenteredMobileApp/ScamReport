@@ -1028,6 +1028,12 @@ abstract class AppLocalizations {
   /// **'New chat'**
   String get askAiNewChat;
 
+  /// No description provided for @askAiReportSeed.
+  ///
+  /// In en, this message translates to:
+  /// **'I want to report a suspicious activity, can you help me?'**
+  String get askAiReportSeed;
+
   /// No description provided for @askAiPastChats.
   ///
   /// In en, this message translates to:
