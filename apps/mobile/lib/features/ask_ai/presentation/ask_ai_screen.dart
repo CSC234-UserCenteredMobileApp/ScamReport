@@ -211,7 +211,7 @@ class _AskAiScreenState extends ConsumerState<AskAiScreen> {
                 children: [
                   Expanded(
                     child: Text(
-                      l.askAiSendFailed,
+                      _formatSendError(state.error!, l.askAiSendFailed),
                       style:
                           TextStyle(color: theme.colorScheme.onErrorContainer),
                     ),
@@ -316,6 +316,19 @@ class _AskAiScreenState extends ConsumerState<AskAiScreen> {
       ),
     );
   }
+}
+
+/// Translate a thrown sendMessage error into a single-line banner string.
+/// Surfaces the underlying failure message instead of a generic l10n line so
+/// network / server / validation problems are visible on-device.
+String _formatSendError(Object error, String fallback) {
+  if (error is AskAiFailure) {
+    final detail = error.message.trim();
+    return detail.isEmpty ? fallback : '$fallback: $detail';
+  }
+  // Last resort — keep the visible message short.
+  final s = error.toString();
+  return s.length > 200 ? '$fallback: ${s.substring(0, 200)}…' : '$fallback: $s';
 }
 
 class _EmptyState extends StatelessWidget {
