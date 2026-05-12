@@ -17,7 +17,8 @@
       "Bash(python3 -m scripts /home/symphony/Documents/projects/ScamReport/CLAUDE.md)",
       "Bash(rm /home/symphony/Documents/projects/ScamReport/docs/sprint-2.md)",
       "Bash(rm -rf /home/symphony/Documents/projects/ScamReport/docs/presentations/)",
-      "Bash(bun --filter @my-product/api test)"
+      "Bash(bun --filter @my-product/api test)",
+      "mcp__plugin_playwright_playwright__browser_close"
     ]
   }
 }

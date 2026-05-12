@@ -1,17 +1,18 @@
 import { ShieldAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { useAuth } from '@/lib/auth/auth-context';
 
-export function NoAccessPage() {
+export function SyncErrorScreen() {
   const { t } = useTranslation();
-  const { signOut, role, ready } = useAuth();
-  // If role becomes admin after a retry/refresh, don't trap the user here.
-  if (ready && role === 'admin') {
-    return <Navigate to="/" replace />;
-  }
+  const { signOut } = useAuth();
   return (
     <div className="flex min-h-full items-center justify-center bg-background p-6">
       <Card className="w-full max-w-md">
@@ -19,11 +20,18 @@ export function NoAccessPage() {
           <div className="mb-2 flex size-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
             <ShieldAlert />
           </div>
-          <CardTitle>{t('auth.noAccessTitle')}</CardTitle>
-          <CardDescription>{t('auth.noAccessBody')}</CardDescription>
+          <CardTitle>{t('auth.syncErrorTitle')}</CardTitle>
+          <CardDescription>{t('auth.syncErrorBody')}</CardDescription>
         </CardHeader>
-        <CardContent>
-          <Button className="w-full" onClick={() => void signOut()}>
+        <CardContent className="space-y-2">
+          <Button className="w-full" onClick={() => window.location.reload()}>
+            {t('common.retry')}
+          </Button>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => void signOut()}
+          >
             {t('nav.signOut')}
           </Button>
         </CardContent>
