@@ -290,6 +290,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminReviewUnflagged => 'Flag removed.';
 
   @override
+  String get modErrorUnauthorized => 'Your session expired. Sign in again.';
+
+  @override
+  String get modErrorForbidden =>
+      'This account does not have admin permission. Ask the team lead to promote it.';
+
+  @override
+  String get modErrorNotFound => 'This report was deleted or already actioned.';
+
+  @override
+  String get modErrorInvalidRemark => 'Remark is required.';
+
+  @override
+  String modErrorGeneric(int code, String message) {
+    return 'Server error ($code): $message';
+  }
+
+  @override
+  String get aiScorePending => 'AI score pending';
+
+  @override
   String adminReviewSubmittedOn(String date) {
     return 'Submitted $date';
   }

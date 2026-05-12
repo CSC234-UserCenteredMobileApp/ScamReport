@@ -290,6 +290,27 @@ class AppLocalizationsTh extends AppLocalizations {
   String get adminReviewUnflagged => 'ยกเลิกสถานะแล้ว';
 
   @override
+  String get modErrorUnauthorized => 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่';
+
+  @override
+  String get modErrorForbidden =>
+      'บัญชีนี้ไม่มีสิทธิ์ผู้ดูแลระบบ กรุณาแจ้งหัวหน้าทีมเพื่อยกระดับสิทธิ์';
+
+  @override
+  String get modErrorNotFound => 'รายงานนี้ถูกลบหรือดำเนินการไปแล้ว';
+
+  @override
+  String get modErrorInvalidRemark => 'ต้องระบุเหตุผล';
+
+  @override
+  String modErrorGeneric(int code, String message) {
+    return 'ข้อผิดพลาดเซิร์ฟเวอร์ ($code): $message';
+  }
+
+  @override
+  String get aiScorePending => 'กำลังประมวลผลคะแนน AI';
+
+  @override
   String adminReviewSubmittedOn(String date) {
     return 'ส่งเมื่อ $date';
   }

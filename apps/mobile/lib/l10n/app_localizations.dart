@@ -626,6 +626,42 @@ abstract class AppLocalizations {
   /// **'Flag removed.'**
   String get adminReviewUnflagged;
 
+  /// No description provided for @modErrorUnauthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session expired. Sign in again.'**
+  String get modErrorUnauthorized;
+
+  /// No description provided for @modErrorForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'This account does not have admin permission. Ask the team lead to promote it.'**
+  String get modErrorForbidden;
+
+  /// No description provided for @modErrorNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This report was deleted or already actioned.'**
+  String get modErrorNotFound;
+
+  /// No description provided for @modErrorInvalidRemark.
+  ///
+  /// In en, this message translates to:
+  /// **'Remark is required.'**
+  String get modErrorInvalidRemark;
+
+  /// No description provided for @modErrorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error ({code}): {message}'**
+  String modErrorGeneric(int code, String message);
+
+  /// No description provided for @aiScorePending.
+  ///
+  /// In en, this message translates to:
+  /// **'AI score pending'**
+  String get aiScorePending;
+
   /// No description provided for @adminReviewSubmittedOn.
   ///
   /// In en, this message translates to:
