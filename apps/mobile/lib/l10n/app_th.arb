@@ -152,6 +152,7 @@
   "@verdictMatchedReports": { "placeholders": { "count": { "type": "int" } } },
   "verdictSeeReports": "ดูรายงานที่ตรงกัน",
   "verdictReportThis": "รายงานสิ่งนี้",
+  "verdictShareViaSms": "แชร์ผ่าน SMS",
   "verdictCachedResult": "ผลลัพธ์ที่แคชไว้",
 
   "reportDetailVerified": "ตรวจสอบแล้ว",

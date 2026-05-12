@@ -848,6 +848,12 @@ abstract class AppLocalizations {
   /// **'Report this'**
   String get verdictReportThis;
 
+  /// No description provided for @verdictShareViaSms.
+  ///
+  /// In en, this message translates to:
+  /// **'Share via SMS'**
+  String get verdictShareViaSms;
+
   /// No description provided for @verdictCachedResult.
   ///
   /// In en, this message translates to:

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/widgets/verdict_pill.dart';
 import '../../../l10n/l10n.dart';
@@ -204,6 +205,29 @@ class _ResultView extends StatelessWidget {
                   onPressed: () => context.push('/submit-report'),
                   child: Text(l.verdictReportThis),
                 ),
+
+                // Share via SMS — only for actionable verdicts
+                if (result.verdict == 'scam' || result.verdict == 'suspicious') ...[
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.sms_outlined),
+                    label: Text(l.verdictShareViaSms),
+                    onPressed: () async {
+                      final preview = query.payload.length > 80
+                          ? '${query.payload.substring(0, 80)}…'
+                          : query.payload;
+                      final label = result.verdict == 'scam'
+                          ? 'SCAM ⚠️'
+                          : 'SUSPICIOUS ⚠️';
+                      final body = Uri.encodeComponent(
+                        '[ScamReport] "$preview" — Result: $label\n'
+                        'Checked via ScamReport app.',
+                      );
+                      final uri = Uri.parse('sms:?body=$body');
+                      if (await canLaunchUrl(uri)) await launchUrl(uri);
+                    },
+                  ),
+                ],
               ],
             ),
           ),

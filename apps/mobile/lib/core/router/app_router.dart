@@ -30,6 +30,7 @@ import '../../features/announcement_editor/presentation/admin_announcements_scre
 import '../../features/announcement_editor/presentation/announcement_editor_screen.dart';
 import '../../features/deletion_requests/presentation/admin_deletion_requests_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
+import '../../features/share_target/presentation/share_target_handler.dart';
 import '../di/auth.dart';
 import '../widgets/app_shell.dart';
 import '../widgets/empty_gate.dart';
@@ -45,12 +46,13 @@ const _authRequired = <String>{
 final goRouterProvider = Provider<GoRouter>((ref) {
   final firebaseAuth = ref.watch(firebaseAuthProvider);
 
+
   // Refresh the router whenever Firebase auth state changes (sign-in,
   // sign-out, token refresh) so `redirect` re-evaluates.
   final refresh = _AuthRefreshNotifier(firebaseAuth.authStateChanges());
   ref.onDispose(refresh.dispose);
 
-  return GoRouter(
+  final router = GoRouter(
     refreshListenable: refresh,
     redirect: (context, state) {
       final user = firebaseAuth.currentUser;
@@ -193,7 +195,16 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/verdict',
-        builder: (_, s) => VerdictScreen(query: s.extra as CheckQuery),
+        builder: (_, s) {
+          if (s.extra case CheckQuery q) return VerdictScreen(query: q);
+          // Notification deep-link: /verdict?q=<encoded>&kind=<kind>
+          final text =
+              Uri.decodeComponent(s.uri.queryParameters['q'] ?? '');
+          final kind = s.uri.queryParameters['kind'] ?? 'text';
+          return VerdictScreen(
+            query: CheckQuery(payload: text, type: kind, source: 'share'),
+          );
+        },
       ),
       GoRoute(
         path: '/announcement-detail/:id',
@@ -239,6 +250,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
+
+  // Register the router so share-target notification taps can navigate.
+  setShareNotificationNavigator(router.go);
+
+  return router;
 });
 
 // Bridges a Stream<User?> into a Listenable so go_router can refresh on

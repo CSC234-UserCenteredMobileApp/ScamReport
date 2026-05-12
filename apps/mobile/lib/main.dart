@@ -12,6 +12,7 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/ask_ai/presentation/ask_ai_providers.dart';
 import 'features/settings/presentation/settings_providers.dart';
+import 'features/share_target/presentation/share_target_handler.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,11 +29,25 @@ Future<void> main() async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends ConsumerWidget {
+class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends ConsumerState<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Defer one frame so goRouterProvider (and Remote Config) are initialised.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ShareTargetHandler.init(ref);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(goRouterProvider);
     final settings = ref.watch(settingsProvider).valueOrNull;
 

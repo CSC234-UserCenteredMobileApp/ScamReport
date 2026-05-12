@@ -228,5 +228,72 @@ void main() {
         findsOneWidget,
       );
     });
+
+    testWidgets('scam verdict shows "Share via SMS" button', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          _query,
+          result: const CheckResult(
+            verdict: 'scam',
+            matchedCount: 1,
+            matches: [],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Share via SMS'), findsOneWidget);
+    });
+
+    testWidgets('suspicious verdict shows "Share via SMS" button',
+        (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          _query,
+          result: const CheckResult(
+            verdict: 'suspicious',
+            matchedCount: 0,
+            matches: [],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Share via SMS'), findsOneWidget);
+    });
+
+    testWidgets('safe verdict does NOT show "Share via SMS" button',
+        (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          _query,
+          result: const CheckResult(
+            verdict: 'safe',
+            matchedCount: 0,
+            matches: [],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Share via SMS'), findsNothing);
+    });
+
+    testWidgets('unknown verdict does NOT show "Share via SMS" button',
+        (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          _query,
+          result: const CheckResult(
+            verdict: 'unknown',
+            matchedCount: 0,
+            matches: [],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Share via SMS'), findsNothing);
+    });
   });
 }

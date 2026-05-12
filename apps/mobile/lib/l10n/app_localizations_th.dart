@@ -412,6 +412,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get verdictReportThis => 'รายงานสิ่งนี้';
 
   @override
+  String get verdictShareViaSms => 'แชร์ผ่าน SMS';
+
+  @override
   String get verdictCachedResult => 'ผลลัพธ์ที่แคชไว้';
 
   @override

@@ -412,6 +412,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verdictReportThis => 'Report this';
 
   @override
+  String get verdictShareViaSms => 'Share via SMS';
+
+  @override
   String get verdictCachedResult => 'Cached result';
 
   @override

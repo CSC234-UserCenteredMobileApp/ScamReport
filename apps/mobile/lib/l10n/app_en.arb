@@ -162,6 +162,7 @@
   "@verdictMatchedReports": { "placeholders": { "count": { "type": "int" } } },
   "verdictSeeReports": "See matched reports",
   "verdictReportThis": "Report this",
+  "verdictShareViaSms": "Share via SMS",
   "verdictCachedResult": "Cached result",
 
   "reportDetailVerified": "Verified",
