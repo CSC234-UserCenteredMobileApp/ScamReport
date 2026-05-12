@@ -692,6 +692,186 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchFilterScamTypeLabel => 'Scam type';
 
   @override
+  String get myReportsTitle => 'My reports';
+
+  @override
+  String get myReportsEmpty => 'You haven\'t submitted any reports yet.';
+
+  @override
+  String get myReportsEmptyAction => 'Submit a report';
+
+  @override
+  String get myReportsFilterAll => 'All';
+
+  @override
+  String myReportsFilterPending(int n) {
+    return 'Pending ($n)';
+  }
+
+  @override
+  String myReportsFilterVerified(int n) {
+    return 'Verified ($n)';
+  }
+
+  @override
+  String myReportsFilterRejected(int n) {
+    return 'Rejected ($n)';
+  }
+
+  @override
+  String get myReportsStatusPending => 'Pending';
+
+  @override
+  String get myReportsStatusVerified => 'Verified';
+
+  @override
+  String get myReportsStatusRejected => 'Rejected';
+
+  @override
+  String get myReportsEdit => 'Edit';
+
+  @override
+  String get myReportsWithdraw => 'Withdraw';
+
+  @override
+  String get myReportsWithdrawTitle => 'Withdraw report?';
+
+  @override
+  String get myReportsWithdrawBody =>
+      'This report will be removed from the queue and cannot be re-submitted.';
+
+  @override
+  String get myReportsWithdrawConfirm => 'Withdraw';
+
+  @override
+  String myReportsModeratorNote(String note) {
+    return 'Moderator note: $note';
+  }
+
+  @override
+  String get myReportsUnderReview =>
+      'Under team review. We\'ll let you know once a decision is made.';
+
+  @override
+  String get myReportsWithdrawFailed =>
+      'Could not withdraw report. Please try again.';
+
+  @override
+  String get submitReportTitle => 'Report a scam';
+
+  @override
+  String get submitReportEditTitle => 'Edit report';
+
+  @override
+  String get submitReportStep1of2 => 'Step 1 of 2';
+
+  @override
+  String get submitReportStep2of2 => 'Step 2 of 2';
+
+  @override
+  String get submitReportConfirmTitle => 'Confirm and submit';
+
+  @override
+  String get submitReportFieldTitle => 'Title';
+
+  @override
+  String get submitReportFieldTitleHint => 'e.g. Fake bank call asking for OTP';
+
+  @override
+  String get submitReportFieldDescription => 'Description';
+
+  @override
+  String get submitReportFieldDescriptionHint => 'Describe what happened…';
+
+  @override
+  String submitReportCharCount(int count) {
+    return '$count/500';
+  }
+
+  @override
+  String get submitReportFieldScamType => 'Scam type';
+
+  @override
+  String get submitReportFieldTarget => 'Target identifier';
+
+  @override
+  String get submitReportFieldTargetHint =>
+      'Optional — scammer\'s number, link, or account';
+
+  @override
+  String get submitReportFieldEvidence => 'Evidence (optional)';
+
+  @override
+  String get submitReportEvidenceHint => 'Add up to 5 images or PDFs';
+
+  @override
+  String get submitReportAddEvidence => 'Add file';
+
+  @override
+  String get submitReportEvidenceCapReached => 'Maximum 5 files.';
+
+  @override
+  String get submitReportContinue => 'Continue';
+
+  @override
+  String get submitReportSubmit => 'Submit report';
+
+  @override
+  String get submitReportUpdate => 'Save changes';
+
+  @override
+  String get submitReportSubmitting => 'Submitting…';
+
+  @override
+  String get submitReportConsent =>
+      'By submitting, you agree that this report — but never your identity — may be published to the verified feed once approved.';
+
+  @override
+  String get submitReportConsentCheck => 'I understand and agree.';
+
+  @override
+  String get submitReportSuccess =>
+      'Report submitted — we\'ll let you know when it\'s reviewed.';
+
+  @override
+  String get submitReportUpdateSuccess => 'Report updated.';
+
+  @override
+  String get submitReportFailed => 'Could not submit report. Please try again.';
+
+  @override
+  String get submitReportRequiredField => 'This field is required.';
+
+  @override
+  String get submitReportTitleTooShort =>
+      'Title must be at least 3 characters.';
+
+  @override
+  String get submitReportDescriptionTooShort =>
+      'Description must be at least 10 characters.';
+
+  @override
+  String get submitReportSelectScamType => 'Please select a scam type.';
+
+  @override
+  String get scamTypePhoneImpersonation => 'Phone Impersonation';
+
+  @override
+  String get scamTypePhishingSms => 'Phishing SMS';
+
+  @override
+  String get scamTypeFakeQr => 'Fake QR Code';
+
+  @override
+  String get scamTypeEcommerce => 'E-commerce Fraud';
+
+  @override
+  String get scamTypeInvestment => 'Investment Fraud';
+
+  @override
+  String get scamTypeRomance => 'Romance Scam';
+
+  @override
   String get manageAnnouncements => 'Manage Announcements';
 
   @override
@@ -710,4 +890,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deletionRequests => 'Deletion Requests';
+
+  @override
+  String get editReportTitle => 'Edit Report';
+
+  @override
+  String get editReportSectionDetails => 'Details';
+
+  @override
+  String get editReportSectionTarget => 'Target';
+
+  @override
+  String get editReportSave => 'Save';
+
+  @override
+  String get editReportSaving => 'Saving…';
+
+  @override
+  String editReportUploading(int current, int total) {
+    return 'Uploading $current of $total…';
+  }
+
+  @override
+  String get editReportSaved => 'Report updated';
+
+  @override
+  String get editReportSaveFailed =>
+      'Could not update report. Please try again.';
+
+  @override
+  String get editReportUploadFailed =>
+      'Could not upload image. Please try again.';
+
+  @override
+  String get editReportUploadSuccess => 'Image uploaded';
+
+  @override
+  String get editReportLoadFailed => 'Could not load report.';
 }

@@ -100,3 +100,78 @@ export const CreateReportResponse = Type.Object({
   createdAt: Type.String({ format: 'date-time' }),
 });
 export type CreateReportResponse = Static<typeof CreateReportResponse>;
+
+// Reporter-facing status (flagged is remapped to pending server-side per FR-6.1)
+export const MyReportStatusLiteral = Type.Union([
+  Type.Literal('pending'),
+  Type.Literal('verified'),
+  Type.Literal('rejected'),
+  Type.Literal('withdrawn'),
+]);
+
+export const MyReportItem = Type.Object({
+  id: Type.String({ format: 'uuid' }),
+  title: Type.String(),
+  scamTypeCode: Type.String(),
+  scamTypeLabelEn: Type.String(),
+  scamTypeLabelTh: Type.String(),
+  status: MyReportStatusLiteral,
+  createdAt: Type.String({ format: 'date-time' }),
+  updatedAt: Type.String({ format: 'date-time' }),
+  rejectionRemark: Type.Union([Type.String(), Type.Null()]),
+});
+export type MyReportItem = Static<typeof MyReportItem>;
+
+export const MyReportsResponse = Type.Object({
+  items: Type.Array(MyReportItem),
+});
+export type MyReportsResponse = Static<typeof MyReportsResponse>;
+
+export const UpdateReportRequest = Type.Object({
+  title: Type.String({ minLength: 3, maxLength: 200 }),
+  description: Type.String({ minLength: 10, maxLength: 2000 }),
+  scamTypeCode: Type.String({ minLength: 1 }),
+  targetIdentifier: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  targetIdentifierKind: Type.Optional(Type.Union([TargetIdentifierKindLiteral, Type.Null()])),
+  evidenceFiles: Type.Array(EvidenceMetadata, { maxItems: 5, default: [] }),
+});
+export type UpdateReportRequest = Static<typeof UpdateReportRequest>;
+
+export const UpdateReportResponse = Type.Object({
+  id: Type.String({ format: 'uuid' }),
+  status: MyReportStatusLiteral,
+  updatedAt: Type.String({ format: 'date-time' }),
+});
+export type UpdateReportResponse = Static<typeof UpdateReportResponse>;
+
+export const WithdrawReportResponse = Type.Object({
+  id: Type.String({ format: 'uuid' }),
+  status: Type.Literal('withdrawn'),
+});
+export type WithdrawReportResponse = Static<typeof WithdrawReportResponse>;
+
+// Evidence file returned for edit pre-fill — includes storagePath + sizeBytes
+// so the client can echo them back unchanged in the PATCH evidenceFiles array.
+export const EditReportEvidenceFile = Type.Object({
+  id: Type.String({ format: 'uuid' }),
+  storagePath: Type.String(),
+  signedUrl: Type.Union([Type.String(), Type.Null()]),
+  kind: EvidenceKindLiteral,
+  mimeType: Type.String(),
+  sizeBytes: Type.Integer({ minimum: 1 }),
+});
+export type EditReportEvidenceFile = Static<typeof EditReportEvidenceFile>;
+
+export const EditReportDetailResponse = Type.Object({
+  id: Type.String({ format: 'uuid' }),
+  title: Type.String(),
+  description: Type.String(),
+  scamTypeCode: Type.String(),
+  scamTypeLabelEn: Type.String(),
+  scamTypeLabelTh: Type.String(),
+  status: MyReportStatusLiteral,
+  targetIdentifier: Type.Union([Type.String(), Type.Null()]),
+  targetIdentifierKind: Type.Union([TargetIdentifierKindLiteral, Type.Null()]),
+  evidenceFiles: Type.Array(EditReportEvidenceFile),
+});
+export type EditReportDetailResponse = Static<typeof EditReportDetailResponse>;

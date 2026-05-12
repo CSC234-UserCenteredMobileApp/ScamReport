@@ -1358,6 +1358,330 @@ abstract class AppLocalizations {
   /// **'Scam type'**
   String get searchFilterScamTypeLabel;
 
+  /// No description provided for @myReportsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My reports'**
+  String get myReportsTitle;
+
+  /// No description provided for @myReportsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t submitted any reports yet.'**
+  String get myReportsEmpty;
+
+  /// No description provided for @myReportsEmptyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit a report'**
+  String get myReportsEmptyAction;
+
+  /// No description provided for @myReportsFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get myReportsFilterAll;
+
+  /// No description provided for @myReportsFilterPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending ({n})'**
+  String myReportsFilterPending(int n);
+
+  /// No description provided for @myReportsFilterVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified ({n})'**
+  String myReportsFilterVerified(int n);
+
+  /// No description provided for @myReportsFilterRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected ({n})'**
+  String myReportsFilterRejected(int n);
+
+  /// No description provided for @myReportsStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get myReportsStatusPending;
+
+  /// No description provided for @myReportsStatusVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get myReportsStatusVerified;
+
+  /// No description provided for @myReportsStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get myReportsStatusRejected;
+
+  /// No description provided for @myReportsEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get myReportsEdit;
+
+  /// No description provided for @myReportsWithdraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw'**
+  String get myReportsWithdraw;
+
+  /// No description provided for @myReportsWithdrawTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw report?'**
+  String get myReportsWithdrawTitle;
+
+  /// No description provided for @myReportsWithdrawBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This report will be removed from the queue and cannot be re-submitted.'**
+  String get myReportsWithdrawBody;
+
+  /// No description provided for @myReportsWithdrawConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw'**
+  String get myReportsWithdrawConfirm;
+
+  /// No description provided for @myReportsModeratorNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderator note: {note}'**
+  String myReportsModeratorNote(String note);
+
+  /// No description provided for @myReportsUnderReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Under team review. We\'ll let you know once a decision is made.'**
+  String get myReportsUnderReview;
+
+  /// No description provided for @myReportsWithdrawFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not withdraw report. Please try again.'**
+  String get myReportsWithdrawFailed;
+
+  /// No description provided for @submitReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a scam'**
+  String get submitReportTitle;
+
+  /// No description provided for @submitReportEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit report'**
+  String get submitReportEditTitle;
+
+  /// No description provided for @submitReportStep1of2.
+  ///
+  /// In en, this message translates to:
+  /// **'Step 1 of 2'**
+  String get submitReportStep1of2;
+
+  /// No description provided for @submitReportStep2of2.
+  ///
+  /// In en, this message translates to:
+  /// **'Step 2 of 2'**
+  String get submitReportStep2of2;
+
+  /// No description provided for @submitReportConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm and submit'**
+  String get submitReportConfirmTitle;
+
+  /// No description provided for @submitReportFieldTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get submitReportFieldTitle;
+
+  /// No description provided for @submitReportFieldTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Fake bank call asking for OTP'**
+  String get submitReportFieldTitleHint;
+
+  /// No description provided for @submitReportFieldDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get submitReportFieldDescription;
+
+  /// No description provided for @submitReportFieldDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe what happened…'**
+  String get submitReportFieldDescriptionHint;
+
+  /// No description provided for @submitReportCharCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}/500'**
+  String submitReportCharCount(int count);
+
+  /// No description provided for @submitReportFieldScamType.
+  ///
+  /// In en, this message translates to:
+  /// **'Scam type'**
+  String get submitReportFieldScamType;
+
+  /// No description provided for @submitReportFieldTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Target identifier'**
+  String get submitReportFieldTarget;
+
+  /// No description provided for @submitReportFieldTargetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional — scammer\'s number, link, or account'**
+  String get submitReportFieldTargetHint;
+
+  /// No description provided for @submitReportFieldEvidence.
+  ///
+  /// In en, this message translates to:
+  /// **'Evidence (optional)'**
+  String get submitReportFieldEvidence;
+
+  /// No description provided for @submitReportEvidenceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add up to 5 images or PDFs'**
+  String get submitReportEvidenceHint;
+
+  /// No description provided for @submitReportAddEvidence.
+  ///
+  /// In en, this message translates to:
+  /// **'Add file'**
+  String get submitReportAddEvidence;
+
+  /// No description provided for @submitReportEvidenceCapReached.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum 5 files.'**
+  String get submitReportEvidenceCapReached;
+
+  /// No description provided for @submitReportContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get submitReportContinue;
+
+  /// No description provided for @submitReportSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit report'**
+  String get submitReportSubmit;
+
+  /// No description provided for @submitReportUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get submitReportUpdate;
+
+  /// No description provided for @submitReportSubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitting…'**
+  String get submitReportSubmitting;
+
+  /// No description provided for @submitReportConsent.
+  ///
+  /// In en, this message translates to:
+  /// **'By submitting, you agree that this report — but never your identity — may be published to the verified feed once approved.'**
+  String get submitReportConsent;
+
+  /// No description provided for @submitReportConsentCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'I understand and agree.'**
+  String get submitReportConsentCheck;
+
+  /// No description provided for @submitReportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Report submitted — we\'ll let you know when it\'s reviewed.'**
+  String get submitReportSuccess;
+
+  /// No description provided for @submitReportUpdateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Report updated.'**
+  String get submitReportUpdateSuccess;
+
+  /// No description provided for @submitReportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not submit report. Please try again.'**
+  String get submitReportFailed;
+
+  /// No description provided for @submitReportRequiredField.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required.'**
+  String get submitReportRequiredField;
+
+  /// No description provided for @submitReportTitleTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Title must be at least 3 characters.'**
+  String get submitReportTitleTooShort;
+
+  /// No description provided for @submitReportDescriptionTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Description must be at least 10 characters.'**
+  String get submitReportDescriptionTooShort;
+
+  /// No description provided for @submitReportSelectScamType.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a scam type.'**
+  String get submitReportSelectScamType;
+
+  /// No description provided for @scamTypePhoneImpersonation.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone Impersonation'**
+  String get scamTypePhoneImpersonation;
+
+  /// No description provided for @scamTypePhishingSms.
+  ///
+  /// In en, this message translates to:
+  /// **'Phishing SMS'**
+  String get scamTypePhishingSms;
+
+  /// No description provided for @scamTypeFakeQr.
+  ///
+  /// In en, this message translates to:
+  /// **'Fake QR Code'**
+  String get scamTypeFakeQr;
+
+  /// No description provided for @scamTypeEcommerce.
+  ///
+  /// In en, this message translates to:
+  /// **'E-commerce Fraud'**
+  String get scamTypeEcommerce;
+
+  /// No description provided for @scamTypeInvestment.
+  ///
+  /// In en, this message translates to:
+  /// **'Investment Fraud'**
+  String get scamTypeInvestment;
+
+  /// No description provided for @scamTypeRomance.
+  ///
+  /// In en, this message translates to:
+  /// **'Romance Scam'**
+  String get scamTypeRomance;
+
   /// No description provided for @manageAnnouncements.
   ///
   /// In en, this message translates to:
@@ -1393,6 +1717,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Deletion Requests'**
   String get deletionRequests;
+
+  /// No description provided for @editReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Report'**
+  String get editReportTitle;
+
+  /// No description provided for @editReportSectionDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get editReportSectionDetails;
+
+  /// No description provided for @editReportSectionTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Target'**
+  String get editReportSectionTarget;
+
+  /// No description provided for @editReportSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get editReportSave;
+
+  /// No description provided for @editReportSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get editReportSaving;
+
+  /// No description provided for @editReportUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading {current} of {total}…'**
+  String editReportUploading(int current, int total);
+
+  /// No description provided for @editReportSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Report updated'**
+  String get editReportSaved;
+
+  /// No description provided for @editReportSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update report. Please try again.'**
+  String get editReportSaveFailed;
+
+  /// No description provided for @editReportUploadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not upload image. Please try again.'**
+  String get editReportUploadFailed;
+
+  /// No description provided for @editReportUploadSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Image uploaded'**
+  String get editReportUploadSuccess;
+
+  /// No description provided for @editReportLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load report.'**
+  String get editReportLoadFailed;
 }
 
 class _AppLocalizationsDelegate

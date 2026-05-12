@@ -692,6 +692,185 @@ class AppLocalizationsTh extends AppLocalizations {
   String get searchFilterScamTypeLabel => 'ประเภทหลอกลวง';
 
   @override
+  String get myReportsTitle => 'รายงานของฉัน';
+
+  @override
+  String get myReportsEmpty => 'คุณยังไม่ได้ส่งรายงานใดๆ';
+
+  @override
+  String get myReportsEmptyAction => 'ส่งรายงาน';
+
+  @override
+  String get myReportsFilterAll => 'ทั้งหมด';
+
+  @override
+  String myReportsFilterPending(int n) {
+    return 'รอดำเนินการ ($n)';
+  }
+
+  @override
+  String myReportsFilterVerified(int n) {
+    return 'ยืนยันแล้ว ($n)';
+  }
+
+  @override
+  String myReportsFilterRejected(int n) {
+    return 'ถูกปฏิเสธ ($n)';
+  }
+
+  @override
+  String get myReportsStatusPending => 'รอดำเนินการ';
+
+  @override
+  String get myReportsStatusVerified => 'ยืนยันแล้ว';
+
+  @override
+  String get myReportsStatusRejected => 'ถูกปฏิเสธ';
+
+  @override
+  String get myReportsEdit => 'แก้ไข';
+
+  @override
+  String get myReportsWithdraw => 'ถอนรายงาน';
+
+  @override
+  String get myReportsWithdrawTitle => 'ถอนรายงาน?';
+
+  @override
+  String get myReportsWithdrawBody =>
+      'รายงานนี้จะถูกลบออกจากคิวและไม่สามารถส่งใหม่ได้';
+
+  @override
+  String get myReportsWithdrawConfirm => 'ถอน';
+
+  @override
+  String myReportsModeratorNote(String note) {
+    return 'หมายเหตุผู้ดูแล: $note';
+  }
+
+  @override
+  String get myReportsUnderReview =>
+      'อยู่ระหว่างการพิจารณาของทีม เราจะแจ้งให้คุณทราบเมื่อมีการตัดสินใจ';
+
+  @override
+  String get myReportsWithdrawFailed =>
+      'ไม่สามารถถอนรายงานได้ กรุณาลองอีกครั้ง';
+
+  @override
+  String get submitReportTitle => 'รายงานการหลอกลวง';
+
+  @override
+  String get submitReportEditTitle => 'แก้ไขรายงาน';
+
+  @override
+  String get submitReportStep1of2 => 'ขั้นตอนที่ 1 จาก 2';
+
+  @override
+  String get submitReportStep2of2 => 'ขั้นตอนที่ 2 จาก 2';
+
+  @override
+  String get submitReportConfirmTitle => 'ยืนยันและส่ง';
+
+  @override
+  String get submitReportFieldTitle => 'หัวข้อ';
+
+  @override
+  String get submitReportFieldTitleHint => 'เช่น สายโทรปลอมธนาคารขอ OTP';
+
+  @override
+  String get submitReportFieldDescription => 'รายละเอียด';
+
+  @override
+  String get submitReportFieldDescriptionHint => 'อธิบายสิ่งที่เกิดขึ้น…';
+
+  @override
+  String submitReportCharCount(int count) {
+    return '$count/500';
+  }
+
+  @override
+  String get submitReportFieldScamType => 'ประเภทการหลอกลวง';
+
+  @override
+  String get submitReportFieldTarget => 'ตัวระบุเป้าหมาย';
+
+  @override
+  String get submitReportFieldTargetHint =>
+      'ไม่บังคับ — หมายเลข ลิงก์ หรือบัญชีของมิจฉาชีพ';
+
+  @override
+  String get submitReportFieldEvidence => 'หลักฐาน (ไม่บังคับ)';
+
+  @override
+  String get submitReportEvidenceHint => 'เพิ่มได้สูงสุด 5 รูปภาพหรือ PDF';
+
+  @override
+  String get submitReportAddEvidence => 'เพิ่มไฟล์';
+
+  @override
+  String get submitReportEvidenceCapReached => 'สูงสุด 5 ไฟล์';
+
+  @override
+  String get submitReportContinue => 'ถัดไป';
+
+  @override
+  String get submitReportSubmit => 'ส่งรายงาน';
+
+  @override
+  String get submitReportUpdate => 'บันทึกการเปลี่ยนแปลง';
+
+  @override
+  String get submitReportSubmitting => 'กำลังส่ง…';
+
+  @override
+  String get submitReportConsent =>
+      'ด้วยการส่งรายงาน คุณยินยอมให้เผยแพร่เนื้อหารายงาน — แต่ไม่ใช่ตัวตนของคุณ — ในฟีดที่ยืนยันแล้วเมื่อได้รับการอนุมัติ';
+
+  @override
+  String get submitReportConsentCheck => 'ฉันเข้าใจและยินยอม';
+
+  @override
+  String get submitReportSuccess =>
+      'ส่งรายงานแล้ว — เราจะแจ้งให้คุณทราบเมื่อตรวจสอบเสร็จ';
+
+  @override
+  String get submitReportUpdateSuccess => 'อัปเดตรายงานแล้ว';
+
+  @override
+  String get submitReportFailed => 'ไม่สามารถส่งรายงานได้ กรุณาลองอีกครั้ง';
+
+  @override
+  String get submitReportRequiredField => 'จำเป็นต้องกรอกข้อมูลนี้';
+
+  @override
+  String get submitReportTitleTooShort => 'หัวข้อต้องมีอย่างน้อย 3 ตัวอักษร';
+
+  @override
+  String get submitReportDescriptionTooShort =>
+      'รายละเอียดต้องมีอย่างน้อย 10 ตัวอักษร';
+
+  @override
+  String get submitReportSelectScamType => 'กรุณาเลือกประเภทการหลอกลวง';
+
+  @override
+  String get scamTypePhoneImpersonation => 'แอบอ้างทางโทรศัพท์';
+
+  @override
+  String get scamTypePhishingSms => 'SMS ฟิชชิ่ง';
+
+  @override
+  String get scamTypeFakeQr => 'QR Code ปลอม';
+
+  @override
+  String get scamTypeEcommerce => 'ฉ้อโกงอีคอมเมิร์ซ';
+
+  @override
+  String get scamTypeInvestment => 'ฉ้อโกงการลงทุน';
+
+  @override
+  String get scamTypeRomance => 'หลอกรัก';
+
+  @override
   String get manageAnnouncements => 'จัดการประกาศ';
 
   @override
@@ -709,4 +888,41 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get deletionRequests => 'คำขอลบบัญชี';
+
+  @override
+  String get editReportTitle => 'แก้ไขรายงาน';
+
+  @override
+  String get editReportSectionDetails => 'รายละเอียด';
+
+  @override
+  String get editReportSectionTarget => 'เป้าหมาย';
+
+  @override
+  String get editReportSave => 'บันทึก';
+
+  @override
+  String get editReportSaving => 'กำลังบันทึก…';
+
+  @override
+  String editReportUploading(int current, int total) {
+    return 'กำลังอัปโหลด $current/$total…';
+  }
+
+  @override
+  String get editReportSaved => 'อัปเดตรายงานแล้ว';
+
+  @override
+  String get editReportSaveFailed =>
+      'ไม่สามารถอัปเดตรายงานได้ กรุณาลองอีกครั้ง';
+
+  @override
+  String get editReportUploadFailed =>
+      'ไม่สามารถอัปโหลดรูปภาพได้ กรุณาลองอีกครั้ง';
+
+  @override
+  String get editReportUploadSuccess => 'อัปโหลดรูปภาพแล้ว';
+
+  @override
+  String get editReportLoadFailed => 'ไม่สามารถโหลดรายงานได้';
 }
