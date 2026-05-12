@@ -1,3 +1,5 @@
+import 'package:file_picker/file_picker.dart';
+
 import 'admin_announcement.dart';
 
 abstract class AnnouncementEditorRepository {
@@ -17,4 +19,6 @@ abstract class AnnouncementEditorRepository {
   Future<void> delete(String id);
   Future<AdminAnnouncementDetail> publish(String id, {required bool pushToFcm});
   Future<AdminAnnouncementDetail> unpublish(String id);
+  Future<AnnouncementAttachment> uploadAttachment(String announcementId, PlatformFile file);
+  Future<void> deleteAttachment(String announcementId, String attachmentId);
 }

@@ -23,6 +23,11 @@ String get apiBaseUrl {
   return 'http://localhost:3000';
 }
 
+String get supabasePublicUrl {
+  const url = String.fromEnvironment('SUPABASE_URL');
+  return url.isNotEmpty ? url : 'https://placeholder.supabase.co';
+}
+
 final httpClientProvider = Provider<http.Client>((ref) {
   final client = http.Client();
   ref.onDispose(client.close);

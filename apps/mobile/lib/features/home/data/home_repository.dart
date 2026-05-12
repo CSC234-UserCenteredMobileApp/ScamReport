@@ -28,6 +28,7 @@ class HomeRepository {
         title: map['title'] as String,
         category: _parseCategory(map['category'] as String),
         publishedAt: DateTime.parse(map['publishedAt'] as String),
+        firstImageStoragePath: map['firstImageStoragePath'] as String?,
       );
     }).toList();
   }
