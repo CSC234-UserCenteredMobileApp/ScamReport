@@ -174,7 +174,7 @@ void main() {
       expect(find.textContaining('Submitted '), findsOneWidget);
     });
 
-    testWidgets('AI score row visible when score is non-null', (tester) async {
+    testWidgets('AI score card visible when score is non-null', (tester) async {
       tester.view.physicalSize = const Size(1080, 1920);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -190,10 +190,13 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('87%'), findsOneWidget);
+      // Score ring renders the raw number; verdict copy + label appear beside it.
+      expect(find.text('87'), findsOneWidget);
+      expect(find.text('AI VERDICT'), findsOneWidget);
+      expect(find.text('Likely scam'), findsOneWidget);
     });
 
-    testWidgets('AI score row hidden when score is null', (tester) async {
+    testWidgets('AI score card hidden when score is null', (tester) async {
       tester.view.physicalSize = const Size(1080, 1920);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -208,7 +211,8 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('confidence'), findsNothing);
+      expect(find.text('AI VERDICT'), findsNothing);
+      expect(find.text('RISK'), findsNothing);
     });
 
     testWidgets('renders no-evidence placeholder when list is empty',

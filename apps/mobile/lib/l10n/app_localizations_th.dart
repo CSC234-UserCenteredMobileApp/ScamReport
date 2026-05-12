@@ -312,6 +312,32 @@ class AppLocalizationsTh extends AppLocalizations {
   }
 
   @override
+  String get aiScoreBadgeLabel => 'AI';
+
+  @override
+  String get aiScoreRiskLabel => 'ความเสี่ยง';
+
+  @override
+  String get aiScoreVerdictLabel => 'ผลตรวจ AI';
+
+  @override
+  String get aiVerdictHigh => 'น่าจะเป็นสแกม';
+
+  @override
+  String get aiVerdictMedium => 'ต้องตรวจสอบ';
+
+  @override
+  String get aiVerdictLow => 'น่าจะปฏิเสธ';
+
+  @override
+  String get aiVerdictUnknown => 'สรุปไม่ได้';
+
+  @override
+  String aiScoreA11yLabel(String confidence, int score) {
+    return 'ความเชื่อมั่น AI $confidence คะแนน $score จาก 100';
+  }
+
+  @override
   String get noEvidence => 'ไม่มีไฟล์หลักฐาน';
 
   @override

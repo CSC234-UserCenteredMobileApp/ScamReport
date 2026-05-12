@@ -27,6 +27,7 @@ import { getPrisma } from '../../core/db/client';
 import { Prisma } from '../../generated/prisma/client';
 import { copyFile, uploadFile } from '../../core/supabase/storage';
 import { mirrorMyReport } from '../../sync/firestore_sync';
+import { computeAiScore } from '../../core/ai-score';
 
 const ATTACHMENTS_BUCKET = 'chat-attachments';
 const MAX_EVIDENCE_PER_REPORT = 5;
@@ -320,6 +321,25 @@ export async function createReport(
     createdAt: created.createdAt,
     updatedAt: created.createdAt,
   });
+
+  // AI triage score — best-effort. Submit must succeed even if Gemini is
+  // unreachable; the column stays NULL and the moderator UI hides the badge.
+  // The helper swallows its own errors and logs distinct phases; we
+  // additionally swallow a DB update failure so it can never surface as a 500.
+  try {
+    const { aiScore, aiConfidence } = await computeAiScore(
+      `${input.title}\n${input.description}`,
+      { reportId: created.id },
+    );
+    if (aiScore !== null || aiConfidence !== null) {
+      await prisma.report.update({
+        where: { id: created.id },
+        data: { aiScore, aiConfidence },
+      });
+    }
+  } catch (err) {
+    console.error('[reports] ai-score-persist failed', { reportId: created.id, err });
+  }
 
   return {
     id: created.id,

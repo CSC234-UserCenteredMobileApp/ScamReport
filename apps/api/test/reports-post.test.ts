@@ -12,6 +12,12 @@ let conversationUpdateCalls: unknown[] = [];
 let uploadCalls: Array<{ bucket: string; path: string; bytes: number }> = [];
 let uploadShouldFail = false;
 let txReturn: unknown = null;
+let reportUpdateCalls: Array<{ where: unknown; data: unknown }> = [];
+let aiScoreReturn: { aiScore: number | null; aiConfidence: string | null } = {
+  aiScore: 88,
+  aiConfidence: 'high',
+};
+let aiScoreShouldThrow = false;
 
 mock.module('firebase-admin/auth', () => ({
   getAuth: () => ({
@@ -38,6 +44,13 @@ mock.module('../src/core/gemini/client', () => ({
 mock.module('../src/sync/firestore_sync', () => ({
   mirrorMyReport: async (report: unknown) => {
     mirrorCalls.push(report);
+  },
+}));
+
+mock.module('../src/core/ai-score', () => ({
+  computeAiScore: async () => {
+    if (aiScoreShouldThrow) throw new Error('mock: ai-score failed');
+    return aiScoreReturn;
   },
 }));
 
@@ -68,6 +81,10 @@ mock.module('../src/core/db/client', () => ({
       findFirst: async () => mockExistingDuplicate,
       findMany: async () => [],
       count: async () => 0,
+      update: async (args: { where: unknown; data: unknown }) => {
+        reportUpdateCalls.push(args);
+        return { id: (args.where as { id: string }).id };
+      },
     },
     aiConversation: {
       updateMany: async (args: unknown) => {
@@ -140,6 +157,9 @@ beforeEach(() => {
   uploadCalls = [];
   uploadShouldFail = false;
   txReturn = null;
+  reportUpdateCalls = [];
+  aiScoreReturn = { aiScore: 88, aiConfidence: 'high' };
+  aiScoreShouldThrow = false;
 });
 
 afterEach(() => {
@@ -294,6 +314,61 @@ describe('POST /reports', () => {
     expect(body).not.toHaveProperty('reporterId');
     expect(body).not.toHaveProperty('reporter');
     expect(body).not.toHaveProperty('email');
+  });
+
+  test('persists AI score on the report row after insert', async () => {
+    mockDecoded = { uid: 'reporter-ai', email: 'r@example.com' };
+    mockScamType = { id: 2, isActive: true };
+    txReturn = {
+      id: '66666666-6666-6666-6666-666666666666',
+      status: 'pending',
+      createdAt: new Date('2026-05-07T00:00:00Z'),
+      title: VALID_REPORT.title,
+      scamType: { code: 'phishing_sms' },
+    };
+    aiScoreReturn = { aiScore: 91, aiConfidence: 'high' };
+
+    const res = await app.handle(jsonReq('/reports', { token: 'tok', body: VALID_REPORT }));
+    expect(res.status).toBe(200);
+    expect(reportUpdateCalls).toHaveLength(1);
+    const args = reportUpdateCalls[0]!;
+    expect((args.where as { id: string }).id).toBe('66666666-6666-6666-6666-666666666666');
+    expect(args.data).toMatchObject({ aiScore: 91, aiConfidence: 'high' });
+  });
+
+  test('submit succeeds (200) even when AI scoring throws', async () => {
+    mockDecoded = { uid: 'reporter-ai-fail', email: 'r@example.com' };
+    mockScamType = { id: 2, isActive: true };
+    txReturn = {
+      id: '77777777-7777-7777-7777-777777777777',
+      status: 'pending',
+      createdAt: new Date('2026-05-07T00:00:00Z'),
+      title: VALID_REPORT.title,
+      scamType: { code: 'phishing_sms' },
+    };
+    aiScoreShouldThrow = true;
+
+    const res = await app.handle(jsonReq('/reports', { token: 'tok', body: VALID_REPORT }));
+    expect(res.status).toBe(200);
+    expect(reportUpdateCalls).toHaveLength(0);
+    expect(mirrorCalls).toHaveLength(1);
+  });
+
+  test('skips the persistence UPDATE when AI score is null', async () => {
+    mockDecoded = { uid: 'reporter-ai-null', email: 'r@example.com' };
+    mockScamType = { id: 2, isActive: true };
+    txReturn = {
+      id: '88888888-8888-8888-8888-888888888888',
+      status: 'pending',
+      createdAt: new Date('2026-05-07T00:00:00Z'),
+      title: VALID_REPORT.title,
+      scamType: { code: 'phishing_sms' },
+    };
+    aiScoreReturn = { aiScore: null, aiConfidence: null };
+
+    const res = await app.handle(jsonReq('/reports', { token: 'tok', body: VALID_REPORT }));
+    expect(res.status).toBe(200);
+    expect(reportUpdateCalls).toHaveLength(0);
   });
 });
 
