@@ -307,14 +307,20 @@ describe('GET /admin/reports/:id', () => {
     expect(findReporterLeak(body)).toBeNull();
   });
 
-  test('200 admin — detail tolerates null AI score on legacy rows', async () => {
+  test('200 admin — detail triggers lazy backfill on legacy null rows (empty corpus → unknown)', async () => {
+    // Legacy row with both AI fields null + an empty corpus (no $queryRaw
+    // matches). The detail handler should call computeAiScore, get
+    // { null, 'unknown' } back, return that to the client, and not crash.
     mockDecoded = ADMIN;
     mockFindUniqueReport = { ...MOCK_DETAIL_REPORT, aiScore: null, aiConfidence: null };
+    mockQueryRawResults = [];
     const res = await app.handle(req(`/admin/reports/${VALID_ID}`, { token: 'tok' }));
     expect(res.status).toBe(200);
     const body = await res.json();
+    // After backfill: score stays null (no matches), confidence reads
+    // 'unknown' (helper's signal to the UI to render the pending chip).
     expect(body.report.aiScore).toBeNull();
-    expect(body.report.aiConfidence).toBeNull();
+    expect(body.report.aiConfidence).toBe('unknown');
   });
 });
 

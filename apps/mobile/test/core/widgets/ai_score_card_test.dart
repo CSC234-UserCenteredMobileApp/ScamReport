@@ -17,13 +17,28 @@ Widget _themed(Widget child, {Locale locale = const Locale('en')}) {
 
 void main() {
   group('AiScoreCard', () {
-    testWidgets('renders nothing when score is null', (tester) async {
+    testWidgets('renders pending chip for full variant when score is null',
+        (tester) async {
       await tester.pumpWidget(_themed(
-        const AiScoreCard(score: null, confidence: 'high'),
+        const AiScoreCard(score: null, confidence: null),
       ));
-      // The widget short-circuits to SizedBox.shrink — no Container, no text.
+      // No score ring, no RISK label — the admin sees a muted placeholder.
       expect(find.byType(CircularProgressIndicator), findsNothing);
       expect(find.text('RISK'), findsNothing);
+      expect(find.text('AI score pending'), findsOneWidget);
+    });
+
+    testWidgets('compact variant renders nothing when score is null',
+        (tester) async {
+      await tester.pumpWidget(_themed(
+        const AiScoreCard(
+          score: null,
+          confidence: null,
+          variant: AiScoreCardVariant.compact,
+        ),
+      ));
+      expect(find.text('AI score pending'), findsNothing);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
     });
 
     testWidgets('renders full card with score ring + verdict label', (tester) async {

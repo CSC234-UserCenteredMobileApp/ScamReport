@@ -27,7 +27,7 @@ import { getPrisma } from '../../core/db/client';
 import { Prisma } from '../../generated/prisma/client';
 import { copyFile, uploadFile } from '../../core/supabase/storage';
 import { mirrorMyReport } from '../../sync/firestore_sync';
-import { computeAiScore } from '../../core/ai-score';
+import { canonicalEmbedInput, computeAiScore } from '../../core/ai-score';
 
 const ATTACHMENTS_BUCKET = 'chat-attachments';
 const MAX_EVIDENCE_PER_REPORT = 5;
@@ -133,7 +133,7 @@ export async function createReport(
   // Resolve scam type code → id (validates that the taxonomy entry exists).
   const scamType = await prisma.scamType.findUnique({
     where: { code: input.scamTypeCode },
-    select: { id: true, isActive: true },
+    select: { id: true, isActive: true, labelEn: true, labelTh: true },
   });
   if (!scamType || !scamType.isActive) {
     throw new ReportSubmitError(
@@ -323,12 +323,19 @@ export async function createReport(
   });
 
   // AI triage score — best-effort. Submit must succeed even if Gemini is
-  // unreachable; the column stays NULL and the moderator UI hides the badge.
-  // The helper swallows its own errors and logs distinct phases; we
-  // additionally swallow a DB update failure so it can never surface as a 500.
+  // unreachable; the column stays NULL and the moderator UI shows the
+  // "AI score pending" chip until the admin opens the report (lazy backfill
+  // in admin-reports.service.getDetail). The helper swallows its own
+  // errors; we additionally swallow a DB update failure so it can never
+  // surface as a 500.
   try {
     const { aiScore, aiConfidence } = await computeAiScore(
-      `${input.title}\n${input.description}`,
+      canonicalEmbedInput({
+        title: input.title,
+        description: input.description,
+        targetIdentifier,
+        scamType: { labelEn: scamType.labelEn, labelTh: scamType.labelTh },
+      }),
       { reportId: created.id },
     );
     if (aiScore !== null || aiConfidence !== null) {

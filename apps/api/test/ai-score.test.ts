@@ -33,7 +33,7 @@ afterEach(() => {
 });
 
 describe('computeAiScore', () => {
-  test('high tier when avg similarity ≥ 0.85', async () => {
+  test('high tier when top-1 similarity ≥ 0.85', async () => {
     mockResults = [
       { reportId: 'r1', similarity: 0.92 },
       { reportId: 'r2', similarity: 0.9 },
@@ -42,23 +42,50 @@ describe('computeAiScore', () => {
       { reportId: 'r5', similarity: 0.5 },
     ];
     const result = await computeAiScore('phishing sms about parcel');
-    expect(result.aiScore).toBe(90);
+    // Score is now max(top1, topKAvg) * 100. top1 = 0.92 → 92.
+    expect(result.aiScore).toBe(92);
     expect(result.aiConfidence).toBe('high');
   });
 
-  test('medium tier when avg similarity in [0.70, 0.85)', async () => {
+  test('high tier even when neighbours dilute the top-3 average', async () => {
+    // Pre-fix this case scored 'medium' (top-3 avg ≈ 0.717). After the
+    // top-1 priority change, a 0.95 top-1 stands on its own.
     mockResults = [
-      { reportId: 'r1', similarity: 0.78 },
-      { reportId: 'r2', similarity: 0.74 },
-      { reportId: 'r3', similarity: 0.7 },
+      { reportId: 'r1', similarity: 0.95 },
+      { reportId: 'r2', similarity: 0.6 },
+      { reportId: 'r3', similarity: 0.6 },
     ];
-    const result = await computeAiScore('borderline match');
-    expect(result.aiConfidence).toBe('medium');
-    expect(result.aiScore).toBeGreaterThanOrEqual(70);
-    expect(result.aiScore).toBeLessThan(85);
+    const result = await computeAiScore('one strong match');
+    expect(result.aiScore).toBe(95);
+    expect(result.aiConfidence).toBe('high');
   });
 
-  test('low tier when avg similarity < 0.70', async () => {
+  test('medium tier when top-1 ∈ [0.70, 0.85)', async () => {
+    mockResults = [
+      { reportId: 'r1', similarity: 0.78 },
+      { reportId: 'r2', similarity: 0.6 },
+      { reportId: 'r3', similarity: 0.55 },
+    ];
+    const result = await computeAiScore('borderline top-1');
+    expect(result.aiConfidence).toBe('medium');
+    expect(result.aiScore).toBe(78);
+  });
+
+  test('medium tier when top-1 < 0.70 but top-3 avg ≥ 0.75 (cluster signal)', async () => {
+    mockResults = [
+      { reportId: 'r1', similarity: 0.69 },
+      { reportId: 'r2', similarity: 0.78 },
+      { reportId: 'r3', similarity: 0.78 },
+    ];
+    const result = await computeAiScore('weak-top1 strong-cluster');
+    // top-1 is sub-medium but the cluster average bumps confidence to medium.
+    expect(result.aiConfidence).toBe('medium');
+    // Score still uses max(top1, avg) so the displayed number reflects the
+    // stronger of the two signals.
+    expect(result.aiScore).toBe(75);
+  });
+
+  test('low tier when both top-1 and top-3 avg are weak', async () => {
     mockResults = [
       { reportId: 'r1', similarity: 0.5 },
       { reportId: 'r2', similarity: 0.45 },
@@ -91,7 +118,8 @@ describe('computeAiScore', () => {
     expect((payload as { phase: string }).phase).toBe('embedding_failed');
   });
 
-  test('averages only top-3 even when more results are supplied', async () => {
+  test('score uses the dominant of (top-1, top-3 avg)', async () => {
+    // Top-3 avg = 0.9, top-1 = 0.9 → score = 90.
     mockResults = [
       { reportId: 'r1', similarity: 0.9 },
       { reportId: 'r2', similarity: 0.9 },
@@ -99,8 +127,35 @@ describe('computeAiScore', () => {
       { reportId: 'r4', similarity: 0.0 },
       { reportId: 'r5', similarity: 0.0 },
     ];
-    const result = await computeAiScore('top-3 only');
+    const result = await computeAiScore('balanced cluster');
     expect(result.aiScore).toBe(90);
     expect(result.aiConfidence).toBe('high');
+  });
+});
+
+describe('canonicalEmbedInput', () => {
+  test('includes title, description, target identifier, and category', async () => {
+    const { canonicalEmbedInput } = await import('../src/core/ai-score');
+    const text = canonicalEmbedInput({
+      title: 'Kerry parcel SMS',
+      description: 'Claim parcel, click link, enter card details.',
+      targetIdentifier: 'http://kerry-th.scam',
+      scamType: { labelEn: 'Phishing SMS', labelTh: 'ฟิชชิง SMS' },
+    });
+    expect(text).toContain('Kerry parcel SMS');
+    expect(text).toContain('Claim parcel');
+    expect(text).toContain('target: http://kerry-th.scam');
+    expect(text).toContain('category: Phishing SMS');
+  });
+
+  test('omits target / category lines when absent', async () => {
+    const { canonicalEmbedInput } = await import('../src/core/ai-score');
+    const text = canonicalEmbedInput({
+      title: 't',
+      description: 'd',
+      targetIdentifier: null,
+      scamType: null,
+    });
+    expect(text).toBe('t\nd');
   });
 });
