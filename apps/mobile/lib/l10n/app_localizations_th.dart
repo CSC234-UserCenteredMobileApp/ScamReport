@@ -706,4 +706,7 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get deleteAccountFailed => 'ไม่สามารถส่งคำขอลบบัญชีได้ กรุณาลองใหม่';
+
+  @override
+  String get deletionRequests => 'คำขอลบบัญชี';
 }

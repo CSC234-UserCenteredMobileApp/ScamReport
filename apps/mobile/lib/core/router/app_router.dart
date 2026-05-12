@@ -28,6 +28,7 @@ import '../../features/reports/presentation/report_detail_screen.dart';
 import '../../features/search/presentation/search_screen.dart';
 import '../../features/announcement_editor/presentation/admin_announcements_screen.dart';
 import '../../features/announcement_editor/presentation/announcement_editor_screen.dart';
+import '../../features/deletion_requests/presentation/admin_deletion_requests_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../di/auth.dart';
 import '../widgets/app_shell.dart';
@@ -231,6 +232,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, s) => AnnouncementEditorScreen(
           announcementId: s.pathParameters['id'],
         ),
+      ),
+      GoRoute(
+        path: '/admin/deletion-requests',
+        builder: (_, __) => const AdminDeletionRequestsScreen(),
       ),
     ],
   );
