@@ -662,6 +662,54 @@ abstract class AppLocalizations {
   /// **'AI confidence: {score}% ({level})'**
   String adminAiScore(int score, String level);
 
+  /// No description provided for @aiScoreBadgeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'AI'**
+  String get aiScoreBadgeLabel;
+
+  /// No description provided for @aiScoreRiskLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'RISK'**
+  String get aiScoreRiskLabel;
+
+  /// No description provided for @aiScoreVerdictLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'AI VERDICT'**
+  String get aiScoreVerdictLabel;
+
+  /// No description provided for @aiVerdictHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Likely scam'**
+  String get aiVerdictHigh;
+
+  /// No description provided for @aiVerdictMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs review'**
+  String get aiVerdictMedium;
+
+  /// No description provided for @aiVerdictLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Likely reject'**
+  String get aiVerdictLow;
+
+  /// No description provided for @aiVerdictUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Inconclusive'**
+  String get aiVerdictUnknown;
+
+  /// No description provided for @aiScoreA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'AI confidence {confidence}, score {score} out of 100'**
+  String aiScoreA11yLabel(String confidence, int score);
+
   /// No description provided for @noEvidence.
   ///
   /// In en, this message translates to:

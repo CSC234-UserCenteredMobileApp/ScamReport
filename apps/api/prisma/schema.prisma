@@ -190,6 +190,13 @@ model Report {
   status                     ReportStatus    @default(pending)
   priorityFlag               Boolean         @default(false) @map("priority_flag")
   rejectionRemark            String?         @map("rejection_remark")
+  /// AI similarity score (0..100), persisted at submit time. Null when
+  /// embedding failed or no verified embeddings exist yet. See
+  /// `apps/api/src/core/ai-score/index.ts`.
+  aiScore                    Int?            @map("ai_score")
+  /// AI confidence tier: 'high' | 'medium' | 'low' | 'unknown'. See
+  /// `packages/shared/src/schemas/admin-reports.ts` for the union.
+  aiConfidence               String?         @map("ai_confidence")
   createdAt                  DateTime        @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt                  DateTime        @default(now()) @map("updated_at") @db.Timestamptz()
   verifiedAt                 DateTime?       @map("verified_at") @db.Timestamptz()

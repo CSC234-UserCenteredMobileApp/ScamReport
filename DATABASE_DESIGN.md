@@ -60,7 +60,7 @@ These are inferred from the PRD (§6.2, §6.3, §3.3, §3.8) and from the repo's
 - **Extensions required:** `pgvector` (RAG semantic search), `pgcrypto` (UUID + hashing), `citext` (case-insensitive identifiers)
 - **Authentication:** Firebase Authentication via email+password and Google OAuth (FR-1.1). The app sends Firebase ID tokens; the backend verifies them and maps `firebase_uid` → an internal `users.id`. Supabase Auth is **not** used — RLS policies must read the verified Firebase UID from a request claim/header set by the backend, not from `auth.uid()`.
 - **Object storage:** Supabase Storage bucket `evidence/` with RLS; files served via signed, time-limited URLs.
-- **Embeddings:** Gemini `text-embedding-004` → **vector(768)**. If the team picks a different model, only the column dimension changes.
+- **Embeddings:** Gemini `gemini-embedding-001` → **vector(768)**. If the team picks a different model, only the column dimension changes. (Pre-2026-05-12 this said `text-embedding-004`; the code uses `gemini-embedding-001` — see `apps/api/src/core/gemini/client.ts`.)
 - **Push:** FCM, sent server-side. Two trigger cases only (FR-8.3, FR-8.4):
   - On report status transition to `verified` or `rejected` → push to reporter's devices.
   - On announcement publish → push to **all** registered users' devices.
@@ -198,6 +198,8 @@ The central content table.
 | `status` | `report_status` NOT NULL DEFAULT `'pending'` | See note below on `flagged`. |
 | `priority_flag` | `boolean` NOT NULL DEFAULT `false` | Lets admins/system rules bump a report to the top of the queue (FR-7.1). |
 | `rejection_remark` | `text` | Populated on Reject; visible to the reporter (FR-6.2). Internal flag remarks are **never** stored here — see §4.6. |
+| `ai_score` | `int` CHECK (`ai_score IS NULL OR ai_score BETWEEN 0 AND 100`) | Triage hint computed at submit time via Gemini + pgvector. Null when no verified embeddings exist yet or Gemini failed (legacy rows stay null forever — the admin UI hides the AI badge in that case). See `apps/api/src/core/ai-score/`. |
+| `ai_confidence` | `text` | Confidence tier: `high` / `medium` / `low` / `unknown`. Kept as `text` rather than a Postgres enum because the union lives in `packages/shared/src/schemas/admin-reports.ts` — single source of truth across api + mobile. |
 | `created_at` | `timestamptz` NOT NULL DEFAULT `now()` | |
 | `updated_at` | `timestamptz` NOT NULL DEFAULT `now()` | |
 | `verified_at` | `timestamptz` | Set on transition to `verified`. Powers feed sort and "reports this week" stat (FR-3.2). |
@@ -266,9 +268,9 @@ One row per report, holding the Gemini-generated vector for AI semantic search (
 | Column | Type | Notes |
 |---|---|---|
 | `report_id` | `uuid` PK FK → `reports(id)` ON DELETE CASCADE | 1:1 with reports. |
-| `embedding` | `vector(768)` NOT NULL | Gemini `text-embedding-004` dimension. |
+| `embedding` | `vector(768)` NOT NULL | Gemini `gemini-embedding-001` dimension. |
 | `content_hash` | `text` NOT NULL | SHA-256 of `title \|\| description`. Skip re-embedding when content hasn't changed. |
-| `model_version` | `text` NOT NULL | E.g. `'gemini-text-embedding-004'`. |
+| `model_version` | `text` NOT NULL | E.g. `'gemini-embedding-001'`. |
 | `updated_at` | `timestamptz` NOT NULL DEFAULT `now()` | |
 
 **Index:** `USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100)` — switch to `hnsw` once the dataset grows past ~10k rows.

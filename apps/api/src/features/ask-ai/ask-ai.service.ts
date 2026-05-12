@@ -18,6 +18,7 @@ import type {
   AskAiUpsertDraftRequest,
 } from '@my-product/shared';
 import { searchSimilarReports } from '../../core/rag/retrieval';
+import { TOP_K as SIMILAR_REPORTS_TOP_K } from '../../core/ai-score/constants';
 import { getSignedUrl, uploadFile } from '../../core/supabase/storage';
 import * as repo from './ask-ai.repository';
 import { runTurn } from './ask-ai.gemini';
@@ -42,7 +43,6 @@ export class AskAiError extends Error {
 }
 
 const HISTORY_TURNS_FOR_PROMPT = 12;
-const SIMILAR_REPORTS_TOP_K = 5;
 const CONVERSATION_LIST_LIMIT = 50;
 
 export async function createConversation(

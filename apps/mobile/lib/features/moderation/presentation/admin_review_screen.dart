@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/widgets/ai_score_card.dart';
 import '../../../core/widgets/audit_trail_row.dart';
 import '../../../l10n/l10n.dart';
 import '../domain/mod_report.dart';
@@ -86,13 +87,11 @@ class _ReviewBody extends ConsumerWidget {
                 ),
               ),
               if (report.aiScore != null) ...[
-                const SizedBox(height: 8),
-                Text(
-                  l10n.adminAiScore(report.aiScore!, report.aiConfidence ?? ''),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
+                const SizedBox(height: 12),
+                AiScoreCard(
+                  score: report.aiScore,
+                  confidence: report.aiConfidence,
+                  variant: AiScoreCardVariant.full,
                 ),
               ],
               const SizedBox(height: 16),

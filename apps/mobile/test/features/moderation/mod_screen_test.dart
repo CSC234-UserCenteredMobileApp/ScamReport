@@ -24,7 +24,13 @@ Widget _wrap(
   );
 }
 
-ModQueueItem _item(String id, {bool flagged = false, String? lastRemark}) =>
+ModQueueItem _item(
+  String id, {
+  bool flagged = false,
+  String? lastRemark,
+  int? aiScore,
+  String? aiConfidence,
+}) =>
     ModQueueItem(
       id: id,
       title: 'Scam Report $id',
@@ -36,6 +42,8 @@ ModQueueItem _item(String id, {bool flagged = false, String? lastRemark}) =>
       priorityFlag: flagged,
       evidenceCount: 2,
       lastRemarkByAdmin: lastRemark,
+      aiScore: aiScore,
+      aiConfidence: aiConfidence,
     );
 
 ModQueueData _queue([int count = 2]) => ModQueueData(
@@ -220,6 +228,51 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('Exception'), findsOneWidget);
+    });
+
+    testWidgets('renders compact AI score badge when item has a score',
+        (tester) async {
+      tester.view.physicalSize = const Size(1080, 1920);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final item = _item('r1', aiScore: 91, aiConfidence: 'high');
+      final queue = ModQueueData(items: [item], pendingCount: 1, flaggedCount: 0);
+      await tester.pumpWidget(_wrap(
+        const ModScreen(),
+        overrides: [
+          modQueueProvider.overrideWith((ref) async => queue),
+          modFilteredQueueProvider.overrideWith(
+            (ref) => AsyncValue.data(queue.items),
+          ),
+        ],
+      ));
+
+      await tester.pumpAndSettle();
+      expect(find.text('91'), findsOneWidget);
+      expect(find.text('AI'), findsOneWidget);
+    });
+
+    testWidgets('hides AI score badge when score is null', (tester) async {
+      tester.view.physicalSize = const Size(1080, 1920);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final queue = _queue(1);
+      await tester.pumpWidget(_wrap(
+        const ModScreen(),
+        overrides: [
+          modQueueProvider.overrideWith((ref) async => queue),
+          modFilteredQueueProvider.overrideWith(
+            (ref) => AsyncValue.data(queue.items),
+          ),
+        ],
+      ));
+
+      await tester.pumpAndSettle();
+      expect(find.text('AI'), findsNothing);
     });
 
     testWidgets('flagged variant renders team note', (tester) async {
