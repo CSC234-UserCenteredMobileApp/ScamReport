@@ -1,0 +1,56 @@
+{
+  "queueTitle": "คิวการตรวจสอบ",
+  "queueSubtitle": "อนุมัติ ปฏิเสธ หรือ Flag รายงานที่รอการตรวจสอบ",
+  "stats": {
+    "pending": "รอดำเนินการ",
+    "flagged": "Flag แล้ว",
+    "avgAge": "อายุเฉลี่ย",
+    "hoursUnit": "ชม."
+  },
+  "filter": {
+    "scamTypeAll": "ทุกประเภท",
+    "priorityOnly": "เฉพาะที่ติด Priority"
+  },
+  "col": {
+    "type": "ประเภท",
+    "title": "หัวข้อ",
+    "age": "อายุ",
+    "evidence": "หลักฐาน",
+    "status": "สถานะ",
+    "ai": "AI",
+    "actions": "การกระทำ"
+  },
+  "status": {
+    "pending": "รอดำเนินการ",
+    "flagged": "Flag แล้ว"
+  },
+  "action": {
+    "approve": "อนุมัติ",
+    "reject": "ปฏิเสธ",
+    "flag": "Flag",
+    "unflag": "ยกเลิก Flag",
+    "review": "ตรวจสอบ"
+  },
+  "dialog": {
+    "approveTitle": "อนุมัติรายงาน",
+    "rejectTitle": "ปฏิเสธรายงาน",
+    "flagTitle": "Flag รายงานเพื่อปรึกษาทีม",
+    "unflagTitle": "ยกเลิก Flag รายงาน",
+    "remarkLabel": "หมายเหตุ",
+    "remarkPlaceholder": "ระบุเหตุผลของการตัดสินใจสั้น ๆ (จำเป็น)",
+    "remarkRequired": "ต้องระบุหมายเหตุ",
+    "submit": "ยืนยัน",
+    "cancel": "ยกเลิก"
+  },
+  "toast": {
+    "approved": "อนุมัติรายงานแล้ว",
+    "rejected": "ปฏิเสธรายงานแล้ว",
+    "flagged": "Flag รายงานเพื่อปรึกษาทีม",
+    "unflagged": "ยกเลิก Flag แล้ว",
+    "actionError": "ดำเนินการไม่สำเร็จ กรุณาลองใหม่"
+  },
+  "empty": "คิวว่างเปล่า — เยี่ยมมาก!",
+  "error": "โหลดคิวไม่สำเร็จ กรุณาลองใหม่",
+  "loading": "กำลังโหลดรายงาน…",
+  "detailComingSoon": "หน้ารายละเอียดเต็มจะมาในสปรินต์ถัดไป"
+}

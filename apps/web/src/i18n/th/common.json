@@ -1,0 +1,39 @@
+{
+  "appName": "ScamReport Admin",
+  "nav": {
+    "moderation": "ตรวจสอบ",
+    "announcements": "ประกาศ",
+    "deletionRequests": "คำขอลบบัญชี",
+    "signOut": "ออกจากระบบ"
+  },
+  "auth": {
+    "loginTitle": "เข้าสู่ระบบ ScamReport Admin",
+    "loginSubtitle": "คอนโซลสำหรับผู้ดูแลระบบ — ตรวจสอบ ประกาศ และคำขอลบบัญชี",
+    "email": "อีเมล",
+    "password": "รหัสผ่าน",
+    "signIn": "เข้าสู่ระบบ",
+    "signInWithGoogle": "ดำเนินการต่อด้วย Google",
+    "or": "หรือ",
+    "noAccessTitle": "ไม่มีสิทธิ์ผู้ดูแลระบบ",
+    "noAccessBody": "บัญชีนี้ไม่มีสิทธิ์เข้าใช้พอร์ทัลผู้ดูแลระบบ กรุณาออกจากระบบและลองใหม่ด้วยบัญชีผู้ดูแลระบบ",
+    "errorInvalid": "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
+    "errorGeneric": "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง"
+  },
+  "common": {
+    "loading": "กำลังโหลด…",
+    "retry": "ลองอีกครั้ง",
+    "cancel": "ยกเลิก",
+    "confirm": "ยืนยัน",
+    "save": "บันทึก",
+    "delete": "ลบ",
+    "edit": "แก้ไข",
+    "search": "ค้นหา",
+    "language": "ภาษา",
+    "theme": "ธีม",
+    "lightMode": "สว่าง",
+    "darkMode": "มืด",
+    "openMenu": "เปิดเมนู",
+    "closeMenu": "ปิดเมนู",
+    "comingSoon": "เร็ว ๆ นี้"
+  }
+}

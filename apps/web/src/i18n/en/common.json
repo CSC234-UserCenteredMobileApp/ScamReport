@@ -1,0 +1,39 @@
+{
+  "appName": "ScamReport Admin",
+  "nav": {
+    "moderation": "Moderation",
+    "announcements": "Announcements",
+    "deletionRequests": "Deletion requests",
+    "signOut": "Sign out"
+  },
+  "auth": {
+    "loginTitle": "Sign in to ScamReport Admin",
+    "loginSubtitle": "Admin-only console for moderation, announcements, and deletion review.",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signInWithGoogle": "Continue with Google",
+    "or": "or",
+    "noAccessTitle": "No admin access",
+    "noAccessBody": "This account is not authorised for the admin portal. Sign out and try again with an admin account.",
+    "errorInvalid": "Invalid email or password.",
+    "errorGeneric": "Something went wrong. Please try again."
+  },
+  "common": {
+    "loading": "Loading…",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "language": "Language",
+    "theme": "Theme",
+    "lightMode": "Light",
+    "darkMode": "Dark",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "comingSoon": "Coming soon"
+  }
+}

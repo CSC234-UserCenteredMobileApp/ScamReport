@@ -30,7 +30,7 @@ The result of any check is always the same: a clear, colour-coded **traffic-ligh
 
 ## 2. User Roles
 
-The application has three distinct user types. Each sees a different version of the same app — there is no separate admin web dashboard in this release.
+The application has three distinct user types. Guests and registered users use the Android mobile app; administrators use a dedicated **admin web portal** (`apps/web`) for moderation, announcements, and deletion-request review. The mobile app continues to expose the admin screens as a fallback, but day-to-day moderation work happens on the web portal because of its denser desktop-grade layout.
 
 | Role | How they get in | What they can do |
 |---|---|---|
@@ -415,6 +415,7 @@ Requirement IDs map to screens in §4.
 
 - **Primary platform: Android.** The full feature set (verdict, feed, AI search, submit, my-reports, alerts, biometric login, moderation, announcement editor, share-target, clipboard scanner) ships on Android.
 - **Secondary platform: Flutter Web — public surface only.** Web ships these screens only: Splash / Login (P-01), Registration (P-02), Verified Feed (P-03), Report Detail (P-04), Announcements List (P-05), Announcement Detail (P-06), Privacy (P-07), Terms (P-08), Verdict (P-13), Onboarding overlay. Web does **not** ship: biometric login (no `local_auth` web implementation), Submit Report (P-10), My Reports (P-11), AI Search (P-09), all admin screens (A-01..A-03), share-target, clipboard scanner, FCM background handlers. Mobile non-web features are gated by `kIsWeb` checks.
+- **Tertiary platform: Admin Web Portal (`apps/web`).** Vite + React + TypeScript + Tailwind + shadcn/ui SPA hosted on Vercel. Carries A-01 Moderation Queue, A-02 Report Review, A-03 Announcement Editor, and the account-deletion-request review tools. Admin-only: gated server-side by `requireRole('admin')` and client-side by `<ProtectedRoute role="admin">` reading `users.role` from `POST /auth/sync`. Reuses the existing `/admin/*` and `/auth/*` API surface — no backend rewrite. Theme tokens mirror `apps/mobile/lib/core/theme/app_theme.dart` (coral primary, VerdictPalette, Plus Jakarta Sans + Sarabun). CORS allowlist in `apps/api/src/index.ts` accepts the dev origin (`http://localhost:5173`), the production Vercel domain, and a project-scoped preview regex.
 - **Out: iOS** — no iOS build, no iOS-specific code path, no APNs integration, no Apple OAuth.
 - The app must not use Android Accessibility Services or system-overlay windows (platform policy compliance).
 
@@ -501,6 +502,7 @@ Resolutions are recorded inline. New open questions added in subsequent revision
 | 1.1 | 2026-04-26 | Team | Simplified: report statuses reduced to Pending/Verified/Rejected (reporter-facing); push notifications scoped to two cases (status change → reporter, announcement → all users); platform narrowed to Android only; Apple OAuth removed; topic subscriptions removed; OQ-6 and OQ-7 resolved and closed. |
 | 1.2 | 2026-04-28 | Team | Enterprise-Grade rubric alignment. Added: Flutter Web public surface (§6.6), biometric login FR-1.6, Firestore mirror for alerts (FR-8.1) and my-reports (FR-6.1) with offline-first persistence (§6.5), full reporter anonymisation in admin views (FR-7.4 + FR-7.8 + §3.6), reliability section (§6.8) with Crashlytics + Remote Config feature flags + rollback. Coverage target unified to ≥ 80% line all packages (§6.7). OQ-1, OQ-3, OQ-4, OQ-5 resolved. Submit requires connectivity (FR-5.4). |
 | 1.3 | 2026-05-01 | A.P | Feature changes: (1) P-09 renamed from "AI Search" to "Ask AI" — conversational AI chat with proactive reporting-intent detection and AI-assisted report drafting (§3.3, §5.4 FR-4.x rewritten). (2) Regional/province alerts permanently removed from scope (§7, OQ-3 closed). (3) Feed filter "(Future) Province/region tag" removed (§3.2). Admin moderator tools UX/UI spec pending update — see `docs/admin-moderator-tools.md`. |
+| 1.4 | 2026-05-12 | A.P | Added **admin web portal** (`apps/web`): Vite + React + Tailwind + shadcn/ui SPA hosted on Vercel, carrying A-01..A-03 + deletion-requests. §2 + §6.6 updated to add this tertiary platform. Reuses the existing `/admin/*` and `/auth/sync` API surface; no backend behaviour change beyond a tightened CORS allowlist on `apps/api`. Response-shape runtime validation via `@sinclair/typebox/compiler` is in scope from v1 of the portal. |
 
 **Sign-off required before Sprint 2:**
 - [ ] Team consensus (A.P, T.P, B.S, S.P, Y.R)

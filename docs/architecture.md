@@ -2,7 +2,7 @@
 
 > **Audience:** anyone editing the codebase. Read this once before your first PR; revisit whenever a layer rule feels ambiguous. Cross-references: `PRODUCT-REQUIREMENTS.md` (what), `DATABASE_DESIGN.md` (Postgres schema), `docs/ai-workflow.md` (how AI agents collaborate), `docs/design/index.md` (per-screen specs), `firestore.rules` (Firestore security policy).
 
-## The three pieces
+## The four pieces
 
 ```
 ┌─────────────────┐        HTTPS / JSON         ┌─────────────────┐
@@ -13,15 +13,31 @@
           │ Dart types (generated)                        │ Prisma
           │                                               ▼
           │                                        ┌─────────────┐
-          │                                        │  PostgreSQL │
-          │                                        └─────────────┘
-          │
-  ┌───────┴────────────────────────────────┐
-  │          packages/shared               │
-  │   TypeBox schemas = JSON Schema        │
-  │   (the single source of truth)         │
-  └────────────────────────────────────────┘
+          │      ┌──────────────────┐              │  PostgreSQL │
+          │      │  apps/web        │ ────────────▶│             │
+          │      │  (Vite + React)  │   /admin/*   └─────────────┘
+          │      │  admin portal    │   /auth/sync
+          │      └──────────────────┘
+          │              ▲
+          │              │ TypeScript types (direct import + TypeCompiler.Compile)
+  ┌───────┴──────────────┴─────────────────┐
+  │          packages/shared                │
+  │   TypeBox schemas = JSON Schema         │
+  │   (the single source of truth)          │
+  └─────────────────────────────────────────┘
 ```
+
+### `apps/web` — admin portal (Vite + React)
+
+- Vite 5 + React 18 + TypeScript + Tailwind + shadcn/ui SPA. Hosted on Vercel.
+- Auth-gated by Firebase Web SDK; calls `/admin/*` with `Authorization: Bearer <firebase-id-token>`.
+- Role gate reads `users.role` from `POST /auth/sync` — never trusts a Firebase custom claim.
+- Imports TypeBox schemas + `Static<>` types directly from `@my-product/shared` (workspace symlink). Every response goes through a precompiled `TypeCompiler.Compile(...).Check(...)` inside `apiFetch` — server-shape drift surfaces as `ApiError(0, 'SCHEMA_MISMATCH')` rather than a silent type mismatch.
+- Feature-first folders (`features/<feature>/{api,components,hooks,pages}`) mirror the Flutter app's domain split.
+- CORS allowlist on `apps/api` (`WEB_ORIGINS` in `src/index.ts`) covers the dev origin, the production Vercel domain, and a project-scoped preview regex.
+- See `apps/web/CLAUDE.md` for layout, patterns, and deploy details.
+
+## The legacy three pieces (historical layout)
 
 ### `apps/mobile` — Flutter
 
