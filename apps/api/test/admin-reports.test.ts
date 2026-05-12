@@ -55,6 +55,10 @@ mock.module('../src/core/db/client', () => ({
       // lookup in that case.
       findUnique: async () =>
         mockDecoded?.role ? { role: mockDecoded.role } : null,
+      // Action handlers resolve the Firebase UID to a Postgres users.id via
+      // `resolveInternalUserId`, which upserts. Return a stable UUID so the
+      // FK insert into moderation_actions doesn't 500.
+      upsert: async () => ({ id: '00000000-0000-0000-0000-aaaaaaaaaaaa' }),
     },
     report: {
       findMany: async () => mockFindManyReports,
