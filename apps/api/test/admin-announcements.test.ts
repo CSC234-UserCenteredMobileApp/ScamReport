@@ -60,6 +60,7 @@ const MOCK_DRAFT_ROW = {
   publishedAt: null,
   pushedToFcmAt: null,
   authorId: AUTHOR_ID,
+  attachments: [],
 };
 
 const MOCK_PUBLISHED_ROW = {
@@ -77,12 +78,26 @@ mock.module('../src/core/db/client', () => ({
   getPrisma: () => ({
     announcement: {
       findMany: async () => mockFindManyAnnouncements,
-      findUnique: async () => mockFindUniqueAnnouncement,
+      findUnique: async () => mockFindUniqueAnnouncement
+        ? { ...mockFindUniqueAnnouncement, _count: { attachments: 0 } }
+        : null,
       create: async () => MOCK_DRAFT_ROW,
       update: async () => {
         // Return explicit update result if set, otherwise fall back to findUnique state
         return mockUpdateAnnouncement ?? mockFindUniqueAnnouncement ?? MOCK_DRAFT_ROW;
       },
+      delete: async () => ({}),
+    },
+    announcementAttachment: {
+      findFirst: async () => null,
+      create: async () => ({
+        id: '00000000-0000-0000-0000-000000000099',
+        storagePath: `${VALID_ID}/test.jpg`,
+        kind: 'image',
+        mimeType: 'image/jpeg',
+        sizeBytes: BigInt(1024),
+        sortOrder: 0,
+      }),
       delete: async () => ({}),
     },
     // resolveInternalUserId calls user.upsert to get internal userId from firebaseUid;
@@ -184,6 +199,7 @@ describe('POST /admin/announcements — create', () => {
     expect(body.item).toHaveProperty('createdAt');
     expect(body.item).toHaveProperty('updatedAt');
     expect(body.item.publishedAt).toBeNull();
+    expect(body.item).toHaveProperty('attachments');
   });
 });
 
@@ -198,6 +214,8 @@ describe('GET /admin/announcements/:id — detail', () => {
     expect(body).toHaveProperty('item');
     expect(body.item).toHaveProperty('id', VALID_ID);
     expect(body.item).toHaveProperty('status', 'draft');
+    expect(body.item).toHaveProperty('attachments');
+    expect(Array.isArray(body.item.attachments)).toBe(true);
   });
 
   test('404 admin — announcement not found', async () => {
