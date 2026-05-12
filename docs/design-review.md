@@ -4,6 +4,8 @@
 
 > **Platform note (PRD v1.2):** The full screen inventory below targets **Android**. The **Flutter Web** build ships only the public surface — Splash/Login (P-01, P-02), Verified Feed (P-03), Report Detail (P-04), Announcements (P-05, P-06), Privacy / Terms (P-07, P-08), Verdict (P-13), Onboarding overlay. Web does not ship Submit (P-10), My Reports (P-11), Ask AI (P-09), Moderation (A-01, A-02), Announcement Editor (A-03), biometric login, share-target, or the clipboard scanner. Platform-specific UI (biometric toggle on Settings, clipboard banner) is gated by `kIsWeb` checks at presentation layer.
 
+> **Admin Web Portal (PRD v1.4):** A separate React SPA at `apps/web` carries A-01 Moderation Queue, A-02 Report Review, A-03 Announcement Editor, and the deletion-request review tools. Design tokens mirror this file — coral primary `#f25f2a`, VerdictPalette, Plus Jakarta Sans + Sarabun, radii 8/12/16/24 — via Tailwind HSL CSS variables in `apps/web/src/styles/globals.css`. shadcn/ui consumes the standard `--background/--foreground/--primary/...` surface tokens; verdict colours (`--verdict-scam-{bg,fg}`, etc.) extend the shadcn palette as bespoke utilities and a `Badge` variant. **Don't hardcode hex anywhere in `apps/web`** — same rule as Flutter.
+
 > **Reporter anonymity (PRD v1.2 FR-7.4 + FR-7.8):** The mod queue (A-01) and admin review (A-02) screens **must not** display reporter identity — no user ID, no display name, no email, no avatar, no masked handle. The previous `User_3a91`-style mask shown in the prototype is **no longer accepted**; admin-facing report cards show scam content only. The API enforces this server-side.
 
 **Source:** Claude Design handoff bundle (received 2026-04-26) — screenshots + snapshots last synced **2026-05-01** from new bundled prototypes.
@@ -144,6 +146,7 @@ These came out of the design review and need a call before relevant feature work
 
 ## Where this lands in the codebase
 
+- **Web theme:** `apps/web/tailwind.config.ts` + `apps/web/src/styles/globals.css` — HSL CSS variables mirror `app_theme.dart`. shadcn/ui consumes the standard `--background/--foreground/--primary/--muted/...` tokens; the verdict palette ships as bespoke vars (`--verdict-scam-bg`, `--verdict-scam-fg`, etc.) and as a `Badge` variant.
 - **Flutter theme:** `apps/mobile/lib/core/theme/app_theme.dart` — written this PR, exposes `lightTheme()`, `darkTheme()`, and `VerdictPalette` extension.
 - **Screen implementation:** each PRD screen ID becomes a Flutter feature folder under `apps/mobile/lib/features/<screen>/{data,domain,presentation}/`. Use `/add-feature` slash command. Use the design as the visual spec; don't transliterate React component shapes — match the visual output via Flutter idioms.
 - **Sample data / fixtures:** when adding a feature, copy relevant samples from the prototype's `data.jsx` for tests and dev seeding, but treat them as fixtures, not requirements.

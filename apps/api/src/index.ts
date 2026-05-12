@@ -13,8 +13,25 @@ import { scamTypesRoute } from './features/scam-types/scam-types.route';
 import { userRoute } from './features/user/user.route';
 import { adminDeletionRequestsRoute } from './features/admin-deletion-requests/admin-deletion-requests.route';
 
+// CORS allowlist for the admin web portal (apps/web).
+// Project-scoped Vercel preview pattern intentionally NOT `*.vercel.app` —
+// wildcard would allow any Vercel-hosted site to call this API.
+export const WEB_ORIGINS: (string | RegExp)[] = [
+  'http://localhost:5173',
+  'https://scamreport-admin.vercel.app',
+  /^https:\/\/scamreport-admin-[a-z0-9-]+\.vercel\.app$/,
+];
+
 export const app = new Elysia()
-  .use(cors())
+  .use(
+    cors({
+      origin: WEB_ORIGINS,
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Authorization', 'Content-Type'],
+      credentials: false,
+      maxAge: 600,
+    }),
+  )
   .use(healthRoute)
   .use(authRoute)
   .use(statsRoute)

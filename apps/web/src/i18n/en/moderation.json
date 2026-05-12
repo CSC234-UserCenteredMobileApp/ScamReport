@@ -1,0 +1,56 @@
+{
+  "queueTitle": "Moderation queue",
+  "queueSubtitle": "Approve, reject, or flag pending reports.",
+  "stats": {
+    "pending": "Pending",
+    "flagged": "Flagged",
+    "avgAge": "Avg age",
+    "hoursUnit": "h"
+  },
+  "filter": {
+    "scamTypeAll": "All scam types",
+    "priorityOnly": "Priority flag only"
+  },
+  "col": {
+    "type": "Type",
+    "title": "Title",
+    "age": "Age",
+    "evidence": "Evidence",
+    "status": "Status",
+    "ai": "AI",
+    "actions": "Actions"
+  },
+  "status": {
+    "pending": "Pending",
+    "flagged": "Flagged"
+  },
+  "action": {
+    "approve": "Approve",
+    "reject": "Reject",
+    "flag": "Flag",
+    "unflag": "Unflag",
+    "review": "Review"
+  },
+  "dialog": {
+    "approveTitle": "Approve report",
+    "rejectTitle": "Reject report",
+    "flagTitle": "Flag report for discussion",
+    "unflagTitle": "Unflag report",
+    "remarkLabel": "Remark",
+    "remarkPlaceholder": "Briefly explain the decision (required).",
+    "remarkRequired": "A remark is required.",
+    "submit": "Confirm",
+    "cancel": "Cancel"
+  },
+  "toast": {
+    "approved": "Report approved.",
+    "rejected": "Report rejected.",
+    "flagged": "Report flagged for discussion.",
+    "unflagged": "Report unflagged.",
+    "actionError": "Action failed. Please retry."
+  },
+  "empty": "Queue is empty — nice work!",
+  "error": "Could not load the queue. Try again.",
+  "loading": "Loading reports…",
+  "detailComingSoon": "The full review detail page is coming next sprint."
+}

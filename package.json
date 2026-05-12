@@ -10,10 +10,13 @@
     "bun": ">=1.1.0"
   },
   "scripts": {
-    "dev": "concurrently -n api,mobile -c blue,magenta \"bun run --filter @my-product/api dev\" \"cd apps/mobile && flutter run\"",
-    "test": "bun run --filter @my-product/api test && bun run --filter @my-product/shared test && cd apps/mobile && flutter test",
-    "typecheck": "bun run --filter @my-product/shared typecheck && bun run --filter @my-product/api typecheck",
-    "lint": "cd apps/mobile && dart analyze",
+    "dev": "concurrently -n api,web,mobile -c blue,cyan,magenta \"bun run --filter @my-product/api dev\" \"bun run --filter @my-product/web dev\" \"cd apps/mobile && flutter run\"",
+    "dev:web": "bun run --filter @my-product/web dev",
+    "dev:api": "bun run --filter @my-product/api dev",
+    "build:web": "bun run --filter @my-product/web build",
+    "test": "bun run --filter @my-product/api test && bun run --filter @my-product/shared test && bun run --filter @my-product/web test && cd apps/mobile && flutter test",
+    "typecheck": "bun run --filter @my-product/shared typecheck && bun run --filter @my-product/api typecheck && bun run --filter @my-product/web typecheck",
+    "lint": "bun run --filter @my-product/web lint && cd apps/mobile && dart analyze",
     "lint:fr43": "bash scripts/check-no-verdict-tokens.sh",
     "prisma:generate": "bun run --filter @my-product/api prisma:generate"
   },
@@ -23,6 +26,7 @@
   },
   "overrides": {
     "fast-uri": "^3.1.2",
-    "fast-xml-builder": "^1.1.7"
+    "fast-xml-builder": "^1.1.7",
+    "undici": ">=6.24.0"
   }
 }

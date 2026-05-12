@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light surfaces — mirror app_theme.dart light tokens */
+    --background: 60 19% 97%;          /* #FAFAF7 */
+    --foreground: 36 12% 9%;           /* #1A1814 */
+    --card: 0 0% 100%;                 /* #FFFFFF */
+    --card-foreground: 36 12% 9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 36 12% 9%;
+    --muted: 48 14% 95%;               /* #F5F4EF */
+    --muted-foreground: 36 6% 49%;     /* #847F74 */
+    --accent: 48 14% 95%;
+    --accent-foreground: 36 12% 9%;
+    --border: 45 16% 90%;              /* #EBE9E2 */
+    --input: 45 16% 90%;
+    --ring: 14 89% 56%;                /* coral */
+    --primary: 14 89% 56%;             /* #F25F2A */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 48 14% 95%;
+    --secondary-foreground: 36 12% 9%;
+    --destructive: 0 73% 41%;          /* scam fg */
+    --destructive-foreground: 0 0% 100%;
+
+    --verdict-scam-bg: 0 86% 97%;       --verdict-scam-fg: 0 73% 41%;
+    --verdict-suspicious-bg: 48 100% 96%; --verdict-suspicious-fg: 32 91% 36%;
+    --verdict-safe-bg: 138 76% 97%;     --verdict-safe-fg: 142 69% 30%;
+    --verdict-unknown-bg: 210 40% 98%;  --verdict-unknown-fg: 215 19% 35%;
+
+    --radius: 12px;
+  }
+
+  .dark {
+    --background: 40 11% 7%;           /* #14130F */
+    --foreground: 45 23% 95%;          /* #F5F3EE */
+    --card: 40 9% 11%;                 /* #1D1C18 */
+    --card-foreground: 45 23% 95%;
+    --popover: 40 9% 11%;
+    --popover-foreground: 45 23% 95%;
+    --muted: 40 9% 14%;                /* #26241F */
+    --muted-foreground: 45 6% 58%;     /* #9C978A */
+    --accent: 40 9% 14%;
+    --accent-foreground: 45 23% 95%;
+    --border: 40 7% 17%;               /* #2E2C26 */
+    --input: 40 7% 17%;
+    --ring: 14 89% 56%;
+    --primary: 14 89% 56%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 40 9% 14%;
+    --secondary-foreground: 45 23% 95%;
+    --destructive: 0 73% 56%;
+    --destructive-foreground: 0 0% 100%;
+
+    --verdict-scam-bg: 0 35% 12%;       --verdict-scam-fg: 0 93% 82%;
+    --verdict-suspicious-bg: 30 50% 11%; --verdict-suspicious-fg: 43 96% 56%;
+    --verdict-safe-bg: 140 50% 10%;     --verdict-safe-fg: 142 76% 73%;
+    --verdict-unknown-bg: 220 14% 16%;  --verdict-unknown-fg: 215 25% 78%;
+  }
+
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Plus Jakarta Sans', 'Sarabun', system-ui, sans-serif;
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
+  }
+  html, body, #root {
+    height: 100%;
+  }
+}

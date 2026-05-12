@@ -6,7 +6,8 @@ Flutter app + Elysia.js backend (Bun) + shared TypeBox contract package. Schemas
 
 - `apps/mobile/` — Flutter app (feature-first: `core/` + `features/<feature>/{data,domain,presentation}`)
 - `apps/api/` — Elysia.js + Prisma backend
-- `packages/shared/` — TypeBox schemas shared between api and mobile (contract layer)
+- `apps/web/` — admin web portal (Vite + React + Tailwind + shadcn/ui). Auth-gated SPA on Vercel, calls `/admin/*` + `/auth/sync`. See `apps/web/CLAUDE.md`.
+- `packages/shared/` — TypeBox schemas shared across api, mobile, and web (contract layer)
 - `scripts/` — `dev.sh` (runs api + mobile), `codegen.sh` (TypeBox → Dart)
 - `docs/` — architecture + ADRs + per-screen design specs (`docs/design/index.md`)
 
