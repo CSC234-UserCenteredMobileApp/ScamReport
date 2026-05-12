@@ -4,8 +4,12 @@
 //   - compact: small circular badge for queue rows ("94 / AI").
 //   - full: detail-card with a score ring + RISK label + AI verdict chip.
 //
-// Hides itself entirely when `score` is null (no embeddings yet / Gemini
-// outage); the admin sees nothing rather than a confusing zero.
+// When `score` is null:
+//   - full variant renders a muted "AI score pending" chip so the admin
+//     knows the system has not yet attached a similarity hint to this
+//     report (legacy row pre-migration, Gemini outage, or empty corpus).
+//   - compact variant hides itself — queue rows are space-constrained and
+//     a placeholder there would add noise.
 //
 // Per PRD §6.4 — colour is never the only differentiator: every variant
 // renders the score as a number AND the verdict as text.
@@ -32,11 +36,14 @@ class AiScoreCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (score == null) return const SizedBox.shrink();
+    final l10n = context.l10n;
+    if (score == null) {
+      if (variant == AiScoreCardVariant.compact) return const SizedBox.shrink();
+      return _PendingCard(label: l10n.aiScorePending);
+    }
     final colors = AiScorePalette.forConfidence(context, confidence);
     if (colors == null) return const SizedBox.shrink();
 
-    final l10n = context.l10n;
     final a11y = l10n.aiScoreA11yLabel(confidence ?? 'unknown', score!);
 
     return Semantics(
@@ -65,6 +72,41 @@ class AiScoreCard extends StatelessWidget {
       default:
         return l10n.aiVerdictUnknown;
     }
+  }
+}
+
+class _PendingCard extends StatelessWidget {
+  const _PendingCard({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.hourglass_empty_rounded,
+            size: 18,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

@@ -7,11 +7,22 @@
 /** Top-K verified reports retrieved per RAG query. */
 export const TOP_K = 5;
 
-/** Number of top results averaged into the confidence score (avg of top-N). */
+/**
+ * Number of top results averaged into the secondary `topKAvg` signal used
+ * as a tie-breaker when the top-1 similarity falls below the high threshold.
+ */
 export const AVG_TOP_K = 3;
 
-/** Cosine similarity at or above which confidence is reported as `high`. */
+/** Top-1 cosine similarity at or above which confidence is `high`. */
 export const THRESHOLD_HIGH = 0.85;
 
-/** Cosine similarity at or above which confidence is reported as `medium`. */
+/** Top-1 cosine similarity at or above which confidence is `medium`. */
 export const THRESHOLD_MEDIUM = 0.7;
+
+/**
+ * Top-3 average similarity at or above which confidence is bumped to
+ * `medium` even when the top-1 is below `THRESHOLD_MEDIUM`. Catches the
+ * cluster case where several mid-similarity neighbours collectively
+ * indicate a likely scam family.
+ */
+export const THRESHOLD_TOPK_MEDIUM = 0.75;

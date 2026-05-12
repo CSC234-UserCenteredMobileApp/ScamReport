@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../core/widgets/ai_score_card.dart';
 import '../../../core/widgets/audit_trail_row.dart';
 import '../../../l10n/l10n.dart';
+import '../data/mod_action_failure.dart';
 import '../domain/mod_report.dart';
 import '../domain/mod_repository.dart';
 import 'mod_providers.dart';
@@ -86,14 +87,16 @@ class _ReviewBody extends ConsumerWidget {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
-              if (report.aiScore != null) ...[
-                const SizedBox(height: 12),
-                AiScoreCard(
-                  score: report.aiScore,
-                  confidence: report.aiConfidence,
-                  variant: AiScoreCardVariant.full,
-                ),
-              ],
+              const SizedBox(height: 12),
+              // Renders the score when present, or a muted "AI score
+              // pending" chip when the row is null (legacy submit, Gemini
+              // outage at submit time). The admin-side detail handler
+              // lazily backfills on first open.
+              AiScoreCard(
+                score: report.aiScore,
+                confidence: report.aiConfidence,
+                variant: AiScoreCardVariant.full,
+              ),
               const SizedBox(height: 16),
               _SectionLabel(label: l10n.adminLabelDescription),
               const SizedBox(height: 4),
@@ -151,44 +154,55 @@ class _ReviewBody extends ConsumerWidget {
   }
 }
 
-class _ActionBar extends ConsumerWidget {
+class _ActionBar extends ConsumerStatefulWidget {
   const _ActionBar({required this.report, required this.reportId});
 
   final ModReportDetail report;
   final String reportId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-    final enabled = report.isPending || report.isFlagged;
+  ConsumerState<_ActionBar> createState() => _ActionBarState();
+}
 
-    Future<void> doAction(
-      String label,
-      Future<void> Function(ModRepository repo, String remark) action,
-      String toast,
-    ) async {
-      final remark = await showDialog<String>(
-        context: context,
-        builder: (_) => _RemarkDialog(actionLabel: label),
-      );
-      if (remark == null || !context.mounted) return;
-      final repo = ref.read(modRepositoryProvider);
-      try {
-        await action(repo, remark);
-        ref.invalidate(modQueueProvider);
-        ref.invalidate(modDetailProvider(reportId));
-        if (context.mounted) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text(toast)));
-          context.pop();
-        }
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text(e.toString())));
-        }
-      }
+class _ActionBarState extends ConsumerState<_ActionBar> {
+  bool _isSubmitting = false;
+
+  Future<void> _doAction(
+    String label,
+    Future<void> Function(ModRepository repo, String remark) action,
+    String toast,
+  ) async {
+    final remark = await showDialog<String>(
+      context: context,
+      builder: (_) => _RemarkDialog(actionLabel: label),
+    );
+    if (remark == null || !mounted) return;
+    setState(() => _isSubmitting = true);
+    final repo = ref.read(modRepositoryProvider);
+    try {
+      await action(repo, remark);
+      if (!mounted) return;
+      ref.invalidate(modQueueProvider);
+      ref.invalidate(modDetailProvider(widget.reportId));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(toast)));
+      context.pop();
+    } catch (e) {
+      if (!mounted) return;
+      final message = _formatActionError(context, e);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final report = widget.report;
+    final l10n = context.l10n;
+    final enabled =
+        (report.isPending || report.isFlagged) && !_isSubmitting;
 
     return Container(
       color: Theme.of(context).colorScheme.surface,
@@ -198,9 +212,9 @@ class _ActionBar extends ConsumerWidget {
           Expanded(
             child: OutlinedButton(
               onPressed: enabled
-                  ? () => doAction(
+                  ? () => _doAction(
                         l10n.adminReviewReject,
-                        (repo, r) => repo.reject(reportId, r),
+                        (repo, r) => repo.reject(widget.reportId, r),
                         l10n.adminReviewRejected,
                       )
                   : null,
@@ -221,15 +235,15 @@ class _ActionBar extends ConsumerWidget {
               onPressed: enabled
                   ? () {
                       if (report.isFlagged) {
-                        doAction(
+                        _doAction(
                           l10n.adminReviewUnflag,
-                          (repo, r) => repo.unflag(reportId, r),
+                          (repo, r) => repo.unflag(widget.reportId, r),
                           l10n.adminReviewUnflagged,
                         );
                       } else {
-                        doAction(
+                        _doAction(
                           l10n.adminReviewFlag,
-                          (repo, r) => repo.flag(reportId, r),
+                          (repo, r) => repo.flag(widget.reportId, r),
                           l10n.adminReviewFlagged,
                         );
                       }
@@ -254,19 +268,52 @@ class _ActionBar extends ConsumerWidget {
           Expanded(
             child: FilledButton(
               onPressed: enabled
-                  ? () => doAction(
+                  ? () => _doAction(
                         l10n.adminReviewApprove,
-                        (repo, r) => repo.approve(reportId, r),
+                        (repo, r) => repo.approve(widget.reportId, r),
                         l10n.adminReviewApproved,
                       )
                   : null,
-              child: Text(l10n.adminReviewApprove),
+              child: _isSubmitting
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(l10n.adminReviewApprove),
             ),
           ),
         ],
       ),
     );
   }
+}
+
+/// Convert a thrown exception from a moderation action into a localised
+/// snackbar string. Recognises `ModActionFailure` and maps the known HTTP
+/// status codes to the corresponding `modError*` l10n key; falls back to the
+/// generic template for any other failure so the admin still sees something
+/// actionable.
+String _formatActionError(BuildContext context, Object error) {
+  final l10n = context.l10n;
+  if (error is ModActionFailure) {
+    switch (error.statusCode) {
+      case 401:
+        return l10n.modErrorUnauthorized;
+      case 403:
+        return l10n.modErrorForbidden;
+      case 404:
+        return l10n.modErrorNotFound;
+      case 422:
+        return l10n.modErrorInvalidRemark;
+      default:
+        return l10n.modErrorGeneric(
+          error.statusCode,
+          error.serverMessage.isEmpty ? '—' : error.serverMessage,
+        );
+    }
+  }
+  return l10n.modErrorGeneric(0, error.toString());
 }
 
 class _RemarkDialog extends StatefulWidget {
