@@ -3,6 +3,8 @@ import { resolveInternalUserId } from '../../core/lib/resolve-user';
 import { sendFcmBroadcast } from '../../core/firebase/messaging';
 import { Prisma } from '../../generated/prisma/client';
 import type { AdminAnnouncementListItem, AdminAnnouncementDetail } from '@my-product/shared';
+import { uploadFile, deleteFile } from '../../core/supabase/storage';
+import type { AnnouncementAttachment } from '@my-product/shared';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -29,6 +31,17 @@ const detailSelect = {
   publishedAt: true,
   pushedToFcmAt: true,
   authorId: true,
+  attachments: {
+    orderBy: { sortOrder: 'asc' as const },
+    select: {
+      id: true,
+      storagePath: true,
+      kind: true,
+      mimeType: true,
+      sizeBytes: true,
+      sortOrder: true,
+    },
+  },
 } as const;
 
 function toDetail(row: {
@@ -43,6 +56,14 @@ function toDetail(row: {
   publishedAt: Date | null;
   pushedToFcmAt: Date | null;
   authorId: string | null;
+  attachments: Array<{
+    id: string;
+    storagePath: string;
+    kind: string;
+    mimeType: string;
+    sizeBytes: bigint;
+    sortOrder: number;
+  }>;
 }): AdminAnnouncementDetail {
   return {
     id: row.id,
@@ -56,7 +77,14 @@ function toDetail(row: {
     publishedAt: row.publishedAt?.toISOString() ?? null,
     pushedToFcmAt: row.pushedToFcmAt?.toISOString() ?? null,
     authorId: row.authorId ?? null,
-    attachments: [],
+    attachments: row.attachments.map((a) => ({
+      id: a.id,
+      storagePath: a.storagePath,
+      kind: a.kind as AnnouncementAttachment['kind'],
+      mimeType: a.mimeType,
+      sizeBytes: Number(a.sizeBytes),
+      sortOrder: a.sortOrder,
+    })),
   };
 }
 
@@ -252,4 +280,73 @@ export async function unpublishAnnouncement(
     select: detailSelect,
   });
   return toDetail(row);
+}
+
+// ---------------------------------------------------------------------------
+// Attachments
+// ---------------------------------------------------------------------------
+
+const ALLOWED_MIME = new Set([
+  'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf',
+]);
+const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
+const BUCKET = 'announcement-attachments';
+
+export async function uploadAttachment(
+  announcementId: string,
+  file: File,
+): Promise<AnnouncementAttachment | null | 'invalid_mime' | 'too_large' | 'limit_reached'> {
+  if (!ALLOWED_MIME.has(file.type)) return 'invalid_mime';
+  if (file.size > MAX_SIZE_BYTES) return 'too_large';
+
+  const prisma = getPrisma();
+  const announcement = await prisma.announcement.findUnique({
+    where: { id: announcementId },
+    select: { id: true, _count: { select: { attachments: true } } },
+  });
+  if (!announcement) return null;
+  if (announcement._count.attachments >= 10) return 'limit_reached';
+
+  const ext = file.name.split('.').pop() ?? 'bin';
+  const storagePath = `${announcementId}/${crypto.randomUUID()}.${ext}`;
+  const kind = file.type.startsWith('image/') ? 'image' : 'pdf';
+
+  const bytes = await file.arrayBuffer();
+  await uploadFile(BUCKET, storagePath, bytes, { contentType: file.type, upsert: false });
+
+  const row = await prisma.announcementAttachment.create({
+    data: {
+      announcementId,
+      storagePath,
+      kind,
+      mimeType: file.type,
+      sizeBytes: BigInt(file.size),
+      sortOrder: announcement._count.attachments,
+    },
+  });
+
+  return {
+    id: row.id,
+    storagePath: row.storagePath,
+    kind: row.kind as AnnouncementAttachment['kind'],
+    mimeType: row.mimeType,
+    sizeBytes: Number(row.sizeBytes),
+    sortOrder: row.sortOrder,
+  };
+}
+
+export async function deleteAttachment(
+  announcementId: string,
+  attachmentId: string,
+): Promise<'ok' | null> {
+  const prisma = getPrisma();
+  const attachment = await prisma.announcementAttachment.findFirst({
+    where: { id: attachmentId, announcementId },
+    select: { id: true, storagePath: true },
+  });
+  if (!attachment) return null;
+
+  await deleteFile(BUCKET, [attachment.storagePath]);
+  await prisma.announcementAttachment.delete({ where: { id: attachmentId } });
+  return 'ok';
 }

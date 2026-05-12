@@ -13,7 +13,21 @@ export const announcementsRoute = new Elysia()
         where: { status: 'published' },
         orderBy: { publishedAt: 'desc' },
         take: limit,
-        select: { id: true, title: true, body: true, category: true, publishedAt: true, createdAt: true },
+        select: {
+          id: true,
+          title: true,
+          body: true,
+          category: true,
+          publishedAt: true,
+          createdAt: true,
+          attachments: {
+            where: { kind: 'image' },
+            take: 1,
+            orderBy: { sortOrder: 'asc' },
+            select: { storagePath: true },
+          },
+          _count: { select: { attachments: true } },
+        },
       });
 
       return {
@@ -23,8 +37,8 @@ export const announcementsRoute = new Elysia()
           excerpt: r.body.slice(0, 120).trimEnd() + (r.body.length > 120 ? '…' : ''),
           category: r.category,
           publishedAt: (r.publishedAt ?? r.createdAt).toISOString(),
-          firstImageStoragePath: null,
-          attachmentCount: 0,
+          firstImageStoragePath: r.attachments[0]?.storagePath ?? null,
+          attachmentCount: r._count.attachments,
         })),
       };
     },
@@ -40,7 +54,25 @@ export const announcementsRoute = new Elysia()
 
       const row = await prisma.announcement.findFirst({
         where: { id: params.id, status: 'published' },
-        select: { id: true, title: true, body: true, category: true, publishedAt: true, createdAt: true, slug: true },
+        select: {
+          id: true,
+          title: true,
+          body: true,
+          category: true,
+          publishedAt: true,
+          createdAt: true,
+          slug: true,
+          attachments: {
+            orderBy: { sortOrder: 'asc' },
+            select: {
+              id: true,
+              storagePath: true,
+              kind: true,
+              mimeType: true,
+              sizeBytes: true,
+            },
+          },
+        },
       });
 
       if (!row) {
@@ -57,7 +89,13 @@ export const announcementsRoute = new Elysia()
           category: row.category,
           slug: row.slug,
           publishedAt: (row.publishedAt ?? row.createdAt).toISOString(),
-          attachments: [],
+          attachments: row.attachments.map((a) => ({
+            id: a.id,
+            storagePath: a.storagePath,
+            kind: a.kind as 'image' | 'pdf',
+            mimeType: a.mimeType,
+            sizeBytes: Number(a.sizeBytes),
+          })),
         },
       };
     },
