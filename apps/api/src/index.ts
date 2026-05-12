@@ -11,6 +11,7 @@ import { checkRoute } from './features/check/check.route';
 import { askAiRoute } from './features/ask-ai/ask-ai.route';
 import { scamTypesRoute } from './features/scam-types/scam-types.route';
 import { userRoute } from './features/user/user.route';
+import { adminDeletionRequestsRoute } from './features/admin-deletion-requests/admin-deletion-requests.route';
 
 export const app = new Elysia()
   .use(cors())
@@ -24,7 +25,8 @@ export const app = new Elysia()
   .use(checkRoute)
   .use(askAiRoute)
   .use(scamTypesRoute)
-  .use(userRoute);
+  .use(userRoute)
+  .use(adminDeletionRequestsRoute);
 
 if (import.meta.main) {
   const port = Number(process.env.PORT ?? 3000);

@@ -165,6 +165,12 @@ class _AccountSection extends StatelessWidget {
                 onTap: () => context.push('/admin/announcements'),
               ),
               const Divider(height: 1, indent: 16, endIndent: 16),
+              _NavTile(
+                icon: Icons.person_remove_outlined,
+                title: context.l10n.deletionRequests,
+                onTap: () => context.push('/admin/deletion-requests'),
+              ),
+              const Divider(height: 1, indent: 16, endIndent: 16),
             ],
             const _SignOutTile(),
             const Divider(height: 1, indent: 16, endIndent: 16),

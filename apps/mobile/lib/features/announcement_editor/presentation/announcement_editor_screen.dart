@@ -1,7 +1,9 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/api_client.dart';
 import '../domain/admin_announcement.dart';
 import 'announcement_editor_providers.dart';
 
@@ -24,6 +26,7 @@ class _AnnouncementEditorScreenState
 
   bool _saving = false;
   bool _loaded = false;
+  bool _uploadingAttachment = false;
 
   bool get _isEdit => widget.announcementId != null;
 
@@ -123,6 +126,46 @@ class _AnnouncementEditorScreenState
       }
     } finally {
       if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  Future<void> _pickAndUpload() async {
+    final result = await FilePicker.platform.pickFiles(
+      allowMultiple: true,
+      type: FileType.custom,
+      allowedExtensions: ['jpg', 'jpeg', 'png', 'webp', 'gif', 'pdf'],
+      withData: true,
+    );
+    if (result == null || result.files.isEmpty) return;
+    if (!mounted) return;
+    setState(() => _uploadingAttachment = true);
+    try {
+      final repo = ref.read(announcementEditorRepositoryProvider);
+      for (final file in result.files) {
+        if (file.bytes == null) continue;
+        await repo.uploadAttachment(widget.announcementId!, file);
+      }
+      ref.invalidate(adminAnnouncementDetailProvider(widget.announcementId!));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    } finally {
+      if (mounted) setState(() => _uploadingAttachment = false);
+    }
+  }
+
+  Future<void> _deleteAttachment(String attachmentId) async {
+    final repo = ref.read(announcementEditorRepositoryProvider);
+    try {
+      await repo.deleteAttachment(widget.announcementId!, attachmentId);
+      ref.invalidate(adminAnnouncementDetailProvider(widget.announcementId!));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
+      }
     }
   }
 
@@ -227,6 +270,26 @@ class _AnnouncementEditorScreenState
               validator: (v) =>
                   (v == null || v.trim().isEmpty) ? 'Body is required' : null,
             ),
+            const SizedBox(height: 16),
+
+            // Attachment section — edit mode only
+            if (_isEdit) ...[
+              const SizedBox(height: 8),
+              _AttachmentSection(
+                detail: detail,
+                saving: _saving || _uploadingAttachment,
+                onAdd: _pickAndUpload,
+                onDelete: _deleteAttachment,
+              ),
+            ] else ...[
+              const SizedBox(height: 8),
+              Text(
+                'Save draft first to add attachments.',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
+            ],
           ],
         ),
       ),
@@ -342,6 +405,75 @@ class _PublishSheetState extends ConsumerState<_PublishSheet> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _AttachmentSection extends StatelessWidget {
+  const _AttachmentSection({
+    required this.detail,
+    required this.saving,
+    required this.onAdd,
+    required this.onDelete,
+  });
+
+  final AdminAnnouncementDetail? detail;
+  final bool saving;
+  final VoidCallback onAdd;
+  final void Function(String attachmentId) onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final attachments = detail?.attachments ?? [];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              'Attachments (${attachments.length}/10)',
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+            const Spacer(),
+            if (attachments.length < 10)
+              TextButton.icon(
+                onPressed: saving ? null : onAdd,
+                icon: const Icon(Icons.attach_file, size: 18),
+                label: const Text('Add'),
+              ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        for (final att in attachments)
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: att.kind == 'image'
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: Image.network(
+                      '$supabasePublicUrl/storage/v1/object/public/announcement-attachments/${att.storagePath}',
+                      width: 40,
+                      height: 40,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                          const Icon(Icons.image_outlined),
+                    ),
+                  )
+                : const Icon(Icons.picture_as_pdf_outlined),
+            title: Text(
+              att.storagePath.split('/').last,
+              style: Theme.of(context).textTheme.bodySmall,
+              overflow: TextOverflow.ellipsis,
+            ),
+            trailing: IconButton(
+              icon: const Icon(Icons.delete_outline, size: 20),
+              onPressed: saving ? null : () => onDelete(att.id),
+            ),
+          ),
+      ],
     );
   }
 }

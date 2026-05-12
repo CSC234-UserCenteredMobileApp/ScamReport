@@ -1,6 +1,21 @@
 import '../../home/domain/recent_alert.dart'; // reuse AlertCategory enum — do NOT duplicate it
 import '../../sms_scan/domain/sms_alert.dart';
 
+class AlertAttachment {
+  const AlertAttachment({
+    required this.id,
+    required this.storagePath,
+    required this.kind,
+    required this.mimeType,
+    required this.sizeBytes,
+  });
+  final String id;
+  final String storagePath;
+  final String kind; // 'image' | 'pdf'
+  final String mimeType;
+  final int sizeBytes;
+}
+
 class Alert {
   const Alert({
     required this.id,
@@ -10,6 +25,7 @@ class Alert {
     required this.category,
     required this.publishedAt,
     required this.slug,
+    this.attachments = const [],
     this.senderMasked,
     this.verdict,
   });
@@ -21,6 +37,7 @@ class Alert {
   final AlertCategory category;
   final DateTime publishedAt;
   final String slug;
+  final List<AlertAttachment> attachments;
   final String? senderMasked;
   final String? verdict;
 

@@ -21,14 +21,25 @@ class AlertsRepositoryImpl implements AlertsRepository {
   }
 
   Alert _mapAlert(Map<String, dynamic> map) {
+    final rawAttachments = map['attachments'] as List<dynamic>? ?? [];
     return Alert(
       id: map['id'] as String,
       title: map['title'] as String,
-      excerpt: map['excerpt'] as String,
+      excerpt: map['excerpt'] as String? ?? '',
       body: (map['body'] as String?) ?? '',
       category: _parseCategory(map['category'] as String),
       publishedAt: DateTime.parse(map['publishedAt'] as String),
       slug: (map['slug'] as String?) ?? '',
+      attachments: rawAttachments.map((a) {
+        final am = a as Map<String, dynamic>;
+        return AlertAttachment(
+          id: am['id'] as String,
+          storagePath: am['storagePath'] as String,
+          kind: am['kind'] as String,
+          mimeType: am['mimeType'] as String,
+          sizeBytes: (am['sizeBytes'] as num).toInt(),
+        );
+      }).toList(),
     );
   }
 

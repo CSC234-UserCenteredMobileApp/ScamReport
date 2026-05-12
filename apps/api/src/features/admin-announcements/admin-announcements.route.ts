@@ -6,6 +6,7 @@ import {
   UpdateAnnouncementRequest,
   PublishAnnouncementRequest,
   AdminAnnouncementActionResponse,
+  AdminAnnouncementAttachmentResponse,
 } from '@my-product/shared';
 import { requireRole } from '../../core/middleware/require_role';
 import {
@@ -16,6 +17,8 @@ import {
   deleteAnnouncement,
   publishAnnouncement,
   unpublishAnnouncement,
+  uploadAttachment,
+  deleteAttachment,
 } from './admin-announcements.service';
 
 const uuidParam = t.Object({ id: t.String({ format: 'uuid' }) });
@@ -154,5 +157,38 @@ export const adminAnnouncementsRoute = new Elysia({ prefix: '/admin/announcement
     {
       params: uuidParam,
       response: { 200: AdminAnnouncementActionResponse, 404: notFound, 409: conflict },
+    },
+  )
+
+  // POST /admin/announcements/:id/attachments
+  .post(
+    '/:id/attachments',
+    async ({ params, body, set }) => {
+      const result = await uploadAttachment(params.id, body.file as File);
+      if (result === null) { set.status = 404; return { error: 'Not found' }; }
+      if (result === 'invalid_mime') { set.status = 422; return { error: 'Unsupported file type' }; }
+      if (result === 'too_large') { set.status = 422; return { error: 'File exceeds 10 MB limit' }; }
+      if (result === 'limit_reached') { set.status = 422; return { error: 'Maximum 10 attachments per announcement' }; }
+      return { attachment: result };
+    },
+    {
+      params: uuidParam,
+      body: t.Object({ file: t.File({ maxSize: 10 * 1024 * 1024 }) }),
+      response: { 200: AdminAnnouncementAttachmentResponse, 404: notFound, 422: notFound },
+      type: 'multipart/form-data',
+    },
+  )
+
+  // DELETE /admin/announcements/:id/attachments/:attachmentId
+  .delete(
+    '/:id/attachments/:attachmentId',
+    async ({ params, set }) => {
+      const result = await deleteAttachment(params.id, params.attachmentId);
+      if (result === null) { set.status = 404; return { error: 'Not found' }; }
+      return { id: params.attachmentId, status: 'deleted', updatedAt: new Date().toISOString() };
+    },
+    {
+      params: t.Object({ id: t.String({ format: 'uuid' }), attachmentId: t.String({ format: 'uuid' }) }),
+      response: { 200: AdminAnnouncementActionResponse, 404: notFound },
     },
   );

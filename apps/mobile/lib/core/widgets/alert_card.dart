@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../api_client.dart';
 import '../theme/app_theme.dart';
 import '../../features/home/domain/recent_alert.dart';
 import '../../l10n/l10n.dart';
@@ -44,69 +45,89 @@ class AlertCard extends StatelessWidget {
     }
 
     final dateStr = _formatDate(alert.publishedAt);
+    final imageUrl = alert.firstImageStoragePath != null
+        ? '$supabasePublicUrl/storage/v1/object/public/announcement-attachments/${alert.firstImageStoragePath}'
+        : null;
 
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => context.push('/announcement-detail/${alert.id}'),
         borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: iconBg,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(iconData, color: iconFg, size: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (imageUrl != null)
+              Image.network(
+                imageUrl,
+                height: 160,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Chip(
-                      label: Text(chipLabel),
-                      backgroundColor: iconBg,
-                      labelStyle: theme.textTheme.labelSmall?.copyWith(
-                        color: iconFg,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      side: BorderSide.none,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 0),
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      visualDensity: VisualDensity.compact,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      alert.title,
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (imageUrl == null)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: iconBg,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(iconData, color: iconFg, size: 20),
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      dateStr,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Chip(
+                          label: Text(chipLabel),
+                          backgroundColor: iconBg,
+                          labelStyle: theme.textTheme.labelSmall?.copyWith(
+                            color: iconFg,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          side: BorderSide.none,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 0),
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                          visualDensity: VisualDensity.compact,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          alert.title,
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          dateStr,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-/// Format DateTime as yyyy-MM-dd without external package.
 String _formatDate(DateTime dt) {
   final y = dt.year.toString().padLeft(4, '0');
   final m = dt.month.toString().padLeft(2, '0');

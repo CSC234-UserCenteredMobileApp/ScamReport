@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api_client.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../l10n/l10n.dart';
 import '../../home/domain/recent_alert.dart';
 import '../domain/alert.dart';
 import 'alerts_providers.dart';
 
-// ---------------------------------------------------------------------------
-// AnnouncementDetailScreen — full announcement view with share action.
-// ---------------------------------------------------------------------------
 class AnnouncementDetailScreen extends ConsumerWidget {
   const AnnouncementDetailScreen({super.key, required this.id});
 
@@ -51,18 +49,23 @@ class AnnouncementDetailScreen extends ConsumerWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// _AnnouncementBody — fully loaded scaffold + content.
-// ---------------------------------------------------------------------------
-class _AnnouncementBody extends StatelessWidget {
+class _AnnouncementBody extends StatefulWidget {
   const _AnnouncementBody({required this.alert});
 
   final Alert alert;
 
   @override
+  State<_AnnouncementBody> createState() => _AnnouncementBodyState();
+}
+
+class _AnnouncementBodyState extends State<_AnnouncementBody> {
+  int _currentImageIndex = 0;
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final verdict = theme.extension<VerdictPalette>()!;
+    final alert = widget.alert;
 
     final Color chipBg;
     final Color chipFg;
@@ -87,6 +90,9 @@ class _AnnouncementBody extends StatelessWidget {
         chipLabel = context.l10n.categorySmsAlert;
     }
 
+    final images = alert.attachments.where((a) => a.kind == 'image').toList();
+    final pdfs = alert.attachments.where((a) => a.kind == 'pdf').toList();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(alert.title),
@@ -100,42 +106,122 @@ class _AnnouncementBody extends StatelessWidget {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Chip(
-                label: Text(chipLabel),
-                backgroundColor: chipBg,
-                labelStyle: theme.textTheme.labelSmall?.copyWith(
-                  color: chipFg,
-                  fontWeight: FontWeight.w600,
+            // Image carousel
+            if (images.isNotEmpty) ...[
+              SizedBox(
+                height: 220,
+                child: PageView.builder(
+                  itemCount: images.length,
+                  onPageChanged: (i) => setState(() => _currentImageIndex = i),
+                  itemBuilder: (_, i) {
+                    final url =
+                        '$supabasePublicUrl/storage/v1/object/public/announcement-attachments/${images[i].storagePath}';
+                    return Image.network(
+                      url,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: theme.colorScheme.surfaceContainerHighest,
+                        child: const Icon(Icons.broken_image_outlined),
+                      ),
+                    );
+                  },
                 ),
-                side: BorderSide.none,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                visualDensity: VisualDensity.compact,
+              ),
+              if (images.length > 1)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      images.length,
+                      (i) => Container(
+                        width: 6,
+                        height: 6,
+                        margin: const EdgeInsets.symmetric(horizontal: 3),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: i == _currentImageIndex
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.outlineVariant,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+
+            // Text content
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Chip(
+                      label: Text(chipLabel),
+                      backgroundColor: chipBg,
+                      labelStyle: theme.textTheme.labelSmall?.copyWith(
+                        color: chipFg,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      side: BorderSide.none,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 0),
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    alert.title,
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${_formatDateFull(alert.publishedAt)} • ${context.l10n.postedByTeam}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _BodyText(body: alert.body),
+
+                  // PDF attachments
+                  if (pdfs.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      'Attachments',
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    for (final pdf in pdfs)
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.picture_as_pdf_outlined),
+                        title: Text(
+                          pdf.storagePath.split('/').last,
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.copy_outlined),
+                          tooltip: 'Copy link',
+                          onPressed: () => _copyPdfLink(context, pdf.storagePath),
+                        ),
+                      ),
+                  ],
+                  const SizedBox(height: 32),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              alert.title,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '${_formatDateFull(alert.publishedAt)} • ${context.l10n.postedByTeam}',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 16),
-            _BodyText(body: alert.body),
           ],
         ),
       ),
@@ -151,11 +237,18 @@ class _AnnouncementBody extends StatelessWidget {
       SnackBar(content: Text(context.l10n.linkCopied)),
     );
   }
+
+  Future<void> _copyPdfLink(BuildContext context, String storagePath) async {
+    final url =
+        '$supabasePublicUrl/storage/v1/object/public/announcement-attachments/$storagePath';
+    await Clipboard.setData(ClipboardData(text: url));
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Link copied')),
+    );
+  }
 }
 
-// ---------------------------------------------------------------------------
-// _BodyText — renders newline-separated paragraphs and "• " bullet lines.
-// ---------------------------------------------------------------------------
 class _BodyText extends StatelessWidget {
   const _BodyText({required this.body});
 
@@ -177,12 +270,7 @@ class _BodyText extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('• ', style: paragraphStyle),
-              Expanded(
-                child: Text(
-                  line.substring(2),
-                  style: paragraphStyle,
-                ),
-              ),
+              Expanded(child: Text(line.substring(2), style: paragraphStyle)),
             ],
           ),
         );
@@ -198,7 +286,6 @@ class _BodyText extends StatelessWidget {
   }
 }
 
-/// Format DateTime as yyyy-MM-dd without external package.
 String _formatDateFull(DateTime dt) {
   final y = dt.year.toString().padLeft(4, '0');
   final m = dt.month.toString().padLeft(2, '0');

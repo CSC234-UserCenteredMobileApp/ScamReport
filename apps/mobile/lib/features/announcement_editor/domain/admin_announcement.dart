@@ -16,6 +16,23 @@ extension AdminAnnouncementCategoryLabel on AdminAnnouncementCategory {
       };
 }
 
+class AnnouncementAttachment {
+  const AnnouncementAttachment({
+    required this.id,
+    required this.storagePath,
+    required this.kind,
+    required this.mimeType,
+    required this.sizeBytes,
+    required this.sortOrder,
+  });
+  final String id;
+  final String storagePath;
+  final String kind; // 'image' | 'pdf'
+  final String mimeType;
+  final int sizeBytes;
+  final int sortOrder;
+}
+
 class AdminAnnouncementListItem {
   const AdminAnnouncementListItem({
     required this.id,
@@ -46,6 +63,7 @@ class AdminAnnouncementDetail {
     required this.status,
     required this.createdAt,
     required this.updatedAt,
+    required this.attachments,
     this.publishedAt,
     this.pushedToFcmAt,
     this.authorId,
@@ -59,6 +77,7 @@ class AdminAnnouncementDetail {
   final AdminAnnouncementStatus status;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final List<AnnouncementAttachment> attachments;
   final DateTime? publishedAt;
   final DateTime? pushedToFcmAt;
   final String? authorId;

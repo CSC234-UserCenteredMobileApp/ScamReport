@@ -1,3 +1,5 @@
+import 'package:file_picker/file_picker.dart';
+
 import '../domain/admin_announcement.dart';
 import '../domain/announcement_editor_repository.dart';
 import 'announcement_editor_api.dart';
@@ -79,6 +81,7 @@ class AnnouncementEditorRepositoryImpl implements AnnouncementEditorRepository {
   }
 
   AdminAnnouncementDetail _mapDetail(Map<String, dynamic> m) {
+    final rawAttachments = m['attachments'] as List<dynamic>? ?? [];
     return AdminAnnouncementDetail(
       id: m['id'] as String,
       slug: m['slug'] as String,
@@ -95,7 +98,38 @@ class AnnouncementEditorRepositoryImpl implements AnnouncementEditorRepository {
           ? DateTime.parse(m['pushedToFcmAt'] as String)
           : null,
       authorId: m['authorId'] as String?,
+      attachments: rawAttachments.map((a) {
+        final am = a as Map<String, dynamic>;
+        return AnnouncementAttachment(
+          id: am['id'] as String,
+          storagePath: am['storagePath'] as String,
+          kind: am['kind'] as String,
+          mimeType: am['mimeType'] as String,
+          sizeBytes: (am['sizeBytes'] as num).toInt(),
+          sortOrder: (am['sortOrder'] as num).toInt(),
+        );
+      }).toList(),
     );
+  }
+
+  @override
+  Future<AnnouncementAttachment> uploadAttachment(
+      String announcementId, PlatformFile file) async {
+    final raw = await _api.postAttachment(announcementId, file);
+    return AnnouncementAttachment(
+      id: raw['id'] as String,
+      storagePath: raw['storagePath'] as String,
+      kind: raw['kind'] as String,
+      mimeType: raw['mimeType'] as String,
+      sizeBytes: (raw['sizeBytes'] as num).toInt(),
+      sortOrder: (raw['sortOrder'] as num).toInt(),
+    );
+  }
+
+  @override
+  Future<void> deleteAttachment(
+      String announcementId, String attachmentId) async {
+    await _api.deleteAttachment(announcementId, attachmentId);
   }
 
   AdminAnnouncementStatus _parseStatus(String s) => switch (s) {
