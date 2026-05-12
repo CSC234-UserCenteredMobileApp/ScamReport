@@ -20,6 +20,8 @@ class ModQueueItem {
     required this.priorityFlag,
     required this.evidenceCount,
     this.lastRemarkByAdmin,
+    this.aiScore,
+    this.aiConfidence,
   });
 
   final String id;
@@ -32,6 +34,8 @@ class ModQueueItem {
   final bool priorityFlag;
   final int evidenceCount;
   final String? lastRemarkByAdmin;
+  final int? aiScore;
+  final String? aiConfidence;
 
   bool get isFlagged => status == 'flagged';
 }

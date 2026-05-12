@@ -57,6 +57,22 @@ Mobile init runs from `apps/mobile/lib/core/di/firebase.dart`. If the config fil
 2. Deploy security rules: `firebase deploy --only firestore:rules` from the repo root (uses `firestore.rules`).
 3. Confirm the rules in the Firebase Console match the file before any client work begins.
 
+**Promoting an account to admin** (PRD §2 — admin role is granted manually):
+
+`requireRole('admin')` middleware reads `users.role` from Postgres on every request, NOT from Firebase custom claims. To promote an account, ensure they have signed in at least once (so `/auth/sync` has created their `users` row), then either:
+
+- Dev / local DB: `bun run --filter @my-product/api promote-admin <firebase-uid-or-email>` (see `apps/api/scripts/promote-admin.ts`).
+- Production / shared DB: open Supabase → SQL editor and run:
+
+  ```sql
+  -- Promote a Firebase account to admin. Auditable via SQL history.
+  UPDATE users SET role = 'admin' WHERE firebase_uid = '<uid>';
+  -- or by email:
+  UPDATE users SET role = 'admin' WHERE email = '<email>';
+  ```
+
+If admin actions return 403 in the app, this is almost always the cause.
+
 ### 3.2 Supabase (backend only — mobile never talks to Supabase directly)
 
 In `apps/api/.env` set:

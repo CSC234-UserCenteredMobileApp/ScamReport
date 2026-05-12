@@ -5,6 +5,7 @@ import {
   ApproveRejectFlagRequest,
   AdminActionResponse,
 } from '@my-product/shared';
+import { resolveInternalUserId } from '../../core/lib/resolve-user';
 import { requireRole } from '../../core/middleware/require_role';
 import {
   getQueue,
@@ -46,8 +47,13 @@ export const adminReportsRoute = new Elysia({ prefix: '/admin/reports' })
   .post(
     '/:id/approve',
     async ({ params, body, user, set }) => {
-      const result = await approveReport(params.id, user!.uid, body.remark);
-      if (!result) { set.status = 404; return { error: 'Not found' }; }
+      const adminInternalId = await resolveInternalUserId(user!.uid, user!.email);
+      const result = await approveReport(params.id, adminInternalId, body.remark);
+      if (!result) {
+        warnMissing('approve', params.id);
+        set.status = 404;
+        return { error: 'Not found' };
+      }
       return { id: result.id, status: result.status, updatedAt: result.updatedAt.toISOString() };
     },
     {
@@ -60,8 +66,13 @@ export const adminReportsRoute = new Elysia({ prefix: '/admin/reports' })
   .post(
     '/:id/reject',
     async ({ params, body, user, set }) => {
-      const result = await rejectReport(params.id, user!.uid, body.remark);
-      if (!result) { set.status = 404; return { error: 'Not found' }; }
+      const adminInternalId = await resolveInternalUserId(user!.uid, user!.email);
+      const result = await rejectReport(params.id, adminInternalId, body.remark);
+      if (!result) {
+        warnMissing('reject', params.id);
+        set.status = 404;
+        return { error: 'Not found' };
+      }
       return { id: result.id, status: result.status, updatedAt: result.updatedAt.toISOString() };
     },
     {
@@ -74,8 +85,13 @@ export const adminReportsRoute = new Elysia({ prefix: '/admin/reports' })
   .post(
     '/:id/flag',
     async ({ params, body, user, set }) => {
-      const result = await flagReport(params.id, user!.uid, body.remark);
-      if (!result) { set.status = 404; return { error: 'Not found' }; }
+      const adminInternalId = await resolveInternalUserId(user!.uid, user!.email);
+      const result = await flagReport(params.id, adminInternalId, body.remark);
+      if (!result) {
+        warnMissing('flag', params.id);
+        set.status = 404;
+        return { error: 'Not found' };
+      }
       return { id: result.id, status: result.status, updatedAt: result.updatedAt.toISOString() };
     },
     {
@@ -88,8 +104,13 @@ export const adminReportsRoute = new Elysia({ prefix: '/admin/reports' })
   .post(
     '/:id/unflag',
     async ({ params, body, user, set }) => {
-      const result = await unflagReport(params.id, user!.uid, body.remark);
-      if (!result) { set.status = 404; return { error: 'Not found' }; }
+      const adminInternalId = await resolveInternalUserId(user!.uid, user!.email);
+      const result = await unflagReport(params.id, adminInternalId, body.remark);
+      if (!result) {
+        warnMissing('unflag', params.id);
+        set.status = 404;
+        return { error: 'Not found' };
+      }
       return { id: result.id, status: result.status, updatedAt: result.updatedAt.toISOString() };
     },
     {
@@ -98,3 +119,10 @@ export const adminReportsRoute = new Elysia({ prefix: '/admin/reports' })
       response: { 200: AdminActionResponse, 404: notFound },
     },
   );
+
+// Surfaced when a service action returns null — either the report id is
+// unknown or it was deleted between detail load and action. Logging it
+// once per occurrence makes the 404 path debuggable from server logs.
+function warnMissing(action: string, id: string): void {
+  console.warn(`[admin-reports] action '${action}' on ${id} → report not found or already actioned`);
+}

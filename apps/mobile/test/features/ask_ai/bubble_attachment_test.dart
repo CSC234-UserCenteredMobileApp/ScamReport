@@ -131,7 +131,7 @@ void main() {
         intentDetected: false,
         reportable: false,
         hasEnoughInfo: false,
-        similarReportIds: const [],
+        similarReports: const [],
       );
     await tester.pumpWidget(_wrap(repo));
     await tester.pumpAndSettle();
@@ -158,7 +158,7 @@ void main() {
         intentDetected: false,
         reportable: false,
         hasEnoughInfo: false,
-        similarReportIds: const [],
+        similarReports: const [],
       );
     await tester.pumpWidget(_wrap(repo));
     await tester.pumpAndSettle();
@@ -186,7 +186,7 @@ void main() {
         intentDetected: false,
         reportable: false,
         hasEnoughInfo: false,
-        similarReportIds: const [],
+        similarReports: const [],
       );
     await tester.pumpWidget(_wrap(repo));
     await tester.pumpAndSettle();

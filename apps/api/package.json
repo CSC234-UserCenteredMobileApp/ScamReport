@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "seed:call-screening": "bun run prisma/seed-call-screening.ts"
+    "seed:call-screening": "bun run prisma/seed-call-screening.ts",
+    "promote-admin": "bun run scripts/promote-admin.ts"
   },
   "dependencies": {
     "elysia": "^1.2.0",

@@ -44,6 +44,8 @@ export const AdminQueueItem = Type.Object({
   priorityFlag: Type.Boolean(),
   evidenceCount: Type.Integer({ minimum: 0 }),
   lastRemarkByAdmin: Type.Union([Type.String(), Type.Null()]),
+  aiScore: Type.Union([Type.Integer({ minimum: 0, maximum: 100 }), Type.Null()]),
+  aiConfidence: Type.Union([AiConfidence, Type.Null()]),
 });
 export type AdminQueueItem = Static<typeof AdminQueueItem>;
 

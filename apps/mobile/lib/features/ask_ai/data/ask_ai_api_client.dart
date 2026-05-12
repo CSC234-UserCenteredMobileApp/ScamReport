@@ -10,6 +10,7 @@ import '../domain/entities/ai_draft.dart';
 import '../domain/entities/chat_attachment.dart';
 import '../domain/entities/chat_message.dart';
 import '../domain/entities/conversation.dart';
+import '../domain/entities/similar_report.dart';
 import '../domain/entities/turn_outcome.dart';
 import '../domain/failures.dart';
 import 'attachment_picker.dart';
@@ -297,8 +298,10 @@ class AskAiApiClient {
       intentDetected: (j['intentDetected'] as bool?) ?? false,
       reportable: (j['reportable'] as bool?) ?? false,
       hasEnoughInfo: (j['hasEnoughInfo'] as bool?) ?? false,
-      similarReportIds:
-          (j['similarReportIds'] as List? ?? const []).cast<String>(),
+      similarReports: ((j['similarReports'] as List?) ?? const [])
+          .cast<Map<String, dynamic>>()
+          .map(SimilarReport.fromJson)
+          .toList(growable: false),
       draft: _draftFromJson(j['draft'] as Map<String, dynamic>?),
       // Default to empty list when older servers don't include the field —
       // mobile's fallback is "no question pending".

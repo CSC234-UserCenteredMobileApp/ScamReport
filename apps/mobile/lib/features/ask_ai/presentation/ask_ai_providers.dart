@@ -400,12 +400,22 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
       );
       // Replace the optimistic message with the server-returned one (which
       // has the real id + signedUrl on each attachment), then append the
-      // assistant reply.
+      // assistant reply. The assistant ChatMessage gets the turn's similar-
+      // report cards attached so `_MessageBubble` can render them.
+      final assistantWithCards = ChatMessage(
+        id: result.outcome.assistantMessage.id,
+        role: result.outcome.assistantMessage.role,
+        content: result.outcome.assistantMessage.content,
+        intentDetected: result.outcome.assistantMessage.intentDetected,
+        createdAt: result.outcome.assistantMessage.createdAt,
+        attachments: result.outcome.assistantMessage.attachments,
+        similarReports: result.outcome.similarReports,
+      );
       final swapped = state.messages
           .where((m) => m.id != tempId)
           .toList(growable: true)
         ..add(result.outcome.userMessage)
-        ..add(result.outcome.assistantMessage);
+        ..add(assistantWithCards);
       // Redraft preservation rules (iter-4):
       //  • If the user has edited the draft (`userEditedDraft`), keep
       //    `activeDraft` exactly as-is — the AI just refines reasoning, the

@@ -21,6 +21,8 @@ export interface QueueRow {
   priorityFlag: boolean;
   createdAt: Date;
   reporterId: string | null;
+  aiScore: number | null;
+  aiConfidence: string | null;
   scamType: { code: string; labelEn: string; labelTh: string };
   _count: { evidenceFiles: number };
   moderations: { remark: string }[];
@@ -36,6 +38,8 @@ export interface DetailRow {
   targetIdentifierKind: string | null;
   targetIdentifierNormalized: string | null;
   reporterId: string | null;
+  aiScore: number | null;
+  aiConfidence: string | null;
   createdAt: Date;
   updatedAt: Date;
   verifiedAt: Date | null;
@@ -81,6 +85,8 @@ export async function findQueueRows(scamTypeCode?: string): Promise<QueueRow[]> 
       priorityFlag: true,
       createdAt: true,
       reporterId: true,
+      aiScore: true,
+      aiConfidence: true,
       scamType: { select: { code: true, labelEn: true, labelTh: true } },
       _count: { select: { evidenceFiles: true } },
       moderations: {
@@ -116,6 +122,8 @@ export async function findDetailRow(reportId: string): Promise<DetailRow | null>
       targetIdentifierKind: true,
       targetIdentifierNormalized: true,
       reporterId: true,
+      aiScore: true,
+      aiConfidence: true,
       createdAt: true,
       updatedAt: true,
       verifiedAt: true,

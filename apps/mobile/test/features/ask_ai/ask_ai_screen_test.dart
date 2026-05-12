@@ -70,7 +70,7 @@ class _StubRepo implements AskAiRepository {
           intentDetected: false,
           reportable: false,
           hasEnoughInfo: false,
-          similarReportIds: const [],
+          similarReports: const [],
         );
   }
 
@@ -106,7 +106,7 @@ class _NoopPersistence implements AskAiPersistence {
   Future<void> clearForUser(String userId) async {}
 }
 
-Widget _wrap(_StubRepo repo, {_StubSubmit? submit}) {
+Widget _wrap(_StubRepo repo, {_StubSubmit? submit, bool autoSeedReport = false}) {
   final stubSubmit = submit ?? _StubSubmit();
   return ProviderScope(
     overrides: [
@@ -115,10 +115,10 @@ Widget _wrap(_StubRepo repo, {_StubSubmit? submit}) {
       submitDraftedReportProvider.overrideWithValue(stubSubmit),
       askAiPersistenceProvider.overrideWithValue(_NoopPersistence()),
     ],
-    child: const MaterialApp(
+    child: MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: AskAiScreen(),
+      home: AskAiScreen(autoSeedReport: autoSeedReport),
     ),
   );
 }
@@ -166,6 +166,41 @@ void main() {
       await tester.pumpAndSettle();
       final btn = tester.widget<IconButton>(find.byKey(const Key('askAiViewDraft')));
       expect(btn.onPressed, isNull);
+    },
+  );
+
+  testWidgets(
+    'autoSeedReport sends askAiReportSeed once on first build',
+    (tester) async {
+      final repo = _StubRepo();
+      await tester.pumpWidget(_wrap(repo, autoSeedReport: true));
+      await tester.pumpAndSettle();
+
+      expect(
+        repo.sent,
+        equals(['I want to report a suspicious activity, can you help me?']),
+      );
+      // Seed bubble is rendered in chat.
+      expect(
+        find.text('I want to report a suspicious activity, can you help me?'),
+        findsOneWidget,
+      );
+
+      // Trigger a rebuild — seed must not fire again.
+      await tester.pump(const Duration(milliseconds: 200));
+      await tester.pumpAndSettle();
+      expect(repo.sent.length, 1);
+    },
+  );
+
+  testWidgets(
+    'autoSeedReport defaults to false — no seed sent on plain entry',
+    (tester) async {
+      final repo = _StubRepo();
+      await tester.pumpWidget(_wrap(repo));
+      await tester.pumpAndSettle();
+
+      expect(repo.sent, isEmpty);
     },
   );
 }

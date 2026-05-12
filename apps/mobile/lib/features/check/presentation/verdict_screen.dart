@@ -201,7 +201,8 @@ class _ResultView extends StatelessWidget {
 
                 // Report this (always visible)
                 OutlinedButton(
-                  onPressed: () => context.push('/submit-report'),
+                  onPressed: () =>
+                      context.push('/ask-ai?seed=report-intent'),
                   child: Text(l.verdictReportThis),
                 ),
               ],

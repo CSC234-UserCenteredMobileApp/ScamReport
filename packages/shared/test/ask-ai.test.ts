@@ -105,6 +105,15 @@ describe('AskAiTurnResponse', () => {
   };
   const assistantMessage = { ...baseMessage, id: UUID2, role: 'assistant' as const };
 
+  const sampleSimilarReport = {
+    id: UUID,
+    title: 'Fake Kerry parcel SMS',
+    scamTypeCode: 'phishing_sms',
+    scamTypeLabelEn: 'Phishing SMS',
+    scamTypeLabelTh: 'ฟิชชิง SMS',
+    verifiedAt: DT,
+  };
+
   test('accepts a not-reportable turn (with missingFacts)', () => {
     expect(
       Value.Check(AskAiTurnResponse, {
@@ -114,7 +123,7 @@ describe('AskAiTurnResponse', () => {
         reportable: false,
         hasEnoughInfo: false,
         draft: null,
-        similarReportIds: [],
+        similarReports: [],
         missingFacts: ['description', 'targetIdentifier', 'scamTypeCue', 'userAction'],
       }),
     ).toBe(true);
@@ -129,7 +138,7 @@ describe('AskAiTurnResponse', () => {
         reportable: true,
         hasEnoughInfo: true,
         draft: validDraft,
-        similarReportIds: [UUID],
+        similarReports: [sampleSimilarReport],
         missingFacts: [],
       }),
     ).toBe(true);
@@ -144,13 +153,13 @@ describe('AskAiTurnResponse', () => {
         reportable: false,
         hasEnoughInfo: false,
         draft: null,
-        similarReportIds: [],
+        similarReports: [],
         missingFacts: ['nope'],
       }),
     ).toBe(false);
   });
 
-  test('rejects more than 5 similarReportIds', () => {
+  test('rejects more than 5 similarReports', () => {
     expect(
       Value.Check(AskAiTurnResponse, {
         userMessage: baseMessage,
@@ -159,7 +168,30 @@ describe('AskAiTurnResponse', () => {
         reportable: false,
         hasEnoughInfo: false,
         draft: null,
-        similarReportIds: [UUID, UUID2, UUID, UUID2, UUID, UUID2],
+        similarReports: [
+          sampleSimilarReport,
+          { ...sampleSimilarReport, id: UUID2 },
+          sampleSimilarReport,
+          { ...sampleSimilarReport, id: UUID2 },
+          sampleSimilarReport,
+          { ...sampleSimilarReport, id: UUID2 },
+        ],
+        missingFacts: [],
+      }),
+    ).toBe(false);
+  });
+
+  test('rejects a similarReports entry missing required fields', () => {
+    expect(
+      Value.Check(AskAiTurnResponse, {
+        userMessage: baseMessage,
+        assistantMessage,
+        intentDetected: false,
+        reportable: false,
+        hasEnoughInfo: false,
+        draft: null,
+        // Missing scamTypeLabelTh.
+        similarReports: [{ ...sampleSimilarReport, scamTypeLabelTh: undefined }],
         missingFacts: [],
       }),
     ).toBe(false);

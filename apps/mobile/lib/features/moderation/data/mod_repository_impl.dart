@@ -56,6 +56,8 @@ class ModRepositoryImpl implements ModRepository {
         priorityFlag: m['priorityFlag'] as bool,
         evidenceCount: m['evidenceCount'] as int,
         lastRemarkByAdmin: m['lastRemarkByAdmin'] as String?,
+        aiScore: m['aiScore'] as int?,
+        aiConfidence: m['aiConfidence'] as String?,
       );
 
   ModReportDetail _mapDetail(Map<String, dynamic> m) => ModReportDetail(
