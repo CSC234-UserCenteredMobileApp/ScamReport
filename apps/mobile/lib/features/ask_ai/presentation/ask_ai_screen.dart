@@ -17,7 +17,12 @@ import 'widgets/draft_editor_sheet.dart';
 /// Ask AI conversational chat screen (P-09 / FR-4.x). Text-only in v1;
 /// attachments + inline consent + draft editor land in PR-4 / PR-5.
 class AskAiScreen extends ConsumerStatefulWidget {
-  const AskAiScreen({super.key});
+  const AskAiScreen({super.key, this.autoSeedReport = false});
+
+  /// When true, on first build the screen resets any in-flight conversation
+  /// and auto-sends `askAiReportSeed` so the AI knows the user arrived via a
+  /// "Report" CTA and should drive the report-with-AI flow.
+  final bool autoSeedReport;
 
   @override
   ConsumerState<AskAiScreen> createState() => _AskAiScreenState();
@@ -26,6 +31,23 @@ class AskAiScreen extends ConsumerStatefulWidget {
 class _AskAiScreenState extends ConsumerState<AskAiScreen> {
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
+  bool _seedFired = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.autoSeedReport) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _fireSeed());
+    }
+  }
+
+  void _fireSeed() {
+    if (_seedFired || !mounted) return;
+    _seedFired = true;
+    final notifier = ref.read(askAiChatControllerProvider.notifier);
+    notifier.reset();
+    notifier.sendMessage(context.l10n.askAiReportSeed);
+  }
 
   @override
   void dispose() {

@@ -100,32 +100,42 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/ask-ai',
-              builder: (_, __) => Consumer(
-                builder: (context, ref, _) {
-                  final user = ref.watch(currentUserProvider).valueOrNull;
-                  if (user?.isAdmin == true) return const ModScreen();
-                  if (user == null) {
-                    return Scaffold(
-                      appBar: AppBar(title: Text(context.l10n.aiSearch)),
-                      body: EmptyGate(
-                        icon: Icons.auto_awesome_outlined,
-                        heading: context.l10n.askAiSignInTitle,
-                        body: context.l10n.askAiSignInBody,
-                        primaryLabel: context.l10n.askAiSignInCta,
-                        onPrimary: () => context.push('/login'),
-                      ),
-                    );
-                  }
-                  final enabled = ref.watch(featureFlagProvider('enable_ask_ai'));
-                  if (!enabled) {
-                    return Scaffold(
-                      appBar: AppBar(title: Text(context.l10n.aiSearch)),
-                      body: Center(child: Text(context.l10n.askAiComingSoon)),
-                    );
-                  }
-                  return const AskAiScreen();
-                },
-              ),
+              builder: (_, state) {
+                // ?seed=report-intent — entry from "Report" CTAs. Bypasses the
+                // admin → Mod redirect so admins can also file reports, and
+                // tells AskAiScreen to reset + auto-send the seed message.
+                final isReportSeed =
+                    state.uri.queryParameters['seed'] == 'report-intent';
+                return Consumer(
+                  builder: (context, ref, _) {
+                    final user = ref.watch(currentUserProvider).valueOrNull;
+                    if (user?.isAdmin == true && !isReportSeed) {
+                      return const ModScreen();
+                    }
+                    if (user == null) {
+                      return Scaffold(
+                        appBar: AppBar(title: Text(context.l10n.aiSearch)),
+                        body: EmptyGate(
+                          icon: Icons.auto_awesome_outlined,
+                          heading: context.l10n.askAiSignInTitle,
+                          body: context.l10n.askAiSignInBody,
+                          primaryLabel: context.l10n.askAiSignInCta,
+                          onPrimary: () => context.push('/login'),
+                        ),
+                      );
+                    }
+                    final enabled =
+                        ref.watch(featureFlagProvider('enable_ask_ai'));
+                    if (!enabled) {
+                      return Scaffold(
+                        appBar: AppBar(title: Text(context.l10n.aiSearch)),
+                        body: Center(child: Text(context.l10n.askAiComingSoon)),
+                      );
+                    }
+                    return AskAiScreen(autoSeedReport: isReportSeed);
+                  },
+                );
+              },
               routes: [
                 GoRoute(
                   path: 'review/:id',
