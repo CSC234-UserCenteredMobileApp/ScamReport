@@ -16,6 +16,8 @@
     "or": "or",
     "noAccessTitle": "No admin access",
     "noAccessBody": "This account is not authorised for the admin portal. Sign out and try again with an admin account.",
+    "syncErrorTitle": "Couldn't verify your account",
+    "syncErrorBody": "We signed you in, but couldn't reach the server to confirm your access. Check your connection and try again.",
     "errorInvalid": "Invalid email or password.",
     "errorGeneric": "Something went wrong. Please try again."
   },
