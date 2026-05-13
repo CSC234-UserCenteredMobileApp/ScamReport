@@ -1,3 +1,6 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 allprojects {
     repositories {
         google()
@@ -17,6 +20,15 @@ subprojects {
 }
 subprojects {
     project.evaluationDependsOn(":app")
+}
+
+subprojects {
+    tasks.withType<KotlinCompile>().configureEach {
+        val target = project.provider {
+            project.tasks.withType<JavaCompile>().firstOrNull()?.targetCompatibility ?: "17"
+        }
+        compilerOptions.jvmTarget.set(target.map { JvmTarget.fromTarget(it) })
+    }
 }
 
 tasks.register<Delete>("clean") {
