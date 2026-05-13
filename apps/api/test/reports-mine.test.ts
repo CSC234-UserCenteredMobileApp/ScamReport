@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from 'bun:test';
+import { __setFirestoreForTest } from '../src/sync/firestore_sync';
 
 // ---------------------------------------------------------------------------
 // Module-level mocks — installed before importing app
@@ -9,7 +10,8 @@ let mockMyReports: unknown[] = [];
 let mockFindFirst: unknown = null;
 let mockScamType: unknown = null;
 let mockUpdateResult: unknown = null;
-let mirrorCalls: unknown[] = [];
+let firestoreSets: Array<{ path: string; data: Record<string, unknown> }> = [];
+let firestoreDeletes: Array<{ path: string }> = [];
 let txDeleteManyCalls: unknown[] = [];
 let txCreateManyCalls: unknown[] = [];
 let txUpdateCalls: unknown[] = [];
@@ -39,12 +41,6 @@ mock.module('../src/core/gemini/client', () => ({
   generateMultimodal: async () => '',
   GeminiStructuredParseError: class GeminiStructuredParseError extends Error {},
   inlinePart: () => ({}),
-}));
-
-mock.module('../src/sync/firestore_sync', () => ({
-  mirrorMyReport: async (report: unknown) => {
-    mirrorCalls.push(report);
-  },
 }));
 
 mock.module('../src/core/supabase/storage', () => ({
@@ -107,6 +103,19 @@ mock.module('../src/core/db/client', () => ({
   }),
 }));
 
+const firestoreStub = {
+  collection: (collPath: string) => ({
+    doc: (id: string) => ({
+      set: async (data: Record<string, unknown>) => {
+        firestoreSets.push({ path: `${collPath}/${id}`, data });
+      },
+      delete: async () => {
+        firestoreDeletes.push({ path: `${collPath}/${id}` });
+      },
+    }),
+  }),
+};
+
 const { app } = await import('../src/index');
 
 // ---------------------------------------------------------------------------
@@ -132,14 +141,17 @@ beforeEach(() => {
   mockFindFirst = null;
   mockScamType = null;
   mockUpdateResult = null;
-  mirrorCalls = [];
+  firestoreSets = [];
+  firestoreDeletes = [];
   txDeleteManyCalls = [];
   txCreateManyCalls = [];
   txUpdateCalls = [];
+  __setFirestoreForTest(firestoreStub);
 });
 
 afterEach(() => {
   mockDecoded = null;
+  __setFirestoreForTest(null);
 });
 
 // ---------------------------------------------------------------------------
@@ -291,7 +303,7 @@ describe('PATCH /reports/:id', () => {
     });
     expect(result.id).toBe(REPORT_ID);
     expect(result.status).toBe('pending');
-    expect(mirrorCalls).toHaveLength(1);
+    expect(firestoreSets).toHaveLength(1);
   });
 });
 
@@ -342,8 +354,7 @@ describe('DELETE /reports/:id', () => {
     const result = await withdrawReport(USER_ID, REPORT_ID);
     expect(result.id).toBe(REPORT_ID);
     expect(result.status).toBe('withdrawn');
-    // mirrorMyReport called with status=withdrawn (which triggers Firestore delete)
-    expect(mirrorCalls).toHaveLength(1);
-    expect((mirrorCalls[0] as { status: string }).status).toBe('withdrawn');
+    // withdrawn status → mirrorMyReport calls .delete() on the Firestore doc
+    expect(firestoreDeletes).toHaveLength(1);
   });
 });
