@@ -102,3 +102,9 @@ export const AdminActionResponse = Type.Object({
   updatedAt: Type.String({ format: 'date-time' }),
 });
 export type AdminActionResponse = Static<typeof AdminActionResponse>;
+
+export const AdminEvidenceUrlResponse = Type.Object({
+  url: Type.String({ format: 'uri' }),
+  expiresAt: Type.String({ format: 'date-time' }),
+});
+export type AdminEvidenceUrlResponse = Static<typeof AdminEvidenceUrlResponse>;

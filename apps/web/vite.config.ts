@@ -56,7 +56,6 @@ export default defineConfig({
         'src/routes/dashboard-layout.tsx',
         'src/routes/announcements/**',
         'src/routes/deletion-requests.tsx',
-        'src/routes/moderation/detail.tsx',
         // Generated / static.
         'src/i18n/**',
         'src/lib/i18n/**',

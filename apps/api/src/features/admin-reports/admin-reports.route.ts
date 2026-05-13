@@ -2,6 +2,7 @@ import { Elysia, t } from 'elysia';
 import {
   AdminQueueResponse,
   AdminReportDetailResponse,
+  AdminEvidenceUrlResponse,
   ApproveRejectFlagRequest,
   AdminActionResponse,
 } from '@my-product/shared';
@@ -10,6 +11,7 @@ import { requireRole } from '../../core/middleware/require_role';
 import {
   getQueue,
   getDetail,
+  getEvidenceSignedUrl,
   approveReport,
   rejectReport,
   flagReport,
@@ -17,6 +19,10 @@ import {
 } from './admin-reports.service';
 
 const uuidParam = t.Object({ id: t.String({ format: 'uuid' }) });
+const evidenceParams = t.Object({
+  id: t.String({ format: 'uuid' }),
+  fileId: t.String({ format: 'uuid' }),
+});
 const notFound = t.Object({ error: t.String() });
 
 export const adminReportsRoute = new Elysia({ prefix: '/admin/reports' })
@@ -41,6 +47,19 @@ export const adminReportsRoute = new Elysia({ prefix: '/admin/reports' })
     {
       params: uuidParam,
       response: { 200: AdminReportDetailResponse, 404: notFound },
+    },
+  )
+
+  .get(
+    '/:id/evidence/:fileId/url',
+    async ({ params, set }) => {
+      const signed = await getEvidenceSignedUrl(params.id, params.fileId);
+      if (!signed) { set.status = 404; return { error: 'Not found' }; }
+      return signed;
+    },
+    {
+      params: evidenceParams,
+      response: { 200: AdminEvidenceUrlResponse, 404: notFound },
     },
   )
 

@@ -52,5 +52,39 @@
   "empty": "คิวว่างเปล่า — เยี่ยมมาก!",
   "error": "โหลดคิวไม่สำเร็จ กรุณาลองใหม่",
   "loading": "กำลังโหลดรายงาน…",
-  "detailComingSoon": "หน้ารายละเอียดเต็มจะมาในสปรินต์ถัดไป"
+  "detail": {
+    "title": "ตรวจสอบรายงาน",
+    "back": "กลับไปยังคิว",
+    "submittedAt": "ส่งเมื่อ",
+    "submittedAnonymously": "ส่งโดยไม่ระบุตัวตน",
+    "description": "รายละเอียด",
+    "targetIdentifier": "ข้อมูลที่ถูกร้องเรียน",
+    "evidence": "หลักฐาน",
+    "evidenceCount": "{{count}} ไฟล์",
+    "evidenceCount_other": "{{count}} ไฟล์",
+    "auditTrail": "ประวัติการดำเนินการ",
+    "auditSubmitted": "ส่งรายงาน",
+    "anonymousAdmin": "ระบบ",
+    "alreadyActioned": "รายงานนี้ได้รับการตรวจสอบไปแล้ว",
+    "loading": "กำลังโหลดรายงาน…",
+    "error": "โหลดรายงานไม่สำเร็จ กรุณาลองใหม่",
+    "notFound": "ไม่พบรายงานนี้",
+    "actions": {
+      "reject": "ปฏิเสธ",
+      "flag": "Flag เพื่อปรึกษาทีม",
+      "unflag": "ยกเลิก Flag",
+      "approve": "อนุมัติ"
+    },
+    "ai": {
+      "label": "คะแนน AI",
+      "pending": "รอการประเมิน"
+    }
+  },
+  "evidence": {
+    "openFull": "เปิดในแท็บใหม่",
+    "pdfFallback": "ไม่สามารถดูตัวอย่างได้ กรุณาเปิดในแท็บใหม่",
+    "missing": "โหลดไฟล์ไม่สำเร็จ",
+    "loading": "กำลังโหลดตัวอย่าง…",
+    "viewerTitle": "ตัวอย่างหลักฐาน"
+  }
 }

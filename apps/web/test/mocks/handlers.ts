@@ -1,5 +1,12 @@
 import { http, HttpResponse } from 'msw';
-import type { AdminQueueItem, AdminQueueResponse, AuthSyncResponse } from '@my-product/shared';
+import type {
+  AdminEvidenceUrlResponse,
+  AdminQueueItem,
+  AdminQueueResponse,
+  AdminReportDetail,
+  AdminReportDetailResponse,
+  AuthSyncResponse,
+} from '@my-product/shared';
 
 const BASE = '*';
 
@@ -34,6 +41,55 @@ export const sampleQueue: AdminQueueResponse = {
   flaggedCount: 1,
 };
 
+export const sampleDetail: AdminReportDetail = {
+  id: '11111111-1111-1111-1111-111111111111',
+  title: 'Fake parcel SMS',
+  description:
+    'I received an SMS claiming a parcel was held for clearance fees. The link looked suspicious.',
+  scamTypeCode: 'phishing_sms',
+  scamTypeLabelEn: 'Phishing SMS',
+  scamTypeLabelTh: 'ฟิชชิ่ง SMS',
+  submittedAt: new Date(Date.now() - 12 * 3_600_000).toISOString(),
+  status: 'pending',
+  priorityFlag: false,
+  targetIdentifier: '0812345678',
+  targetIdentifierKind: 'phone',
+  evidenceFiles: [
+    {
+      id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+      storagePath: 'evidence/admin/sample.jpg',
+      kind: 'image',
+      mimeType: 'image/jpeg',
+      sizeBytes: 24_576,
+    },
+    {
+      id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+      storagePath: 'evidence/admin/sample.pdf',
+      kind: 'pdf',
+      mimeType: 'application/pdf',
+      sizeBytes: 65_536,
+    },
+  ],
+  duplicateCount: 0,
+  aiScore: 78,
+  aiConfidence: 'high',
+  auditTrail: [
+    {
+      adminId: 'cccccccc-cccc-cccc-cccc-cccccccccccc',
+      action: 'flag',
+      remark: 'Need a second pair of eyes on this one.',
+      createdAt: new Date(Date.now() - 2 * 3_600_000).toISOString(),
+    },
+  ],
+};
+
+export const sampleDetailResponse: AdminReportDetailResponse = { report: sampleDetail };
+
+export const sampleEvidenceUrlResponse: AdminEvidenceUrlResponse = {
+  url: 'https://signed.example/evidence/sample.jpg?token=mock',
+  expiresAt: new Date(Date.now() + 3_600_000).toISOString(),
+};
+
 export const adminSyncResponse: AuthSyncResponse = {
   user: {
     id: '99999999-9999-9999-9999-999999999999',
@@ -53,6 +109,10 @@ export const userSyncResponse: AuthSyncResponse = {
 export const handlers = [
   http.post(`${BASE}/auth/sync`, () => HttpResponse.json(adminSyncResponse)),
   http.get(`${BASE}/admin/reports/queue`, () => HttpResponse.json(sampleQueue)),
+  http.get(`${BASE}/admin/reports/:id`, () => HttpResponse.json(sampleDetailResponse)),
+  http.get(`${BASE}/admin/reports/:id/evidence/:fileId/url`, () =>
+    HttpResponse.json(sampleEvidenceUrlResponse),
+  ),
   http.post(`${BASE}/admin/reports/:id/approve`, ({ params }) =>
     HttpResponse.json({
       id: params.id as string,
