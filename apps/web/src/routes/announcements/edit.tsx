@@ -1,17 +1,5 @@
-import { useTranslation } from 'react-i18next';
-import { PageHeader } from '@/components/page-header';
-import { Card, CardContent } from '@/components/ui/card';
+import { AnnouncementsEditPage } from '@/features/announcements/pages/edit-page';
 
-export default function AnnouncementsEditPage() {
-  const { t } = useTranslation('announcements');
-  return (
-    <div className="space-y-6">
-      <PageHeader title={t('editTitle')} subtitle={t('comingSoonBody')} />
-      <Card>
-        <CardContent className="p-8 text-center text-muted-foreground">
-          {t('comingSoonBody')}
-        </CardContent>
-      </Card>
-    </div>
-  );
+export default function EditRoute() {
+  return <AnnouncementsEditPage />;
 }
