@@ -290,6 +290,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminReviewUnflagged => 'Flag removed.';
 
   @override
+  String get modErrorUnauthorized => 'Your session expired. Sign in again.';
+
+  @override
+  String get modErrorForbidden =>
+      'This account does not have admin permission. Ask the team lead to promote it.';
+
+  @override
+  String get modErrorNotFound => 'This report was deleted or already actioned.';
+
+  @override
+  String get modErrorInvalidRemark => 'Remark is required.';
+
+  @override
+  String modErrorGeneric(int code, String message) {
+    return 'Server error ($code): $message';
+  }
+
+  @override
+  String get aiScorePending => 'AI score pending';
+
+  @override
   String adminReviewSubmittedOn(String date) {
     return 'Submitted $date';
   }
@@ -309,6 +330,32 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String adminAiScore(int score, String level) {
     return 'AI confidence: $score% ($level)';
+  }
+
+  @override
+  String get aiScoreBadgeLabel => 'AI';
+
+  @override
+  String get aiScoreRiskLabel => 'RISK';
+
+  @override
+  String get aiScoreVerdictLabel => 'AI VERDICT';
+
+  @override
+  String get aiVerdictHigh => 'Likely scam';
+
+  @override
+  String get aiVerdictMedium => 'Needs review';
+
+  @override
+  String get aiVerdictLow => 'Likely reject';
+
+  @override
+  String get aiVerdictUnknown => 'Inconclusive';
+
+  @override
+  String aiScoreA11yLabel(String confidence, int score) {
+    return 'AI confidence $confidence, score $score out of 100';
   }
 
   @override
@@ -492,6 +539,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get askAiNewChat => 'New chat';
+
+  @override
+  String get askAiReportSeed =>
+      'I want to report a suspicious activity, can you help me?';
+
+  @override
+  String get askAiSimilarReportsLabel => 'Matched verified reports';
 
   @override
   String get askAiPastChats => 'Past chats';

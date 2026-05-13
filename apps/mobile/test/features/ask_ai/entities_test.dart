@@ -3,6 +3,7 @@ import 'package:mobile/features/ask_ai/domain/entities/ai_draft.dart';
 import 'package:mobile/features/ask_ai/domain/entities/chat_attachment.dart';
 import 'package:mobile/features/ask_ai/domain/entities/chat_message.dart';
 import 'package:mobile/features/ask_ai/domain/entities/conversation.dart';
+import 'package:mobile/features/ask_ai/domain/entities/similar_report.dart';
 import 'package:mobile/features/ask_ai/domain/entities/turn_outcome.dart';
 import 'package:mobile/features/ask_ai/domain/failures.dart';
 
@@ -97,7 +98,16 @@ void main() {
       intentDetected: true,
       reportable: true,
       hasEnoughInfo: true,
-      similarReportIds: const ['r-1'],
+      similarReports: [
+        SimilarReport(
+          id: 'r-1',
+          title: 'Sample',
+          scamTypeCode: 'other',
+          scamTypeLabelEn: 'Other',
+          scamTypeLabelTh: 'อื่นๆ',
+          verifiedAt: DateTime(2026, 5, 7),
+        ),
+      ],
       draft: const AiDraft(
         title: 'A draft title here',
         description: 'A draft description here.',
@@ -105,7 +115,7 @@ void main() {
       ),
     );
     expect(outcome.draft, isNotNull);
-    expect(outcome.similarReportIds, ['r-1']);
+    expect(outcome.similarReports.map((r) => r.id).toList(), ['r-1']);
   });
 
   test('AskAiFailure subclasses carry messages', () {

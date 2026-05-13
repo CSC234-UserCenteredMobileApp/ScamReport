@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/theme/app_theme.dart';
 import 'package:mobile/core/widgets/audit_trail_row.dart';
+import 'package:mobile/features/moderation/data/mod_action_failure.dart';
 import 'package:mobile/features/moderation/domain/mod_report.dart';
 import 'package:mobile/features/moderation/domain/mod_repository.dart';
 import 'package:mobile/features/moderation/presentation/admin_review_screen.dart';
@@ -174,7 +177,7 @@ void main() {
       expect(find.textContaining('Submitted '), findsOneWidget);
     });
 
-    testWidgets('AI score row visible when score is non-null', (tester) async {
+    testWidgets('AI score card visible when score is non-null', (tester) async {
       tester.view.physicalSize = const Size(1080, 1920);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -190,10 +193,14 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('87%'), findsOneWidget);
+      // Score ring renders the raw number; verdict copy + label appear beside it.
+      expect(find.text('87'), findsOneWidget);
+      expect(find.text('AI VERDICT'), findsOneWidget);
+      expect(find.text('Likely scam'), findsOneWidget);
     });
 
-    testWidgets('AI score row hidden when score is null', (tester) async {
+    testWidgets('AI score card shows pending chip when score is null',
+        (tester) async {
       tester.view.physicalSize = const Size(1080, 1920);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -208,7 +215,10 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('confidence'), findsNothing);
+      // No verdict / risk strings — but the admin sees the pending chip.
+      expect(find.text('AI VERDICT'), findsNothing);
+      expect(find.text('RISK'), findsNothing);
+      expect(find.text('AI score pending'), findsOneWidget);
     });
 
     testWidgets('renders no-evidence placeholder when list is empty',
@@ -497,5 +507,182 @@ void main() {
 
       expect(find.textContaining('Exception'), findsOneWidget);
     });
+
+    testWidgets(
+        '403 from approve surfaces localised Forbidden snackbar — no generic dump',
+        (tester) async {
+      tester.view.physicalSize = const Size(1080, 1920);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(_wrap(
+        const AdminReviewScreen(reportId: 'r1'),
+        overrides: [
+          modDetailProvider('r1').overrideWith((ref) async => _detail()),
+          modRepositoryProvider.overrideWithValue(_FailingRepository(
+            ModActionFailure(
+              statusCode: 403,
+              serverMessage: 'Forbidden',
+              action: 'approve',
+            ),
+          )),
+        ],
+      ));
+
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Approve'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'looks legit');
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Approve').last);
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining(
+          'This account does not have admin permission',
+        ),
+        findsOneWidget,
+      );
+      // Make sure the raw `Exception(...)` dump from the old code path is gone.
+      expect(find.textContaining('ModActionFailure'), findsNothing);
+    });
+
+    testWidgets(
+        '401 from reject surfaces localised Unauthorized snackbar',
+        (tester) async {
+      tester.view.physicalSize = const Size(1080, 1920);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(_wrap(
+        const AdminReviewScreen(reportId: 'r1'),
+        overrides: [
+          modDetailProvider('r1').overrideWith((ref) async => _detail()),
+          modRepositoryProvider.overrideWithValue(_FailingRepository(
+            ModActionFailure(
+              statusCode: 401,
+              serverMessage: 'Unauthorized',
+              action: 'reject',
+            ),
+          )),
+        ],
+      ));
+
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Reject'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'spam');
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Reject'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('Your session expired'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets(
+        'action bar disables buttons while approve request is in-flight',
+        (tester) async {
+      tester.view.physicalSize = const Size(1080, 1920);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final repo = _SlowRepository();
+
+      await tester.pumpWidget(_wrap(
+        const AdminReviewScreen(reportId: 'r1'),
+        overrides: [
+          modDetailProvider('r1').overrideWith((ref) async => _detail()),
+          modRepositoryProvider.overrideWithValue(repo),
+        ],
+      ));
+
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Approve'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'looks legit');
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Approve').last);
+      // pump once — the request is hanging on the slow future, button state
+      // should now reflect isSubmitting.
+      await tester.pump();
+
+      // Spinner replaces the Approve label inside the FilledButton.
+      expect(
+        find.descendant(
+          of: find.byType(FilledButton),
+          matching: find.byType(CircularProgressIndicator),
+        ),
+        findsOneWidget,
+      );
+
+      // Reject + Flag are now disabled (onPressed is null).
+      final rejectBtn = tester
+          .widget<OutlinedButton>(find.widgetWithText(OutlinedButton, 'Reject'));
+      final flagBtn = tester
+          .widget<OutlinedButton>(find.widgetWithText(OutlinedButton, 'Flag'));
+      expect(rejectBtn.onPressed, isNull);
+      expect(flagBtn.onPressed, isNull);
+
+      // Resolve the slow future and let the screen settle.
+      repo.completer.complete();
+      await tester.pumpAndSettle();
+    });
   });
+}
+
+class _FailingRepository implements ModRepository {
+  _FailingRepository(this.failure);
+
+  final Object failure;
+
+  @override
+  Future<ModQueueData> getQueue() async => throw failure;
+
+  @override
+  Future<ModReportDetail> getDetail(String reportId) async => throw failure;
+
+  @override
+  Future<void> approve(String id, String remark) async => throw failure;
+
+  @override
+  Future<void> reject(String id, String remark) async => throw failure;
+
+  @override
+  Future<void> flag(String id, String remark) async => throw failure;
+
+  @override
+  Future<void> unflag(String id, String remark) async => throw failure;
+}
+
+class _SlowRepository implements ModRepository {
+  final completer = Completer<void>();
+
+  @override
+  Future<ModQueueData> getQueue() async =>
+      const ModQueueData(items: [], pendingCount: 0, flaggedCount: 0);
+
+  @override
+  Future<ModReportDetail> getDetail(String reportId) async =>
+      throw UnimplementedError();
+
+  @override
+  Future<void> approve(String id, String remark) => completer.future;
+
+  @override
+  Future<void> reject(String id, String remark) => completer.future;
+
+  @override
+  Future<void> flag(String id, String remark) => completer.future;
+
+  @override
+  Future<void> unflag(String id, String remark) => completer.future;
 }

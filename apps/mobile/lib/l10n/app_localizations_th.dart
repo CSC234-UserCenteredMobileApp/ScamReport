@@ -290,6 +290,27 @@ class AppLocalizationsTh extends AppLocalizations {
   String get adminReviewUnflagged => 'ยกเลิกสถานะแล้ว';
 
   @override
+  String get modErrorUnauthorized => 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่';
+
+  @override
+  String get modErrorForbidden =>
+      'บัญชีนี้ไม่มีสิทธิ์ผู้ดูแลระบบ กรุณาแจ้งหัวหน้าทีมเพื่อยกระดับสิทธิ์';
+
+  @override
+  String get modErrorNotFound => 'รายงานนี้ถูกลบหรือดำเนินการไปแล้ว';
+
+  @override
+  String get modErrorInvalidRemark => 'ต้องระบุเหตุผล';
+
+  @override
+  String modErrorGeneric(int code, String message) {
+    return 'ข้อผิดพลาดเซิร์ฟเวอร์ ($code): $message';
+  }
+
+  @override
+  String get aiScorePending => 'กำลังประมวลผลคะแนน AI';
+
+  @override
   String adminReviewSubmittedOn(String date) {
     return 'ส่งเมื่อ $date';
   }
@@ -309,6 +330,32 @@ class AppLocalizationsTh extends AppLocalizations {
   @override
   String adminAiScore(int score, String level) {
     return 'ความเชื่อมั่น AI: $score% ($level)';
+  }
+
+  @override
+  String get aiScoreBadgeLabel => 'AI';
+
+  @override
+  String get aiScoreRiskLabel => 'ความเสี่ยง';
+
+  @override
+  String get aiScoreVerdictLabel => 'ผลตรวจ AI';
+
+  @override
+  String get aiVerdictHigh => 'น่าจะเป็นสแกม';
+
+  @override
+  String get aiVerdictMedium => 'ต้องตรวจสอบ';
+
+  @override
+  String get aiVerdictLow => 'น่าจะปฏิเสธ';
+
+  @override
+  String get aiVerdictUnknown => 'สรุปไม่ได้';
+
+  @override
+  String aiScoreA11yLabel(String confidence, int score) {
+    return 'ความเชื่อมั่น AI $confidence คะแนน $score จาก 100';
   }
 
   @override
@@ -492,6 +539,13 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get askAiNewChat => 'แชทใหม่';
+
+  @override
+  String get askAiReportSeed =>
+      'ฉันต้องการรายงานกิจกรรมที่น่าสงสัย ช่วยฉันได้ไหม';
+
+  @override
+  String get askAiSimilarReportsLabel => 'รายงานที่ตรวจสอบแล้วที่ตรงกัน';
 
   @override
   String get askAiPastChats => 'แชทที่ผ่านมา';

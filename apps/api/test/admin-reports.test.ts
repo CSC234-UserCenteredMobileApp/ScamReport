@@ -55,6 +55,10 @@ mock.module('../src/core/db/client', () => ({
       // lookup in that case.
       findUnique: async () =>
         mockDecoded?.role ? { role: mockDecoded.role } : null,
+      // Action handlers resolve the Firebase UID to a Postgres users.id via
+      // `resolveInternalUserId`, which upserts. Return a stable UUID so the
+      // FK insert into moderation_actions doesn't 500.
+      upsert: async () => ({ id: '00000000-0000-0000-0000-aaaaaaaaaaaa' }),
     },
     report: {
       findMany: async () => mockFindManyReports,
@@ -84,6 +88,8 @@ const MOCK_QUEUE_REPORT = {
   priorityFlag: false,
   createdAt: new Date('2026-01-01T00:00:00Z'),
   reporterId: 'abcd1234-0000-0000-0000-000000000000',
+  aiScore: 87,
+  aiConfidence: 'high',
   scamType: { code: 'phone', labelEn: 'Phone Scam', labelTh: 'หลอกลวงโทรศัพท์' },
   _count: { evidenceFiles: 2 },
   moderations: [],
@@ -99,6 +105,8 @@ const MOCK_DETAIL_REPORT = {
   targetIdentifierKind: 'phone',
   targetIdentifierNormalized: null,
   reporterId: null,
+  aiScore: 92,
+  aiConfidence: 'high',
   createdAt: new Date('2026-01-01T00:00:00Z'),
   updatedAt: new Date('2026-01-01T00:00:00Z'),
   verifiedAt: null,
@@ -242,6 +250,26 @@ describe('GET /admin/reports/queue', () => {
     expect(item).not.toHaveProperty('reporterId');
     expect(findReporterLeak(body)).toBeNull();
   });
+
+  test('200 admin — queue items expose persisted AI score + confidence', async () => {
+    mockDecoded = ADMIN;
+    mockFindManyReports = [MOCK_QUEUE_REPORT];
+    const res = await app.handle(req('/admin/reports/queue', { token: 'tok' }));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.items[0]).toHaveProperty('aiScore', 87);
+    expect(body.items[0]).toHaveProperty('aiConfidence', 'high');
+  });
+
+  test('200 admin — queue items render null AI score when never computed', async () => {
+    mockDecoded = ADMIN;
+    mockFindManyReports = [{ ...MOCK_QUEUE_REPORT, aiScore: null, aiConfidence: null }];
+    const res = await app.handle(req('/admin/reports/queue', { token: 'tok' }));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.items[0].aiScore).toBeNull();
+    expect(body.items[0].aiConfidence).toBeNull();
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -269,23 +297,34 @@ describe('GET /admin/reports/:id', () => {
     expect(res.status).toBe(404);
   });
 
-  test('200 admin — returns detail with AI score and no reporter identity', async () => {
+  test('200 admin — returns detail with persisted AI score and no reporter identity', async () => {
     mockDecoded = ADMIN;
     mockFindUniqueReport = MOCK_DETAIL_REPORT;
-    mockQueryRawResults = [
-      { report_id: 'aaaa0000-0000-0000-0000-000000000001', similarity: 0.92 },
-      { report_id: 'bbbb0000-0000-0000-0000-000000000002', similarity: 0.88 },
-      { report_id: 'cccc0000-0000-0000-0000-000000000003', similarity: 0.80 },
-    ];
     const res = await app.handle(req(`/admin/reports/${VALID_ID}`, { token: 'tok' }));
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body).toHaveProperty('report');
-    expect(body.report).toHaveProperty('aiScore');
-    expect(body.report).toHaveProperty('aiConfidence');
+    expect(body.report.aiScore).toBe(92);
+    expect(body.report.aiConfidence).toBe('high');
     expect(body.report).not.toHaveProperty('reporterHandle');
     expect(body.report).not.toHaveProperty('reporterId');
     expect(findReporterLeak(body)).toBeNull();
+  });
+
+  test('200 admin — detail triggers lazy backfill on legacy null rows (empty corpus → unknown)', async () => {
+    // Legacy row with both AI fields null + an empty corpus (no $queryRaw
+    // matches). The detail handler should call computeAiScore, get
+    // { null, 'unknown' } back, return that to the client, and not crash.
+    mockDecoded = ADMIN;
+    mockFindUniqueReport = { ...MOCK_DETAIL_REPORT, aiScore: null, aiConfidence: null };
+    mockQueryRawResults = [];
+    const res = await app.handle(req(`/admin/reports/${VALID_ID}`, { token: 'tok' }));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    // After backfill: score stays null (no matches), confidence reads
+    // 'unknown' (helper's signal to the UI to render the pending chip).
+    expect(body.report.aiScore).toBeNull();
+    expect(body.report.aiConfidence).toBe('unknown');
   });
 });
 

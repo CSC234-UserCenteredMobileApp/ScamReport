@@ -626,6 +626,42 @@ abstract class AppLocalizations {
   /// **'Flag removed.'**
   String get adminReviewUnflagged;
 
+  /// No description provided for @modErrorUnauthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session expired. Sign in again.'**
+  String get modErrorUnauthorized;
+
+  /// No description provided for @modErrorForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'This account does not have admin permission. Ask the team lead to promote it.'**
+  String get modErrorForbidden;
+
+  /// No description provided for @modErrorNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This report was deleted or already actioned.'**
+  String get modErrorNotFound;
+
+  /// No description provided for @modErrorInvalidRemark.
+  ///
+  /// In en, this message translates to:
+  /// **'Remark is required.'**
+  String get modErrorInvalidRemark;
+
+  /// No description provided for @modErrorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error ({code}): {message}'**
+  String modErrorGeneric(int code, String message);
+
+  /// No description provided for @aiScorePending.
+  ///
+  /// In en, this message translates to:
+  /// **'AI score pending'**
+  String get aiScorePending;
+
   /// No description provided for @adminReviewSubmittedOn.
   ///
   /// In en, this message translates to:
@@ -661,6 +697,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'AI confidence: {score}% ({level})'**
   String adminAiScore(int score, String level);
+
+  /// No description provided for @aiScoreBadgeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'AI'**
+  String get aiScoreBadgeLabel;
+
+  /// No description provided for @aiScoreRiskLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'RISK'**
+  String get aiScoreRiskLabel;
+
+  /// No description provided for @aiScoreVerdictLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'AI VERDICT'**
+  String get aiScoreVerdictLabel;
+
+  /// No description provided for @aiVerdictHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Likely scam'**
+  String get aiVerdictHigh;
+
+  /// No description provided for @aiVerdictMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs review'**
+  String get aiVerdictMedium;
+
+  /// No description provided for @aiVerdictLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Likely reject'**
+  String get aiVerdictLow;
+
+  /// No description provided for @aiVerdictUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Inconclusive'**
+  String get aiVerdictUnknown;
+
+  /// No description provided for @aiScoreA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'AI confidence {confidence}, score {score} out of 100'**
+  String aiScoreA11yLabel(String confidence, int score);
 
   /// No description provided for @noEvidence.
   ///
@@ -979,6 +1063,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New chat'**
   String get askAiNewChat;
+
+  /// No description provided for @askAiReportSeed.
+  ///
+  /// In en, this message translates to:
+  /// **'I want to report a suspicious activity, can you help me?'**
+  String get askAiReportSeed;
+
+  /// No description provided for @askAiSimilarReportsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Matched verified reports'**
+  String get askAiSimilarReportsLabel;
 
   /// No description provided for @askAiPastChats.
   ///

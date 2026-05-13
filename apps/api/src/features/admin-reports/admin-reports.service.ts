@@ -18,10 +18,11 @@ import type {
   AdminEvidenceFile,
   AdminQueueItem,
   AdminReportDetail,
-  AiConfidence,
   ModerationRecord,
+  AiConfidence,
 } from '@my-product/shared';
-import { searchSimilarReports } from '../../core/rag/retrieval';
+import { canonicalEmbedInput, computeAiScore } from '../../core/ai-score';
+import { getPrisma } from '../../core/db/client';
 import { sendFcmToUser } from '../../core/firebase/messaging';
 import { mirrorMyReport } from '../../sync/firestore_sync';
 import {
@@ -60,6 +61,8 @@ export async function getQueue(scamTypeCode?: string): Promise<{
     priorityFlag: r.priorityFlag,
     evidenceCount: r._count.evidenceFiles,
     lastRemarkByAdmin: r.moderations[0]?.remark ?? null,
+    aiScore: r.aiScore,
+    aiConfidence: (r.aiConfidence ?? null) as AdminQueueItem['aiConfidence'],
   }));
 
   return { items, pendingCount, flaggedCount };
@@ -77,9 +80,19 @@ export async function getDetail(reportId: string): Promise<AdminReportDetail | n
     ? await countDuplicates(report.targetIdentifierNormalized, reportId)
     : 0;
 
-  const { aiScore, aiConfidence } = await computeAiScore(
-    `${report.title}\n${report.description}`,
-  );
+  // Lazy backfill: legacy reports submitted before the AI score column
+  // existed (and reports whose submit-time scoring was rate-limited or
+  // had no verified corpus to compare against) stay NULL forever. Compute
+  // on-demand the first time an admin opens the report so subsequent
+  // opens are free. Best-effort — any failure leaves the column NULL and
+  // the response shows the "AI score pending" state.
+  let aiScore = report.aiScore;
+  let aiConfidence = (report.aiConfidence ?? null) as AiConfidence | null;
+  if (aiScore === null && aiConfidence === null) {
+    const backfilled = await backfillAiScore(report);
+    aiScore = backfilled.aiScore;
+    aiConfidence = backfilled.aiConfidence;
+  }
 
   const evidenceFiles: AdminEvidenceFile[] = report.evidenceFiles.map((f) => ({
     id: f.id,
@@ -111,34 +124,51 @@ export async function getDetail(reportId: string): Promise<AdminReportDetail | n
     evidenceFiles,
     duplicateCount,
     aiScore,
-    aiConfidence,
+    aiConfidence: aiConfidence as AdminReportDetail['aiConfidence'],
     auditTrail,
   };
 }
 
-// ---------------------------------------------------------------------------
-// AI score (unchanged from the previous implementation)
-// ---------------------------------------------------------------------------
+interface DetailRowForBackfill {
+  id: string;
+  title: string;
+  description: string;
+  targetIdentifier: string | null;
+  scamType: { labelEn: string; labelTh: string };
+}
 
-const TOP_K = 5;
-const AVG_TOP_K = 3;
-
-export async function computeAiScore(text: string): Promise<{
-  aiScore: number | null;
-  aiConfidence: AiConfidence | null;
-}> {
+/**
+ * Compute a score for a report whose `ai_score` / `ai_confidence` columns
+ * are NULL and persist the result so subsequent opens are O(1) DB reads.
+ * Errors are swallowed (and logged inside `computeAiScore`) so the detail
+ * endpoint never fails because of an AI subsystem issue.
+ */
+async function backfillAiScore(
+  report: DetailRowForBackfill,
+): Promise<{ aiScore: number | null; aiConfidence: AiConfidence | null }> {
   try {
-    const results = await searchSimilarReports(text, TOP_K);
-    if (results.length === 0) return { aiScore: null, aiConfidence: 'unknown' };
-
-    const top = results.slice(0, AVG_TOP_K);
-    const avg = top.reduce((sum, r) => sum + r.similarity, 0) / top.length;
-    const score = Math.round(avg * 100);
-    const confidence: AiConfidence = avg >= 0.85 ? 'high' : avg >= 0.70 ? 'medium' : 'low';
-
-    return { aiScore: score, aiConfidence: confidence };
-  } catch {
-    return { aiScore: null, aiConfidence: 'unknown' };
+    const result = await computeAiScore(
+      canonicalEmbedInput({
+        title: report.title,
+        description: report.description,
+        targetIdentifier: report.targetIdentifier,
+        scamType: report.scamType,
+      }),
+      { reportId: report.id },
+    );
+    if (result.aiScore !== null || result.aiConfidence !== null) {
+      await getPrisma().report.update({
+        where: { id: report.id },
+        data: { aiScore: result.aiScore, aiConfidence: result.aiConfidence },
+      });
+    }
+    return result;
+  } catch (err) {
+    console.error('[admin-reports] ai-score-backfill failed', {
+      reportId: report.id,
+      err,
+    });
+    return { aiScore: null, aiConfidence: null };
   }
 }
 

@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| **Document Version** | 1.4 |
+| **Document Version** | 1.6 |
 | **Status** | Draft — for team review |
-| **Date issued** | 2026-05-01 |
+| **Date issued** | 2026-05-12 |
 | **Derived from** | PRD v1.3 (2026-05-01), BRD v2.0 (2026-04-23) |
 | **Target backend** | Supabase Postgres 15 + `pgvector` (system of record), Firebase Cloud Firestore (read-only mirror for `alerts` + `my-reports`) |
 
@@ -15,6 +15,20 @@
 ---
 
 ## 0. What Changed
+
+### v1.6 (2026-05-12)
+
+| Area | v1.5 | v1.6 | Why |
+|---|---|---|---|
+| Announcement attachments | Announcements text-only | Added `announcement_attachments` table | Mirror evidence-file pattern for announcement images/PDFs (Supabase Storage bytes, DB metadata). |
+| Account-deletion review workflow | Worker-only purge (`pending → purged`) | Added `status` (`deletion_request_status` enum), `reviewed_at`, `reviewed_by_admin_id`, `rejection_reason` on `account_deletion_requests` | Admin moderation of deletion requests before purge worker runs. |
+| `reports.ai_score` / `ai_confidence` | Computed on-demand inside admin detail handler | Persisted at submit time (still nullable for legacy rows + Gemini failures) | Avoid recomputing on every admin detail load; preserve triage hint across queue restarts. See `apps/api/src/core/ai-score/`. |
+
+### v1.5 (2026-05-10)
+
+| Area | v1.4 | v1.5 | Why |
+|---|---|---|---|
+| Ask AI draft persistence | Drafts client-only | Added `ai_conversations.draft_state` (JSONB) | Cross-device sync of in-progress AI-drafted report. Shape `AskAiPersistedDraft` in `packages/shared/src/schemas/ask-ai.ts`. `evidenceAttachmentIds` inside the JSON references existing `ai_message_attachments.id` rows; raw bytes never stored in this column. |
 
 ### v1.4 (2026-05-01)
 
@@ -60,7 +74,7 @@ These are inferred from the PRD (§6.2, §6.3, §3.3, §3.8) and from the repo's
 - **Extensions required:** `pgvector` (RAG semantic search), `pgcrypto` (UUID + hashing), `citext` (case-insensitive identifiers)
 - **Authentication:** Firebase Authentication via email+password and Google OAuth (FR-1.1). The app sends Firebase ID tokens; the backend verifies them and maps `firebase_uid` → an internal `users.id`. Supabase Auth is **not** used — RLS policies must read the verified Firebase UID from a request claim/header set by the backend, not from `auth.uid()`.
 - **Object storage:** Supabase Storage bucket `evidence/` with RLS; files served via signed, time-limited URLs.
-- **Embeddings:** Gemini `text-embedding-004` → **vector(768)**. If the team picks a different model, only the column dimension changes.
+- **Embeddings:** Gemini `gemini-embedding-001` → **vector(768)**. If the team picks a different model, only the column dimension changes. (Pre-2026-05-12 this said `text-embedding-004`; the code uses `gemini-embedding-001` — see `apps/api/src/core/gemini/client.ts`.)
 - **Push:** FCM, sent server-side. Two trigger cases only (FR-8.3, FR-8.4):
   - On report status transition to `verified` or `rejected` → push to reporter's devices.
   - On announcement publish → push to **all** registered users' devices.
@@ -113,6 +127,7 @@ CREATE TYPE check_input_kind  AS ENUM ('phone', 'url', 'text');
 CREATE TYPE announcement_cat  AS ENUM ('fraud_alert', 'tips', 'platform_update');
 CREATE TYPE announcement_stat AS ENUM ('draft', 'published', 'unpublished');
 CREATE TYPE consent_kind      AS ENUM ('registration', 'first_report_submission', 'privacy_policy', 'terms_of_service');
+CREATE TYPE deletion_request_status AS ENUM ('pending', 'approved', 'rejected');
 -- device_platform enum REMOVED in v1.1 (Android-only release).
 ```
 
@@ -198,6 +213,8 @@ The central content table.
 | `status` | `report_status` NOT NULL DEFAULT `'pending'` | See note below on `flagged`. |
 | `priority_flag` | `boolean` NOT NULL DEFAULT `false` | Lets admins/system rules bump a report to the top of the queue (FR-7.1). |
 | `rejection_remark` | `text` | Populated on Reject; visible to the reporter (FR-6.2). Internal flag remarks are **never** stored here — see §4.6. |
+| `ai_score` | `int` CHECK (`ai_score IS NULL OR ai_score BETWEEN 0 AND 100`) | Triage hint computed at submit time via Gemini + pgvector. Null when no verified embeddings exist yet or Gemini failed (legacy rows stay null forever — the admin UI hides the AI badge in that case). See `apps/api/src/core/ai-score/`. |
+| `ai_confidence` | `text` | Confidence tier: `high` / `medium` / `low` / `unknown`. Kept as `text` rather than a Postgres enum because the union lives in `packages/shared/src/schemas/admin-reports.ts` — single source of truth across api + mobile. |
 | `created_at` | `timestamptz` NOT NULL DEFAULT `now()` | |
 | `updated_at` | `timestamptz` NOT NULL DEFAULT `now()` | |
 | `verified_at` | `timestamptz` | Set on transition to `verified`. Powers feed sort and "reports this week" stat (FR-3.2). |
@@ -266,9 +283,9 @@ One row per report, holding the Gemini-generated vector for AI semantic search (
 | Column | Type | Notes |
 |---|---|---|
 | `report_id` | `uuid` PK FK → `reports(id)` ON DELETE CASCADE | 1:1 with reports. |
-| `embedding` | `vector(768)` NOT NULL | Gemini `text-embedding-004` dimension. |
+| `embedding` | `vector(768)` NOT NULL | Gemini `gemini-embedding-001` dimension. |
 | `content_hash` | `text` NOT NULL | SHA-256 of `title \|\| description`. Skip re-embedding when content hasn't changed. |
-| `model_version` | `text` NOT NULL | E.g. `'gemini-text-embedding-004'`. |
+| `model_version` | `text` NOT NULL | E.g. `'gemini-embedding-001'`. |
 | `updated_at` | `timestamptz` NOT NULL DEFAULT `now()` | |
 
 **Index:** `USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100)` — switch to `hnsw` once the dataset grows past ~10k rows.
@@ -296,6 +313,25 @@ Admin-published communications (PRD §3.7).
 **Index:** `(status, published_at DESC)` WHERE `status = 'published'`.
 
 **Trigger duty:** on transition to `published` AND `pushed_to_fcm_at IS NULL`, enqueue a broadcast FCM job that targets every active row in `fcm_devices`, then sets `pushed_to_fcm_at = now()`.
+
+### 4.8.1 `announcement_attachments`
+
+Optional image / PDF attachments on an announcement. Mirrors the `evidence_files` shape but scoped to announcements. Bytes live in Supabase Storage.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `uuid` PK, default `gen_random_uuid()` | |
+| `announcement_id` | `uuid` FK → `announcements(id)` ON DELETE CASCADE | |
+| `storage_path` | `text` NOT NULL | E.g. `announcements/{announcement_id}/{uuid}.jpg`. |
+| `kind` | `text` NOT NULL | Free-form (`image` / `pdf`); not enum-constrained yet — promote to `evidence_kind` if reused. |
+| `mime_type` | `text` NOT NULL | |
+| `size_bytes` | `bigint` NOT NULL | |
+| `sort_order` | `integer` NOT NULL DEFAULT `0` | Author-controlled display order. |
+| `created_at` | `timestamptz` NOT NULL DEFAULT `now()` | |
+
+**No 5-files cap trigger** — admins author announcements and the limit is enforced at the API layer.
+
+**Storage RLS:** bucket policy allows authenticated `SELECT` via signed URL for any published announcement; admins additionally see drafts.
 
 ### 4.9 `fcm_devices`
 
@@ -348,6 +384,7 @@ Server-side log of every `POST /check` call (PRD §3.1). Useful for the public f
 | `linked_report_id` | `uuid` FK → `reports(id)` ON DELETE SET NULL | Set when the conversation leads to a report submission via "Report with AI". |
 | `created_at` | `timestamptz` NOT NULL DEFAULT `now()` | |
 | `last_message_at` | `timestamptz` NOT NULL DEFAULT `now()` | |
+| `draft_state` | `jsonb` | In-progress AI-drafted report for this conversation (cross-device sync). Shape `AskAiPersistedDraft` from `packages/shared/src/schemas/ask-ai.ts`. `evidenceAttachmentIds` inside the JSON references existing `ai_message_attachments.id` rows — raw bytes never stored here. |
 
 **Index:** `(user_id, last_message_at DESC)`.
 
@@ -388,8 +425,12 @@ Drives the 7-day purge worker (FR-1.5).
 | `requested_at` | `timestamptz` NOT NULL DEFAULT `now()` | |
 | `purge_due_at` | `timestamptz` NOT NULL | `requested_at + interval '7 days'`. |
 | `purged_at` | `timestamptz` | Set when the worker completes. |
+| `status` | `deletion_request_status` NOT NULL DEFAULT `'pending'` | Admin moderation outcome — `pending` while awaiting review; `approved` lets the purge worker proceed at `purge_due_at`; `rejected` halts the worker. |
+| `reviewed_at` | `timestamptz` | When the admin acted. |
+| `reviewed_by_admin_id` | `text` | Admin `users.id` who reviewed. Not a Prisma FK relation (kept as plain text to mirror moderation audit detachment if the admin is later deleted). |
+| `rejection_reason` | `text` | Required when `status = 'rejected'`; visible to the requesting user. |
 
-When `now() >= purge_due_at`, the worker: anonymises the `users` row (clear PII, keep `id`), nulls out `reporter_id` on the user's pending/withdrawn reports and hard-deletes them, leaves verified reports in place with `reporter_id` already nullable, and deletes any `fcm_devices` rows.
+When `now() >= purge_due_at` **and** `status = 'approved'`, the worker: anonymises the `users` row (clear PII, keep `id`), nulls out `reporter_id` on the user's pending/withdrawn reports and hard-deletes them, leaves verified reports in place with `reporter_id` already nullable, and deletes any `fcm_devices` rows. `pending` requests are skipped (worker waits for admin); `rejected` requests are skipped permanently.
 
 ---
 

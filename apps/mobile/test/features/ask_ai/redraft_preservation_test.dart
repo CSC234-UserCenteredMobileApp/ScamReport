@@ -126,7 +126,7 @@ TurnOutcome _basic(String content, {AiDraft? draft, bool reportable = true}) =>
       intentDetected: true,
       reportable: reportable,
       hasEnoughInfo: reportable,
-      similarReportIds: const [],
+      similarReports: const [],
       draft: draft,
     );
 

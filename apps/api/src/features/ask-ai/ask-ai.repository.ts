@@ -275,7 +275,7 @@ export async function hydrateSimilarReports(reportIds: string[]) {
       id: true,
       title: true,
       verifiedAt: true,
-      scamType: { select: { code: true, labelEn: true } },
+      scamType: { select: { code: true, labelEn: true, labelTh: true } },
     },
   });
   // Preserve the input ordering (RAG results are already ranked by similarity).
@@ -288,6 +288,47 @@ export async function hydrateSimilarReports(reportIds: string[]) {
       title: r.title,
       verifiedAt: r.verifiedAt?.toISOString() ?? null,
       scamTypeCode: r.scamType.code,
+      scamTypeLabelEn: r.scamType.labelEn,
+      scamTypeLabelTh: r.scamType.labelTh,
+      // Kept for downstream callers that still want a single locale label
+      // (Gemini prompt context). Picks `labelEn` to match prior behaviour.
       scamTypeLabel: r.scamType.labelEn,
     }));
+}
+
+/**
+ * Look up verified reports by exact-match against
+ * `target_identifier_normalized`. Used by Ask AI to lift the recall on
+ * questions that contain a phone number or URL (where semantic similarity
+ * over a 10-digit string is noisy). Returns the same shape as
+ * `hydrateSimilarReports` for trivial merging.
+ *
+ * Caller passes already-normalised identifiers; see
+ * `core/lib/identifier-extractor.ts`.
+ */
+export async function findReportsByIdentifiers(normalized: string[]) {
+  if (normalized.length === 0) return [];
+  const prisma = getPrisma();
+  const rows = await prisma.report.findMany({
+    where: {
+      status: 'verified',
+      targetIdentifierNormalized: { in: normalized },
+    },
+    orderBy: { verifiedAt: 'desc' },
+    select: {
+      id: true,
+      title: true,
+      verifiedAt: true,
+      scamType: { select: { code: true, labelEn: true, labelTh: true } },
+    },
+  });
+  return rows.map((r) => ({
+    id: r.id,
+    title: r.title,
+    verifiedAt: r.verifiedAt?.toISOString() ?? null,
+    scamTypeCode: r.scamType.code,
+    scamTypeLabelEn: r.scamType.labelEn,
+    scamTypeLabelTh: r.scamType.labelTh,
+    scamTypeLabel: r.scamType.labelEn,
+  }));
 }

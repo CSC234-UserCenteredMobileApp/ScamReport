@@ -15,6 +15,8 @@ Map<String, dynamic> _itemMap({
   bool priorityFlag = false,
   String? lastRemarkByAdmin,
   bool injectReporterFields = false,
+  int? aiScore,
+  String? aiConfidence,
 }) {
   final base = <String, dynamic>{
     'id': id,
@@ -27,6 +29,8 @@ Map<String, dynamic> _itemMap({
     'priorityFlag': priorityFlag,
     'evidenceCount': 2,
     'lastRemarkByAdmin': lastRemarkByAdmin,
+    'aiScore': aiScore,
+    'aiConfidence': aiConfidence,
   };
   if (injectReporterFields) {
     base['reporterHandle'] = '@SHOULD_BE_DROPPED';
@@ -126,6 +130,30 @@ void main() {
       // must silently drop those keys without throwing.
       final data = await repo.getQueue();
       expect(data.items, hasLength(1));
+    });
+
+    test('parses persisted aiScore + aiConfidence from queue item', () async {
+      when(() => mockApi.fetchQueue()).thenAnswer((_) async => {
+            'items': [_itemMap(aiScore: 87, aiConfidence: 'high')],
+            'pendingCount': 1,
+            'flaggedCount': 0,
+          });
+
+      final data = await repo.getQueue();
+      expect(data.items.first.aiScore, 87);
+      expect(data.items.first.aiConfidence, 'high');
+    });
+
+    test('tolerates null ai fields on legacy rows', () async {
+      when(() => mockApi.fetchQueue()).thenAnswer((_) async => {
+            'items': [_itemMap()],
+            'pendingCount': 1,
+            'flaggedCount': 0,
+          });
+
+      final data = await repo.getQueue();
+      expect(data.items.first.aiScore, isNull);
+      expect(data.items.first.aiConfidence, isNull);
     });
   });
 

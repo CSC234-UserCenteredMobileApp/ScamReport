@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../core/api_client.dart';
+import 'mod_action_failure.dart';
 
 class ModApiClient {
   ModApiClient(this._client, this._auth);
@@ -27,7 +28,7 @@ class ModApiClient {
       Uri.parse('$apiBaseUrl/admin/reports/queue'),
       headers: await _authHeaders(),
     );
-    _check(res, 'GET /admin/reports/queue');
+    _check(res, 'queue');
     return jsonDecode(res.body) as Map<String, dynamic>;
   }
 
@@ -36,7 +37,7 @@ class ModApiClient {
       Uri.parse('$apiBaseUrl/admin/reports/$reportId'),
       headers: await _authHeaders(),
     );
-    _check(res, 'GET /admin/reports/$reportId');
+    _check(res, 'detail');
     return jsonDecode(res.body) as Map<String, dynamic>;
   }
 
@@ -46,12 +47,35 @@ class ModApiClient {
       headers: await _authHeaders(),
       body: jsonEncode({'remark': remark}),
     );
-    _check(res, 'POST /admin/reports/$reportId/$action');
+    _check(res, action);
   }
 
-  void _check(http.Response res, String label) {
-    if (res.statusCode < 200 || res.statusCode >= 300) {
-      throw Exception('$label failed with ${res.statusCode}: ${res.body}');
+  void _check(http.Response res, String action) {
+    if (res.statusCode >= 200 && res.statusCode < 300) return;
+    throw ModActionFailure(
+      statusCode: res.statusCode,
+      serverMessage: _extractMessage(res.body),
+      action: action,
+    );
+  }
+
+  // Pull a human-readable message out of the response body. The API returns
+  // `{ "error": "..." }` on 4xx + 5xx; non-JSON bodies fall through to a
+  // trimmed raw string so nothing is hidden from the admin.
+  String _extractMessage(String body) {
+    final trimmed = body.trim();
+    if (trimmed.isEmpty) return '';
+    try {
+      final decoded = jsonDecode(trimmed);
+      if (decoded is Map && decoded['error'] is String) {
+        return decoded['error'] as String;
+      }
+      if (decoded is Map && decoded['message'] is String) {
+        return decoded['message'] as String;
+      }
+    } catch (_) {
+      // Fall through to raw body — body wasn't JSON.
     }
+    return trimmed.length > 280 ? '${trimmed.substring(0, 280)}…' : trimmed;
   }
 }

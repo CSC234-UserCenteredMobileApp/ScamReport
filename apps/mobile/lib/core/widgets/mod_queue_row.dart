@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../features/moderation/domain/mod_report.dart';
 import '../../l10n/l10n.dart';
 import '../theme/app_theme.dart';
+import 'ai_score_card.dart';
 
 /// One row in the moderation queue.
 ///
@@ -44,6 +45,16 @@ class ModQueueRow extends StatelessWidget {
               children: [
                 if (item.isFlagged)
                   Container(width: 4, color: palette.suspicious.fg),
+                if (item.aiScore != null) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12, top: 12, bottom: 12),
+                    child: AiScoreCard(
+                      score: item.aiScore,
+                      confidence: item.aiConfidence,
+                      variant: AiScoreCardVariant.compact,
+                    ),
+                  ),
+                ],
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(12),
