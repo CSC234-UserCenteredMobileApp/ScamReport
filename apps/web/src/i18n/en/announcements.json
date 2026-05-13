@@ -97,5 +97,48 @@
     "deleted": "Announcement deleted.",
     "actionError": "Action failed. Try again.",
     "notFound": "Announcement not found."
+  },
+  "deletionRequests": {
+    "title": "Deletion requests",
+    "subtitle": "Review and act on account-deletion requests from users.",
+    "stats": "Pending",
+    "filter": "Filter by status",
+    "empty": "No deletion requests in this view.",
+    "error": "Could not load deletion requests. Try again.",
+    "cancel": "Cancel",
+    "col": {
+      "handle": "User",
+      "requested": "Requested",
+      "purgeDue": "Purge due",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "action": {
+      "approve": "Approve",
+      "reject": "Reject"
+    },
+    "approve": {
+      "title": "Approve account deletion?",
+      "body": "This deletes the account and purges data after 7 days. This cannot be undone after the purge window closes.",
+      "confirm": "Approve deletion"
+    },
+    "reject": {
+      "title": "Reject deletion request",
+      "reasonLabel": "Reason (sent to user)",
+      "reasonPlaceholder": "Explain why this request is being rejected. The user will see this text in a push notification.",
+      "reasonRequired": "Reason is required (1-500 characters).",
+      "confirm": "Reject"
+    },
+    "toast": {
+      "approved": "Request approved.",
+      "rejected": "Request rejected. User notified.",
+      "alreadyReviewed": "This request was already reviewed.",
+      "actionError": "Action failed. Try again."
+    }
   }
 }
