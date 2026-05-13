@@ -3,7 +3,7 @@ import { resolveInternalUserId } from '../../core/lib/resolve-user';
 import { sendFcmBroadcast } from '../../core/firebase/messaging';
 import { Prisma } from '../../generated/prisma/client';
 import type { AdminAnnouncementListItem, AdminAnnouncementDetail } from '@my-product/shared';
-import { uploadFile, deleteFile } from '../../core/supabase/storage';
+import { uploadFile, deleteFile, getSignedUrl } from '../../core/supabase/storage';
 import type { AnnouncementAttachment } from '@my-product/shared';
 
 // ---------------------------------------------------------------------------
@@ -44,7 +44,21 @@ const detailSelect = {
   },
 } as const;
 
-function toDetail(row: {
+const ATTACHMENT_SIGNED_URL_TTL_SECONDS = 3600;
+
+async function signAttachmentUrl(storagePath: string): Promise<string | null> {
+  try {
+    return await getSignedUrl(BUCKET, storagePath, ATTACHMENT_SIGNED_URL_TTL_SECONDS);
+  } catch (err) {
+    console.error('[admin-announcements] sign attachment failed', {
+      storagePath,
+      err,
+    });
+    return null;
+  }
+}
+
+async function toDetail(row: {
   id: string;
   slug: string;
   title: string;
@@ -64,7 +78,7 @@ function toDetail(row: {
     sizeBytes: bigint;
     sortOrder: number;
   }>;
-}): AdminAnnouncementDetail {
+}): Promise<AdminAnnouncementDetail> {
   return {
     id: row.id,
     slug: row.slug,
@@ -77,14 +91,17 @@ function toDetail(row: {
     publishedAt: row.publishedAt?.toISOString() ?? null,
     pushedToFcmAt: row.pushedToFcmAt?.toISOString() ?? null,
     authorId: row.authorId ?? null,
-    attachments: row.attachments.map((a) => ({
-      id: a.id,
-      storagePath: a.storagePath,
-      kind: a.kind as AnnouncementAttachment['kind'],
-      mimeType: a.mimeType,
-      sizeBytes: Number(a.sizeBytes),
-      sortOrder: a.sortOrder,
-    })),
+    attachments: await Promise.all(
+      row.attachments.map(async (a) => ({
+        id: a.id,
+        storagePath: a.storagePath,
+        signedUrl: await signAttachmentUrl(a.storagePath),
+        kind: a.kind as AnnouncementAttachment['kind'],
+        mimeType: a.mimeType,
+        sizeBytes: Number(a.sizeBytes),
+        sortOrder: a.sortOrder,
+      })),
+    ),
   };
 }
 
@@ -243,7 +260,7 @@ export async function publishAnnouncement(
       },
       select: detailSelect,
     });
-    const result = toDetail(row);
+    const result = await toDetail(row);
     if (pushToFcm) {
       await sendFcmBroadcast({
         title: result.title,
@@ -328,6 +345,7 @@ export async function uploadAttachment(
   return {
     id: row.id,
     storagePath: row.storagePath,
+    signedUrl: await signAttachmentUrl(row.storagePath),
     kind: row.kind as AnnouncementAttachment['kind'],
     mimeType: row.mimeType,
     sizeBytes: Number(row.sizeBytes),

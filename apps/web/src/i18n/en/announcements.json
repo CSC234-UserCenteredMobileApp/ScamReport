@@ -3,5 +3,99 @@
   "newTitle": "New announcement",
   "editTitle": "Edit announcement",
   "deletionRequestsTitle": "Account deletion requests",
-  "comingSoonBody": "This page lands in a follow-up PR. Use the mobile app for now."
+  "comingSoonBody": "This page lands in a follow-up PR. Use the mobile app for now.",
+  "error": "Could not load announcements. Try again.",
+  "retry": "Try again",
+  "list": {
+    "title": "Announcements",
+    "subtitle": "Draft, publish, and broadcast updates to the mobile app.",
+    "newCta": "New announcement",
+    "empty": "No announcements yet."
+  },
+  "new": {
+    "title": "New announcement",
+    "subtitle": "Save the draft to start adding attachments.",
+    "attachmentsHint": "Attachments unlock after the first save."
+  },
+  "edit": {
+    "title": "Edit announcement",
+    "lockedTitle": "Published — editing locked",
+    "lockedBody": "Unpublish to edit fields or replace attachments."
+  },
+  "col": {
+    "title": "Title",
+    "category": "Category",
+    "status": "Status",
+    "createdAt": "Created",
+    "publishedAt": "Published",
+    "actions": "Actions"
+  },
+  "status": {
+    "draft": "Draft",
+    "published": "Published",
+    "unpublished": "Unpublished"
+  },
+  "category": {
+    "fraud_alert": "Fraud alert",
+    "tips": "Tips",
+    "platform_update": "Platform update"
+  },
+  "action": {
+    "edit": "Edit",
+    "saveDraft": "Save draft",
+    "publish": "Publish",
+    "unpublish": "Unpublish",
+    "delete": "Delete"
+  },
+  "editor": {
+    "formLabel": "Announcement editor",
+    "category": "Category",
+    "title": "Title",
+    "body": "Body",
+    "pushSubLabel": "Will notify ~{{count}} subscribers.",
+    "errors": {
+      "titleRequired": "Title is required.",
+      "bodyRequired": "Body is required.",
+      "categoryRequired": "Pick a category."
+    }
+  },
+  "publish": {
+    "confirmTitle": "Publish and send push?",
+    "confirmBody": "About {{count}} subscribers will receive a notification.",
+    "confirm": "Publish",
+    "cancel": "Cancel"
+  },
+  "delete": {
+    "confirmTitle": "Delete this announcement?",
+    "confirmBody": "Drafts and unpublished announcements are removed permanently.",
+    "confirm": "Delete",
+    "cancel": "Cancel"
+  },
+  "attachments": {
+    "heading": "Attachments",
+    "add": "Add file",
+    "dropHint": "Drop a file here or click Add file.",
+    "uploading": "Uploading… {{percent}}%",
+    "uploaded": "Attachment uploaded.",
+    "deleted": "Attachment removed.",
+    "delete": "Delete attachment",
+    "empty": "No attachments yet.",
+    "errors": {
+      "mime": "Only JPG, PNG, WEBP, GIF, or PDF files are allowed.",
+      "size": "File exceeds the 10 MB limit.",
+      "upload": "Upload failed. Try again.",
+      "delete": "Could not delete the attachment."
+    }
+  },
+  "toast": {
+    "created": "Draft created.",
+    "saved": "Draft saved.",
+    "saveError": "Could not save the draft.",
+    "published": "Announcement published.",
+    "publishError": "Could not publish the announcement.",
+    "unpublished": "Announcement unpublished.",
+    "deleted": "Announcement deleted.",
+    "actionError": "Action failed. Try again.",
+    "notFound": "Announcement not found."
+  }
 }

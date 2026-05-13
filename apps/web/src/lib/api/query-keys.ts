@@ -8,6 +8,14 @@ export const queryKeys = {
     evidenceUrl: (reportId: string, fileId: string) =>
       ['moderation', 'evidence-url', reportId, fileId] as const,
   },
+  announcements: {
+    all: ['announcements'] as const,
+    list: ['announcements', 'list'] as const,
+    detail: (id: string) => ['announcements', 'detail', id] as const,
+  },
+  notifications: {
+    subscriberCount: ['notifications', 'subscriber-count'] as const,
+  },
   auth: {
     me: ['auth', 'me'] as const,
   },

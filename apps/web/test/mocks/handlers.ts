@@ -1,11 +1,16 @@
 import { http, HttpResponse } from 'msw';
 import type {
+  AdminAnnouncementDetail,
+  AdminAnnouncementDetailResponse,
+  AdminAnnouncementListItem,
+  AdminAnnouncementListResponse,
   AdminEvidenceUrlResponse,
   AdminQueueItem,
   AdminQueueResponse,
   AdminReportDetail,
   AdminReportDetailResponse,
   AuthSyncResponse,
+  SubscriberCountResponse,
 } from '@my-product/shared';
 
 const BASE = '*';
@@ -108,8 +113,98 @@ export const userSyncResponse: AuthSyncResponse = {
   user: { ...adminSyncResponse.user, role: 'user', email: 'regular@example.com' },
 };
 
+export const sampleAnnouncementDraft: AdminAnnouncementDetail = {
+  id: '33333333-3333-3333-3333-333333333333',
+  slug: 'draft-launch-tips-abc',
+  title: 'Launch tips draft',
+  body: 'Walkthrough of the new app onboarding.',
+  category: 'tips',
+  status: 'draft',
+  createdAt: new Date(Date.now() - 2 * 3_600_000).toISOString(),
+  updatedAt: new Date(Date.now() - 1 * 3_600_000).toISOString(),
+  publishedAt: null,
+  pushedToFcmAt: null,
+  authorId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+  attachments: [],
+};
+
+export const samplePublishedAnnouncement: AdminAnnouncementDetail = {
+  ...sampleAnnouncementDraft,
+  id: '44444444-4444-4444-4444-444444444444',
+  slug: 'fraud-alert-published-abc',
+  title: 'Published fraud alert',
+  status: 'published',
+  publishedAt: new Date().toISOString(),
+  pushedToFcmAt: new Date().toISOString(),
+};
+
+export const sampleAnnouncementList: AdminAnnouncementListResponse = {
+  items: [sampleAnnouncementDraft, samplePublishedAnnouncement].map(
+    (it): AdminAnnouncementListItem => ({
+      id: it.id,
+      slug: it.slug,
+      title: it.title,
+      category: it.category,
+      status: it.status,
+      createdAt: it.createdAt,
+      publishedAt: it.publishedAt,
+    }),
+  ),
+};
+
+export const sampleSubscriberCount: SubscriberCountResponse = { count: 42 };
+
 export const handlers = [
   http.post(`${BASE}/auth/sync`, () => HttpResponse.json(adminSyncResponse)),
+  http.get(`${BASE}/admin/announcements`, () =>
+    HttpResponse.json(sampleAnnouncementList),
+  ),
+  http.get(`${BASE}/admin/announcements/:id`, ({ params }) => {
+    const id = params.id as string;
+    if (id === samplePublishedAnnouncement.id) {
+      return HttpResponse.json<AdminAnnouncementDetailResponse>({
+        item: samplePublishedAnnouncement,
+      });
+    }
+    return HttpResponse.json<AdminAnnouncementDetailResponse>({
+      item: sampleAnnouncementDraft,
+    });
+  }),
+  http.post(`${BASE}/admin/announcements`, () =>
+    HttpResponse.json<AdminAnnouncementDetailResponse>({
+      item: sampleAnnouncementDraft,
+    }),
+  ),
+  http.put(`${BASE}/admin/announcements/:id`, () =>
+    HttpResponse.json<AdminAnnouncementDetailResponse>({
+      item: sampleAnnouncementDraft,
+    }),
+  ),
+  http.delete(`${BASE}/admin/announcements/:id`, ({ params }) =>
+    HttpResponse.json({
+      id: params.id as string,
+      status: 'deleted',
+      updatedAt: new Date().toISOString(),
+    }),
+  ),
+  http.post(`${BASE}/admin/announcements/:id/publish`, ({ params }) =>
+    HttpResponse.json<AdminAnnouncementDetailResponse>({
+      item: {
+        ...samplePublishedAnnouncement,
+        id: params.id as string,
+      },
+    }),
+  ),
+  http.post(`${BASE}/admin/announcements/:id/unpublish`, ({ params }) =>
+    HttpResponse.json({
+      id: params.id as string,
+      status: 'unpublished',
+      updatedAt: new Date().toISOString(),
+    }),
+  ),
+  http.get(`${BASE}/admin/notifications/subscribers/count`, () =>
+    HttpResponse.json(sampleSubscriberCount),
+  ),
   http.get(`${BASE}/admin/reports/queue`, () => HttpResponse.json(sampleQueue)),
   http.get(`${BASE}/admin/reports/:id`, () => HttpResponse.json(sampleDetailResponse)),
   http.get(`${BASE}/admin/reports/:id/evidence/:fileId/url`, () =>

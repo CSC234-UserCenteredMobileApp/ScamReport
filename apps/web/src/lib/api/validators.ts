@@ -5,6 +5,11 @@ import {
   AdminReportDetailResponse,
   AdminEvidenceUrlResponse,
   AdminActionResponse,
+  AdminAnnouncementListResponse,
+  AdminAnnouncementDetailResponse,
+  AdminAnnouncementActionResponse,
+  AdminAnnouncementAttachmentResponse,
+  SubscriberCountResponse,
   AuthSyncResponse,
 } from '@my-product/shared';
 
@@ -40,6 +45,11 @@ export const validators = {
   adminReportDetail: TypeCompiler.Compile(AdminReportDetailResponse),
   adminEvidenceUrl: TypeCompiler.Compile(AdminEvidenceUrlResponse),
   adminAction: TypeCompiler.Compile(AdminActionResponse),
+  adminAnnouncementList: TypeCompiler.Compile(AdminAnnouncementListResponse),
+  adminAnnouncementDetail: TypeCompiler.Compile(AdminAnnouncementDetailResponse),
+  adminAnnouncementAction: TypeCompiler.Compile(AdminAnnouncementActionResponse),
+  adminAnnouncementAttachment: TypeCompiler.Compile(AdminAnnouncementAttachmentResponse),
+  subscriberCount: TypeCompiler.Compile(SubscriberCountResponse),
   authSync: TypeCompiler.Compile(AuthSyncResponse),
 } as const;
 

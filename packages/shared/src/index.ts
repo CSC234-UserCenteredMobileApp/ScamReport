@@ -10,3 +10,4 @@ export * from './schemas/ask-ai';
 export * from './schemas/scam-types';
 export * from './schemas/admin-deletion-requests';
 export * from './schemas/notifications';
+export * from './schemas/admin-notifications';

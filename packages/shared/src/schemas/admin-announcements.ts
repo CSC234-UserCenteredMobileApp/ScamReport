@@ -4,6 +4,7 @@ import { AnnouncementCategory } from './announcements';
 export const AnnouncementAttachmentSchema = Type.Object({
   id:          Type.String({ format: 'uuid' }),
   storagePath: Type.String(),
+  signedUrl:   Type.Union([Type.String(), Type.Null()]),
   kind:        Type.Union([Type.Literal('image'), Type.Literal('pdf')]),
   mimeType:    Type.String(),
   sizeBytes:   Type.Number(),
