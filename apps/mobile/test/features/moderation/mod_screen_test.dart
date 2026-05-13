@@ -130,7 +130,10 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.text('Phishing SMS'), findsOneWidget);
+      // Label appears at least once: on the queue-row scam-type chip.
+      // It may also appear on the scam-type filter chip rail above the list,
+      // so we assert presence rather than exact count.
+      expect(find.text('Phishing SMS'), findsAtLeastNWidgets(1));
     });
 
     testWidgets('renders Thai scam-type label when locale is th',
@@ -154,7 +157,9 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.text('ฟิชชิง SMS'), findsOneWidget);
+      // Same loosening as the EN test — chip rail above the list also renders
+      // the localised scam-type label.
+      expect(find.text('ฟิชชิง SMS'), findsAtLeastNWidgets(1));
     });
 
     testWidgets(

@@ -264,6 +264,68 @@ class AppLocalizationsTh extends AppLocalizations {
   }
 
   @override
+  String get modSearchHint => 'ค้นหาชื่อหรือประเภทกลโกง…';
+
+  @override
+  String get modFilterTitle => 'ตัวกรองและเรียง';
+
+  @override
+  String get modFilterReset => 'ล้าง';
+
+  @override
+  String get modFilterApply => 'ใช้';
+
+  @override
+  String get modFilterSectionScamType => 'ประเภทกลโกง';
+
+  @override
+  String get modFilterSectionAiConfidence => 'ความเชื่อมั่น AI';
+
+  @override
+  String get modFilterSectionFlags => 'ตัวเลือก';
+
+  @override
+  String get modFilterSectionSort => 'เรียง';
+
+  @override
+  String get modFilterPriorityOnly => 'เฉพาะที่ปักธงสำคัญ';
+
+  @override
+  String get modFilterHasEvidence => 'มีหลักฐาน';
+
+  @override
+  String get modFilterChipAllTypes => 'ทั้งหมด';
+
+  @override
+  String modActiveFilterCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'ตัวกรอง $count รายการ',
+      one: 'ตัวกรอง 1 รายการ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get modEmptyFilteredTitle => 'ไม่พบรายงานที่ตรงกับตัวกรอง';
+
+  @override
+  String get modEmptyFilteredAction => 'ล้างตัวกรอง';
+
+  @override
+  String get aiConfidenceHigh => 'สูง';
+
+  @override
+  String get aiConfidenceMedium => 'ปานกลาง';
+
+  @override
+  String get aiConfidenceLow => 'ต่ำ';
+
+  @override
+  String get aiConfidenceUnknown => 'ไม่ทราบ';
+
+  @override
   String get adminReviewTitle => 'ตรวจสอบรายงาน';
 
   @override
