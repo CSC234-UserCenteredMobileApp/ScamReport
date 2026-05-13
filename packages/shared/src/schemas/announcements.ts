@@ -13,7 +13,7 @@ export const AnnouncementCard = Type.Object({
   excerpt: Type.String(),
   category: AnnouncementCategory,
   publishedAt: Type.String({ format: 'date-time' }),
-  firstImageStoragePath: Type.Union([Type.String(), Type.Null()]),
+  firstImageUrl: Type.Union([Type.String(), Type.Null()]),
   attachmentCount: Type.Number(),
 });
 export type AnnouncementCard = Static<typeof AnnouncementCard>;
@@ -32,11 +32,11 @@ export const AnnouncementDetail = Type.Object({
   publishedAt: Type.String({ format: 'date-time' }),
   slug: Type.String(),
   attachments: Type.Array(Type.Object({
-    id:          Type.String({ format: 'uuid' }),
-    storagePath: Type.String(),
-    kind:        Type.Union([Type.Literal('image'), Type.Literal('pdf')]),
-    mimeType:    Type.String(),
-    sizeBytes:   Type.Number(),
+    id:       Type.String({ format: 'uuid' }),
+    url:      Type.String(),
+    kind:     Type.Union([Type.Literal('image'), Type.Literal('pdf')]),
+    mimeType: Type.String(),
+    sizeBytes: Type.Number(),
   })),
 });
 export type AnnouncementDetail = Static<typeof AnnouncementDetail>;

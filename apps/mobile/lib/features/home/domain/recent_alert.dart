@@ -6,11 +6,11 @@ class RecentAlert {
     required this.title,
     required this.category,
     required this.publishedAt,
-    this.firstImageStoragePath,
+    this.firstImageUrl,
   });
   final String id;
   final String title;
   final AlertCategory category;
   final DateTime publishedAt;
-  final String? firstImageStoragePath;
+  final String? firstImageUrl;
 }

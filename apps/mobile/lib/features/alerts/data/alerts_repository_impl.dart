@@ -30,11 +30,12 @@ class AlertsRepositoryImpl implements AlertsRepository {
       category: _parseCategory(map['category'] as String),
       publishedAt: DateTime.parse(map['publishedAt'] as String),
       slug: (map['slug'] as String?) ?? '',
+      firstImageUrl: map['firstImageUrl'] as String?,
       attachments: rawAttachments.map((a) {
         final am = a as Map<String, dynamic>;
         return AlertAttachment(
           id: am['id'] as String,
-          storagePath: am['storagePath'] as String,
+          url: am['url'] as String,
           kind: am['kind'] as String,
           mimeType: am['mimeType'] as String,
           sizeBytes: (am['sizeBytes'] as num).toInt(),
