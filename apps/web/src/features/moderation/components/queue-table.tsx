@@ -4,6 +4,7 @@ import { enUS, th } from 'date-fns/locale';
 import { MoreHorizontal } from 'lucide-react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import type { AdminQueueItem } from '@my-product/shared';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -31,6 +32,7 @@ interface QueueTableProps {
 
 export function QueueTable({ items, onAction }: QueueTableProps) {
   const { t, i18n } = useTranslation('moderation');
+  const navigate = useNavigate();
   const locale = i18n.language === 'th' ? th : enUS;
 
   const columns = useMemo<ColumnDef<AdminQueueItem>[]>(
@@ -80,39 +82,48 @@ export function QueueTable({ items, onAction }: QueueTableProps) {
         cell: ({ row }) => {
           const isFlagged = row.original.status === 'flagged';
           return (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={t('action.review')}
-                >
-                  <MoreHorizontal />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onSelect={() => onAction(row.original, 'approve')}>
-                  {t('action.approve')}
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => onAction(row.original, 'reject')}>
-                  {t('action.reject')}
-                </DropdownMenuItem>
-                {isFlagged ? (
-                  <DropdownMenuItem onSelect={() => onAction(row.original, 'unflag')}>
-                    {t('action.unflag')}
+            <div className="flex items-center justify-end gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate(`/moderation/${row.original.id}`)}
+              >
+                {t('action.review')}
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label={t('col.actions')}
+                  >
+                    <MoreHorizontal />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onSelect={() => onAction(row.original, 'approve')}>
+                    {t('action.approve')}
                   </DropdownMenuItem>
-                ) : (
-                  <DropdownMenuItem onSelect={() => onAction(row.original, 'flag')}>
-                    {t('action.flag')}
+                  <DropdownMenuItem onSelect={() => onAction(row.original, 'reject')}>
+                    {t('action.reject')}
                   </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  {isFlagged ? (
+                    <DropdownMenuItem onSelect={() => onAction(row.original, 'unflag')}>
+                      {t('action.unflag')}
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem onSelect={() => onAction(row.original, 'flag')}>
+                      {t('action.flag')}
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           );
         },
       },
     ],
-    [t, i18n.language, locale, onAction],
+    [t, i18n.language, locale, navigate, onAction],
   );
 
   const table = useReactTable({

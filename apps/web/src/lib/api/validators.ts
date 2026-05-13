@@ -3,6 +3,7 @@ import { TypeCompiler, type TypeCheck } from '@sinclair/typebox/compiler';
 import {
   AdminQueueResponse,
   AdminReportDetailResponse,
+  AdminEvidenceUrlResponse,
   AdminActionResponse,
   AuthSyncResponse,
 } from '@my-product/shared';
@@ -20,10 +21,24 @@ if (!FormatRegistry.Has('uuid')) {
 if (!FormatRegistry.Has('date-time')) {
   FormatRegistry.Set('date-time', (v) => DATETIME_RE.test(v));
 }
+// Loose URI check — admin evidence URLs are Supabase-signed and always
+// `https://...`. The schema only needs to confirm "looks like a URL", not
+// RFC-3986 perfection.
+if (!FormatRegistry.Has('uri')) {
+  FormatRegistry.Set('uri', (v) => {
+    try {
+      new URL(v);
+      return true;
+    } catch {
+      return false;
+    }
+  });
+}
 
 export const validators = {
   adminQueue: TypeCompiler.Compile(AdminQueueResponse),
   adminReportDetail: TypeCompiler.Compile(AdminReportDetailResponse),
+  adminEvidenceUrl: TypeCompiler.Compile(AdminEvidenceUrlResponse),
   adminAction: TypeCompiler.Compile(AdminActionResponse),
   authSync: TypeCompiler.Compile(AuthSyncResponse),
 } as const;

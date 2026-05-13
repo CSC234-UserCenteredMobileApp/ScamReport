@@ -53,9 +53,10 @@ describe('QueuePage', () => {
     renderWithProviders(<QueuePage />, { client: makeQueryClient() });
 
     const firstRowTitle = await screen.findByText(sampleQueue.items[0]!.title);
-    // The actions dropdown trigger is the row's first IconButton sibling
-    const actionsButtons = screen.getAllByRole('button', { name: /review/i });
-    await user.click(actionsButtons[0]!);
+    // Dropdown trigger is labelled by the column's "Actions" header; click that
+    // (the row also has an inline Review button which navigates instead).
+    const menuTriggers = screen.getAllByRole('button', { name: /actions/i });
+    await user.click(menuTriggers[0]!);
 
     const approveItem = await screen.findByRole('menuitem', { name: /approve/i });
     await user.click(approveItem);

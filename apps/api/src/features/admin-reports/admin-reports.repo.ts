@@ -140,6 +140,27 @@ export async function findDetailRow(reportId: string): Promise<DetailRow | null>
   }) as unknown as Promise<DetailRow | null>;
 }
 
+export interface EvidenceFileRow {
+  id: string;
+  storagePath: string;
+  kind: string;
+  mimeType: string;
+}
+
+// Returns the evidence file iff it belongs to the given report. Cross-report
+// lookups (admin guessing fileId from a different reportId) return null and
+// the route layer maps that to 404 — a guard against URL-tampering.
+export async function findEvidenceFile(
+  reportId: string,
+  fileId: string,
+): Promise<EvidenceFileRow | null> {
+  const prisma = getPrisma();
+  return prisma.evidenceFile.findFirst({
+    where: { id: fileId, reportId },
+    select: { id: true, storagePath: true, kind: true, mimeType: true },
+  });
+}
+
 export async function countDuplicates(
   normalizedIdentifier: string,
   excludeReportId: string,

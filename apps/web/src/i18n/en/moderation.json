@@ -52,5 +52,39 @@
   "empty": "Queue is empty — nice work!",
   "error": "Could not load the queue. Try again.",
   "loading": "Loading reports…",
-  "detailComingSoon": "The full review detail page is coming next sprint."
+  "detail": {
+    "title": "Review report",
+    "back": "Back to queue",
+    "submittedAt": "Submitted",
+    "submittedAnonymously": "Submitted anonymously",
+    "description": "Description",
+    "targetIdentifier": "Target identifier",
+    "evidence": "Evidence",
+    "evidenceCount": "{{count}} item",
+    "evidenceCount_other": "{{count}} items",
+    "auditTrail": "Audit trail",
+    "auditSubmitted": "Submitted",
+    "anonymousAdmin": "System",
+    "alreadyActioned": "This report has already been reviewed.",
+    "loading": "Loading report…",
+    "error": "Could not load the report. Try again.",
+    "notFound": "Report not found.",
+    "actions": {
+      "reject": "Reject",
+      "flag": "Flag for discussion",
+      "unflag": "Unflag",
+      "approve": "Approve"
+    },
+    "ai": {
+      "label": "AI score",
+      "pending": "Pending"
+    }
+  },
+  "evidence": {
+    "openFull": "Open in new tab",
+    "pdfFallback": "Preview unavailable. Open in a new tab to read this PDF.",
+    "missing": "Could not load this file.",
+    "loading": "Loading preview…",
+    "viewerTitle": "Evidence preview"
+  }
 }
