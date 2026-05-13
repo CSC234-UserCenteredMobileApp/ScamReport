@@ -23,6 +23,7 @@ import type {
 } from '@my-product/shared';
 import { canonicalEmbedInput, computeAiScore } from '../../core/ai-score';
 import { getPrisma } from '../../core/db/client';
+import { sendFcmToUser } from '../../core/firebase/messaging';
 import { getSignedUrl } from '../../core/supabase/storage';
 import { mirrorMyReport } from '../../sync/firestore_sync';
 import { notifyReporter } from '../notifications/notifications.service';
@@ -31,10 +32,14 @@ import {
   countByStatus,
   countDuplicates,
   findDetailRow,
+  findEvidenceFile,
   findQueueRows,
   type ActionKind,
   type ActionResult,
 } from './admin-reports.repo';
+
+const EVIDENCE_BUCKET = 'evidence';
+const EVIDENCE_URL_TTL_SECONDS = 3600;
 
 // ---------------------------------------------------------------------------
 // Queue
@@ -189,6 +194,26 @@ async function backfillAiScore(
     });
     return { aiScore: null, aiConfidence: null };
   }
+}
+
+// ---------------------------------------------------------------------------
+// Evidence signed URL
+// ---------------------------------------------------------------------------
+
+export interface EvidenceSignedUrl {
+  url: string;
+  expiresAt: string;
+}
+
+export async function getEvidenceSignedUrl(
+  reportId: string,
+  fileId: string,
+): Promise<EvidenceSignedUrl | null> {
+  const file = await findEvidenceFile(reportId, fileId);
+  if (!file) return null;
+  const url = await getSignedUrl(EVIDENCE_BUCKET, file.storagePath, EVIDENCE_URL_TTL_SECONDS);
+  const expiresAt = new Date(Date.now() + EVIDENCE_URL_TTL_SECONDS * 1000).toISOString();
+  return { url, expiresAt };
 }
 
 // ---------------------------------------------------------------------------

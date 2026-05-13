@@ -36,6 +36,16 @@ mock.module('../src/core/gemini/client', () => ({
   generateText: async () => '',
 }));
 
+// Supabase storage stub — evidence URL endpoint asks for a signed URL; the
+// test pins the response so we can assert the route returns it verbatim.
+let mockSignedUrl = 'https://signed.example/evidence/test';
+mock.module('../src/core/supabase/storage', () => ({
+  getSignedUrl: async () => mockSignedUrl,
+  uploadFile: async () => ({}),
+  deleteFile: async () => undefined,
+  copyFile: async () => undefined,
+}));
+
 // ---------------------------------------------------------------------------
 // Prisma mock — dynamic per test via module-level variables
 // ---------------------------------------------------------------------------
@@ -43,6 +53,7 @@ let mockFindUniqueReport: Record<string, unknown> | null = null;
 let mockFindManyReports: unknown[] = [];
 let mockQueryRawResults: unknown[] = [];
 let mockUpdateReport: Record<string, unknown> = {};
+let mockEvidenceFile: Record<string, unknown> | null = null;
 
 mock.module('../src/core/db/client', () => ({
   getPrisma: () => ({
@@ -68,6 +79,12 @@ mock.module('../src/core/db/client', () => ({
     },
     moderationAction: {
       create: async () => ({}),
+    },
+    evidenceFile: {
+      // The repo's `findEvidenceFile` filters on { id, reportId } — the mock
+      // returns whatever the test set, so the test controls the cross-report
+      // 404 path (set `mockEvidenceFile = null`).
+      findFirst: async () => mockEvidenceFile,
     },
     $transaction: async (ops: Promise<unknown>[]) => Promise.all(ops),
     $queryRaw: async () => mockQueryRawResults,
@@ -202,6 +219,8 @@ beforeEach(() => {
   mockFindManyReports = [];
   mockQueryRawResults = [];
   mockUpdateReport = ACTION_UPDATE_RESULT;
+  mockEvidenceFile = null;
+  mockSignedUrl = 'https://signed.example/evidence/test';
   firestoreSets = [];
   firestoreDeletes = [];
   __setFirestoreForTest(firestoreStub);
@@ -212,6 +231,7 @@ afterEach(() => {
   mockFindUniqueReport = null;
   mockFindManyReports = [];
   mockQueryRawResults = [];
+  mockEvidenceFile = null;
   __setFirestoreForTest(null);
 });
 
@@ -460,5 +480,55 @@ ACTION_CASES.forEach(({ action, dbStatus, mirroredStatus }) => {
       expect(write.path).toBe(`my-reports/${REPORTER_ID}/items/${VALID_ID}`);
       expect(write.data.status).toBe(mirroredStatus);
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+describe('GET /admin/reports/:id/evidence/:fileId/url', () => {
+  const FILE_ID = '22222222-2222-2222-2222-222222222222';
+
+  test('401 unauthenticated', async () => {
+    const res = await app.handle(
+      req(`/admin/reports/${VALID_ID}/evidence/${FILE_ID}/url`),
+    );
+    expect(res.status).toBe(401);
+  });
+
+  test('403 regular user', async () => {
+    mockDecoded = USER;
+    const res = await app.handle(
+      req(`/admin/reports/${VALID_ID}/evidence/${FILE_ID}/url`, { token: 'tok' }),
+    );
+    expect(res.status).toBe(403);
+  });
+
+  test('404 admin — file not found (also covers cross-report URL tampering)', async () => {
+    // mockEvidenceFile stays null — repo's findFirst returns null whether the
+    // file doesn't exist OR exists under a different reportId. Either way the
+    // route 404s, which is the security property under test.
+    mockDecoded = ADMIN;
+    const res = await app.handle(
+      req(`/admin/reports/${VALID_ID}/evidence/${FILE_ID}/url`, { token: 'tok' }),
+    );
+    expect(res.status).toBe(404);
+  });
+
+  test('200 admin — returns signed URL + expiresAt', async () => {
+    mockDecoded = ADMIN;
+    mockEvidenceFile = {
+      id: FILE_ID,
+      storagePath: 'admin/evidence/foo.jpg',
+      kind: 'image',
+      mimeType: 'image/jpeg',
+    };
+    mockSignedUrl = 'https://signed.example/evidence/foo.jpg?token=abc';
+    const res = await app.handle(
+      req(`/admin/reports/${VALID_ID}/evidence/${FILE_ID}/url`, { token: 'tok' }),
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.url).toBe('https://signed.example/evidence/foo.jpg?token=abc');
+    expect(typeof body.expiresAt).toBe('string');
+    expect(new Date(body.expiresAt).getTime()).toBeGreaterThan(Date.now());
   });
 });
