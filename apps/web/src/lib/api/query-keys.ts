@@ -1,6 +1,7 @@
 export const queryKeys = {
   moderation: {
     all: ['moderation'] as const,
+    queues: ['moderation', 'queue'] as const,
     queue: (scamType?: string) =>
       ['moderation', 'queue', scamType ?? 'all'] as const,
     detail: (id: string) => ['moderation', 'detail', id] as const,
