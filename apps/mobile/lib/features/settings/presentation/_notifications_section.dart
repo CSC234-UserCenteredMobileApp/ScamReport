@@ -1,16 +1,18 @@
 part of 'settings_screen.dart';
 
+// Alerts & Protection section — push notification toggles + active device
+// protection (call screening, SMS scanning). Android-only items are hidden
+// on web and other platforms.
 class _NotificationsSection extends ConsumerWidget {
   const _NotificationsSection();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settingsAsync = ref.watch(settingsProvider);
-    final showCallScreening =
-        !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+    final isAndroid = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
 
     return settingsAsync.when(
-      loading: () => const _SettingsSkeleton(height: 116),
+      loading: () => const _SettingsSkeleton(height: 160),
       error: (_, __) => const SizedBox.shrink(),
       data: (settings) => Card(
         margin: EdgeInsets.zero,
@@ -36,13 +38,62 @@ class _NotificationsSection extends ConsumerWidget {
               onChanged: (v) => ref
                   .read(settingsProvider.notifier)
                   .save(settings.copyWith(smsPhishingAlerts: v)),
+              isLast: !isAndroid,
             ),
-            if (showCallScreening) ...[
+            if (isAndroid) ...[
               const Divider(height: 1, indent: 16, endIndent: 16),
               const _CallScreeningTile(),
+              const Divider(height: 1, indent: 16, endIndent: 16),
+              _SmsToggleTile(settings: settings),
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _NotifTile extends StatelessWidget {
+  const _NotifTile({
+    required this.title,
+    required this.subtitle,
+    required this.value,
+    required this.onChanged,
+    this.isFirst = false,
+    this.isLast = false,
+  });
+
+  final String title;
+  final String subtitle;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  final bool isFirst;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final radius = BorderRadius.vertical(
+      top: isFirst ? const Radius.circular(16) : Radius.zero,
+      bottom: isLast ? const Radius.circular(16) : Radius.zero,
+    );
+
+    return ClipRRect(
+      borderRadius: radius,
+      child: SwitchListTile(
+        title: Text(title,
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(fontWeight: FontWeight.w600)),
+        subtitle: Text(subtitle,
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(color: cs.onSurfaceVariant)),
+        value: value,
+        onChanged: onChanged,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       ),
     );
   }
@@ -54,9 +105,8 @@ class _CallScreeningTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    const radius = BorderRadius.vertical(bottom: Radius.circular(16));
     return ClipRRect(
-      borderRadius: radius,
+      borderRadius: BorderRadius.zero,
       child: ListTile(
         leading: Icon(Icons.phone_in_talk_outlined, color: cs.onSurfaceVariant, size: 22),
         title: Text(
@@ -81,45 +131,84 @@ class _CallScreeningTile extends StatelessWidget {
   }
 }
 
-class _NotifTile extends StatelessWidget {
-  const _NotifTile({
-    required this.title,
-    required this.subtitle,
-    required this.value,
-    required this.onChanged,
-    this.isFirst = false,
-  });
+class _SmsToggleTile extends ConsumerWidget {
+  const _SmsToggleTile({required this.settings});
 
-  final String title;
-  final String subtitle;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-  final bool isFirst;
+  final SettingsState settings;
 
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final radius = BorderRadius.vertical(
-      top: isFirst ? const Radius.circular(16) : Radius.zero,
-    );
-
+  Widget build(BuildContext context, WidgetRef ref) {
     return ClipRRect(
-      borderRadius: radius,
+      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
       child: SwitchListTile(
-        title: Text(title,
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(fontWeight: FontWeight.w600)),
-        subtitle: Text(subtitle,
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(color: cs.onSurfaceVariant)),
-        value: value,
-        onChanged: onChanged,
+        secondary: Icon(
+          Icons.sms_outlined,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          size: 22,
+        ),
+        title: Text(
+          context.l10n.smsSmishingDetectionLabel,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+        ),
+        subtitle: Text(
+          context.l10n.smsSmishingDetectionDesc,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+        ),
+        value: settings.smsScanning,
+        onChanged: (v) => _onToggle(context, ref, v),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       ),
     );
+  }
+
+  Future<void> _onToggle(BuildContext context, WidgetRef ref, bool enable) async {
+    if (!enable) {
+      await ref.read(settingsProvider.notifier).save(settings.copyWith(smsScanning: false));
+      return;
+    }
+
+    final settingsRepo = ref.read(settingsRepositoryProvider);
+    final consentGiven = settingsRepo.smsScanConsentGiven;
+    if (!consentGiven) {
+      if (!context.mounted) return;
+      final agreed = await _showSmsConsentDialog(context);
+      if (!agreed || !context.mounted) return;
+      await settingsRepo.setSmsScanConsentGiven();
+    }
+
+    final status = await Permission.sms.request();
+    if (!status.isGranted) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.smsPermissionDenied)),
+        );
+      }
+      return;
+    }
+
+    await ref.read(settingsProvider.notifier).save(settings.copyWith(smsScanning: true));
+  }
+
+  Future<bool> _showSmsConsentDialog(BuildContext context) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text(ctx.l10n.smsConsentTitle),
+            content: Text(ctx.l10n.smsConsentBody),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: Text(ctx.l10n.cancel),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(ctx).pop(true),
+                child: Text(ctx.l10n.smsConsentAgree),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 }

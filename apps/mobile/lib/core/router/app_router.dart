@@ -221,7 +221,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, s) =>
             EditReportScreen(reportId: s.pathParameters['id']!),
       ),
-      GoRoute(path: '/search', builder: (_, __) => const SearchScreen()),
+      GoRoute(
+        path: '/search',
+        builder: (_, s) => SearchScreen(
+          openFilter: s.uri.queryParameters['filter'] == '1',
+        ),
+      ),
       GoRoute(path: '/privacy', builder: (_, __) => const PrivacyScreen()),
       GoRoute(path: '/terms',   builder: (_, __) => const TermsScreen()),
 

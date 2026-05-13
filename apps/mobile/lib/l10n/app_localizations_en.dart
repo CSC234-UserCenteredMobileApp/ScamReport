@@ -88,6 +88,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSectionAccount => 'ACCOUNT';
 
   @override
+  String get settingsSectionAppearance => 'APPEARANCE';
+
+  @override
+  String get settingsSectionProtection => 'ALERTS & PROTECTION';
+
+  @override
+  String get settingsSectionAdminTools => 'ADMIN TOOLS';
+
+  @override
+  String get settingsDangerZone => 'Danger zone';
+
+  @override
   String get myReports => 'My reports';
 
   @override

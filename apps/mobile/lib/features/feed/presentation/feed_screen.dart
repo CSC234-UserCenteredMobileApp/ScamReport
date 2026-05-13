@@ -21,11 +21,11 @@ class FeedScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
-            onPressed: () => context.push('/check-input'),
+            onPressed: () => context.push('/search'),
           ),
           IconButton(
             icon: const Icon(Icons.tune),
-            onPressed: () {},
+            onPressed: () => context.push('/search?filter=1'),
           ),
         ],
       ),
@@ -92,16 +92,6 @@ class _FeedBody extends ConsumerWidget {
                 ],
               ),
             ),
-          ),
-        ),
-
-        const SliverToBoxAdapter(child: SizedBox(height: 12)),
-
-        // Search tile
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _SearchTile(onTap: () => context.push('/search')),
           ),
         ),
 
@@ -329,46 +319,6 @@ class _ErrorRow extends StatelessWidget {
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
-      ),
-    );
-  }
-}
-
-class _SearchTile extends StatelessWidget {
-  const _SearchTile({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Material(
-      color: theme.colorScheme.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: theme.dividerColor),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.auto_awesome_outlined, size: 20,
-                  color: theme.colorScheme.primary),
-              const SizedBox(width: 8),
-              Text(
-                context.l10n.searchTitle,
-                style: theme.textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

@@ -206,5 +206,29 @@ void main() {
 
       expect(find.byType(Badge), findsOneWidget);
     });
+
+    testWidgets('openFilter: false does not auto-open filter sheet',
+        (tester) async {
+      await tester.pumpWidget(_themed(
+        const SearchScreen(openFilter: false),
+        overrides: [httpClientProvider.overrideWithValue(_reportsClient())],
+      ));
+      await tester.pumpAndSettle();
+
+      // "SORT BY" label only appears inside the filter bottom sheet.
+      expect(find.text('SORT BY'), findsNothing);
+    });
+
+    testWidgets('openFilter: true auto-opens filter sheet on mount',
+        (tester) async {
+      await tester.pumpWidget(_themed(
+        const SearchScreen(openFilter: true),
+        overrides: [httpClientProvider.overrideWithValue(_reportsClient())],
+      ));
+      await tester.pumpAndSettle();
+
+      // "SORT BY" label is exclusive to the filter bottom sheet header.
+      expect(find.text('SORT BY'), findsOneWidget);
+    });
   });
 }
