@@ -16,6 +16,7 @@ const imageFile: AdminEvidenceFile = {
   kind: 'image',
   mimeType: 'image/jpeg',
   sizeBytes: 24_576,
+  signedUrl: null,
 };
 
 const pdfFile: AdminEvidenceFile = {
@@ -24,6 +25,7 @@ const pdfFile: AdminEvidenceFile = {
   kind: 'pdf',
   mimeType: 'application/pdf',
   sizeBytes: 65_536,
+  signedUrl: null,
 };
 
 describe('EvidenceGallery', () => {

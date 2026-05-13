@@ -61,6 +61,7 @@ export const sampleDetail: AdminReportDetail = {
       kind: 'image',
       mimeType: 'image/jpeg',
       sizeBytes: 24_576,
+      signedUrl: null,
     },
     {
       id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
@@ -68,6 +69,7 @@ export const sampleDetail: AdminReportDetail = {
       kind: 'pdf',
       mimeType: 'application/pdf',
       sizeBytes: 65_536,
+      signedUrl: null,
     },
   ],
   duplicateCount: 0,
