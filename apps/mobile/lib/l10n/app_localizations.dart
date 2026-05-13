@@ -578,6 +578,114 @@ abstract class AppLocalizations {
   /// **'{minutes}m'**
   String modAgeMinutes(int minutes);
 
+  /// No description provided for @modSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search title or scam type…'**
+  String get modSearchHint;
+
+  /// No description provided for @modFilterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter & sort'**
+  String get modFilterTitle;
+
+  /// No description provided for @modFilterReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get modFilterReset;
+
+  /// No description provided for @modFilterApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get modFilterApply;
+
+  /// No description provided for @modFilterSectionScamType.
+  ///
+  /// In en, this message translates to:
+  /// **'Scam type'**
+  String get modFilterSectionScamType;
+
+  /// No description provided for @modFilterSectionAiConfidence.
+  ///
+  /// In en, this message translates to:
+  /// **'AI confidence'**
+  String get modFilterSectionAiConfidence;
+
+  /// No description provided for @modFilterSectionFlags.
+  ///
+  /// In en, this message translates to:
+  /// **'Flags'**
+  String get modFilterSectionFlags;
+
+  /// No description provided for @modFilterSectionSort.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get modFilterSectionSort;
+
+  /// No description provided for @modFilterPriorityOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority-flagged only'**
+  String get modFilterPriorityOnly;
+
+  /// No description provided for @modFilterHasEvidence.
+  ///
+  /// In en, this message translates to:
+  /// **'Has evidence'**
+  String get modFilterHasEvidence;
+
+  /// No description provided for @modFilterChipAllTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'All types'**
+  String get modFilterChipAllTypes;
+
+  /// No description provided for @modActiveFilterCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 filter} other{{count} filters}}'**
+  String modActiveFilterCount(int count);
+
+  /// No description provided for @modEmptyFilteredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No reports match these filters'**
+  String get modEmptyFilteredTitle;
+
+  /// No description provided for @modEmptyFilteredAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset filters'**
+  String get modEmptyFilteredAction;
+
+  /// No description provided for @aiConfidenceHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get aiConfidenceHigh;
+
+  /// No description provided for @aiConfidenceMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get aiConfidenceMedium;
+
+  /// No description provided for @aiConfidenceLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get aiConfidenceLow;
+
+  /// No description provided for @aiConfidenceUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get aiConfidenceUnknown;
+
   /// No description provided for @adminReviewTitle.
   ///
   /// In en, this message translates to:

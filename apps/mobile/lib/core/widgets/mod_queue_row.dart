@@ -11,8 +11,13 @@ import 'ai_score_card.dart';
 /// FR-7.8). The previous demo's masked-handle pill is gone — this widget
 /// shows only the scam content the admin needs to act on.
 ///
-/// Flagged variant: 4-px coral-amber left border + a localised "team note"
-/// line beneath the row when `lastRemarkByAdmin` is non-null.
+/// Left stripe (4 px) communicates the row's most important signal:
+/// - Flagged rows: coral primary — flagged status dominates.
+/// - Pending rows: tint mirrors `aiConfidence`
+///   (`high → safe`, `medium → suspicious`, `low → scam`, otherwise unknown).
+/// Flagged rows also keep the localised "team note" line beneath the row
+/// when `lastRemarkByAdmin` is non-null, so the flagged signal carries
+/// colour + text, not colour alone (PRD §6.4).
 class ModQueueRow extends StatelessWidget {
   const ModQueueRow({
     super.key,
@@ -22,6 +27,20 @@ class ModQueueRow extends StatelessWidget {
 
   final ModQueueItem item;
   final VoidCallback onTap;
+
+  Color _stripeColor(BuildContext context, VerdictPalette palette) {
+    if (item.isFlagged) return Theme.of(context).colorScheme.primary;
+    switch (item.aiConfidence) {
+      case 'high':
+        return palette.safe.fg;
+      case 'medium':
+        return palette.suspicious.fg;
+      case 'low':
+        return palette.scam.fg;
+      default:
+        return palette.unknown.fg;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +62,7 @@ class ModQueueRow extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (item.isFlagged)
-                  Container(width: 4, color: palette.suspicious.fg),
+                Container(width: 4, color: _stripeColor(context, palette)),
                 if (item.aiScore != null) ...[
                   Padding(
                     padding: const EdgeInsets.only(left: 12, top: 12, bottom: 12),

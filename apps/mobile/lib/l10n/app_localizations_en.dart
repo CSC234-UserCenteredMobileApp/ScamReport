@@ -263,6 +263,68 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get modSearchHint => 'Search title or scam type…';
+
+  @override
+  String get modFilterTitle => 'Filter & sort';
+
+  @override
+  String get modFilterReset => 'Reset';
+
+  @override
+  String get modFilterApply => 'Apply';
+
+  @override
+  String get modFilterSectionScamType => 'Scam type';
+
+  @override
+  String get modFilterSectionAiConfidence => 'AI confidence';
+
+  @override
+  String get modFilterSectionFlags => 'Flags';
+
+  @override
+  String get modFilterSectionSort => 'Sort';
+
+  @override
+  String get modFilterPriorityOnly => 'Priority-flagged only';
+
+  @override
+  String get modFilterHasEvidence => 'Has evidence';
+
+  @override
+  String get modFilterChipAllTypes => 'All types';
+
+  @override
+  String modActiveFilterCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count filters',
+      one: '1 filter',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get modEmptyFilteredTitle => 'No reports match these filters';
+
+  @override
+  String get modEmptyFilteredAction => 'Reset filters';
+
+  @override
+  String get aiConfidenceHigh => 'High';
+
+  @override
+  String get aiConfidenceMedium => 'Medium';
+
+  @override
+  String get aiConfidenceLow => 'Low';
+
+  @override
+  String get aiConfidenceUnknown => 'Unknown';
+
+  @override
   String get adminReviewTitle => 'Review report';
 
   @override
