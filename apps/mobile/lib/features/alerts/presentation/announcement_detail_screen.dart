@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/api_client.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../l10n/l10n.dart';
 import '../../home/domain/recent_alert.dart';
@@ -117,8 +116,7 @@ class _AnnouncementBodyState extends State<_AnnouncementBody> {
                   itemCount: images.length,
                   onPageChanged: (i) => setState(() => _currentImageIndex = i),
                   itemBuilder: (_, i) {
-                    final url =
-                        '$supabasePublicUrl/storage/v1/object/public/announcement-attachments/${images[i].storagePath}';
+                    final url = images[i].url;
                     return Image.network(
                       url,
                       fit: BoxFit.cover,
@@ -208,13 +206,13 @@ class _AnnouncementBodyState extends State<_AnnouncementBody> {
                         contentPadding: EdgeInsets.zero,
                         leading: const Icon(Icons.picture_as_pdf_outlined),
                         title: Text(
-                          pdf.storagePath.split('/').last,
+                          pdf.url.split('/').last,
                           style: theme.textTheme.bodyMedium,
                         ),
                         trailing: IconButton(
                           icon: const Icon(Icons.copy_outlined),
                           tooltip: 'Copy link',
-                          onPressed: () => _copyPdfLink(context, pdf.storagePath),
+                          onPressed: () => _copyPdfLink(context, pdf.url),
                         ),
                       ),
                   ],
@@ -238,9 +236,7 @@ class _AnnouncementBodyState extends State<_AnnouncementBody> {
     );
   }
 
-  Future<void> _copyPdfLink(BuildContext context, String storagePath) async {
-    final url =
-        '$supabasePublicUrl/storage/v1/object/public/announcement-attachments/$storagePath';
+  Future<void> _copyPdfLink(BuildContext context, String url) async {
     await Clipboard.setData(ClipboardData(text: url));
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(

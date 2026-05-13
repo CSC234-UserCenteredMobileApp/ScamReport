@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../api_client.dart';
 import '../theme/app_theme.dart';
 import '../../features/home/domain/recent_alert.dart';
 import '../../l10n/l10n.dart';
@@ -45,9 +44,7 @@ class AlertCard extends StatelessWidget {
     }
 
     final dateStr = _formatDate(alert.publishedAt);
-    final imageUrl = alert.firstImageStoragePath != null
-        ? '$supabasePublicUrl/storage/v1/object/public/announcement-attachments/${alert.firstImageStoragePath}'
-        : null;
+    final imageUrl = alert.firstImageUrl;
 
     return Card(
       clipBehavior: Clip.antiAlias,

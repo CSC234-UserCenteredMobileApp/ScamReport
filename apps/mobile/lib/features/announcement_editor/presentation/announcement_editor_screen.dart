@@ -28,7 +28,10 @@ class _AnnouncementEditorScreenState
   bool _loaded = false;
   bool _uploadingAttachment = false;
 
-  bool get _isEdit => widget.announcementId != null;
+  // Set after first save in create mode so the screen gains an ID in-place.
+  String? _savedId;
+  String? get _effectiveId => _savedId ?? widget.announcementId;
+  bool get _isEdit => _effectiveId != null;
 
   @override
   void initState() {
@@ -52,6 +55,31 @@ class _AnnouncementEditorScreenState
     _loaded = true;
   }
 
+  // Saves draft in create mode to obtain an ID. Returns true if ID is ready.
+  Future<bool> _ensureSaved() async {
+    if (_effectiveId != null) return true;
+    if (!_formKey.currentState!.validate()) return false;
+    setState(() => _saving = true);
+    try {
+      final created = await ref.read(announcementEditorRepositoryProvider).create(
+        title: _titleCtrl.text.trim(),
+        body: _bodyCtrl.text.trim(),
+        category: _category,
+      );
+      ref.invalidate(adminAnnouncementsListProvider);
+      if (mounted) setState(() => _savedId = created.id);
+      return true;
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+      return false;
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
   Future<void> _saveDraft() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
@@ -59,23 +87,23 @@ class _AnnouncementEditorScreenState
       final repo = ref.read(announcementEditorRepositoryProvider);
       if (_isEdit) {
         await repo.update(
-          widget.announcementId!,
+          _effectiveId!,
           title: _titleCtrl.text.trim(),
           body: _bodyCtrl.text.trim(),
           category: _category,
         );
+        ref.invalidate(adminAnnouncementDetailProvider(_effectiveId!));
+        ref.invalidate(adminAnnouncementsListProvider);
+        if (mounted) context.pop();
       } else {
-        await repo.create(
+        final created = await repo.create(
           title: _titleCtrl.text.trim(),
           body: _bodyCtrl.text.trim(),
           category: _category,
         );
+        ref.invalidate(adminAnnouncementsListProvider);
+        if (mounted) setState(() => _savedId = created.id);
       }
-      ref.invalidate(adminAnnouncementsListProvider);
-      if (_isEdit) {
-        ref.invalidate(adminAnnouncementDetailProvider(widget.announcementId!));
-      }
-      if (mounted) context.pop();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
@@ -87,6 +115,8 @@ class _AnnouncementEditorScreenState
   }
 
   Future<void> _publish() async {
+    if (!await _ensureSaved()) return;
+    if (!mounted) return;
     // Show confirmation bottom sheet with FCM push toggle
     final result = await showModalBottomSheet<({bool confirmed, bool pushToFcm})>(
       context: context,
@@ -97,9 +127,47 @@ class _AnnouncementEditorScreenState
     setState(() => _saving = true);
     try {
       final repo = ref.read(announcementEditorRepositoryProvider);
-      await repo.publish(widget.announcementId!, pushToFcm: result.pushToFcm);
+      await repo.publish(_effectiveId!, pushToFcm: result.pushToFcm);
       ref.invalidate(adminAnnouncementsListProvider);
-      ref.invalidate(adminAnnouncementDetailProvider(widget.announcementId!));
+      ref.invalidate(adminAnnouncementDetailProvider(_effectiveId!));
+      if (mounted) context.pop();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  Future<void> _delete() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Delete announcement?'),
+        content: const Text('This cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    setState(() => _saving = true);
+    try {
+      await ref.read(announcementEditorRepositoryProvider).delete(_effectiveId!);
+      ref.invalidate(adminAnnouncementsListProvider);
       if (mounted) context.pop();
     } catch (e) {
       if (mounted) {
@@ -115,9 +183,9 @@ class _AnnouncementEditorScreenState
     setState(() => _saving = true);
     try {
       final repo = ref.read(announcementEditorRepositoryProvider);
-      await repo.unpublish(widget.announcementId!);
+      await repo.unpublish(_effectiveId!);
       ref.invalidate(adminAnnouncementsListProvider);
-      ref.invalidate(adminAnnouncementDetailProvider(widget.announcementId!));
+      ref.invalidate(adminAnnouncementDetailProvider(_effectiveId!));
       if (mounted) context.pop();
     } catch (e) {
       if (mounted) {
@@ -130,6 +198,7 @@ class _AnnouncementEditorScreenState
   }
 
   Future<void> _pickAndUpload() async {
+    if (!await _ensureSaved()) return;
     final result = await FilePicker.platform.pickFiles(
       allowMultiple: true,
       type: FileType.custom,
@@ -143,9 +212,9 @@ class _AnnouncementEditorScreenState
       final repo = ref.read(announcementEditorRepositoryProvider);
       for (final file in result.files) {
         if (file.bytes == null) continue;
-        await repo.uploadAttachment(widget.announcementId!, file);
+        await repo.uploadAttachment(_effectiveId!, file);
       }
-      ref.invalidate(adminAnnouncementDetailProvider(widget.announcementId!));
+      ref.invalidate(adminAnnouncementDetailProvider(_effectiveId!));
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
@@ -159,8 +228,8 @@ class _AnnouncementEditorScreenState
   Future<void> _deleteAttachment(String attachmentId) async {
     final repo = ref.read(announcementEditorRepositoryProvider);
     try {
-      await repo.deleteAttachment(widget.announcementId!, attachmentId);
-      ref.invalidate(adminAnnouncementDetailProvider(widget.announcementId!));
+      await repo.deleteAttachment(_effectiveId!, attachmentId);
+      ref.invalidate(adminAnnouncementDetailProvider(_effectiveId!));
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
@@ -174,7 +243,7 @@ class _AnnouncementEditorScreenState
     // In edit mode, load existing detail to populate form
     if (_isEdit) {
       final detailAsync =
-          ref.watch(adminAnnouncementDetailProvider(widget.announcementId!));
+          ref.watch(adminAnnouncementDetailProvider(_effectiveId!));
       return detailAsync.when(
         loading: () => const Scaffold(
           body: Center(child: CircularProgressIndicator()),
@@ -197,8 +266,17 @@ class _AnnouncementEditorScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEdit ? 'Edit Announcement' : 'New Announcement'),
+        title: Text(widget.announcementId != null ? 'Edit Announcement' : 'New Announcement'),
         centerTitle: true,
+        actions: [
+          if (_isEdit && !isPublished)
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              color: Theme.of(context).colorScheme.error,
+              tooltip: 'Delete',
+              onPressed: _saving ? null : _delete,
+            ),
+        ],
       ),
       body: Form(
         key: _formKey,
@@ -272,24 +350,15 @@ class _AnnouncementEditorScreenState
             ),
             const SizedBox(height: 16),
 
-            // Attachment section — edit mode only
-            if (_isEdit) ...[
-              const SizedBox(height: 8),
-              _AttachmentSection(
-                detail: detail,
-                saving: _saving || _uploadingAttachment,
-                onAdd: _pickAndUpload,
-                onDelete: _deleteAttachment,
-              ),
-            ] else ...[
-              const SizedBox(height: 8),
-              Text(
-                'Save draft first to add attachments.',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-              ),
-            ],
+            // Attachment section
+            const SizedBox(height: 8),
+            _AttachmentSection(
+              detail: detail,
+              saving: _saving || _uploadingAttachment,
+              isPublished: isPublished,
+              onAdd: _pickAndUpload,
+              onDelete: _deleteAttachment,
+            ),
           ],
         ),
       ),
@@ -319,27 +388,19 @@ class _AnnouncementEditorScreenState
       );
     }
 
-    if (!_isEdit) {
-      // Create mode: only Save Draft
-      return FilledButton(
-        onPressed: _saving ? null : _saveDraft,
-        child: _saving
-            ? const SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : const Text('Save Draft'),
-      );
-    }
-
-    // Edit mode, draft/unpublished: Save Draft + Publish
+    // Draft / unpublished / new — Save Draft + Publish
     return Row(
       children: [
         Expanded(
           child: OutlinedButton(
             onPressed: _saving ? null : _saveDraft,
-            child: const Text('Save Draft'),
+            child: _saving
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Save Draft'),
           ),
         ),
         const SizedBox(width: 12),
@@ -413,18 +474,21 @@ class _AttachmentSection extends StatelessWidget {
   const _AttachmentSection({
     required this.detail,
     required this.saving,
+    required this.isPublished,
     required this.onAdd,
     required this.onDelete,
   });
 
   final AdminAnnouncementDetail? detail;
   final bool saving;
+  final bool isPublished;
   final VoidCallback onAdd;
   final void Function(String attachmentId) onDelete;
 
   @override
   Widget build(BuildContext context) {
     final attachments = detail?.attachments ?? [];
+    final canEdit = !isPublished && !saving;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -438,9 +502,16 @@ class _AttachmentSection extends StatelessWidget {
                   ),
             ),
             const Spacer(),
-            if (attachments.length < 10)
+            if (isPublished)
+              Text(
+                'Unpublish to edit',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              )
+            else if (attachments.length < 10)
               TextButton.icon(
-                onPressed: saving ? null : onAdd,
+                onPressed: canEdit ? onAdd : null,
                 icon: const Icon(Icons.attach_file, size: 18),
                 label: const Text('Add'),
               ),
@@ -470,7 +541,7 @@ class _AttachmentSection extends StatelessWidget {
             ),
             trailing: IconButton(
               icon: const Icon(Icons.delete_outline, size: 20),
-              onPressed: saving ? null : () => onDelete(att.id),
+              onPressed: canEdit ? () => onDelete(att.id) : null,
             ),
           ),
       ],

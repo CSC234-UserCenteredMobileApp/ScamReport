@@ -2,6 +2,12 @@ import { Elysia, t } from 'elysia';
 import { AnnouncementListResponse, AnnouncementDetailResponse } from '@my-product/shared';
 import { getPrisma } from '../../core/db/client';
 
+const SUPABASE_URL = (process.env.SUPABASE_URL ?? '').replace(/\/$/, '');
+const BUCKET = 'announcement-attachments';
+function attachmentUrl(storagePath: string): string {
+  return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${storagePath}`;
+}
+
 export const announcementsRoute = new Elysia()
   .get(
     '/announcements',
@@ -37,7 +43,7 @@ export const announcementsRoute = new Elysia()
           excerpt: r.body.slice(0, 120).trimEnd() + (r.body.length > 120 ? '…' : ''),
           category: r.category,
           publishedAt: (r.publishedAt ?? r.createdAt).toISOString(),
-          firstImageStoragePath: r.attachments[0]?.storagePath ?? null,
+          firstImageUrl: r.attachments[0] ? attachmentUrl(r.attachments[0].storagePath) : null,
           attachmentCount: r._count.attachments,
         })),
       };
@@ -91,7 +97,7 @@ export const announcementsRoute = new Elysia()
           publishedAt: (row.publishedAt ?? row.createdAt).toISOString(),
           attachments: row.attachments.map((a) => ({
             id: a.id,
-            storagePath: a.storagePath,
+            url: attachmentUrl(a.storagePath),
             kind: a.kind as 'image' | 'pdf',
             mimeType: a.mimeType,
             sizeBytes: Number(a.sizeBytes),

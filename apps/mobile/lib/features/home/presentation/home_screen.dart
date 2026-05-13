@@ -44,10 +44,26 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const Scaffold(
+    Future<void> onRefresh() async {
+      ref.invalidate(homeStatsProvider);
+      ref.invalidate(recentAlertsProvider);
+      ref.invalidate(recentReportsProvider);
+      try {
+        await Future.wait([
+          ref.read(homeStatsProvider.future),
+          ref.read(recentAlertsProvider.future),
+          ref.read(recentReportsProvider.future),
+        ]);
+      } catch (_) {}
+    }
+
+    return Scaffold(
       body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
+        child: RefreshIndicator(
+          onRefresh: onRefresh,
+          child: const CustomScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            slivers: [
             // 1. Brand header
             SliverToBoxAdapter(
               child: Padding(
@@ -83,6 +99,7 @@ class HomeScreen extends ConsumerWidget {
             // 7. Bottom padding
             SliverToBoxAdapter(child: SizedBox(height: 24)),
           ],
+          ),
         ),
       ),
     );

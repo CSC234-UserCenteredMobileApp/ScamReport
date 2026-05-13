@@ -4,13 +4,13 @@ import '../../sms_scan/domain/sms_alert.dart';
 class AlertAttachment {
   const AlertAttachment({
     required this.id,
-    required this.storagePath,
+    required this.url,
     required this.kind,
     required this.mimeType,
     required this.sizeBytes,
   });
   final String id;
-  final String storagePath;
+  final String url;
   final String kind; // 'image' | 'pdf'
   final String mimeType;
   final int sizeBytes;
@@ -26,6 +26,7 @@ class Alert {
     required this.publishedAt,
     required this.slug,
     this.attachments = const [],
+    this.firstImageUrl,
     this.senderMasked,
     this.verdict,
   });
@@ -38,6 +39,7 @@ class Alert {
   final DateTime publishedAt;
   final String slug;
   final List<AlertAttachment> attachments;
+  final String? firstImageUrl;
   final String? senderMasked;
   final String? verdict;
 
