@@ -24,6 +24,7 @@ export type ModerationRecord = Static<typeof ModerationRecord>;
 export const AdminEvidenceFile = Type.Object({
   id: Type.String({ format: 'uuid' }),
   storagePath: Type.String(),
+  signedUrl: Type.Union([Type.String(), Type.Null()]),
   kind: Type.Union([Type.Literal('image'), Type.Literal('pdf')]),
   mimeType: Type.String(),
   sizeBytes: Type.Number(),

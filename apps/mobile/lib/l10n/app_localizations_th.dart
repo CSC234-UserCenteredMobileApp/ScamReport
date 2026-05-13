@@ -991,4 +991,76 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get editReportLoadFailed => 'ไม่สามารถโหลดรายงานได้';
+
+  @override
+  String get notificationsTitle => 'การแจ้งเตือน';
+
+  @override
+  String get notificationsEmpty => 'ยังไม่มีการแจ้งเตือน';
+
+  @override
+  String get notificationsLoadFailed => 'โหลดการแจ้งเตือนไม่สำเร็จ';
+
+  @override
+  String get notificationMarkAllRead => 'ทำเครื่องหมายว่าอ่านทั้งหมด';
+
+  @override
+  String get notificationView => 'ดู';
+
+  @override
+  String get notificationVerifiedTitle => 'รายงานได้รับการยืนยันแล้ว';
+
+  @override
+  String get notificationRejectedTitle => 'รายงานได้รับการตรวจสอบแล้ว';
+
+  @override
+  String get notificationFlaggedTitle => 'รายงานถูกตั้งเครื่องหมาย';
+
+  @override
+  String get notificationTimeJustNow => 'เมื่อสักครู่';
+
+  @override
+  String notificationTimeMinutes(int minutes) {
+    return '$minutes นาทีที่แล้ว';
+  }
+
+  @override
+  String notificationTimeHours(int hours) {
+    return '$hours ชั่วโมงที่แล้ว';
+  }
+
+  @override
+  String notificationTimeDays(int days) {
+    return '$days วันที่แล้ว';
+  }
+
+  @override
+  String get modSegmentAll => 'ทั้งหมด';
+
+  @override
+  String get modSegmentPending => 'รอตรวจ';
+
+  @override
+  String get modSegmentFlagged => 'ตั้งเครื่องหมาย';
+
+  @override
+  String get modSortNewest => 'ใหม่สุดก่อน';
+
+  @override
+  String get modSortOldest => 'เก่าสุดก่อน';
+
+  @override
+  String get adminReviewEvidenceEmpty => 'ไม่มีหลักฐานแนบ';
+
+  @override
+  String get adminReviewTimelineTitle => 'ประวัติการตรวจสอบ';
+
+  @override
+  String get adminReviewRemarkTemplateSpam => 'สแปม';
+
+  @override
+  String get adminReviewRemarkTemplateNotEnough => 'หลักฐานไม่พอ';
+
+  @override
+  String get adminReviewRemarkTemplateConfirmed => 'ยืนยันแล้ว';
 }

@@ -44,6 +44,7 @@ class EvidenceFile {
   const EvidenceFile({
     required this.id,
     required this.storagePath,
+    required this.signedUrl,
     required this.kind,
     required this.mimeType,
     required this.sizeBytes,
@@ -51,6 +52,7 @@ class EvidenceFile {
 
   final String id;
   final String storagePath;
+  final String? signedUrl;
   final String kind;
   final String mimeType;
   final int sizeBytes;

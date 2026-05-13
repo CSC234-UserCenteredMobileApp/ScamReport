@@ -127,6 +127,22 @@ enum ConsentKind {
   @@map("consent_kind")
 }
 
+enum NotificationKind {
+  report_verified
+  report_rejected
+  report_flagged
+
+  @@map("notification_kind")
+}
+
+enum DevicePlatform {
+  ios
+  android
+  web
+
+  @@map("device_platform")
+}
+
 // =============================================================================
 // Tables
 // =============================================================================
@@ -148,6 +164,7 @@ model User {
   moderations     ModerationAction[]
   announcements   Announcement[]
   fcmDevices      FcmDevice[]
+  notifications   Notification[]
   aiConversations AiConversation[]
   checkLogs       CheckLog[]
   deletionRequest AccountDeletionRequest?
@@ -216,6 +233,7 @@ model Report {
   moderations      ModerationAction[]
   embedding        ReportEmbedding?
   aiConversations  AiConversation[]
+  notifications    Notification[]
 
   @@index([status, createdAt(sort: Desc)])
   @@index([reporterId, createdAt(sort: Desc)])
@@ -306,16 +324,37 @@ model AnnouncementAttachment {
 
 /// Per-device push tokens (a user may have multiple Android devices). (DESIGN §4.9)
 model FcmDevice {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId     String   @map("user_id") @db.Uuid
-  fcmToken   String   @unique @map("fcm_token")
-  appVersion String?  @map("app_version")
-  lastSeenAt DateTime @default(now()) @map("last_seen_at") @db.Timestamptz()
+  id         String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String          @map("user_id") @db.Uuid
+  fcmToken   String          @unique @map("fcm_token")
+  platform   DevicePlatform?
+  appVersion String?         @map("app_version")
+  lastSeenAt DateTime        @default(now()) @map("last_seen_at") @db.Timestamptz()
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("fcm_devices")
+}
+
+/// Persistent inbox of in-app notifications. Source of truth even when an FCM
+/// push fails to deliver. (DESIGN §4.9b)
+model Notification {
+  id        String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String           @map("user_id") @db.Uuid
+  kind      NotificationKind
+  title     String
+  body      String
+  reportId  String?          @map("report_id") @db.Uuid
+  isRead    Boolean          @default(false) @map("is_read")
+  createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz()
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  report Report? @relation(fields: [reportId], references: [id], onDelete: SetNull)
+
+  @@index([userId, isRead, createdAt(sort: Desc)])
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("notifications")
 }
 
 /// Server-side log of every POST /check call. (DESIGN §4.10)

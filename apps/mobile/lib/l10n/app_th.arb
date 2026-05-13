@@ -349,5 +349,29 @@
   "editReportSaveFailed": "ไม่สามารถอัปเดตรายงานได้ กรุณาลองอีกครั้ง",
   "editReportUploadFailed": "ไม่สามารถอัปโหลดรูปภาพได้ กรุณาลองอีกครั้ง",
   "editReportUploadSuccess": "อัปโหลดรูปภาพแล้ว",
-  "editReportLoadFailed": "ไม่สามารถโหลดรายงานได้"
+  "editReportLoadFailed": "ไม่สามารถโหลดรายงานได้",
+
+  "notificationsTitle": "การแจ้งเตือน",
+  "notificationsEmpty": "ยังไม่มีการแจ้งเตือน",
+  "notificationsLoadFailed": "โหลดการแจ้งเตือนไม่สำเร็จ",
+  "notificationMarkAllRead": "ทำเครื่องหมายว่าอ่านทั้งหมด",
+  "notificationView": "ดู",
+  "notificationVerifiedTitle": "รายงานได้รับการยืนยันแล้ว",
+  "notificationRejectedTitle": "รายงานได้รับการตรวจสอบแล้ว",
+  "notificationFlaggedTitle": "รายงานถูกตั้งเครื่องหมาย",
+  "notificationTimeJustNow": "เมื่อสักครู่",
+  "notificationTimeMinutes": "{minutes} นาทีที่แล้ว",
+  "notificationTimeHours": "{hours} ชั่วโมงที่แล้ว",
+  "notificationTimeDays": "{days} วันที่แล้ว",
+
+  "modSegmentAll": "ทั้งหมด",
+  "modSegmentPending": "รอตรวจ",
+  "modSegmentFlagged": "ตั้งเครื่องหมาย",
+  "modSortNewest": "ใหม่สุดก่อน",
+  "modSortOldest": "เก่าสุดก่อน",
+  "adminReviewEvidenceEmpty": "ไม่มีหลักฐานแนบ",
+  "adminReviewTimelineTitle": "ประวัติการตรวจสอบ",
+  "adminReviewRemarkTemplateSpam": "สแปม",
+  "adminReviewRemarkTemplateNotEnough": "หลักฐานไม่พอ",
+  "adminReviewRemarkTemplateConfirmed": "ยืนยันแล้ว"
 }

@@ -8,7 +8,8 @@ import '../domain/mod_report.dart';
 import '../domain/mod_repository.dart';
 
 final modApiClientProvider = Provider<ModApiClient>((ref) {
-  return ModApiClient(ref.watch(httpClientProvider), ref.watch(firebaseAuthProvider));
+  return ModApiClient(
+      ref.watch(httpClientProvider), ref.watch(firebaseAuthProvider));
 });
 
 final modRepositoryProvider = Provider<ModRepository>((ref) {
@@ -24,19 +25,30 @@ final modDetailProvider =
   return ref.watch(modRepositoryProvider).getDetail(id);
 });
 
-final modFilterFlaggedProvider = StateProvider<bool>((ref) => false);
+// Segmented filter for the queue. `all` shows pending + flagged together.
+enum ModQueueSegment { all, pending, flagged }
+
+final modFilterSegmentProvider =
+    StateProvider<ModQueueSegment>((ref) => ModQueueSegment.all);
 
 final modSortNewestFirstProvider = StateProvider<bool>((ref) => false);
 
 final modFilteredQueueProvider =
     Provider<AsyncValue<List<ModQueueItem>>>((ref) {
   final queueAsync = ref.watch(modQueueProvider);
-  final flaggedOnly = ref.watch(modFilterFlaggedProvider);
+  final segment = ref.watch(modFilterSegmentProvider);
   final newestFirst = ref.watch(modSortNewestFirstProvider);
   return queueAsync.whenData((data) {
-    var items = flaggedOnly
-        ? data.items.where((i) => i.isFlagged).toList()
-        : List<ModQueueItem>.from(data.items);
+    var items = data.items.where((i) {
+      switch (segment) {
+        case ModQueueSegment.all:
+          return true;
+        case ModQueueSegment.pending:
+          return !i.isFlagged;
+        case ModQueueSegment.flagged:
+          return i.isFlagged;
+      }
+    }).toList();
     items.sort((a, b) => newestFirst
         ? b.submittedAt.compareTo(a.submittedAt)
         : a.submittedAt.compareTo(b.submittedAt));

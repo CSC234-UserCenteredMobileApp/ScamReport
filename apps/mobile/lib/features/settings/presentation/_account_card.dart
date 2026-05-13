@@ -16,7 +16,8 @@ class _AccountCard extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: user == null ? _GuestRow(cs: cs) : _AuthedRow(user: user!, cs: cs),
+        child:
+            user == null ? _GuestRow(cs: cs) : _AuthedRow(user: user!, cs: cs),
       ),
     );
   }
@@ -36,7 +37,8 @@ class _GuestRow extends StatelessWidget {
       children: [
         _AvatarCircle(
           color: cs.onSurfaceVariant.withValues(alpha: 0.2),
-          child: Icon(Icons.person_outline, color: cs.onSurfaceVariant, size: 24),
+          child:
+              Icon(Icons.person_outline, color: cs.onSurfaceVariant, size: 24),
         ),
         const SizedBox(width: 12),
         Expanded(

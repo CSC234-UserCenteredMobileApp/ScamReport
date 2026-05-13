@@ -8,6 +8,8 @@ import 'l10n/l10n.dart';
 
 import 'core/di/auth.dart';
 import 'core/di/firebase.dart';
+import 'core/notifications/fcm_registrar.dart';
+import 'core/notifications/foreground_listener.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/ask_ai/presentation/ask_ai_providers.dart';
@@ -28,11 +30,25 @@ Future<void> main() async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends ConsumerWidget {
+class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends ConsumerState<MyApp> {
+  final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
+  @override
+  void initState() {
+    super.initState();
+    // FcmRegistrar listens to auth state internally; safe to fire-and-forget.
+    ref.read(fcmRegistrarProvider).start();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(goRouterProvider);
     final settings = ref.watch(settingsProvider).valueOrNull;
 
@@ -57,7 +73,11 @@ class MyApp extends ConsumerWidget {
       locale: settings != null ? Locale(settings.language) : null,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      scaffoldMessengerKey: _scaffoldMessengerKey,
       routerConfig: router,
+      builder: (context, child) {
+        return ForegroundNotificationListener(child: child ?? const SizedBox());
+      },
     );
   }
 }

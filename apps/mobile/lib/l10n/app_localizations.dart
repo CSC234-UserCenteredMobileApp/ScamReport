@@ -1903,6 +1903,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not load report.'**
   String get editReportLoadFailed;
+
+  /// No description provided for @notificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notificationsTitle;
+
+  /// No description provided for @notificationsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'You have no notifications yet.'**
+  String get notificationsEmpty;
+
+  /// No description provided for @notificationsLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load notifications.'**
+  String get notificationsLoadFailed;
+
+  /// No description provided for @notificationMarkAllRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all as read'**
+  String get notificationMarkAllRead;
+
+  /// No description provided for @notificationView.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get notificationView;
+
+  /// No description provided for @notificationVerifiedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report verified'**
+  String get notificationVerifiedTitle;
+
+  /// No description provided for @notificationRejectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report reviewed'**
+  String get notificationRejectedTitle;
+
+  /// No description provided for @notificationFlaggedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report flagged'**
+  String get notificationFlaggedTitle;
+
+  /// No description provided for @notificationTimeJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'just now'**
+  String get notificationTimeJustNow;
+
+  /// No description provided for @notificationTimeMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m ago'**
+  String notificationTimeMinutes(int minutes);
+
+  /// No description provided for @notificationTimeHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h ago'**
+  String notificationTimeHours(int hours);
+
+  /// No description provided for @notificationTimeDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days}d ago'**
+  String notificationTimeDays(int days);
+
+  /// No description provided for @modSegmentAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get modSegmentAll;
+
+  /// No description provided for @modSegmentPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get modSegmentPending;
+
+  /// No description provided for @modSegmentFlagged.
+  ///
+  /// In en, this message translates to:
+  /// **'Flagged'**
+  String get modSegmentFlagged;
+
+  /// No description provided for @modSortNewest.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest first'**
+  String get modSortNewest;
+
+  /// No description provided for @modSortOldest.
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest first'**
+  String get modSortOldest;
+
+  /// No description provided for @adminReviewEvidenceEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No evidence attached.'**
+  String get adminReviewEvidenceEmpty;
+
+  /// No description provided for @adminReviewTimelineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Audit trail'**
+  String get adminReviewTimelineTitle;
+
+  /// No description provided for @adminReviewRemarkTemplateSpam.
+  ///
+  /// In en, this message translates to:
+  /// **'Spam'**
+  String get adminReviewRemarkTemplateSpam;
+
+  /// No description provided for @adminReviewRemarkTemplateNotEnough.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough evidence'**
+  String get adminReviewRemarkTemplateNotEnough;
+
+  /// No description provided for @adminReviewRemarkTemplateConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get adminReviewRemarkTemplateConfirmed;
 }
 
 class _AppLocalizationsDelegate

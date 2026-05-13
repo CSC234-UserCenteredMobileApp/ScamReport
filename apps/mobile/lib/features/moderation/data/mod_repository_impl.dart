@@ -88,6 +88,7 @@ class ModRepositoryImpl implements ModRepository {
   EvidenceFile _mapEvidence(Map<String, dynamic> m) => EvidenceFile(
         id: m['id'] as String,
         storagePath: m['storagePath'] as String,
+        signedUrl: m['signedUrl'] as String?,
         kind: m['kind'] as String,
         mimeType: m['mimeType'] as String,
         sizeBytes: m['sizeBytes'] as int,

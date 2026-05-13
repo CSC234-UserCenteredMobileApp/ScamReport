@@ -993,4 +993,76 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editReportLoadFailed => 'Could not load report.';
+
+  @override
+  String get notificationsTitle => 'Notifications';
+
+  @override
+  String get notificationsEmpty => 'You have no notifications yet.';
+
+  @override
+  String get notificationsLoadFailed => 'Could not load notifications.';
+
+  @override
+  String get notificationMarkAllRead => 'Mark all as read';
+
+  @override
+  String get notificationView => 'View';
+
+  @override
+  String get notificationVerifiedTitle => 'Report verified';
+
+  @override
+  String get notificationRejectedTitle => 'Report reviewed';
+
+  @override
+  String get notificationFlaggedTitle => 'Report flagged';
+
+  @override
+  String get notificationTimeJustNow => 'just now';
+
+  @override
+  String notificationTimeMinutes(int minutes) {
+    return '${minutes}m ago';
+  }
+
+  @override
+  String notificationTimeHours(int hours) {
+    return '${hours}h ago';
+  }
+
+  @override
+  String notificationTimeDays(int days) {
+    return '${days}d ago';
+  }
+
+  @override
+  String get modSegmentAll => 'All';
+
+  @override
+  String get modSegmentPending => 'Pending';
+
+  @override
+  String get modSegmentFlagged => 'Flagged';
+
+  @override
+  String get modSortNewest => 'Newest first';
+
+  @override
+  String get modSortOldest => 'Oldest first';
+
+  @override
+  String get adminReviewEvidenceEmpty => 'No evidence attached.';
+
+  @override
+  String get adminReviewTimelineTitle => 'Audit trail';
+
+  @override
+  String get adminReviewRemarkTemplateSpam => 'Spam';
+
+  @override
+  String get adminReviewRemarkTemplateNotEnough => 'Not enough evidence';
+
+  @override
+  String get adminReviewRemarkTemplateConfirmed => 'Confirmed';
 }

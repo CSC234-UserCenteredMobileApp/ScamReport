@@ -9,7 +9,8 @@ class _NotificationsSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settingsAsync = ref.watch(settingsProvider);
-    final isAndroid = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+    final isAndroid =
+        !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
 
     return settingsAsync.when(
       loading: () => const _SettingsSkeleton(height: 160),
@@ -108,7 +109,8 @@ class _CallScreeningTile extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.zero,
       child: ListTile(
-        leading: Icon(Icons.phone_in_talk_outlined, color: cs.onSurfaceVariant, size: 22),
+        leading: Icon(Icons.phone_in_talk_outlined,
+            color: cs.onSurfaceVariant, size: 22),
         title: Text(
           context.l10n.callScreeningTitle,
           style: Theme.of(context)
@@ -148,7 +150,10 @@ class _SmsToggleTile extends ConsumerWidget {
         ),
         title: Text(
           context.l10n.smsSmishingDetectionLabel,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+          style: Theme.of(context)
+              .textTheme
+              .bodyMedium
+              ?.copyWith(fontWeight: FontWeight.w600),
         ),
         subtitle: Text(
           context.l10n.smsSmishingDetectionDesc,
@@ -163,9 +168,12 @@ class _SmsToggleTile extends ConsumerWidget {
     );
   }
 
-  Future<void> _onToggle(BuildContext context, WidgetRef ref, bool enable) async {
+  Future<void> _onToggle(
+      BuildContext context, WidgetRef ref, bool enable) async {
     if (!enable) {
-      await ref.read(settingsProvider.notifier).save(settings.copyWith(smsScanning: false));
+      await ref
+          .read(settingsProvider.notifier)
+          .save(settings.copyWith(smsScanning: false));
       return;
     }
 
@@ -188,7 +196,9 @@ class _SmsToggleTile extends ConsumerWidget {
       return;
     }
 
-    await ref.read(settingsProvider.notifier).save(settings.copyWith(smsScanning: true));
+    await ref
+        .read(settingsProvider.notifier)
+        .save(settings.copyWith(smsScanning: true));
   }
 
   Future<bool> _showSmsConsentDialog(BuildContext context) async {

@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/theme/app_theme.dart';
-import 'package:mobile/core/widgets/audit_trail_row.dart';
 import 'package:mobile/features/moderation/data/mod_action_failure.dart';
 import 'package:mobile/features/moderation/domain/mod_report.dart';
 import 'package:mobile/features/moderation/domain/mod_repository.dart';
@@ -269,7 +268,10 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.byType(AuditTrailRow), findsNWidgets(2));
+      // Audit trail is now rendered as a timeline (one node per record); the
+      // uppercase action label appears once per record.
+      expect(find.text('FLAG'), findsOneWidget);
+      expect(find.text('UNFLAG'), findsOneWidget);
     });
 
     testWidgets('audit trail empty placeholder when list is empty',
@@ -487,10 +489,10 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Approve'));
       await tester.pumpAndSettle();
 
-      // Localised "Cancel" exists in the dialog; raw `const Text('Cancel')`
-      // would also pass, so the deeper guarantee is that this string is in
-      // the ARB. Smoke check that the dialog button is reachable.
-      expect(find.widgetWithText(TextButton, 'Cancel'), findsOneWidget);
+      // Remark prompt is now a bottom sheet with an OutlinedButton cancel.
+      // The deeper guarantee is that this string is in the ARB; the smoke
+      // check is that the cancel control is reachable inside the sheet.
+      expect(find.widgetWithText(OutlinedButton, 'Cancel'), findsOneWidget);
     });
 
     testWidgets('shows error state when fetch fails', (tester) async {

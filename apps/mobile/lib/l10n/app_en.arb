@@ -371,5 +371,38 @@
   "editReportSaveFailed": "Could not update report. Please try again.",
   "editReportUploadFailed": "Could not upload image. Please try again.",
   "editReportUploadSuccess": "Image uploaded",
-  "editReportLoadFailed": "Could not load report."
+  "editReportLoadFailed": "Could not load report.",
+
+  "notificationsTitle": "Notifications",
+  "notificationsEmpty": "You have no notifications yet.",
+  "notificationsLoadFailed": "Could not load notifications.",
+  "notificationMarkAllRead": "Mark all as read",
+  "notificationView": "View",
+  "notificationVerifiedTitle": "Report verified",
+  "notificationRejectedTitle": "Report reviewed",
+  "notificationFlaggedTitle": "Report flagged",
+  "notificationTimeJustNow": "just now",
+  "notificationTimeMinutes": "{minutes}m ago",
+  "@notificationTimeMinutes": {
+    "placeholders": { "minutes": { "type": "int" } }
+  },
+  "notificationTimeHours": "{hours}h ago",
+  "@notificationTimeHours": {
+    "placeholders": { "hours": { "type": "int" } }
+  },
+  "notificationTimeDays": "{days}d ago",
+  "@notificationTimeDays": {
+    "placeholders": { "days": { "type": "int" } }
+  },
+
+  "modSegmentAll": "All",
+  "modSegmentPending": "Pending",
+  "modSegmentFlagged": "Flagged",
+  "modSortNewest": "Newest first",
+  "modSortOldest": "Oldest first",
+  "adminReviewEvidenceEmpty": "No evidence attached.",
+  "adminReviewTimelineTitle": "Audit trail",
+  "adminReviewRemarkTemplateSpam": "Spam",
+  "adminReviewRemarkTemplateNotEnough": "Not enough evidence",
+  "adminReviewRemarkTemplateConfirmed": "Confirmed"
 }

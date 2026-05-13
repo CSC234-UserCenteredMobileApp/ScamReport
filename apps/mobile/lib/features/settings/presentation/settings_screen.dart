@@ -9,6 +9,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../l10n/l10n.dart';
 import '../../auth/domain/auth_user.dart';
 import '../../auth/presentation/auth_providers.dart';
+import '../../notifications/presentation/notifications_providers.dart';
 import '../domain/settings_state.dart';
 import 'settings_providers.dart';
 
@@ -183,6 +184,8 @@ class _AccountSection extends StatelessWidget {
               isFirst: true,
             ),
             const Divider(height: 1, indent: 16, endIndent: 16),
+            const _NotificationsNavTile(),
+            const Divider(height: 1, indent: 16, endIndent: 16),
           ],
 
           // Legal — always visible
@@ -259,6 +262,57 @@ class _NavTile extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
+// Notifications nav tile — shows unread badge from notificationsInboxProvider
+// ---------------------------------------------------------------------------
+class _NotificationsNavTile extends ConsumerWidget {
+  const _NotificationsNavTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    final unread = ref.watch(unreadCountProvider);
+
+    return ClipRRect(
+      borderRadius: BorderRadius.zero,
+      child: ListTile(
+        leading: Icon(Icons.notifications_outlined,
+            color: cs.onSurfaceVariant, size: 22),
+        title: Text(
+          context.l10n.notificationsTitle,
+          style: Theme.of(context)
+              .textTheme
+              .bodyMedium
+              ?.copyWith(fontWeight: FontWeight.w500),
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (unread > 0)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: cs.primary,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  unread > 99 ? '99+' : '$unread',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: cs.onPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+              ),
+            Icon(Icons.chevron_right, color: cs.onSurfaceVariant),
+          ],
+        ),
+        onTap: () => context.push('/notifications'),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Sign out
 // ---------------------------------------------------------------------------
 class _SignOutTile extends StatelessWidget {
@@ -305,7 +359,8 @@ class _SignOutTile extends StatelessWidget {
               await FirebaseAuth.instance.signOut();
             },
             style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(ctx).extension<VerdictPalette>()!.scam.accent,
+              backgroundColor:
+                  Theme.of(ctx).extension<VerdictPalette>()!.scam.accent,
             ),
             child: Text(l10n.signOut),
           ),
@@ -409,9 +464,7 @@ class _DeleteAccountTile extends ConsumerWidget {
           FilledButton(
             onPressed: () async {
               Navigator.of(ctx).pop();
-              await ref
-                  .read(deleteAccountProvider.notifier)
-                  .requestDeletion();
+              await ref.read(deleteAccountProvider.notifier).requestDeletion();
             },
             style: FilledButton.styleFrom(
               backgroundColor:
