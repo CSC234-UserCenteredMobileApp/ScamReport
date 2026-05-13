@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:mobile/core/api_client.dart';
@@ -21,6 +22,34 @@ Widget _themed(Widget widget, {Locale locale = const Locale('en')}) {
     supportedLocales: AppLocalizations.supportedLocales,
     locale: locale,
     home: widget,
+  );
+}
+
+// Router-wrapped helper for navigation tests.
+Widget _withRouter(Widget widget, {List<Override> overrides = const []}) {
+  final router = GoRouter(
+    routes: [
+      GoRoute(path: '/', builder: (_, __) => widget),
+      GoRoute(
+        path: '/search',
+        builder: (_, s) => Scaffold(
+          body: Text(
+            s.uri.queryParameters['filter'] == '1'
+                ? 'search_filter_open'
+                : 'search_plain',
+          ),
+        ),
+      ),
+    ],
+  );
+  return ProviderScope(
+    overrides: overrides,
+    child: MaterialApp.router(
+      routerConfig: router,
+      theme: lightTheme(),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+    ),
   );
 }
 
@@ -191,6 +220,45 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Caller pretending Revenue Department'), findsOneWidget);
+    });
+
+    testWidgets('body has no inline AI search tile', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [httpClientProvider.overrideWithValue(_happyClient())],
+          child: _themed(const FeedScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // auto_awesome_outlined was exclusive to the removed _SearchTile body widget.
+      expect(find.byIcon(Icons.auto_awesome_outlined), findsNothing);
+    });
+
+    testWidgets('search icon navigates to /search', (tester) async {
+      await tester.pumpWidget(_withRouter(
+        const FeedScreen(),
+        overrides: [httpClientProvider.overrideWithValue(_happyClient())],
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pumpAndSettle();
+
+      expect(find.text('search_plain'), findsOneWidget);
+    });
+
+    testWidgets('tune icon navigates to /search with filter=1', (tester) async {
+      await tester.pumpWidget(_withRouter(
+        const FeedScreen(),
+        overrides: [httpClientProvider.overrideWithValue(_happyClient())],
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.tune));
+      await tester.pumpAndSettle();
+
+      expect(find.text('search_filter_open'), findsOneWidget);
     });
   });
 }

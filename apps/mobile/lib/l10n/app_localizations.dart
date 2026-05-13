@@ -248,6 +248,30 @@ abstract class AppLocalizations {
   /// **'ACCOUNT'**
   String get settingsSectionAccount;
 
+  /// No description provided for @settingsSectionAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'APPEARANCE'**
+  String get settingsSectionAppearance;
+
+  /// No description provided for @settingsSectionProtection.
+  ///
+  /// In en, this message translates to:
+  /// **'ALERTS & PROTECTION'**
+  String get settingsSectionProtection;
+
+  /// No description provided for @settingsSectionAdminTools.
+  ///
+  /// In en, this message translates to:
+  /// **'ADMIN TOOLS'**
+  String get settingsSectionAdminTools;
+
+  /// No description provided for @settingsDangerZone.
+  ///
+  /// In en, this message translates to:
+  /// **'Danger zone'**
+  String get settingsDangerZone;
+
   /// No description provided for @myReports.
   ///
   /// In en, this message translates to:

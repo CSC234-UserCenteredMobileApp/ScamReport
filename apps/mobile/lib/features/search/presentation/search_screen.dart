@@ -8,7 +8,9 @@ import 'filter_bottom_sheet.dart';
 import 'search_providers.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
-  const SearchScreen({super.key});
+  const SearchScreen({super.key, this.openFilter = false});
+
+  final bool openFilter;
 
   @override
   ConsumerState<SearchScreen> createState() => _SearchScreenState();
@@ -22,6 +24,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   void initState() {
     super.initState();
     _controller.addListener(_onTextChanged);
+    if (widget.openFilter) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) showFilterSheet(context);
+      });
+    }
   }
 
   void _onTextChanged() {

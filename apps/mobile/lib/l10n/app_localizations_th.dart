@@ -88,6 +88,18 @@ class AppLocalizationsTh extends AppLocalizations {
   String get settingsSectionAccount => 'บัญชี';
 
   @override
+  String get settingsSectionAppearance => 'การแสดงผล';
+
+  @override
+  String get settingsSectionProtection => 'การแจ้งเตือนและการป้องกัน';
+
+  @override
+  String get settingsSectionAdminTools => 'เครื่องมือผู้ดูแล';
+
+  @override
+  String get settingsDangerZone => 'โซนอันตราย';
+
+  @override
   String get myReports => 'รายงานของฉัน';
 
   @override

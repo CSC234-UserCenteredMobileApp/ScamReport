@@ -55,27 +55,35 @@ class SettingsScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           children: [
-            // Account card
+            // Profile
             _AccountCard(user: user),
             const SizedBox(height: 24),
 
-            // Notifications
-            _SectionLabel(context.l10n.settingsSectionNotifications),
-            const SizedBox(height: 8),
-            const _NotificationsSection(),
-            const SizedBox(height: 24),
-
-            // Preferences
-            _SectionLabel(context.l10n.settingsSectionPreferences),
+            // Appearance — language + theme
+            _SectionLabel(context.l10n.settingsSectionAppearance),
             const SizedBox(height: 8),
             const _PreferencesSection(),
             const SizedBox(height: 24),
 
-            // Account links
+            // Alerts & Protection — push toggles + call screening + SMS scanning
+            _SectionLabel(context.l10n.settingsSectionProtection),
+            const SizedBox(height: 8),
+            const _NotificationsSection(),
+            const SizedBox(height: 24),
+
+            // Admin tools — only visible to admins
+            if (user?.isAdmin == true) ...[
+              _SectionLabel(context.l10n.settingsSectionAdminTools),
+              const SizedBox(height: 8),
+              _AdminSection(),
+              const SizedBox(height: 24),
+            ],
+
+            // Account — my reports + legal + sign out + delete
             _SectionLabel(context.l10n.settingsSectionAccount),
             const SizedBox(height: 8),
             _AccountSection(user: user),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
 
             // Version footer
             Center(
@@ -116,7 +124,39 @@ class _SectionLabel extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Account links section (My reports, Privacy, Terms, Sign out)
+// Admin tools section — announcements + deletion requests
+// ---------------------------------------------------------------------------
+class _AdminSection extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.zero,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+      ),
+      child: Column(
+        children: [
+          _NavTile(
+            icon: Icons.campaign_outlined,
+            title: context.l10n.manageAnnouncements,
+            onTap: () => context.push('/admin/announcements'),
+            isFirst: true,
+          ),
+          const Divider(height: 1, indent: 16, endIndent: 16),
+          _NavTile(
+            icon: Icons.person_remove_outlined,
+            title: context.l10n.deletionRequests,
+            onTap: () => context.push('/admin/deletion-requests'),
+            isLast: true,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Account section — my reports + legal + sign out + delete
 // ---------------------------------------------------------------------------
 class _AccountSection extends StatelessWidget {
   const _AccountSection({required this.user});
@@ -134,6 +174,7 @@ class _AccountSection extends StatelessWidget {
       ),
       child: Column(
         children: [
+          // My reports — signed-in users only
           if (!isGuest) ...[
             _NavTile(
               icon: Icons.inbox_outlined,
@@ -143,6 +184,8 @@ class _AccountSection extends StatelessWidget {
             ),
             const Divider(height: 1, indent: 16, endIndent: 16),
           ],
+
+          // Legal — always visible
           _NavTile(
             icon: Icons.lock_outline,
             title: context.l10n.privacyPolicy,
@@ -156,25 +199,13 @@ class _AccountSection extends StatelessWidget {
             onTap: () => context.push('/me/terms'),
             isLast: isGuest,
           ),
+
+          // Destructive actions — signed-in users only
           if (!isGuest) ...[
             const Divider(height: 1, indent: 16, endIndent: 16),
-            if (user!.isAdmin) ...[
-              _NavTile(
-                icon: Icons.campaign_outlined,
-                title: context.l10n.manageAnnouncements,
-                onTap: () => context.push('/admin/announcements'),
-              ),
-              const Divider(height: 1, indent: 16, endIndent: 16),
-              _NavTile(
-                icon: Icons.person_remove_outlined,
-                title: context.l10n.deletionRequests,
-                onTap: () => context.push('/admin/deletion-requests'),
-              ),
-              const Divider(height: 1, indent: 16, endIndent: 16),
-            ],
             const _SignOutTile(),
             const Divider(height: 1, indent: 16, endIndent: 16),
-            const _DeleteAccountTile(),
+            const _DeleteAccountExpansion(),
           ],
         ],
       ),
@@ -182,6 +213,9 @@ class _AccountSection extends StatelessWidget {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Shared nav tile
+// ---------------------------------------------------------------------------
 class _NavTile extends StatelessWidget {
   const _NavTile({
     required this.icon,
@@ -224,6 +258,9 @@ class _NavTile extends StatelessWidget {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Sign out
+// ---------------------------------------------------------------------------
 class _SignOutTile extends StatelessWidget {
   const _SignOutTile();
 
@@ -266,7 +303,6 @@ class _SignOutTile extends StatelessWidget {
             onPressed: () async {
               Navigator.of(ctx).pop();
               await FirebaseAuth.instance.signOut();
-              // Router redirect via _AuthRefreshNotifier handles navigation.
             },
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(ctx).extension<VerdictPalette>()!.scam.accent,
@@ -279,6 +315,47 @@ class _SignOutTile extends StatelessWidget {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Danger zone — collapsed by default; reveals delete account on expand.
+// ---------------------------------------------------------------------------
+class _DeleteAccountExpansion extends StatelessWidget {
+  const _DeleteAccountExpansion();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          leading: Icon(Icons.warning_amber_outlined,
+              color: cs.onSurfaceVariant, size: 22),
+          title: Text(
+            context.l10n.settingsDangerZone,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: cs.onSurfaceVariant,
+                ),
+          ),
+          iconColor: cs.onSurfaceVariant,
+          collapsedIconColor: cs.onSurfaceVariant,
+          tilePadding: const EdgeInsets.symmetric(horizontal: 16),
+          childrenPadding: EdgeInsets.zero,
+          children: const [
+            Divider(height: 1, indent: 16, endIndent: 16),
+            _DeleteAccountTile(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Delete account
+// ---------------------------------------------------------------------------
 class _DeleteAccountTile extends ConsumerWidget {
   const _DeleteAccountTile();
 
@@ -296,9 +373,7 @@ class _DeleteAccountTile extends ConsumerWidget {
     });
 
     return ClipRRect(
-      borderRadius: const BorderRadius.vertical(
-        bottom: Radius.circular(16),
-      ),
+      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
       child: ListTile(
         leading: Icon(
           Icons.delete_forever_outlined,
@@ -337,7 +412,6 @@ class _DeleteAccountTile extends ConsumerWidget {
               await ref
                   .read(deleteAccountProvider.notifier)
                   .requestDeletion();
-              // _AuthRefreshNotifier in app_router handles redirect to /login
             },
             style: FilledButton.styleFrom(
               backgroundColor:
