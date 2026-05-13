@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/alerts/presentation/alerts_screen.dart';
 import '../../features/alerts/presentation/announcement_detail_screen.dart';
 import '../../features/ask_ai/presentation/ask_ai_screen.dart';
+import '../../features/share_intent/presentation/share_intent_listener.dart';
 import '../../features/sms_scan/presentation/sms_overlay_banner.dart';
 import '../../features/auth/presentation/auth_providers.dart';
 import '../../l10n/l10n.dart';
@@ -74,8 +75,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       // Bottom-nav shell — 5 branches share the AppShell scaffold.
       // -----------------------------------------------------------------------
       StatefulShellRoute.indexedStack(
-        builder: (context, state, shell) => SmsAlertOverlayWrapper(
-          child: AppShell(navigationShell: shell),
+        builder: (context, state, shell) => ShareIntentListener(
+          child: SmsAlertOverlayWrapper(
+            child: AppShell(navigationShell: shell),
+          ),
         ),
         branches: [
           // 0 — Home

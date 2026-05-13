@@ -29,6 +29,14 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- Share-to-app (FR-9.1): text/URL/phone shared from any other
+                 Android app routes into the Verdict screen. Gated client-side
+                 by the `enable_share_target` Remote Config flag. -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="text/plain"/>
+            </intent-filter>
         </activity>
         <service
             android:name=".ScamCallScreeningService"
