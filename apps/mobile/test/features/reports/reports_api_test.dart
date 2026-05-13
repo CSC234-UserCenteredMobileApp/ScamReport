@@ -67,7 +67,7 @@ void main() {
     when(() => user.getIdToken()).thenAnswer((_) async => 'tok-abc');
   });
 
-  ReportsApi _api(Future<http.StreamedResponse> Function(http.BaseRequest) handler) =>
+  ReportsApi makeApi(Future<http.StreamedResponse> Function(http.BaseRequest) handler) =>
       ReportsApi(_StubClient(handler), auth);
 
   // ─────────────────────────────────────────────
@@ -76,7 +76,7 @@ void main() {
 
   group('fetchMyReports', () {
     test('returns mapped list on 200', () async {
-      final api = _api((_) async => _streamed(
+      final api = makeApi((_) async => _streamed(
             200,
             jsonEncode({'items': [_myReportJson()]}),
           ));
@@ -87,13 +87,13 @@ void main() {
     });
 
     test('returns empty list when items is empty', () async {
-      final api = _api((_) async => _streamed(200, jsonEncode({'items': []})));
+      final api = makeApi((_) async => _streamed(200, jsonEncode({'items': []})));
       expect(await api.fetchMyReports(), isEmpty);
     });
 
     test('throws ReportUnauthorizedException when no user', () async {
       when(() => auth.currentUser).thenReturn(null);
-      final api = _api((_) async => _streamed(200, '{}'));
+      final api = makeApi((_) async => _streamed(200, '{}'));
       await expectLater(
         () => api.fetchMyReports(),
         throwsA(isA<ReportUnauthorizedException>()),
@@ -101,7 +101,7 @@ void main() {
     });
 
     test('throws ReportUnauthorizedException on 401', () async {
-      final api = _api((_) async => _streamed(401, '{"error":"u"}'));
+      final api = makeApi((_) async => _streamed(401, '{"error":"u"}'));
       await expectLater(
         () => api.fetchMyReports(),
         throwsA(isA<ReportUnauthorizedException>()),
@@ -109,7 +109,7 @@ void main() {
     });
 
     test('throws Exception on 5xx', () async {
-      final api = _api((_) async => _streamed(500, 'oops'));
+      final api = makeApi((_) async => _streamed(500, 'oops'));
       await expectLater(() => api.fetchMyReports(), throwsA(isA<Exception>()));
     });
   });
@@ -120,14 +120,14 @@ void main() {
 
   group('fetchMyReportDetail', () {
     test('returns map on 200', () async {
-      final api = _api((_) async => _streamed(200, jsonEncode(_editDetailJson())));
+      final api = makeApi((_) async => _streamed(200, jsonEncode(_editDetailJson())));
       final detail = await api.fetchMyReportDetail(_reportId);
       expect(detail['id'], _reportId);
     });
 
     test('throws when no user', () async {
       when(() => auth.currentUser).thenReturn(null);
-      final api = _api((_) async => _streamed(200, '{}'));
+      final api = makeApi((_) async => _streamed(200, '{}'));
       await expectLater(
         () => api.fetchMyReportDetail(_reportId),
         throwsA(isA<ReportUnauthorizedException>()),
@@ -135,7 +135,7 @@ void main() {
     });
 
     test('throws ReportUnauthorizedException on 401', () async {
-      final api = _api((_) async => _streamed(401, '{}'));
+      final api = makeApi((_) async => _streamed(401, '{}'));
       await expectLater(
         () => api.fetchMyReportDetail(_reportId),
         throwsA(isA<ReportUnauthorizedException>()),
@@ -143,7 +143,7 @@ void main() {
     });
 
     test('throws ReportNotFoundException on 404', () async {
-      final api = _api((_) async => _streamed(404, '{}'));
+      final api = makeApi((_) async => _streamed(404, '{}'));
       await expectLater(
         () => api.fetchMyReportDetail(_reportId),
         throwsA(isA<ReportNotFoundException>()),
@@ -151,7 +151,7 @@ void main() {
     });
 
     test('throws Exception on 5xx', () async {
-      final api = _api((_) async => _streamed(500, 'err'));
+      final api = makeApi((_) async => _streamed(500, 'err'));
       await expectLater(
         () => api.fetchMyReportDetail(_reportId),
         throwsA(isA<Exception>()),
@@ -166,7 +166,7 @@ void main() {
   group('fetchReportDetail', () {
     test('returns map on 200 without auth header', () async {
       http.BaseRequest? captured;
-      final api = _api((req) async {
+      final api = makeApi((req) async {
         captured = req;
         return _streamed(200, jsonEncode({'id': _reportId}));
       });
@@ -176,7 +176,7 @@ void main() {
     });
 
     test('throws ReportNotFoundException on 404', () async {
-      final api = _api((_) async => _streamed(404, '{}'));
+      final api = makeApi((_) async => _streamed(404, '{}'));
       await expectLater(
         () => api.fetchReportDetail(_reportId),
         throwsA(isA<ReportNotFoundException>()),
@@ -184,7 +184,7 @@ void main() {
     });
 
     test('throws Exception on 5xx', () async {
-      final api = _api((_) async => _streamed(500, 'err'));
+      final api = makeApi((_) async => _streamed(500, 'err'));
       await expectLater(
         () => api.fetchReportDetail(_reportId),
         throwsA(isA<Exception>()),
@@ -197,20 +197,20 @@ void main() {
   // ─────────────────────────────────────────────
 
   group('updateReport', () {
-    const _body = {
+    const body = {
       'title': 'Updated title that is long enough',
       'description': 'Updated description that is also long enough.',
       'scamTypeCode': 'phishing_sms',
     };
 
     test('completes on 200', () async {
-      final api = _api((_) async => _streamed(200, '{}'));
+      final api = makeApi((_) async => _streamed(200, '{}'));
       await expectLater(
         api.updateReport(
           reportId: _reportId,
-          title: _body['title']!,
-          description: _body['description']!,
-          scamTypeCode: _body['scamTypeCode']!,
+          title: body['title']!,
+          description: body['description']!,
+          scamTypeCode: body['scamTypeCode']!,
         ),
         completes,
       );
@@ -218,78 +218,78 @@ void main() {
 
     test('throws when no user', () async {
       when(() => auth.currentUser).thenReturn(null);
-      final api = _api((_) async => _streamed(200, '{}'));
+      final api = makeApi((_) async => _streamed(200, '{}'));
       await expectLater(
         () => api.updateReport(
           reportId: _reportId,
-          title: _body['title']!,
-          description: _body['description']!,
-          scamTypeCode: _body['scamTypeCode']!,
+          title: body['title']!,
+          description: body['description']!,
+          scamTypeCode: body['scamTypeCode']!,
         ),
         throwsA(isA<ReportUnauthorizedException>()),
       );
     });
 
     test('throws ReportUnauthorizedException on 401', () async {
-      final api = _api((_) async => _streamed(401, '{}'));
+      final api = makeApi((_) async => _streamed(401, '{}'));
       await expectLater(
         () => api.updateReport(
           reportId: _reportId,
-          title: _body['title']!,
-          description: _body['description']!,
-          scamTypeCode: _body['scamTypeCode']!,
+          title: body['title']!,
+          description: body['description']!,
+          scamTypeCode: body['scamTypeCode']!,
         ),
         throwsA(isA<ReportUnauthorizedException>()),
       );
     });
 
     test('throws ReportValidationException on 400', () async {
-      final api = _api((_) async => _streamed(400, '{"error":"bad input"}'));
+      final api = makeApi((_) async => _streamed(400, '{"error":"bad input"}'));
       await expectLater(
         () => api.updateReport(
           reportId: _reportId,
-          title: _body['title']!,
-          description: _body['description']!,
-          scamTypeCode: _body['scamTypeCode']!,
+          title: body['title']!,
+          description: body['description']!,
+          scamTypeCode: body['scamTypeCode']!,
         ),
         throwsA(isA<ReportValidationException>()),
       );
     });
 
     test('throws ReportValidationException on 409', () async {
-      final api = _api((_) async => _streamed(409, '{"error":"not editable"}'));
+      final api = makeApi((_) async => _streamed(409, '{"error":"not editable"}'));
       await expectLater(
         () => api.updateReport(
           reportId: _reportId,
-          title: _body['title']!,
-          description: _body['description']!,
-          scamTypeCode: _body['scamTypeCode']!,
+          title: body['title']!,
+          description: body['description']!,
+          scamTypeCode: body['scamTypeCode']!,
         ),
         throwsA(isA<ReportValidationException>()),
       );
     });
 
     test('throws ReportNotFoundException on 404', () async {
-      final api = _api((_) async => _streamed(404, '{}'));
+      final api = makeApi((_) async => _streamed(404, '{}'));
       await expectLater(
         () => api.updateReport(
           reportId: _reportId,
-          title: _body['title']!,
-          description: _body['description']!,
-          scamTypeCode: _body['scamTypeCode']!,
+          title: body['title']!,
+          description: body['description']!,
+          scamTypeCode: body['scamTypeCode']!,
         ),
         throwsA(isA<ReportNotFoundException>()),
       );
     });
 
     test('throws Exception on 5xx', () async {
-      final api = _api((_) async => _streamed(500, 'err'));
+      final api = makeApi((_) async => _streamed(500, 'err'));
       await expectLater(
         () => api.updateReport(
           reportId: _reportId,
-          title: _body['title']!,
-          description: _body['description']!,
-          scamTypeCode: _body['scamTypeCode']!,
+          title: body['title']!,
+          description: body['description']!,
+          scamTypeCode: body['scamTypeCode']!,
         ),
         throwsA(isA<Exception>()),
       );
@@ -297,15 +297,15 @@ void main() {
 
     test('includes targetIdentifier in body when non-empty', () async {
       String? sentBody;
-      final api = _api((req) async {
+      final api = makeApi((req) async {
         if (req is http.Request) sentBody = req.body;
         return _streamed(200, '{}');
       });
       await api.updateReport(
         reportId: _reportId,
-        title: _body['title']!,
-        description: _body['description']!,
-        scamTypeCode: _body['scamTypeCode']!,
+        title: body['title']!,
+        description: body['description']!,
+        scamTypeCode: body['scamTypeCode']!,
         targetIdentifier: '+66812345678',
         targetIdentifierKind: 'phone',
       );
@@ -316,15 +316,15 @@ void main() {
 
     test('omits targetIdentifier when empty string', () async {
       String? sentBody;
-      final api = _api((req) async {
+      final api = makeApi((req) async {
         if (req is http.Request) sentBody = req.body;
         return _streamed(200, '{}');
       });
       await api.updateReport(
         reportId: _reportId,
-        title: _body['title']!,
-        description: _body['description']!,
-        scamTypeCode: _body['scamTypeCode']!,
+        title: body['title']!,
+        description: body['description']!,
+        scamTypeCode: body['scamTypeCode']!,
         targetIdentifier: '',
       );
       final json = jsonDecode(sentBody!) as Map<String, dynamic>;
@@ -338,13 +338,13 @@ void main() {
 
   group('withdrawReport', () {
     test('completes on 200', () async {
-      final api = _api((_) async => _streamed(200, '{}'));
+      final api = makeApi((_) async => _streamed(200, '{}'));
       await expectLater(api.withdrawReport(_reportId), completes);
     });
 
     test('throws when no user', () async {
       when(() => auth.currentUser).thenReturn(null);
-      final api = _api((_) async => _streamed(200, '{}'));
+      final api = makeApi((_) async => _streamed(200, '{}'));
       await expectLater(
         () => api.withdrawReport(_reportId),
         throwsA(isA<ReportUnauthorizedException>()),
@@ -352,7 +352,7 @@ void main() {
     });
 
     test('throws ReportUnauthorizedException on 401', () async {
-      final api = _api((_) async => _streamed(401, '{}'));
+      final api = makeApi((_) async => _streamed(401, '{}'));
       await expectLater(
         () => api.withdrawReport(_reportId),
         throwsA(isA<ReportUnauthorizedException>()),
@@ -360,7 +360,7 @@ void main() {
     });
 
     test('throws ReportValidationException on 409', () async {
-      final api = _api((_) async => _streamed(409, '{"error":"verified"}'));
+      final api = makeApi((_) async => _streamed(409, '{"error":"verified"}'));
       await expectLater(
         () => api.withdrawReport(_reportId),
         throwsA(isA<ReportValidationException>()),
@@ -368,7 +368,7 @@ void main() {
     });
 
     test('throws ReportNotFoundException on 404', () async {
-      final api = _api((_) async => _streamed(404, '{}'));
+      final api = makeApi((_) async => _streamed(404, '{}'));
       await expectLater(
         () => api.withdrawReport(_reportId),
         throwsA(isA<ReportNotFoundException>()),
@@ -376,7 +376,7 @@ void main() {
     });
 
     test('throws Exception on 5xx', () async {
-      final api = _api((_) async => _streamed(500, 'err'));
+      final api = makeApi((_) async => _streamed(500, 'err'));
       await expectLater(
         () => api.withdrawReport(_reportId),
         throwsA(isA<Exception>()),
@@ -391,7 +391,7 @@ void main() {
   group('uploadEvidence', () {
     test('sends multipart and returns metadata map on 200', () async {
       String? capturedPath;
-      final api = _api((req) async {
+      final api = makeApi((req) async {
         capturedPath = req.url.path;
         return _streamed(
           200,
@@ -415,7 +415,7 @@ void main() {
 
     test('throws when no user', () async {
       when(() => auth.currentUser).thenReturn(null);
-      final api = _api((_) async => _streamed(200, '{}'));
+      final api = makeApi((_) async => _streamed(200, '{}'));
       await expectLater(
         () => api.uploadEvidence(
           bytes: Uint8List.fromList([1]),
@@ -427,7 +427,7 @@ void main() {
     });
 
     test('throws ReportUnauthorizedException on 401', () async {
-      final api = _api((_) async => _streamed(401, '{}'));
+      final api = makeApi((_) async => _streamed(401, '{}'));
       await expectLater(
         () => api.uploadEvidence(
           bytes: Uint8List.fromList([1]),
@@ -439,7 +439,7 @@ void main() {
     });
 
     test('throws ReportValidationException on 413', () async {
-      final api = _api((_) async => _streamed(413, '{"error":"too big"}'));
+      final api = makeApi((_) async => _streamed(413, '{"error":"too big"}'));
       await expectLater(
         () => api.uploadEvidence(
           bytes: Uint8List.fromList([1]),
@@ -451,7 +451,7 @@ void main() {
     });
 
     test('throws ReportValidationException on 415', () async {
-      final api = _api((_) async => _streamed(415, '{"error":"bad mime"}'));
+      final api = makeApi((_) async => _streamed(415, '{"error":"bad mime"}'));
       await expectLater(
         () => api.uploadEvidence(
           bytes: Uint8List.fromList([1]),
@@ -463,7 +463,7 @@ void main() {
     });
 
     test('throws Exception on 5xx', () async {
-      final api = _api((_) async => _streamed(500, 'err'));
+      final api = makeApi((_) async => _streamed(500, 'err'));
       await expectLater(
         () => api.uploadEvidence(
           bytes: Uint8List.fromList([1]),
@@ -489,7 +489,7 @@ void main() {
   // ─────────────────────────────────────────────
 
   test('extractError falls back to reasonPhrase on non-JSON body', () async {
-    final api = _api((_) async => http.StreamedResponse(
+    final api = makeApi((_) async => http.StreamedResponse(
           Stream.value(utf8.encode('not json')),
           400,
           reasonPhrase: 'Bad Request',
