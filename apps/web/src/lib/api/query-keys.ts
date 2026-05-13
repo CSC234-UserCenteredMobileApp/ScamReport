@@ -16,6 +16,11 @@ export const queryKeys = {
   notifications: {
     subscriberCount: ['notifications', 'subscriber-count'] as const,
   },
+  deletionRequests: {
+    all: ['deletion-requests'] as const,
+    list: (status?: string) =>
+      ['deletion-requests', 'list', status ?? 'all'] as const,
+  },
   auth: {
     me: ['auth', 'me'] as const,
   },

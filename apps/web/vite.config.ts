@@ -55,7 +55,6 @@ export default defineConfig({
         'src/routes/no-access.tsx',
         'src/routes/dashboard-layout.tsx',
         'src/routes/announcements/**',
-        'src/routes/deletion-requests.tsx',
         // Generated / static.
         'src/i18n/**',
         'src/lib/i18n/**',
