@@ -29,6 +29,7 @@ import '../../features/search/presentation/search_screen.dart';
 import '../../features/announcement_editor/presentation/admin_announcements_screen.dart';
 import '../../features/announcement_editor/presentation/announcement_editor_screen.dart';
 import '../../features/deletion_requests/presentation/admin_deletion_requests_screen.dart';
+import '../../features/notifications/presentation/notifications_inbox_screen.dart';
 import '../../features/reports/presentation/edit_report_screen.dart';
 import '../../features/reports/presentation/my_reports_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
@@ -209,17 +210,19 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/report-detail/:id',
-        builder: (_, s) =>
-            ReportDetailScreen(id: s.pathParameters['id']!),
+        builder: (_, s) => ReportDetailScreen(id: s.pathParameters['id']!),
       ),
       GoRoute(
         path: '/my-reports',
         builder: (_, __) => const MyReportsScreen(),
       ),
       GoRoute(
+        path: '/notifications',
+        builder: (_, __) => const NotificationsInboxScreen(),
+      ),
+      GoRoute(
         path: '/edit-report/:id',
-        builder: (_, s) =>
-            EditReportScreen(reportId: s.pathParameters['id']!),
+        builder: (_, s) => EditReportScreen(reportId: s.pathParameters['id']!),
       ),
       GoRoute(
         path: '/search',
@@ -228,7 +231,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(path: '/privacy', builder: (_, __) => const PrivacyScreen()),
-      GoRoute(path: '/terms',   builder: (_, __) => const TermsScreen()),
+      GoRoute(path: '/terms', builder: (_, __) => const TermsScreen()),
 
       // Admin announcement management — full-screen, no bottom nav.
       // /new MUST be declared before /:id/edit so GoRouter doesn't parse
@@ -239,7 +242,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/admin/announcements/new',
-        builder: (_, __) => const AnnouncementEditorScreen(announcementId: null),
+        builder: (_, __) =>
+            const AnnouncementEditorScreen(announcementId: null),
       ),
       GoRoute(
         path: '/admin/announcements/:id/edit',

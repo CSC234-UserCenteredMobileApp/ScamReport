@@ -78,7 +78,8 @@ void main() {
       addTearDown(container.dispose);
 
       await container.read(modQueueProvider.future);
-      container.read(modFilterFlaggedProvider.notifier).state = true;
+      container.read(modFilterSegmentProvider.notifier).state =
+          ModQueueSegment.flagged;
 
       final result = container.read(modFilteredQueueProvider);
       final items = result.requireValue;
@@ -101,7 +102,8 @@ void main() {
       addTearDown(container.dispose);
 
       await container.read(modQueueProvider.future);
-      container.read(modFilterFlaggedProvider.notifier).state = true;
+      container.read(modFilterSegmentProvider.notifier).state =
+          ModQueueSegment.flagged;
       container.read(modSortNewestFirstProvider.notifier).state = true;
 
       final items = container.read(modFilteredQueueProvider).requireValue;

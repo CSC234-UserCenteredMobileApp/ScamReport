@@ -24,8 +24,10 @@ class _PreferencesSection extends ConsumerWidget {
               isFirst: true,
               trailing: SegmentedButton<String>(
                 segments: [
-                  ButtonSegment(value: 'en', label: Text(context.l10n.languageEnglish)),
-                  ButtonSegment(value: 'th', label: Text(context.l10n.languageThai)),
+                  ButtonSegment(
+                      value: 'en', label: Text(context.l10n.languageEnglish)),
+                  ButtonSegment(
+                      value: 'th', label: Text(context.l10n.languageThai)),
                 ],
                 selected: {settings.language},
                 onSelectionChanged: (s) => ref
@@ -47,8 +49,12 @@ class _PreferencesSection extends ConsumerWidget {
               isLast: true,
               trailing: SegmentedButton<ThemeMode>(
                 segments: [
-                  ButtonSegment(value: ThemeMode.light, label: Text(context.l10n.themeLight)),
-                  ButtonSegment(value: ThemeMode.dark, label: Text(context.l10n.themeDark)),
+                  ButtonSegment(
+                      value: ThemeMode.light,
+                      label: Text(context.l10n.themeLight)),
+                  ButtonSegment(
+                      value: ThemeMode.dark,
+                      label: Text(context.l10n.themeDark)),
                 ],
                 selected: {
                   settings.themeMode == ThemeMode.system

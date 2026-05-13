@@ -12,6 +12,7 @@ import { askAiRoute } from './features/ask-ai/ask-ai.route';
 import { scamTypesRoute } from './features/scam-types/scam-types.route';
 import { userRoute } from './features/user/user.route';
 import { adminDeletionRequestsRoute } from './features/admin-deletion-requests/admin-deletion-requests.route';
+import { notificationsRoute } from './features/notifications/notifications.route';
 
 // CORS allowlist for the admin web portal (apps/web).
 // Project-scoped Vercel preview pattern intentionally NOT `*.vercel.app` —
@@ -43,7 +44,8 @@ export const app = new Elysia()
   .use(askAiRoute)
   .use(scamTypesRoute)
   .use(userRoute)
-  .use(adminDeletionRequestsRoute);
+  .use(adminDeletionRequestsRoute)
+  .use(notificationsRoute);
 
 if (import.meta.main) {
   const port = Number(process.env.PORT ?? 3000);

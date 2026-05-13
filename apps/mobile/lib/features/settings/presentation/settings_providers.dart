@@ -21,8 +21,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
   }
 }
 
-final settingsProvider =
-    AsyncNotifierProvider<SettingsNotifier, SettingsState>(
+final settingsProvider = AsyncNotifierProvider<SettingsNotifier, SettingsState>(
   SettingsNotifier.new,
 );
 

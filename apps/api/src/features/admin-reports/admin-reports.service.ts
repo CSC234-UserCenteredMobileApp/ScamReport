@@ -23,8 +23,9 @@ import type {
 } from '@my-product/shared';
 import { canonicalEmbedInput, computeAiScore } from '../../core/ai-score';
 import { getPrisma } from '../../core/db/client';
-import { sendFcmToUser } from '../../core/firebase/messaging';
+import { getSignedUrl } from '../../core/supabase/storage';
 import { mirrorMyReport } from '../../sync/firestore_sync';
+import { notifyReporter } from '../notifications/notifications.service';
 import {
   applyAction as repoApplyAction,
   countByStatus,
@@ -94,13 +95,31 @@ export async function getDetail(reportId: string): Promise<AdminReportDetail | n
     aiConfidence = backfilled.aiConfidence;
   }
 
-  const evidenceFiles: AdminEvidenceFile[] = report.evidenceFiles.map((f) => ({
-    id: f.id,
-    storagePath: f.storagePath,
-    kind: f.kind as 'image' | 'pdf',
-    mimeType: f.mimeType,
-    sizeBytes: Number(f.sizeBytes),
-  }));
+  // Sign each evidence path so the admin review screen can render previews
+  // directly. Storage hiccups degrade gracefully — the gallery falls back to
+  // a typed-file placeholder when signedUrl is null.
+  const evidenceFiles: AdminEvidenceFile[] = await Promise.all(
+    report.evidenceFiles.map(async (f) => {
+      let signedUrl: string | null = null;
+      try {
+        signedUrl = await getSignedUrl('evidence', f.storagePath, 3600);
+      } catch (err) {
+        console.error('[admin-reports] sign evidence failed', {
+          reportId: report.id,
+          fileId: f.id,
+          err,
+        });
+      }
+      return {
+        id: f.id,
+        storagePath: f.storagePath,
+        signedUrl,
+        kind: f.kind as 'image' | 'pdf',
+        mimeType: f.mimeType,
+        sizeBytes: Number(f.sizeBytes),
+      };
+    }),
+  );
 
   const auditTrail: ModerationRecord[] = report.moderations.map((m) => ({
     adminId: m.adminId,
@@ -189,7 +208,7 @@ export async function approveReport(
 ): Promise<PublicActionResult | null> {
   const result = await repoApplyAction(reportId, adminId, 'approve', remark);
   if (!result) return null;
-  await pushToReporter(result, {
+  await notifyOwner(result, 'report_verified', {
     title: 'Your report was verified',
     body: 'Thank you — your report has been reviewed and verified.',
   });
@@ -204,7 +223,7 @@ export async function rejectReport(
 ): Promise<PublicActionResult | null> {
   const result = await repoApplyAction(reportId, adminId, 'reject', remark);
   if (!result) return null;
-  await pushToReporter(result, {
+  await notifyOwner(result, 'report_rejected', {
     title: 'Your report was reviewed',
     body: remark,
   });
@@ -238,12 +257,29 @@ export async function unflagReport(
 // Internals
 // ---------------------------------------------------------------------------
 
-async function pushToReporter(
+// Writes a persistent Notification row for the reporter + dispatches an FCM
+// push carrying a deeplink in `data` for the mobile foreground listener.
+// FCM is best-effort inside `notifyReporter` — failure does not roll back the
+// inbox row, which is the source of truth for the user's notification history.
+async function notifyOwner(
   result: ActionResult,
+  kind: 'report_verified' | 'report_rejected' | 'report_flagged',
   notification: { title: string; body: string },
 ): Promise<void> {
   if (!result.reporterId) return;
-  await sendFcmToUser(result.reporterId, notification);
+  try {
+    await notifyReporter(
+      result.reporterId,
+      kind,
+      notification.title,
+      notification.body,
+      result.id,
+    );
+  } catch (err) {
+    // Inbox write or FCM send failed. Already logged downstream; swallow so
+    // the moderation HTTP 200 still ships.
+    console.error('[admin-reports] notifyOwner failed', { reportId: result.id, err });
+  }
 }
 
 // Push the post-action row to the My Reports Firestore mirror so the
