@@ -217,8 +217,7 @@ class _AskAiScreenState extends ConsumerState<AskAiScreen> {
                       if (state.submittedReportId != null && offset == 0) {
                         return _SubmittedBanner(
                           reportId: state.submittedReportId!,
-                          onOpen: () =>
-                              context.go('/report-detail/${state.submittedReportId}'),
+                          onOpen: () => context.go('/my-reports'),
                         );
                       }
                       return const SizedBox.shrink();

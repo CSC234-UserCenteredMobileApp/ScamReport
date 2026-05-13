@@ -2,9 +2,14 @@ import { Elysia, t } from 'elysia';
 import {
   CreateReportRequest,
   CreateReportResponse,
+  EditReportDetailResponse,
   EvidenceUploadResponse,
+  MyReportsResponse,
   ReportDetailResponse,
   ReportListResponse,
+  UpdateReportRequest,
+  UpdateReportResponse,
+  WithdrawReportResponse,
 } from '@my-product/shared';
 import type { Prisma } from '../../generated/prisma/client';
 import { getPrisma } from '../../core/db/client';
@@ -13,8 +18,12 @@ import { getSignedUrl } from '../../core/supabase/storage';
 import { requireAuth } from '../../core/middleware/auth.middleware';
 import {
   createReport,
+  getMyReportDetail,
+  getMyReports,
   ReportSubmitError,
+  updateReport,
   uploadEvidence,
+  withdrawReport,
 } from './reports.service';
 
 export const reportsRoute = new Elysia().get(
@@ -215,6 +224,91 @@ export const reportsRoute = new Elysia().get(
     response: {
       200: CreateReportResponse,
       400: t.Object({ error: t.String(), code: t.String() }),
+    },
+  },
+)
+// GET /reports/mine — reporter's own submissions (auth required).
+.get(
+  '/reports/mine',
+  async ({ user }) => {
+    const uid = await resolveInternalUserId(user!.uid, user!.email);
+    const items = await getMyReports(uid);
+    return { items };
+  },
+  { response: MyReportsResponse },
+)
+// GET /reports/mine/:id — full detail of an owned pending/flagged report.
+// Used by the edit-report screen to pre-fill the form. Owner-only.
+.get(
+  '/reports/mine/:id',
+  async ({ params: { id }, user, set }) => {
+    try {
+      const uid = await resolveInternalUserId(user!.uid, user!.email);
+      return await getMyReportDetail(uid, id);
+    } catch (err) {
+      if (err instanceof ReportSubmitError) {
+        set.status = err.status;
+        return { error: err.message, code: err.code };
+      }
+      throw err;
+    }
+  },
+  {
+    params: t.Object({ id: t.String() }),
+    response: {
+      200: EditReportDetailResponse,
+      404: t.Object({ error: t.String(), code: t.String() }),
+      409: t.Object({ error: t.String(), code: t.String() }),
+    },
+  },
+)
+// PATCH /reports/:id — edit a pending report (auth required).
+.patch(
+  '/reports/:id',
+  async ({ params: { id }, body, user, set }) => {
+    try {
+      const uid = await resolveInternalUserId(user!.uid, user!.email);
+      return await updateReport(uid, id, body);
+    } catch (err) {
+      if (err instanceof ReportSubmitError) {
+        set.status = err.status;
+        return { error: err.message, code: err.code };
+      }
+      throw err;
+    }
+  },
+  {
+    params: t.Object({ id: t.String() }),
+    body: UpdateReportRequest,
+    response: {
+      200: UpdateReportResponse,
+      400: t.Object({ error: t.String(), code: t.String() }),
+      404: t.Object({ error: t.String(), code: t.String() }),
+      409: t.Object({ error: t.String(), code: t.String() }),
+    },
+  },
+)
+// DELETE /reports/:id — withdraw a pending report (auth required, soft-delete).
+.delete(
+  '/reports/:id',
+  async ({ params: { id }, user, set }) => {
+    try {
+      const uid = await resolveInternalUserId(user!.uid, user!.email);
+      return await withdrawReport(uid, id);
+    } catch (err) {
+      if (err instanceof ReportSubmitError) {
+        set.status = err.status;
+        return { error: err.message, code: err.code };
+      }
+      throw err;
+    }
+  },
+  {
+    params: t.Object({ id: t.String() }),
+    response: {
+      200: WithdrawReportResponse,
+      404: t.Object({ error: t.String(), code: t.String() }),
+      409: t.Object({ error: t.String(), code: t.String() }),
     },
   },
 );

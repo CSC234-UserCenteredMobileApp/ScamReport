@@ -29,6 +29,8 @@ import '../../features/search/presentation/search_screen.dart';
 import '../../features/announcement_editor/presentation/admin_announcements_screen.dart';
 import '../../features/announcement_editor/presentation/announcement_editor_screen.dart';
 import '../../features/deletion_requests/presentation/admin_deletion_requests_screen.dart';
+import '../../features/reports/presentation/edit_report_screen.dart';
+import '../../features/reports/presentation/my_reports_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../di/auth.dart';
 import '../widgets/app_shell.dart';
@@ -190,12 +192,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
       GoRoute(path: '/register', builder: (_, __) => const RegisterScreen()),
       GoRoute(
-        path: '/submit-report',
-        builder: (_, __) => const Scaffold(
-          body: Center(child: Text('Submit report — coming soon')),
-        ),
-      ),
-      GoRoute(
         path: '/check-input',
         builder: (_, s) => CheckInputScreen(
           initialText: s.uri.queryParameters['text'],
@@ -218,9 +214,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/my-reports',
-        builder: (_, __) => const Scaffold(
-          body: Center(child: Text('My reports — coming soon')),
-        ),
+        builder: (_, __) => const MyReportsScreen(),
+      ),
+      GoRoute(
+        path: '/edit-report/:id',
+        builder: (_, s) =>
+            EditReportScreen(reportId: s.pathParameters['id']!),
       ),
       GoRoute(path: '/search', builder: (_, __) => const SearchScreen()),
       GoRoute(path: '/privacy', builder: (_, __) => const PrivacyScreen()),

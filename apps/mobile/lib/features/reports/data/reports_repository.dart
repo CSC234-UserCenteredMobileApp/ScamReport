@@ -1,3 +1,7 @@
+import 'dart:typed_data';
+
+import '../domain/edit_report_detail.dart';
+import '../domain/my_report.dart';
 import '../domain/report_detail.dart';
 import 'reports_api.dart';
 
@@ -31,4 +35,58 @@ class ReportsRepository {
       }).toList(),
     );
   }
+
+  Future<EditReportDetail> getMyReportDetail(String id) async {
+    final map = await _api.fetchMyReportDetail(id);
+    return EditReportDetail.fromJson(map);
+  }
+
+  Future<List<MyReport>> getMyReports() => _api.fetchMyReports();
+
+  Future<({String reportId, DateTime createdAt})> submitReport({
+    required String title,
+    required String description,
+    required String scamTypeCode,
+    String? targetIdentifier,
+    String? targetIdentifierKind,
+    List<Map<String, dynamic>> evidenceFiles = const [],
+    String? clientSubmissionId,
+  }) =>
+      _api.submitReport(
+        title: title,
+        description: description,
+        scamTypeCode: scamTypeCode,
+        targetIdentifier: targetIdentifier,
+        targetIdentifierKind: targetIdentifierKind,
+        evidenceFiles: evidenceFiles,
+        clientSubmissionId: clientSubmissionId,
+      );
+
+  Future<void> updateReport({
+    required String reportId,
+    required String title,
+    required String description,
+    required String scamTypeCode,
+    String? targetIdentifier,
+    String? targetIdentifierKind,
+    List<Map<String, dynamic>> evidenceFiles = const [],
+  }) =>
+      _api.updateReport(
+        reportId: reportId,
+        title: title,
+        description: description,
+        scamTypeCode: scamTypeCode,
+        targetIdentifier: targetIdentifier,
+        targetIdentifierKind: targetIdentifierKind,
+        evidenceFiles: evidenceFiles,
+      );
+
+  Future<void> withdrawReport(String reportId) => _api.withdrawReport(reportId);
+
+  Future<Map<String, dynamic>> uploadEvidence({
+    required Uint8List bytes,
+    required String mimeType,
+    required String filename,
+  }) =>
+      _api.uploadEvidence(bytes: bytes, mimeType: mimeType, filename: filename);
 }

@@ -22,10 +22,18 @@
 
 import { randomUUID } from 'node:crypto';
 import { Buffer } from 'node:buffer';
-import type { CreateReportRequest, CreateReportResponse } from '@my-product/shared';
+import type {
+  CreateReportRequest,
+  CreateReportResponse,
+  EditReportDetailResponse,
+  MyReportItem,
+  UpdateReportRequest,
+  UpdateReportResponse,
+  WithdrawReportResponse,
+} from '@my-product/shared';
 import { getPrisma } from '../../core/db/client';
 import { Prisma } from '../../generated/prisma/client';
-import { copyFile, uploadFile } from '../../core/supabase/storage';
+import { copyFile, getSignedUrl, uploadFile } from '../../core/supabase/storage';
 import { mirrorMyReport } from '../../sync/firestore_sync';
 import { canonicalEmbedInput, computeAiScore } from '../../core/ai-score';
 
@@ -352,6 +360,217 @@ export async function createReport(
     id: created.id,
     status: 'pending',
     createdAt: created.createdAt.toISOString(),
+  };
+}
+
+export async function getMyReports(reporterId: string): Promise<MyReportItem[]> {
+  const prisma = getPrisma();
+  const rows = await prisma.report.findMany({
+    where: { reporterId, status: { not: 'withdrawn' } },
+    orderBy: { updatedAt: 'desc' },
+    include: { scamType: true },
+  });
+
+  return rows.map((r) => {
+    // FR-6.1: surface flagged as pending for reporter-facing views
+    const status = r.status === 'flagged' ? 'pending' : (r.status as 'pending' | 'verified' | 'rejected');
+    return {
+      id: r.id,
+      title: r.title,
+      scamTypeCode: r.scamType.code,
+      scamTypeLabelEn: r.scamType.labelEn,
+      scamTypeLabelTh: r.scamType.labelTh,
+      status,
+      createdAt: r.createdAt.toISOString(),
+      updatedAt: r.updatedAt.toISOString(),
+      rejectionRemark: r.rejectionRemark ?? null,
+    };
+  });
+}
+
+export async function updateReport(
+  reporterId: string,
+  reportId: string,
+  input: UpdateReportRequest,
+): Promise<UpdateReportResponse> {
+  const prisma = getPrisma();
+
+  const existing = await prisma.report.findFirst({
+    where: { id: reportId, reporterId },
+    select: { id: true, status: true },
+  });
+  if (!existing) {
+    throw new ReportSubmitError('Report not found', 404, 'not_found');
+  }
+  if (existing.status !== 'pending' && existing.status !== 'flagged') {
+    throw new ReportSubmitError(
+      'Only pending reports can be edited',
+      409,
+      'not_editable',
+    );
+  }
+
+  const scamType = await prisma.scamType.findUnique({
+    where: { code: input.scamTypeCode },
+    select: { id: true, isActive: true },
+  });
+  if (!scamType || !scamType.isActive) {
+    throw new ReportSubmitError(
+      `Unknown scam type: ${input.scamTypeCode}`,
+      400,
+      'invalid_scam_type',
+    );
+  }
+
+  const targetIdentifier = input.targetIdentifier ?? null;
+  const targetIdentifierKind = input.targetIdentifierKind ?? null;
+  const targetIdentifierNormalized = normalizeIdentifier(targetIdentifier, targetIdentifierKind);
+  const now = new Date();
+
+  const evidenceCreates = input.evidenceFiles.map((f) => ({
+    reportId,
+    storagePath: f.storagePath,
+    kind: f.kind,
+    mimeType: f.mimeType,
+    sizeBytes: BigInt(f.sizeBytes),
+  }));
+
+  const updated = await prisma.$transaction(async (tx) => {
+    // Replace evidence: delete existing rows, insert new ones.
+    await tx.evidenceFile.deleteMany({ where: { reportId } });
+    if (evidenceCreates.length > 0) {
+      await tx.evidenceFile.createMany({ data: evidenceCreates });
+    }
+    return tx.report.update({
+      where: { id: reportId },
+      data: {
+        title: input.title,
+        description: input.description,
+        scamTypeId: scamType.id,
+        targetIdentifier,
+        targetIdentifierKind,
+        targetIdentifierNormalized,
+        updatedAt: now,
+      },
+      select: { id: true, status: true, updatedAt: true },
+    });
+  });
+
+  // Mirror the updated report
+  await mirrorMyReport({
+    id: updated.id,
+    reporterId,
+    title: input.title,
+    status: updated.status as 'pending' | 'verified' | 'rejected' | 'flagged' | 'withdrawn',
+    scamTypeCode: input.scamTypeCode,
+    createdAt: updated.updatedAt,
+    updatedAt: updated.updatedAt,
+  });
+
+  const status = updated.status === 'flagged' ? 'pending' : (updated.status as 'pending' | 'verified' | 'rejected' | 'withdrawn');
+  return {
+    id: updated.id,
+    status,
+    updatedAt: updated.updatedAt.toISOString(),
+  };
+}
+
+export async function withdrawReport(
+  reporterId: string,
+  reportId: string,
+): Promise<WithdrawReportResponse> {
+  const prisma = getPrisma();
+
+  const existing = await prisma.report.findFirst({
+    where: { id: reportId, reporterId },
+    select: { id: true, status: true, title: true, createdAt: true, scamType: { select: { code: true } } },
+  });
+  if (!existing) {
+    throw new ReportSubmitError('Report not found', 404, 'not_found');
+  }
+  if (existing.status !== 'pending' && existing.status !== 'flagged') {
+    throw new ReportSubmitError(
+      'Only pending reports can be withdrawn',
+      409,
+      'not_withdrawable',
+    );
+  }
+
+  const now = new Date();
+  await prisma.report.update({
+    where: { id: reportId },
+    data: { status: 'withdrawn', updatedAt: now },
+  });
+
+  // Mirror deletion (withdrawing removes the doc from the user's Firestore mirror)
+  await mirrorMyReport({
+    id: reportId,
+    reporterId,
+    title: existing.title,
+    status: 'withdrawn',
+    scamTypeCode: existing.scamType.code,
+    createdAt: existing.createdAt,
+    updatedAt: now,
+  });
+
+  return { id: reportId, status: 'withdrawn' };
+}
+
+export async function getMyReportDetail(
+  reporterId: string,
+  reportId: string,
+): Promise<EditReportDetailResponse> {
+  const prisma = getPrisma();
+
+  const report = await prisma.report.findFirst({
+    where: { id: reportId, reporterId },
+    include: { scamType: true, evidenceFiles: true },
+  });
+
+  if (!report) {
+    throw new ReportSubmitError('Report not found', 404, 'not_found');
+  }
+  if (report.status !== 'pending' && report.status !== 'flagged') {
+    throw new ReportSubmitError('Report is not editable', 409, 'not_editable');
+  }
+
+  const evidenceFiles = await Promise.all(
+    report.evidenceFiles.map(async (f) => {
+      let signedUrl: string | null = null;
+      try {
+        signedUrl = await getSignedUrl('evidence', f.storagePath, 3600);
+      } catch {
+        // storage hiccup — degrade gracefully, form still usable without preview
+      }
+      return {
+        id: f.id,
+        storagePath: f.storagePath,
+        signedUrl,
+        kind: f.kind as 'image' | 'pdf',
+        mimeType: f.mimeType,
+        sizeBytes: Number(f.sizeBytes),
+      };
+    }),
+  );
+
+  // FR-6.1: surface flagged as pending for reporter-facing views
+  const status = (report.status === 'flagged' ? 'pending' : report.status) as
+    | 'pending'
+    | 'verified'
+    | 'rejected'
+    | 'withdrawn';
+
+  return {
+    id: report.id,
+    title: report.title,
+    description: report.description,
+    scamTypeCode: report.scamType.code,
+    scamTypeLabelEn: report.scamType.labelEn,
+    scamTypeLabelTh: report.scamType.labelTh,
+    status,
+    targetIdentifier: report.targetIdentifier ?? null,
+    targetIdentifierKind: (report.targetIdentifierKind as 'phone' | 'url' | 'other' | null) ?? null,
+    evidenceFiles,
   };
 }
 
