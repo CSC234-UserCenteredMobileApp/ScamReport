@@ -34,10 +34,10 @@ export function useModerationAction(kind: ModerationActionKind) {
     onMutate: async ({ id }) => {
       await qc.cancelQueries({ queryKey: queryKeys.moderation.all });
       const previousQueues = qc.getQueriesData<AdminQueueResponse>({
-        queryKey: queryKeys.moderation.all,
+        queryKey: queryKeys.moderation.queues,
       });
       qc.setQueriesData<AdminQueueResponse>(
-        { queryKey: queryKeys.moderation.all },
+        { queryKey: queryKeys.moderation.queues },
         (prev) => {
           if (!prev) return prev;
           if (shouldRemoveFromQueue(kind)) {
@@ -65,7 +65,7 @@ export function useModerationAction(kind: ModerationActionKind) {
               ),
               pendingCount:
                 prev.items.find((it) => it.id === id)?.status === 'pending' &&
-                prev.pendingCount > 0
+                  prev.pendingCount > 0
                   ? prev.pendingCount - 1
                   : prev.pendingCount,
               flaggedCount: prev.flaggedCount + 1,
