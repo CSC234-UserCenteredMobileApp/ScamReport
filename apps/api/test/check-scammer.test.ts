@@ -39,6 +39,7 @@ mock.module('../src/core/db/client', () => ({
           return {
             id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
             displayName: 'Revenue Dept Impersonator',
+            suspectedName: 'Khun Somchai Wongchai',
             aliases: ['Khun Anan'],
             riskLevel: 'high',
             reportCountCache: 3,

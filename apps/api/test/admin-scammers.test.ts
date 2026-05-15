@@ -57,6 +57,7 @@ mock.module('../src/core/db/client', () => ({
           scammer: {
             id: SCAMMER_ID,
             displayName: 'Revenue Dept Impersonator',
+            suspectedName: 'Khun Somchai Wongchai',
             aliases: ['Khun Anan'],
             riskLevel: 'high',
             reportCountCache: 3,
@@ -94,6 +95,7 @@ beforeEach(() => {
   mockScammer = {
     id: SCAMMER_ID,
     displayName: 'Revenue Dept Impersonator',
+    suspectedName: 'Khun Somchai Wongchai',
     aliases: ['Khun Anan'],
     riskLevel: 'high',
     notes: 'mock',
