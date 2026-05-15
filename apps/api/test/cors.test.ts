@@ -1,5 +1,14 @@
-import { describe, it, expect } from 'bun:test';
+import { describe, it, expect, mock } from 'bun:test';
 import { app } from '../src/index';
+
+mock.module('../src/core/firebase/admin', () => ({
+  getFirebaseAdmin: () => ({}),
+}));
+
+mock.module('../src/core/firebase/messaging', () => ({
+  sendFcmToUser: async () => {},
+  sendFcmBroadcast: async () => {},
+}));
 
 const ALLOWED_LOCAL = 'http://localhost:5173';
 const ALLOWED_PROD = 'https://scamreport-admin.vercel.app';

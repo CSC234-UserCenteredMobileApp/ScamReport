@@ -5,6 +5,11 @@ mock.module('../src/core/firebase/admin', () => ({
   getFirebaseAdmin: () => ({ name: '[mock]' }),
 }));
 
+mock.module('../src/core/firebase/messaging', () => ({
+  sendFcmToUser: async () => {},
+  sendFcmBroadcast: async () => {},
+}));
+
 mock.module('../src/core/db/client', () => ({
   getPrisma: () => ({
     report: {
