@@ -21,6 +21,7 @@ mock.module('../src/core/firebase/admin', () => ({
 
 mock.module('../src/core/firebase/messaging', () => ({
   sendFcmToUser: async () => {},
+  sendFcmBroadcast: async () => {},
 }));
 
 mock.module('../src/core/gemini/client', () => ({
