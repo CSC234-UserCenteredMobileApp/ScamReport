@@ -1,4 +1,5 @@
 import { Type, type Static } from '@sinclair/typebox';
+import { ScammerProfileSummary } from './scammers';
 
 // =============================================================================
 // Ask AI (P-09 / FR-4.x) — conversational AI chat
@@ -166,6 +167,9 @@ export const AskAiMissingFact = Type.Union([
   Type.Literal('targetIdentifier'),
   Type.Literal('scamTypeCue'),
   Type.Literal('userAction'),
+  // Set when the AI suspects a known scammer profile matches the user's
+  // identifier and wants to confirm the alias by name.
+  Type.Literal('scammerAlias'),
 ]);
 export type AskAiMissingFact = Static<typeof AskAiMissingFact>;
 
@@ -190,8 +194,12 @@ export const AskAiTurnResponse = Type.Object({
   hasEnoughInfo: Type.Boolean(),
   draft: Type.Union([AskAiDraft, Type.Null()]),
   similarReports: Type.Array(AskAiSimilarReport, { maxItems: 5 }),
-  // The four required facts the AI must collect before it can draft. Empty
-  // ⇔ hasEnoughInfo=true. Drives AI question rigor (iter-4 plan).
-  missingFacts: Type.Array(AskAiMissingFact, { maxItems: 4, default: [] }),
+  // Known scammer profiles whose identifiers appeared in the user message
+  // (phone/URL match). Drives the "this looks like a known scammer named X"
+  // affordance and lets the AI ask follow-ups by alias rather than generic.
+  matchedScammers: Type.Array(ScammerProfileSummary, { maxItems: 5, default: [] }),
+  // The five required facts the AI may collect before it can draft.
+  // `scammerAlias` is optional — only fires when a known scammer is in context.
+  missingFacts: Type.Array(AskAiMissingFact, { maxItems: 5, default: [] }),
 });
 export type AskAiTurnResponse = Static<typeof AskAiTurnResponse>;

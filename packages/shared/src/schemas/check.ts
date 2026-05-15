@@ -1,4 +1,5 @@
 import { Type, type Static } from '@sinclair/typebox';
+import { MatchedScammer } from './scammers';
 
 // POST /check — Quick Verdict request/response (PRD §3.1, FR-2.1..2.5).
 //
@@ -79,6 +80,9 @@ export const CheckResponse = Type.Object(
     verdict: Verdict,
     matchedCount: Type.Integer({ minimum: 0 }),
     matches: Type.Array(ReportSummary),
+    // Populated when the checked identifier maps to a known scammer profile,
+    // or when 2+ semantic top-K matches share the same scammerId.
+    matchedScammer: Type.Optional(Type.Union([MatchedScammer, Type.Null()])),
   },
   { additionalProperties: false },
 );

@@ -9,6 +9,28 @@ import { config } from 'dotenv';
 
 config();
 
+// Lightweight mirror of the production `normalizeIdentifier` in
+// reports.service.ts so seeded rows index the same way real submissions do.
+function normalize(raw: string | undefined, kind: 'phone' | 'url' | 'other' | undefined): string | undefined {
+  if (!raw) return undefined;
+  const trimmed = raw.trim();
+  if (!trimmed) return undefined;
+  if (kind === 'phone') {
+    const stripped = trimmed.replace(/[\s\-()]/g, '');
+    if (/^0\d{8,9}$/.test(stripped)) return '+66' + stripped.slice(1);
+    return stripped.replace(/[^\d+]/g, '');
+  }
+  if (kind === 'url') {
+    try {
+      const u = new URL(trimmed.startsWith('http') ? trimmed : `https://${trimmed}`);
+      return u.host.toLowerCase();
+    } catch {
+      return trimmed.toLowerCase();
+    }
+  }
+  return trimmed.toLowerCase();
+}
+
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
 
@@ -113,7 +135,7 @@ async function main() {
         scamTypeId: s.scamTypeId,
         targetIdentifier: s.targetIdentifier,
         targetIdentifierKind: s.targetIdentifierKind,
-        targetIdentifierNormalized: s.targetIdentifier?.toLowerCase(),
+        targetIdentifierNormalized: normalize(s.targetIdentifier, s.targetIdentifierKind),
         status: 'verified',
         createdAt,
         updatedAt: verifiedAt,

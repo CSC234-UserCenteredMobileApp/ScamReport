@@ -187,6 +187,34 @@ export async function createReport(
     targetIdentifierKind,
   );
 
+  // Opportunistic scammer auto-link. If the submitted identifier matches an
+  // existing scammer profile, link the report at create time so the AI score
+  // and the admin queue immediately see the offender cluster. A moderator
+  // can re-assign later via POST /admin/reports/:id/link-scammer.
+  let autoLinkedScammerId: string | null = null;
+  let autoLinkedScammer: { displayName: string; aliases: string[] } | null = null;
+  if (targetIdentifierNormalized && targetIdentifierKind && targetIdentifierKind !== 'other') {
+    const idRow = await prisma.scammerIdentifier.findUnique({
+      where: {
+        kind_valueNormalized: {
+          kind: targetIdentifierKind,
+          valueNormalized: targetIdentifierNormalized,
+        },
+      },
+      select: {
+        scammerId: true,
+        scammer: { select: { displayName: true, aliases: true } },
+      },
+    });
+    if (idRow) {
+      autoLinkedScammerId = idRow.scammerId;
+      autoLinkedScammer = {
+        displayName: idRow.scammer.displayName,
+        aliases: idRow.scammer.aliases,
+      };
+    }
+  }
+
   // Promote any chat-attachment evidence the user curated in a restored draft
   // — copy bytes from chat-attachments → evidence bucket and convert to
   // EvidenceMetadata. iter-5 server-side draft sync.
@@ -289,6 +317,7 @@ export async function createReport(
         targetIdentifier,
         targetIdentifierKind,
         targetIdentifierNormalized,
+        scammerId: autoLinkedScammerId,
         status: 'pending',
         createdAt: now,
         updatedAt: now,
@@ -304,6 +333,25 @@ export async function createReport(
 
     if (evidenceCreates.length > 0) {
       await tx.evidenceFile.createMany({ data: evidenceCreates });
+    }
+
+    if (autoLinkedScammerId) {
+      // Refresh the cached count + last_seen. first_seen_at is set only if
+      // currently null (raw SQL because Prisma can't express "set if null").
+      // The cache count includes pending reports; admins see this on the
+      // queue and dossier.
+      await tx.scammer.update({
+        where: { id: autoLinkedScammerId },
+        data: {
+          reportCountCache: { increment: 1 },
+          lastSeenAt: now,
+        },
+      });
+      await tx.$executeRaw`
+        UPDATE scammers
+        SET first_seen_at = COALESCE(first_seen_at, ${now})
+        WHERE id = ${autoLinkedScammerId}::uuid
+      `;
     }
 
     if (input.sourceConversationId) {
@@ -343,6 +391,7 @@ export async function createReport(
         description: input.description,
         targetIdentifier,
         scamType: { labelEn: scamType.labelEn, labelTh: scamType.labelTh },
+        scammer: autoLinkedScammer,
       }),
       { reportId: created.id },
     );

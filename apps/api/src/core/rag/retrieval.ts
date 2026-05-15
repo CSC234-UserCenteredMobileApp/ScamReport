@@ -4,6 +4,10 @@ import { embed } from '../gemini/client';
 export type SimilarReport = {
   reportId: string;
   similarity: number;
+  // Scammer profile linked to the report at the time of retrieval, when one
+  // has been assigned by a moderator. Null when unlinked. Used by
+  // `computeAiScore` to detect "multiple top-K share the same offender."
+  scammerId: string | null;
 };
 
 /**
@@ -23,8 +27,11 @@ export async function searchSimilarReports(
   const vectorLiteral = `[${vector.join(',')}]`;
   const prisma = getPrisma();
 
-  const rows = await prisma.$queryRaw<{ report_id: string; similarity: number }[]>`
+  const rows = await prisma.$queryRaw<
+    { report_id: string; similarity: number; scammer_id: string | null }[]
+  >`
     SELECT re.report_id::text,
+           r.scammer_id::text AS scammer_id,
            1 - (re.embedding <=> ${vectorLiteral}::vector) AS similarity
     FROM report_embeddings re
     JOIN reports r ON r.id = re.report_id AND r.status = 'verified'
@@ -32,5 +39,9 @@ export async function searchSimilarReports(
     LIMIT ${topK}
   `;
 
-  return rows.map((r) => ({ reportId: r.report_id, similarity: r.similarity }));
+  return rows.map((r) => ({
+    reportId: r.report_id,
+    similarity: r.similarity,
+    scammerId: r.scammer_id,
+  }));
 }

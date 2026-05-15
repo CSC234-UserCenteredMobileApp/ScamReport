@@ -143,6 +143,27 @@ enum DevicePlatform {
   @@map("device_platform")
 }
 
+enum ScammerRiskLevel {
+  low
+  medium
+  high
+  unknown
+
+  @@map("scammer_risk_level")
+}
+
+enum ScammerIdentifierKind {
+  phone
+  url
+  email
+  bank_account
+  line_id
+  social_handle
+  other
+
+  @@map("scammer_identifier_kind")
+}
+
 // =============================================================================
 // Tables
 // =============================================================================
@@ -226,8 +247,11 @@ model Report {
   updatedAt                  DateTime        @default(now()) @map("updated_at") @db.Timestamptz()
   verifiedAt                 DateTime?       @map("verified_at") @db.Timestamptz()
 
+  scammerId                  String?         @map("scammer_id") @db.Uuid
+
   reporter User?    @relation(fields: [reporterId], references: [id], onDelete: SetNull)
   scamType ScamType @relation(fields: [scamTypeId], references: [id])
+  scammer  Scammer? @relation(fields: [scammerId], references: [id], onDelete: SetNull)
 
   evidenceFiles    EvidenceFile[]
   moderations      ModerationAction[]
@@ -238,7 +262,108 @@ model Report {
   @@index([status, createdAt(sort: Desc)])
   @@index([reporterId, createdAt(sort: Desc)])
   @@index([scamTypeId])
+  @@index([scammerId])
   @@map("reports")
+}
+
+/// Offender profile — separated from `reports` so the same scammer can be
+/// linked to many cases. Identifiers (phone/URL/etc.) live in
+/// `scammer_identifiers`; reports keep their `target_identifier*` columns as
+/// a denormalised cache.
+model Scammer {
+  id                String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  displayName       String           @map("display_name")
+  aliases           String[]         @default([])
+  riskLevel         ScammerRiskLevel @default(unknown) @map("risk_level")
+  notes             String?
+  reportCountCache  Int              @default(0) @map("report_count_cache")
+  firstSeenAt       DateTime?        @map("first_seen_at") @db.Timestamptz()
+  lastSeenAt        DateTime?        @map("last_seen_at") @db.Timestamptz()
+  createdAt         DateTime         @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt         DateTime         @default(now()) @map("updated_at") @db.Timestamptz()
+
+  identifiers   ScammerIdentifier[]
+  reports       Report[]
+  evalCases     AiEvalCase[]
+  evalResults   AiEvalResult[]
+
+  @@map("scammers")
+}
+
+/// One scammer can present many surface identifiers (multiple phones, URLs,
+/// bank accounts). Unique on (kind, value_normalized) so a phone or URL maps
+/// to at most one scammer.
+model ScammerIdentifier {
+  id              String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  scammerId       String                @map("scammer_id") @db.Uuid
+  kind            ScammerIdentifierKind
+  valueRaw        String                @map("value_raw")
+  valueNormalized String                @map("value_normalized") @db.Citext
+  createdAt       DateTime              @default(now()) @map("created_at") @db.Timestamptz()
+
+  scammer Scammer @relation(fields: [scammerId], references: [id], onDelete: Cascade)
+
+  @@unique([kind, valueNormalized])
+  @@index([scammerId])
+  @@map("scammer_identifiers")
+}
+
+/// Labelled eval dataset — mock data drives the AI accuracy measurement.
+model AiEvalCase {
+  id                    String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  label                 String
+  inputType             CheckInputKind @map("input_type")
+  inputPayload          String         @map("input_payload")
+  expectedVerdict       VerdictLabel   @map("expected_verdict")
+  expectedScammerId     String?        @map("expected_scammer_id") @db.Uuid
+  expectedScamTypeCode  String?        @map("expected_scam_type_code")
+  expectedMissingFacts  Json           @default("[]") @map("expected_missing_facts") @db.JsonB
+  notes                 String?
+  createdAt             DateTime       @default(now()) @map("created_at") @db.Timestamptz()
+
+  expectedScammer Scammer?       @relation(fields: [expectedScammerId], references: [id], onDelete: SetNull)
+  results         AiEvalResult[]
+
+  @@map("ai_eval_cases")
+}
+
+/// One row per evaluation pass — summary metrics.
+model AiEvalRun {
+  id                String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  runAt             DateTime         @default(now()) @map("run_at") @db.Timestamptz()
+  totalCases        Int              @map("total_cases")
+  verdictAccuracy   Float            @map("verdict_accuracy")
+  scammerRecallAt1  Float            @map("scammer_recall_at_1")
+  scammerMrr        Float            @map("scammer_mrr")
+  missingFactsF1    Float            @map("missing_facts_f1")
+  p95LatencyMs      Int              @map("p95_latency_ms")
+  createdAt         DateTime         @default(now()) @map("created_at") @db.Timestamptz()
+
+  results AiEvalResult[]
+
+  @@index([runAt(sort: Desc)])
+  @@map("ai_eval_runs")
+}
+
+/// Per-case result inside a run.
+model AiEvalResult {
+  id                  String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  runId               String       @map("run_id") @db.Uuid
+  caseId              String       @map("case_id") @db.Uuid
+  actualVerdict       VerdictLabel @map("actual_verdict")
+  actualScammerId     String?      @map("actual_scammer_id") @db.Uuid
+  actualMissingFacts  Json         @default("[]") @map("actual_missing_facts") @db.JsonB
+  scammerMatched      Boolean      @map("scammer_matched")
+  latencyMs           Int          @map("latency_ms")
+  createdAt           DateTime     @default(now()) @map("created_at") @db.Timestamptz()
+
+  run           AiEvalRun  @relation(fields: [runId], references: [id], onDelete: Cascade)
+  evalCase      AiEvalCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  actualScammer Scammer?   @relation(fields: [actualScammerId], references: [id], onDelete: SetNull)
+
+  @@index([runId])
+  @@index([caseId])
+  @@map("ai_eval_results")
 }
 
 /// Up to 5 files per report. Bytes live in Supabase Storage. (DESIGN §4.5)

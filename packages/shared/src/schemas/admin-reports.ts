@@ -1,4 +1,5 @@
 import { Type, type Static } from '@sinclair/typebox';
+import { ScammerProfileSummary } from './scammers';
 
 export const AiConfidence = Type.Union([
   Type.Literal('high'),
@@ -57,6 +58,15 @@ export const AdminQueueResponse = Type.Object({
 });
 export type AdminQueueResponse = Static<typeof AdminQueueResponse>;
 
+export const AdminSiblingCase = Type.Object({
+  id: Type.String({ format: 'uuid' }),
+  title: Type.String(),
+  status: Type.String(),
+  scamTypeCode: Type.String(),
+  verifiedAt: Type.Union([Type.String({ format: 'date-time' }), Type.Null()]),
+});
+export type AdminSiblingCase = Static<typeof AdminSiblingCase>;
+
 export const AdminReportDetail = Type.Object({
   id: Type.String({ format: 'uuid' }),
   title: Type.String(),
@@ -84,6 +94,10 @@ export const AdminReportDetail = Type.Object({
   aiScore: Type.Union([Type.Integer({ minimum: 0, maximum: 100 }), Type.Null()]),
   aiConfidence: Type.Union([AiConfidence, Type.Null()]),
   auditTrail: Type.Array(ModerationRecord),
+  // Linked scammer profile (when this case has been associated with one) +
+  // sibling cases attributed to the same scammer.
+  scammer: Type.Union([ScammerProfileSummary, Type.Null()]),
+  siblingCases: Type.Array(AdminSiblingCase),
 });
 export type AdminReportDetail = Static<typeof AdminReportDetail>;
 

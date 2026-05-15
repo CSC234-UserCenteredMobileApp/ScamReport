@@ -8,6 +8,9 @@ import AnnouncementsListPage from '@/routes/announcements/list';
 import AnnouncementsNewPage from '@/routes/announcements/new';
 import AnnouncementsEditPage from '@/routes/announcements/edit';
 import DeletionRequestsPage from '@/routes/deletion-requests';
+import ScammerDossierRoute from '@/routes/scammers/dossier';
+import PlatformSummaryRoute from '@/routes/platform-summary';
+import AiEvalRoute from '@/routes/ai-eval';
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -22,6 +25,9 @@ export const router = createBrowserRouter([
       { path: 'announcements/new', element: <AnnouncementsNewPage /> },
       { path: 'announcements/:id/edit', element: <AnnouncementsEditPage /> },
       { path: 'deletion-requests', element: <DeletionRequestsPage /> },
+      { path: 'scammers/:id/dossier', element: <ScammerDossierRoute /> },
+      { path: 'platform-summary', element: <PlatformSummaryRoute /> },
+      { path: 'ai-eval', element: <AiEvalRoute /> },
     ],
   },
   { path: '*', element: <Navigate to="/" replace /> },

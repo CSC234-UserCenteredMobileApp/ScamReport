@@ -18,8 +18,10 @@ import type {
   AdminEvidenceFile,
   AdminQueueItem,
   AdminReportDetail,
+  AdminSiblingCase,
   ModerationRecord,
   AiConfidence,
+  ScammerProfileSummary,
 } from '@my-product/shared';
 import { canonicalEmbedInput, computeAiScore } from '../../core/ai-score';
 import { getPrisma } from '../../core/db/client';
@@ -34,6 +36,7 @@ import {
   findDetailRow,
   findEvidenceFile,
   findQueueRows,
+  findSiblingCases,
   type ActionKind,
   type ActionResult,
 } from './admin-reports.repo';
@@ -133,6 +136,34 @@ export async function getDetail(reportId: string): Promise<AdminReportDetail | n
     createdAt: m.createdAt.toISOString(),
   }));
 
+  // Scammer profile + sibling cases (other reports attributed to the same
+  // offender). Empty when the report hasn't been linked yet — a moderator
+  // can attach via POST /admin/reports/:id/link-scammer.
+  let scammer: ScammerProfileSummary | null = null;
+  let siblingCases: AdminSiblingCase[] = [];
+  if (report.scammer) {
+    const top: string[] = [];
+    for (const r of report.scammer.reports) {
+      if (!top.includes(r.scamType.code)) top.push(r.scamType.code);
+    }
+    scammer = {
+      id: report.scammer.id,
+      displayName: report.scammer.displayName,
+      aliases: report.scammer.aliases,
+      riskLevel: report.scammer.riskLevel as ScammerProfileSummary['riskLevel'],
+      reportCount: report.scammer.reportCountCache,
+      topScamTypeCodes: top,
+    };
+    const siblings = await findSiblingCases(report.scammer.id, reportId);
+    siblingCases = siblings.map((s) => ({
+      id: s.id,
+      title: s.title,
+      status: s.status,
+      scamTypeCode: s.scamTypeCode,
+      verifiedAt: s.verifiedAt ? s.verifiedAt.toISOString() : null,
+    }));
+  }
+
   return {
     id: report.id,
     title: report.title,
@@ -150,6 +181,8 @@ export async function getDetail(reportId: string): Promise<AdminReportDetail | n
     aiScore,
     aiConfidence: aiConfidence as AdminReportDetail['aiConfidence'],
     auditTrail,
+    scammer,
+    siblingCases,
   };
 }
 

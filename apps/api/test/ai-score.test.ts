@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, mock, test } from 'bun:test';
 // Mock retrieval — drives `computeAiScore` behaviour deterministically.
 // ---------------------------------------------------------------------------
 
-let mockResults: Array<{ reportId: string; similarity: number }> = [];
+let mockResults: Array<{ reportId: string; similarity: number; scammerId?: string | null }> = [];
 let mockShouldThrow = false;
 
 mock.module('../src/core/rag/retrieval', () => ({
@@ -116,6 +116,46 @@ describe('computeAiScore', () => {
     const [tag, payload] = errorCalls[0]!;
     expect(tag).toBe('[ai-score]');
     expect((payload as { phase: string }).phase).toBe('embedding_failed');
+  });
+
+  test('2+ top-K share scammerId → confidence bumps + score floor honoured', async () => {
+    // top-1 0.72 (medium); without the cluster bump confidence stays
+    // medium and the score is 72. With cluster, confidence bumps to 'high'
+    // and the SCAMMER_CLUSTER_SCORE_FLOOR floor pulls the score to 75.
+    mockResults = [
+      { reportId: 'r1', similarity: 0.72, scammerId: 'scam-1' },
+      { reportId: 'r2', similarity: 0.62, scammerId: 'scam-1' },
+      { reportId: 'r3', similarity: 0.55, scammerId: null },
+      { reportId: 'r4', similarity: 0.5, scammerId: null },
+      { reportId: 'r5', similarity: 0.4, scammerId: null },
+    ];
+    const result = await computeAiScore('cluster test');
+    expect(result.aiConfidence).toBe('high');
+    expect(result.aiScore).toBeGreaterThanOrEqual(75);
+    expect(result.topScammerId).toBe('scam-1');
+    expect(result.topScammerSiblingCount).toBe(2);
+  });
+
+  test('only 1 top-K shares scammerId → no bump, topScammerId is null', async () => {
+    mockResults = [
+      { reportId: 'r1', similarity: 0.72, scammerId: 'scam-1' },
+      { reportId: 'r2', similarity: 0.62, scammerId: 'scam-2' },
+      { reportId: 'r3', similarity: 0.55, scammerId: null },
+    ];
+    const result = await computeAiScore('no cluster');
+    expect(result.aiConfidence).toBe('medium');
+    expect(result.topScammerId).toBeNull();
+    expect(result.topScammerSiblingCount).toBe(0);
+  });
+
+  test('cluster never downgrades a high tier', async () => {
+    mockResults = [
+      { reportId: 'r1', similarity: 0.95, scammerId: 'scam-1' },
+      { reportId: 'r2', similarity: 0.5, scammerId: 'scam-1' },
+    ];
+    const result = await computeAiScore('high stays high');
+    expect(result.aiConfidence).toBe('high');
+    expect(result.aiScore).toBe(95);
   });
 
   test('score uses the dominant of (top-1, top-3 avg)', async () => {

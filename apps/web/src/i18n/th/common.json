@@ -4,6 +4,8 @@
     "moderation": "ตรวจสอบ",
     "announcements": "ประกาศ",
     "deletionRequests": "คำขอลบบัญชี",
+    "platformSummary": "สรุปแพลตฟอร์ม",
+    "aiEval": "ประเมิน AI",
     "signOut": "ออกจากระบบ"
   },
   "auth": {
