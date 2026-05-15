@@ -83,6 +83,11 @@ export default function PlatformSummaryPage() {
                       >
                         {s.displayName}
                       </Link>
+                      {s.suspectedName && (
+                        <div className="text-xs text-muted-foreground">
+                          Alleged: {s.suspectedName}
+                        </div>
+                      )}
                     </td>
                     <td className="py-1 capitalize">{s.riskLevel}</td>
                     <td className="py-1 text-right">{s.reportCount}</td>

@@ -28,6 +28,12 @@ export default function ScammerDossierPage() {
 
       <header className="border-b pb-4">
         <h2 className="text-xl font-bold">{data.scammer.displayName}</h2>
+        {data.scammer.suspectedName && (
+          <div className="mt-1 text-sm">
+            <span className="text-muted-foreground">Alleged name:</span>{' '}
+            <strong className="text-foreground">{data.scammer.suspectedName}</strong>
+          </div>
+        )}
         <div className="mt-1 text-sm text-muted-foreground">
           Risk: <strong className="text-foreground">{data.scammer.riskLevel}</strong> ·
           {' '}Cases: <strong className="text-foreground">{data.scammer.reportCount}</strong> ·

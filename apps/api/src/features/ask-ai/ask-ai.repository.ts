@@ -339,6 +339,7 @@ export async function findScammersByIdentifiers(normalized: string[]) {
     return {
       id: s.id,
       displayName: s.displayName,
+      suspectedName: s.suspectedName,
       aliases: s.aliases,
       riskLevel: s.riskLevel as 'low' | 'medium' | 'high' | 'unknown',
       reportCount: s.reportCountCache,

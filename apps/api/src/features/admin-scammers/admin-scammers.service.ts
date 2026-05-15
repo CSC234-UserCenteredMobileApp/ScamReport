@@ -66,6 +66,7 @@ export async function search(
   const items: ScammerProfileSummary[] = rows.map((r) => ({
     id: r.id,
     displayName: r.displayName,
+    suspectedName: r.suspectedName,
     aliases: r.aliases,
     riskLevel: r.riskLevel as ScammerProfileSummary['riskLevel'],
     reportCount: r.reportCountCache,
@@ -192,6 +193,7 @@ export async function getDossier(
   const profile: ScammerProfile = {
     id: scammer.id,
     displayName: scammer.displayName,
+    suspectedName: scammer.suspectedName,
     aliases: scammer.aliases,
     riskLevel: scammer.riskLevel as ScammerProfile['riskLevel'],
     notes: scammer.notes,

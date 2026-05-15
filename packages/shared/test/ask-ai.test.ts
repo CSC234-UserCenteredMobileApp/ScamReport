@@ -24,6 +24,7 @@ const validDraft = {
   scamTypeCode: 'phishing_sms',
   targetIdentifier: 'kerry-th-track.net',
   targetIdentifierKind: 'url' as const,
+  suspectedScammerName: null,
 };
 
 describe('AskAiTurnRequest', () => {

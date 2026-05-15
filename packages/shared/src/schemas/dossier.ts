@@ -84,6 +84,7 @@ export const PlatformSummaryRange = Type.Object({
 export const TopScammer = Type.Object({
   id: Type.String({ format: 'uuid' }),
   displayName: Type.String(),
+  suspectedName: Type.Union([Type.String(), Type.Null()]),
   reportCount: Type.Integer({ minimum: 0 }),
   riskLevel: Type.String(),
 });

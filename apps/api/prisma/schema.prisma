@@ -273,6 +273,7 @@ model Report {
 model Scammer {
   id                String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   displayName       String           @map("display_name")
+  suspectedName     String?          @map("suspected_name")
   aliases           String[]         @default([])
   riskLevel         ScammerRiskLevel @default(unknown) @map("risk_level")
   notes             String?

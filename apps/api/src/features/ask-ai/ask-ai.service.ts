@@ -307,6 +307,7 @@ export async function handleTurn(
     knownScammers: knownScammers.map((s) => ({
       id: s.id,
       displayName: s.displayName,
+      suspectedName: s.suspectedName,
       aliases: s.aliases,
       riskLevel: s.riskLevel,
       reportCount: s.reportCount,
@@ -347,6 +348,7 @@ export async function handleTurn(
   const matchedScammers: ScammerProfileSummary[] = knownScammers.map((s) => ({
     id: s.id,
     displayName: s.displayName,
+    suspectedName: s.suspectedName,
     aliases: s.aliases,
     riskLevel: s.riskLevel,
     reportCount: s.reportCount,

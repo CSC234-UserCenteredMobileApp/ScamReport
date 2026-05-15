@@ -58,6 +58,7 @@ export async function getPlatformSummary(
       select: {
         id: true,
         displayName: true,
+        suspectedName: true,
         reportCountCache: true,
         riskLevel: true,
       },
@@ -131,6 +132,7 @@ export async function getPlatformSummary(
     topScammers: topScammersRows.map((s) => ({
       id: s.id,
       displayName: s.displayName,
+      suspectedName: s.suspectedName,
       reportCount: s.reportCountCache,
       riskLevel: s.riskLevel,
     })),

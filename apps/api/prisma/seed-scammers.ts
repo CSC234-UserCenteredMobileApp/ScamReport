@@ -22,6 +22,7 @@ type SeedIdentifier = {
 
 type SeedScammer = {
   displayName: string;
+  suspectedName: string | null;
   aliases: string[];
   riskLevel: ScammerRiskLevel;
   notes: string;
@@ -33,20 +34,22 @@ type SeedScammer = {
 const SEEDS: SeedScammer[] = [
   {
     displayName: 'Revenue Dept Impersonator',
-    aliases: ['Khun Somchai (Revenue Dept)', 'Officer Anan'],
+    suspectedName: 'Khun Somchai Wongchai',
+    aliases: ['Officer Anan'],
     riskLevel: 'high',
     notes:
-      'Cold-calls victims claiming unpaid tax penalties; demands transfers to a "verification" account.',
+      'Cold-calls victims claiming unpaid tax penalties; demands transfers to a "verification" account. Caller introduces himself as "Khun Somchai Wongchai".',
     identifiers: [
       { kind: 'phone', valueRaw: '+66 2 999 1234', valueNormalized: '+6629991234' },
     ],
   },
   {
     displayName: 'Kerry Parcel Phisher',
+    suspectedName: null,
     aliases: ['Kerry Express Notify'],
     riskLevel: 'high',
     notes:
-      'Sends SMS claiming undelivered parcels; link redirects to a cloned Kerry login page that captures credentials.',
+      'Sends SMS claiming undelivered parcels; link redirects to a cloned Kerry login page that captures credentials. Anonymous campaign — no caller name surfaced.',
     identifiers: [
       {
         kind: 'url',
@@ -57,6 +60,7 @@ const SEEDS: SeedScammer[] = [
   },
   {
     displayName: 'IG Marketplace Ghost',
+    suspectedName: null,
     aliases: ['Best Deals TH', 'IG iPhone Reseller'],
     riskLevel: 'medium',
     notes:
@@ -74,20 +78,22 @@ const SEEDS: SeedScammer[] = [
   },
   {
     displayName: 'SCB Fraud-Team Caller',
-    aliases: ['Khun Niran (SCB Fraud Team)'],
+    suspectedName: 'Khun Niran Thanachai',
+    aliases: [],
     riskLevel: 'high',
     notes:
-      'Impersonates SCB fraud desk; convinces victims to share OTPs to "block" suspicious transactions, then drains the account.',
+      'Impersonates SCB fraud desk; convinces victims to share OTPs to "block" suspicious transactions, then drains the account. Caller introduces himself as "Khun Niran Thanachai".',
     identifiers: [
       { kind: 'phone', valueRaw: '+66 2 777 9000', valueNormalized: '+6627779000' },
     ],
   },
   {
     displayName: 'KTB Phishing Ring',
+    suspectedName: null,
     aliases: ['Krungthai Secure Login'],
     riskLevel: 'high',
     notes:
-      'Phishing SMS warning of account suspension; landing page captures username, password, and PIN.',
+      'Phishing SMS warning of account suspension; landing page captures username, password, and PIN. Anonymous campaign.',
     identifiers: [
       {
         kind: 'url',
@@ -98,10 +104,11 @@ const SEEDS: SeedScammer[] = [
   },
   {
     displayName: 'QR Swap Crew',
+    suspectedName: null,
     aliases: ['Lazada Refund QR', 'PromptPay Sticker Crew'],
     riskLevel: 'medium',
     notes:
-      'Distributes fake PromptPay QR codes (refunds, restaurant stickers); transfers route to mule accounts.',
+      'Distributes fake PromptPay QR codes (refunds, restaurant stickers); transfers route to mule accounts. Anonymous campaign.',
     identifiers: [],
   },
 ];
@@ -117,6 +124,7 @@ async function upsertScammers() {
     });
     const data = {
       displayName: s.displayName,
+      suspectedName: s.suspectedName,
       aliases: s.aliases,
       riskLevel: s.riskLevel,
       notes: s.notes,

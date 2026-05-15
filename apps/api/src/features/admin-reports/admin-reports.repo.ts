@@ -49,6 +49,7 @@ export interface DetailRow {
   scammer: {
     id: string;
     displayName: string;
+    suspectedName: string | null;
     aliases: string[];
     riskLevel: string;
     reportCountCache: number;
@@ -151,6 +152,7 @@ export async function findDetailRow(reportId: string): Promise<DetailRow | null>
         select: {
           id: true,
           displayName: true,
+          suspectedName: true,
           aliases: true,
           riskLevel: true,
           reportCountCache: true,

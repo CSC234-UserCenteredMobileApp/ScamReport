@@ -11,6 +11,7 @@ import { getPrisma } from '../../core/db/client';
 export interface ScammerRow {
   id: string;
   displayName: string;
+  suspectedName: string | null;
   aliases: string[];
   riskLevel: string;
   notes: string | null;
@@ -33,6 +34,7 @@ export async function findById(id: string): Promise<ScammerRow | null> {
     select: {
       id: true,
       displayName: true,
+      suspectedName: true,
       aliases: true,
       riskLevel: true,
       notes: true,
@@ -96,6 +98,7 @@ export async function listRecentCheckHits(
 export interface ScammerCandidate {
   id: string;
   displayName: string;
+  suspectedName: string | null;
   aliases: string[];
   riskLevel: string;
   reportCountCache: number;
@@ -120,6 +123,7 @@ export async function searchCandidates(opts: {
           select: {
             id: true,
             displayName: true,
+            suspectedName: true,
             aliases: true,
             riskLevel: true,
             reportCountCache: true,
@@ -132,6 +136,7 @@ export async function searchCandidates(opts: {
         results.set(r.scammer.id, {
           id: r.scammer.id,
           displayName: r.scammer.displayName,
+          suspectedName: r.scammer.suspectedName,
           aliases: r.scammer.aliases,
           riskLevel: r.scammer.riskLevel,
           reportCountCache: r.scammer.reportCountCache,
@@ -147,6 +152,7 @@ export async function searchCandidates(opts: {
       where: {
         OR: [
           { displayName: { contains: q, mode: 'insensitive' } },
+          { suspectedName: { contains: q, mode: 'insensitive' } },
           { aliases: { has: q } },
         ],
       },
@@ -155,6 +161,7 @@ export async function searchCandidates(opts: {
       select: {
         id: true,
         displayName: true,
+        suspectedName: true,
         aliases: true,
         riskLevel: true,
         reportCountCache: true,
@@ -165,6 +172,7 @@ export async function searchCandidates(opts: {
         results.set(r.id, {
           id: r.id,
           displayName: r.displayName,
+          suspectedName: r.suspectedName,
           aliases: r.aliases,
           riskLevel: r.riskLevel,
           reportCountCache: r.reportCountCache,

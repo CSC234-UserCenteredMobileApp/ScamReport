@@ -57,6 +57,12 @@ const RESPONSE_SCHEMA = {
           nullable: true,
           enum: ['phone', 'url', 'other', null],
         },
+        suspectedScammerName: {
+          type: 'string',
+          nullable: true,
+          description:
+            'Name the user said the caller/sender claimed (or the suspectedName from a matched KNOWN SCAMMER when the user did not push back). Null when no name surfaced. Always framed as alleged — never asserted as fact.',
+        },
       },
       required: ['title', 'description', 'scamTypeCode'],
     },
@@ -155,6 +161,7 @@ DRAFT FIELDS (only when reportable=true)
 - scamTypeCode: one of the enum values listed in the schema. Pick the closest match; use "other" only when nothing fits.
 - targetIdentifier: the phone / URL / handle the user mentioned, or null when the user said they don't know. Strip surrounding punctuation.
 - targetIdentifierKind: 'phone', 'url', 'other', or null.
+- suspectedScammerName: when (a) the user said the caller/sender claimed a personal name, OR (b) a KNOWN SCAMMER in context has a non-null suspectedName AND the user's evidence is consistent with that scammer AND the user did not deny it — fill this field with that name AND weave it into title/description framed as a claim (e.g., "Caller who claimed to be 'Khun Somchai' demanded a tax payment"). Otherwise null. Never assert the name as fact: always phrase it as "claimed to be", "said their name was", or "ผู้โทรอ้างว่าชื่อ".
 
 TONE
 
@@ -173,6 +180,7 @@ export type SimilarReportSummary = {
 export type KnownScammerSummary = {
   id: string;
   displayName: string;
+  suspectedName: string | null;
   aliases: string[];
   riskLevel: 'low' | 'medium' | 'high' | 'unknown';
   reportCount: number;
@@ -226,8 +234,11 @@ function buildPrompt(input: GeminiTurnInput): string {
     for (const s of input.knownScammers) {
       const aliases = s.aliases.length > 0 ? `aliases=[${s.aliases.join(', ')}]` : '';
       const top = s.topScamTypeCodes.length > 0 ? `topCategories=[${s.topScamTypeCodes.join(', ')}]` : '';
+      const suspect = s.suspectedName ? `suspectedName="${s.suspectedName}"` : '';
       lines.push(
-        `- displayName="${s.displayName}" risk=${s.riskLevel} reportCount=${s.reportCount} ${aliases} ${top}`.trim(),
+        `- displayName="${s.displayName}" risk=${s.riskLevel} reportCount=${s.reportCount} ${suspect} ${aliases} ${top}`
+          .replace(/\s+/g, ' ')
+          .trim(),
       );
     }
     lines.push('');
@@ -365,6 +376,7 @@ function normaliseOutput(
         | 'url'
         | 'other'
         | null,
+      suspectedScammerName: draft.suspectedScammerName ?? null,
     };
   }
   return {

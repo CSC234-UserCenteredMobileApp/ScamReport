@@ -93,6 +93,7 @@ async function loadMatchedScammer(scammerId: string): Promise<MatchedScammer | n
     {
       id: scammer.id,
       displayName: scammer.displayName,
+      suspectedName: scammer.suspectedName,
       aliases: scammer.aliases,
       riskLevel: scammer.riskLevel,
       reportCountCache: scammer.reportCountCache,
@@ -110,6 +111,7 @@ function toMatchedScammer(
   s: {
     id: string;
     displayName: string;
+    suspectedName: string | null;
     aliases: string[];
     riskLevel: string;
     reportCountCache: number;
@@ -126,6 +128,7 @@ function toMatchedScammer(
     summary: {
       id: s.id,
       displayName: s.displayName,
+      suspectedName: s.suspectedName,
       aliases: s.aliases,
       riskLevel: s.riskLevel as MatchedScammer['summary']['riskLevel'],
       reportCount: s.reportCountCache,

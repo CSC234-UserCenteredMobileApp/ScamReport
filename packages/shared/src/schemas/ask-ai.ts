@@ -115,6 +115,9 @@ export const AskAiDraft = Type.Object({
   scamTypeCode: Type.String({ minLength: 1 }),
   targetIdentifier: Type.Union([Type.String(), Type.Null()]),
   targetIdentifierKind: AskAiTargetIdentifierKind,
+  // Name the user said the offender claimed (or the AI inferred from a known
+  // scammer match). Null when no name surfaced. Moderators read this directly.
+  suspectedScammerName: Type.Union([Type.String(), Type.Null()]),
 });
 export type AskAiDraft = Static<typeof AskAiDraft>;
 

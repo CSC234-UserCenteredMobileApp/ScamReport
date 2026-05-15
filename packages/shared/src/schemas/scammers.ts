@@ -31,6 +31,9 @@ export type ScammerIdentifier = Static<typeof ScammerIdentifier>;
 export const ScammerProfileSummary = Type.Object({
   id: Type.String({ format: 'uuid' }),
   displayName: Type.String(),
+  // Person's name the offender claimed (or is alleged to use). Null when the
+  // scam is run by an anonymous campaign with no named caller.
+  suspectedName: Type.Union([Type.String(), Type.Null()]),
   aliases: Type.Array(Type.String()),
   riskLevel: ScammerRiskLevel,
   reportCount: Type.Integer({ minimum: 0 }),
@@ -41,6 +44,7 @@ export type ScammerProfileSummary = Static<typeof ScammerProfileSummary>;
 export const ScammerProfile = Type.Object({
   id: Type.String({ format: 'uuid' }),
   displayName: Type.String(),
+  suspectedName: Type.Union([Type.String(), Type.Null()]),
   aliases: Type.Array(Type.String()),
   riskLevel: ScammerRiskLevel,
   notes: Type.Union([Type.String(), Type.Null()]),
