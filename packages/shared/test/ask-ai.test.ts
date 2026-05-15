@@ -124,6 +124,7 @@ describe('AskAiTurnResponse', () => {
         hasEnoughInfo: false,
         draft: null,
         similarReports: [],
+        matchedScammers: [],
         missingFacts: ['description', 'targetIdentifier', 'scamTypeCue', 'userAction'],
       }),
     ).toBe(true);
@@ -139,6 +140,7 @@ describe('AskAiTurnResponse', () => {
         hasEnoughInfo: true,
         draft: validDraft,
         similarReports: [sampleSimilarReport],
+        matchedScammers: [],
         missingFacts: [],
       }),
     ).toBe(true);
