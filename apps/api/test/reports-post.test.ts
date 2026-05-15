@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from 'bun:test';
+import { __setFirestoreForTest } from '../src/sync/firestore_sync';
 
 // ---------------------------------------------------------------------------
 // Module-level mocks — installed before importing app
@@ -7,7 +8,18 @@ import { afterEach, beforeEach, describe, expect, mock, test } from 'bun:test';
 let mockDecoded: { uid: string; email: string | null; role?: string } | null = null;
 let mockScamType: { id: number; isActive: boolean } | null = null;
 let mockExistingDuplicate: { id: string; status: string; createdAt: Date } | null = null;
-let mirrorCalls: unknown[] = [];
+interface MirrorRecord { collectionPath: string; docId: string; }
+let mirrorWrites: MirrorRecord[] = [];
+function makeMirrorStub() {
+  return {
+    collection: (collectionPath: string) => ({
+      doc: (docId: string) => ({
+        set: async () => { mirrorWrites.push({ collectionPath, docId }); },
+        delete: async () => { mirrorWrites.push({ collectionPath, docId }); },
+      }),
+    }),
+  };
+}
 let conversationUpdateCalls: unknown[] = [];
 let uploadCalls: Array<{ bucket: string; path: string; bytes: number }> = [];
 let uploadShouldFail = false;
@@ -34,20 +46,23 @@ mock.module('../src/core/firebase/admin', () => ({
 
 mock.module('../src/core/firebase/messaging', () => ({
   sendFcmToUser: async () => {},
+  sendFcmBroadcast: async () => {},
 }));
 
 mock.module('../src/core/gemini/client', () => ({
+  __setGeminiClientForTest: () => {},
+  DEFAULT_MODEL: 'gemini-2.5-flash',
+  EMBEDDING_MODEL: 'gemini-embedding-001',
   embed: async () => Array(768).fill(0.01),
   generateText: async () => '',
-}));
-
-mock.module('../src/sync/firestore_sync', () => ({
-  mirrorMyReport: async (report: unknown) => {
-    mirrorCalls.push(report);
-  },
+  generateStructured: async () => ({}),
+  generateMultimodal: async () => '',
+  inlinePart: () => ({}),
+  GeminiStructuredParseError: class GeminiStructuredParseError extends Error {},
 }));
 
 mock.module('../src/core/ai-score', () => ({
+  canonicalEmbedInput: () => '',
   computeAiScore: async () => {
     if (aiScoreShouldThrow) throw new Error('mock: ai-score failed');
     return aiScoreReturn;
@@ -66,6 +81,7 @@ mock.module('../src/core/supabase/storage', () => ({
   },
   getSignedUrl: async () => 'https://signed.example/url',
   deleteFile: async () => {},
+  copyFile: async () => {},
 }));
 
 mock.module('../src/core/db/client', () => ({
@@ -152,7 +168,8 @@ beforeEach(() => {
   mockDecoded = null;
   mockScamType = null;
   mockExistingDuplicate = null;
-  mirrorCalls = [];
+  mirrorWrites = [];
+  __setFirestoreForTest(makeMirrorStub());
   conversationUpdateCalls = [];
   uploadCalls = [];
   uploadShouldFail = false;
@@ -164,6 +181,7 @@ beforeEach(() => {
 
 afterEach(() => {
   mockDecoded = null;
+  __setFirestoreForTest(null);
 });
 
 // ---------------------------------------------------------------------------
@@ -240,8 +258,8 @@ describe('POST /reports', () => {
     const json = (await res.json()) as { id: string; status: string; createdAt: string };
     expect(json.status).toBe('pending');
     expect(json.id).toBe('11111111-1111-1111-1111-111111111111');
-    expect(mirrorCalls).toHaveLength(1);
-    expect((mirrorCalls[0] as { reporterId: string }).reporterId).toBe('reporter-1');
+    expect(mirrorWrites).toHaveLength(1);
+    expect(mirrorWrites[0]?.collectionPath).toBe('my-reports/reporter-1/items');
   });
 
   test('links conversation when sourceConversationId is provided', async () => {
@@ -294,7 +312,7 @@ describe('POST /reports', () => {
     const json = (await res.json()) as { id: string };
     expect(json.id).toBe('44444444-4444-4444-4444-444444444444');
     // Mirror NOT called on idempotent return path.
-    expect(mirrorCalls).toHaveLength(0);
+    expect(mirrorWrites).toHaveLength(0);
   });
 
   test('does not surface reporter PII in response', async () => {
@@ -351,7 +369,7 @@ describe('POST /reports', () => {
     const res = await app.handle(jsonReq('/reports', { token: 'tok', body: VALID_REPORT }));
     expect(res.status).toBe(200);
     expect(reportUpdateCalls).toHaveLength(0);
-    expect(mirrorCalls).toHaveLength(1);
+    expect(mirrorWrites).toHaveLength(1);
   });
 
   test('skips the persistence UPDATE when AI score is null', async () => {

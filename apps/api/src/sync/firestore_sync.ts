@@ -17,8 +17,6 @@
 import { getFirestore } from 'firebase-admin/firestore';
 import { getFirebaseAdmin } from '../core/firebase/admin';
 
-let _testStub: FirestoreLike | null = null;
-
 interface FirestoreLike {
   collection: (path: string) => CollectionLike;
 }
@@ -30,14 +28,18 @@ interface DocLike {
   delete: () => Promise<unknown>;
 }
 
+// Object wrapper keeps the reference stable under bun's coverage instrumentation,
+// where a plain `let` binding can be split across closure scopes.
+const _test: { stub: FirestoreLike | null } = { stub: null };
+
 // Test seam: replace the Firestore client with a stub. Used by route + sync
 // tests so we don't reach Firebase in CI.
 export function __setFirestoreForTest(stub: FirestoreLike | null): void {
-  _testStub = stub;
+  _test.stub = stub;
 }
 
 function db(): FirestoreLike {
-  if (_testStub) return _testStub;
+  if (_test.stub) return _test.stub;
   return getFirestore(getFirebaseAdmin()) as unknown as FirestoreLike;
 }
 

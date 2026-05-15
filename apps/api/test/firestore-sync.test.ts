@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, mock, test } from 'bun:test';
+import { afterEach, beforeEach, describe, expect, mock, spyOn, test } from 'bun:test';
 import { __setFirestoreForTest, mirrorMyReport } from '../src/sync/firestore_sync';
 
 interface Recorded {
@@ -43,26 +43,20 @@ function makeStubFirestore() {
 
 describe('mirrorMyReport', () => {
   let stubCtx: ReturnType<typeof makeStubFirestore>;
-  let consoleErrorSpy: ReturnType<typeof mock>;
-  let consoleWarnSpy: ReturnType<typeof mock>;
-  let originalConsoleError: typeof console.error;
-  let originalConsoleWarn: typeof console.warn;
+  let warnSpy: ReturnType<typeof spyOn>;
+  let errorSpy: ReturnType<typeof spyOn>;
 
   beforeEach(() => {
     stubCtx = makeStubFirestore();
     __setFirestoreForTest(stubCtx.stub);
-    consoleErrorSpy = mock(() => {});
-    consoleWarnSpy = mock(() => {});
-    originalConsoleError = console.error;
-    originalConsoleWarn = console.warn;
-    console.error = consoleErrorSpy;
-    console.warn = consoleWarnSpy;
+    warnSpy = spyOn(console, 'warn').mockImplementation(() => {});
+    errorSpy = spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
     __setFirestoreForTest(null);
-    console.error = originalConsoleError;
-    console.warn = originalConsoleWarn;
+    warnSpy.mockRestore();
+    errorSpy.mockRestore();
   });
 
   test('writes pending report to my-reports/{uid}/items/{id}', async () => {
@@ -157,7 +151,7 @@ describe('mirrorMyReport', () => {
       updatedAt: new Date('2026-05-07T00:00:00Z'),
     });
     expect(stubCtx.recorded).toHaveLength(0);
-    expect(consoleWarnSpy).toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalled();
   });
 
   test('swallows write errors and logs them (Postgres is authoritative)', async () => {
@@ -171,8 +165,7 @@ describe('mirrorMyReport', () => {
       createdAt: new Date('2026-05-07T00:00:00Z'),
       updatedAt: new Date('2026-05-07T00:00:00Z'),
     });
-    // Did not throw — that is the contract.
-    expect(consoleErrorSpy).toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalled();
   });
 
   test('swallows delete errors on withdrawn status', async () => {
@@ -186,6 +179,6 @@ describe('mirrorMyReport', () => {
       createdAt: new Date('2026-05-07T00:00:00Z'),
       updatedAt: new Date('2026-05-07T00:00:00Z'),
     });
-    expect(consoleErrorSpy).toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalled();
   });
 });
