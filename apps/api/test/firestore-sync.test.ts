@@ -1,13 +1,4 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from 'bun:test';
-
-mock.module('firebase-admin/firestore', () => ({
-  getFirestore: () => ({}),
-}));
-
-mock.module('../src/core/firebase/admin', () => ({
-  getFirebaseAdmin: () => ({}),
-}));
-
 import { __setFirestoreForTest, mirrorMyReport } from '../src/sync/firestore_sync';
 
 interface Recorded {

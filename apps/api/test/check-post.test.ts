@@ -12,11 +12,6 @@ mock.module('../src/core/firebase/admin', () => ({
   getFirebaseAdmin: () => ({}),
 }));
 
-mock.module('../src/core/firebase/messaging', () => ({
-  sendFcmToUser: async () => {},
-  sendFcmBroadcast: async () => {},
-}));
-
 // Mock DB to return proper shapes for both findMany calls in runCheck.
 // Also stubs checkLog.create so the log write doesn't throw in tests.
 mock.module('../src/core/db/client', () => ({

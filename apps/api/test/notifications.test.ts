@@ -8,17 +8,8 @@
 // follow-up; that work is tracked in the plan under "API tests" so it isn't
 // silently dropped.
 
-import { describe, expect, it, mock } from 'bun:test';
+import { describe, expect, it } from 'bun:test';
 import { app } from '../src/index';
-
-mock.module('../src/core/firebase/admin', () => ({
-  getFirebaseAdmin: () => ({}),
-}));
-
-mock.module('../src/core/firebase/messaging', () => ({
-  sendFcmToUser: async () => {},
-  sendFcmBroadcast: async () => {},
-}));
 
 function makeRequest(path: string, init?: RequestInit): Request {
   return new Request(`http://localhost${path}`, init);
