@@ -20,6 +20,9 @@ async function main() {
       ai_message_attachments,
       ai_messages,
       ai_conversations,
+      ai_eval_results,
+      ai_eval_runs,
+      ai_eval_cases,
       report_embeddings,
       evidence_files,
       moderation_actions,
@@ -28,6 +31,8 @@ async function main() {
       fcm_devices,
       consent_records,
       reports,
+      scammer_identifiers,
+      scammers,
       announcements,
       users
     RESTART IDENTITY CASCADE
