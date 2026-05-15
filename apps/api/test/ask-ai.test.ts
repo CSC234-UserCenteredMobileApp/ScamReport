@@ -63,6 +63,7 @@ mock.module('../src/core/firebase/admin', () => ({
 
 mock.module('../src/core/firebase/messaging', () => ({
   sendFcmToUser: async () => {},
+  sendFcmBroadcast: async () => {},
 }));
 
 let storageUploadCalls: Array<{ bucket: string; path: string; bytes: number }> = [];
