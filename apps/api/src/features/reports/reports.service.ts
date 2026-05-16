@@ -318,6 +318,7 @@ export async function createReport(
         targetIdentifierKind,
         targetIdentifierNormalized,
         scammerId: autoLinkedScammerId,
+        suspectedNameAtSubmit: input.suspectedScammerName?.trim() || null,
         status: 'pending',
         createdAt: now,
         updatedAt: now,

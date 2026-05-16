@@ -67,6 +67,16 @@ export function reportTemplate(
       ]
     : [];
 
+  const suspectedNameBlock = detail.suspectedNameAtSubmit
+    ? [
+        sectionTitle('Reported suspect name'),
+        kvTable([
+          ['Alleged name', detail.suspectedNameAtSubmit],
+          ['Source', 'Reporter / Ask AI at submit time'],
+        ]),
+      ]
+    : [];
+
   const scammerBlock = detail.scammer
     ? [
         sectionTitle('Linked scammer'),
@@ -147,6 +157,34 @@ export function reportTemplate(
           ...evidenceImages,
         ];
 
+  const relatedBlock =
+    detail.relatedCases.length === 0
+      ? []
+      : [
+          sectionTitle(`Related cases (${detail.relatedCases.length})`),
+          {
+            table: {
+              headerRows: 1,
+              widths: ['auto', '*', 'auto', 'auto'],
+              body: [
+                [
+                  { text: 'Match', style: 'tableHeader' },
+                  { text: 'Title', style: 'tableHeader' },
+                  { text: 'Status', style: 'tableHeader' },
+                  { text: 'Verified', style: 'tableHeader' },
+                ],
+                ...detail.relatedCases.map((c) => [
+                  { text: c.matchKind.replace(/_/g, ' ') },
+                  { text: c.title },
+                  { text: c.status },
+                  { text: formatDate(c.verifiedAt) },
+                ]),
+              ],
+            },
+            layout: 'lightHorizontalLines',
+          },
+        ];
+
   const auditBlock =
     detail.auditTrail.length === 0
       ? [
@@ -180,7 +218,9 @@ export function reportTemplate(
     ...(headerBlock as Content[]),
     ...(descriptionBlock as Content[]),
     ...(targetBlock as Content[]),
+    ...(suspectedNameBlock as Content[]),
     ...(scammerBlock as Content[]),
+    ...(relatedBlock as Content[]),
     ...(evidenceBlock as Content[]),
     ...(auditBlock as Content[]),
     disclaimer(),

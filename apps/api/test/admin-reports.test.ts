@@ -81,6 +81,11 @@ mock.module('../src/core/db/client', () => ({
       count: async () => 0,
       update: async () => mockUpdateReport,
     },
+    person: {
+      // Name-based auto-link on approve looks here. Default to null so the
+      // existing approve tests stay no-op; specific tests can override.
+      findFirst: async () => null,
+    },
     moderationAction: {
       create: async () => ({}),
     },
@@ -92,6 +97,7 @@ mock.module('../src/core/db/client', () => ({
     },
     $transaction: async (ops: Promise<unknown>[]) => Promise.all(ops),
     $queryRaw: async () => mockQueryRawResults,
+    $executeRaw: async () => 0,
   }),
 }));
 
@@ -128,6 +134,7 @@ const MOCK_DETAIL_REPORT = {
   reporterId: null,
   aiScore: 92,
   aiConfidence: 'high',
+  suspectedNameAtSubmit: null,
   createdAt: new Date('2026-01-01T00:00:00Z'),
   updatedAt: new Date('2026-01-01T00:00:00Z'),
   verifiedAt: null,

@@ -243,6 +243,10 @@ model Report {
   /// AI confidence tier: 'high' | 'medium' | 'low' | 'unknown'. See
   /// `packages/shared/src/schemas/admin-reports.ts` for the union.
   aiConfidence               String?         @map("ai_confidence")
+  /// Name the reporter or Ask AI attributed to the caller/sender at submit
+  /// time. Denormalised text — independent of the scammer/person linkage
+  /// so it survives even when no profile row exists yet.
+  suspectedNameAtSubmit      String?         @map("suspected_name_at_submit")
   createdAt                  DateTime        @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt                  DateTime        @default(now()) @map("updated_at") @db.Timestamptz()
   verifiedAt                 DateTime?       @map("verified_at") @db.Timestamptz()

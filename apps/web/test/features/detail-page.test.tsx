@@ -113,4 +113,38 @@ describe('DetailPage', () => {
     expect(html).not.toMatch(/reporter/i);
     expect(html).not.toMatch(/User_[0-9a-f]/i);
   });
+
+  it('renders the related-cases block with match-kind badges', async () => {
+    server.use(
+      http.get(`*/admin/reports/${REPORT_ID}`, () =>
+        HttpResponse.json({
+          report: {
+            ...sampleDetailResponse.report,
+            relatedCases: [
+              {
+                id: 'aaaa1111-1111-1111-1111-111111111111',
+                title: 'Sibling case under same scammer',
+                status: 'verified',
+                scamTypeCode: 'phone_impersonation',
+                verifiedAt: new Date('2026-05-10T00:00:00Z').toISOString(),
+                matchKind: 'same_scammer' as const,
+              },
+              {
+                id: 'aaaa2222-2222-2222-2222-222222222222',
+                title: 'Other campaign by same person',
+                status: 'pending',
+                scamTypeCode: 'phishing_sms',
+                verifiedAt: null,
+                matchKind: 'same_person' as const,
+              },
+            ],
+          },
+        }),
+      ),
+    );
+    renderRoute();
+    expect(await screen.findByText('Sibling case under same scammer')).toBeInTheDocument();
+    expect(screen.getByText('Same scammer')).toBeInTheDocument();
+    expect(screen.getByText('Same person')).toBeInTheDocument();
+  });
 });

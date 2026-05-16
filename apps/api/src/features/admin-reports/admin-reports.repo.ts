@@ -41,6 +41,7 @@ export interface DetailRow {
   scammerId: string | null;
   aiScore: number | null;
   aiConfidence: string | null;
+  suspectedNameAtSubmit: string | null;
   createdAt: Date;
   updatedAt: Date;
   verifiedAt: Date | null;
@@ -149,6 +150,7 @@ export async function findDetailRow(reportId: string): Promise<DetailRow | null>
       scammerId: true,
       aiScore: true,
       aiConfidence: true,
+      suspectedNameAtSubmit: true,
       createdAt: true,
       updatedAt: true,
       verifiedAt: true,
@@ -218,6 +220,119 @@ export async function findSiblingCases(
     scamTypeCode: r.scamType.code,
     verifiedAt: r.verifiedAt,
   }));
+}
+
+export type RelatedCaseMatchKind =
+  | 'same_scammer'
+  | 'same_person'
+  | 'same_identifier';
+
+export interface RelatedCaseRow {
+  id: string;
+  title: string;
+  status: string;
+  scamTypeCode: string;
+  verifiedAt: Date | null;
+  matchKind: RelatedCaseMatchKind;
+}
+
+/**
+ * High-accuracy related-case finder for the admin detail page. Three
+ * sources, deduped by report id with priority
+ * `same_scammer > same_person > same_identifier`. No semantic similarity
+ * — admin moderator needs a guaranteed-relevant list, not nearest
+ * neighbours.
+ */
+export async function findRelatedCases(opts: {
+  reportId: string;
+  scammerId: string | null;
+  personId: string | null;
+  targetIdentifierNormalized: string | null;
+  limit?: number;
+}): Promise<RelatedCaseRow[]> {
+  const limit = opts.limit ?? 20;
+  const prisma = getPrisma();
+  const out = new Map<string, RelatedCaseRow>();
+
+  const baseSelect = {
+    id: true,
+    title: true,
+    status: true,
+    verifiedAt: true,
+    scamType: { select: { code: true } },
+  } as const;
+
+  // 1. same_scammer (highest priority)
+  if (opts.scammerId) {
+    const rows = await prisma.report.findMany({
+      where: { scammerId: opts.scammerId, id: { not: opts.reportId } },
+      orderBy: [{ verifiedAt: 'desc' }, { createdAt: 'desc' }],
+      take: limit,
+      select: baseSelect,
+    });
+    for (const r of rows) {
+      out.set(r.id, {
+        id: r.id,
+        title: r.title,
+        status: r.status,
+        scamTypeCode: r.scamType.code,
+        verifiedAt: r.verifiedAt,
+        matchKind: 'same_scammer',
+      });
+    }
+  }
+
+  // 2. same_person via OTHER scammer campaigns of the same Person
+  if (opts.personId && out.size < limit) {
+    const rows = await prisma.report.findMany({
+      where: {
+        id: { not: opts.reportId },
+        scammer: { personId: opts.personId },
+        // Exclude rows already covered by same_scammer.
+        ...(opts.scammerId ? { scammerId: { not: opts.scammerId } } : {}),
+      },
+      orderBy: [{ verifiedAt: 'desc' }, { createdAt: 'desc' }],
+      take: limit - out.size,
+      select: baseSelect,
+    });
+    for (const r of rows) {
+      if (out.has(r.id)) continue;
+      out.set(r.id, {
+        id: r.id,
+        title: r.title,
+        status: r.status,
+        scamTypeCode: r.scamType.code,
+        verifiedAt: r.verifiedAt,
+        matchKind: 'same_person',
+      });
+    }
+  }
+
+  // 3. same_identifier (exact normalised match, any scammer)
+  if (opts.targetIdentifierNormalized && out.size < limit) {
+    const rows = await prisma.report.findMany({
+      where: {
+        id: { not: opts.reportId },
+        targetIdentifierNormalized: opts.targetIdentifierNormalized,
+      },
+      orderBy: [{ verifiedAt: 'desc' }, { createdAt: 'desc' }],
+      take: limit - out.size,
+      select: baseSelect,
+    });
+    for (const r of rows) {
+      if (out.has(r.id)) continue;
+      out.set(r.id, {
+        id: r.id,
+        title: r.title,
+        status: r.status,
+        scamTypeCode: r.scamType.code,
+        verifiedAt: r.verifiedAt,
+        matchKind: 'same_identifier',
+      });
+    }
+  }
+
+  return Array.from(out.values()).slice(0, limit);
 }
 
 export interface EvidenceFileRow {

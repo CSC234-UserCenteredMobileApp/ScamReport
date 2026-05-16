@@ -94,9 +94,11 @@ describe('AdminReportDetail', () => {
     duplicateCount: 0,
     aiScore: 50,
     aiConfidence: 'low' as const,
+    suspectedNameAtSubmit: null,
     auditTrail: [],
     scammer: null,
     siblingCases: [],
+    relatedCases: [],
   };
   test('accepts well-formed detail row', () => {
     expect(Value.Check(AdminReportDetail, baseDetail)).toBe(true);

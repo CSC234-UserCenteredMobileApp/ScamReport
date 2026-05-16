@@ -67,6 +67,30 @@ export const AdminSiblingCase = Type.Object({
 });
 export type AdminSiblingCase = Static<typeof AdminSiblingCase>;
 
+// matchKind discriminates how the related case was tied to the current
+// one. Ordered by accuracy:
+//   - `same_scammer`    — both reports FK to the same Scammer row.
+//   - `same_person`     — both Scammers FK to the same Person row.
+//   - `same_identifier` — same normalised target identifier value.
+// Lower-priority sources are dropped when a higher one already covered
+// the same case (dedupe by id in service-layer merge).
+export const AdminRelatedCaseMatchKind = Type.Union([
+  Type.Literal('same_scammer'),
+  Type.Literal('same_person'),
+  Type.Literal('same_identifier'),
+]);
+export type AdminRelatedCaseMatchKind = Static<typeof AdminRelatedCaseMatchKind>;
+
+export const AdminRelatedCase = Type.Object({
+  id: Type.String({ format: 'uuid' }),
+  title: Type.String(),
+  status: Type.String(),
+  scamTypeCode: Type.String(),
+  verifiedAt: Type.Union([Type.String({ format: 'date-time' }), Type.Null()]),
+  matchKind: AdminRelatedCaseMatchKind,
+});
+export type AdminRelatedCase = Static<typeof AdminRelatedCase>;
+
 export const AdminReportDetail = Type.Object({
   id: Type.String({ format: 'uuid' }),
   title: Type.String(),
@@ -93,11 +117,17 @@ export const AdminReportDetail = Type.Object({
   duplicateCount: Type.Integer({ minimum: 0 }),
   aiScore: Type.Union([Type.Integer({ minimum: 0, maximum: 100 }), Type.Null()]),
   aiConfidence: Type.Union([AiConfidence, Type.Null()]),
+  // Snapshot of `suspectedScammerName` at submit time. Null when the
+  // reporter didn't surface a name (or the report pre-dates the field).
+  suspectedNameAtSubmit: Type.Union([Type.String(), Type.Null()]),
   auditTrail: Type.Array(ModerationRecord),
   // Linked scammer profile (when this case has been associated with one) +
   // sibling cases attributed to the same scammer.
   scammer: Type.Union([ScammerProfileSummary, Type.Null()]),
   siblingCases: Type.Array(AdminSiblingCase),
+  // High-accuracy related cases from three sources (same_scammer,
+  // same_person, same_identifier). Deduped server-side. Capped at 20.
+  relatedCases: Type.Array(AdminRelatedCase),
 });
 export type AdminReportDetail = Static<typeof AdminReportDetail>;
 

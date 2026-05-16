@@ -80,6 +80,17 @@
       "pending": "รอการประเมิน"
     },
     "printPdf": "พิมพ์ / ส่งออก PDF",
+    "suspectedNameAtSubmit": "ชื่อผู้ต้องสงสัยที่รายงาน",
+    "suspectedNameAtSubmitHint": "(ที่ผู้โทร/ผู้ส่งอ้างว่าใช้)",
+    "relatedCases": {
+      "title": "คดีที่เกี่ยวข้อง",
+      "title_other": "คดีที่เกี่ยวข้อง ({{count}})",
+      "match": {
+        "same_scammer": "ผู้ต้องสงสัยเดียวกัน",
+        "same_person": "บุคคลเดียวกัน",
+        "same_identifier": "ข้อมูลเดียวกัน"
+      }
+    },
     "scammer": {
       "title": "ผู้ต้องสงสัยที่เชื่อมโยง",
       "alleged": "ชื่อที่อ้าง",

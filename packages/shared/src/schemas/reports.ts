@@ -81,6 +81,10 @@ export const CreateReportRequest = Type.Object({
   scamTypeCode: Type.String({ minLength: 1 }),
   targetIdentifier: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   targetIdentifierKind: Type.Optional(Type.Union([TargetIdentifierKindLiteral, Type.Null()])),
+  // Name the reporter (or Ask AI's draft) attributed to the caller. Stored
+  // as a denormalised text snapshot on `reports.suspected_name_at_submit`
+  // — independent of whether a scammer/person profile exists yet.
+  suspectedScammerName: Type.Optional(Type.Union([Type.String({ maxLength: 200 }), Type.Null()])),
   evidenceFiles: Type.Array(EvidenceMetadata, { maxItems: 5, default: [] }),
   clientSubmissionId: Type.Optional(Type.String({ minLength: 1, maxLength: 128 })),
   // When provided, the server links ai_conversations.linked_report_id → new report.

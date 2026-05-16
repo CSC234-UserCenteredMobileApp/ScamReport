@@ -227,6 +227,7 @@ class AskAiApiClient {
             'other' => TargetIdentifierKind.other,
             _ => null,
           },
+          suspectedScammerName: draftJson['suspectedScammerName'] as String?,
         ),
         userEditedDraft: (draftJson['userEditedDraft'] as bool?) ?? false,
         evidenceAttachmentIds: ids,
@@ -287,6 +288,7 @@ class AskAiApiClient {
         'other' => TargetIdentifierKind.other,
         _ => null,
       },
+      suspectedScammerName: j['suspectedScammerName'] as String?,
     );
   }
 

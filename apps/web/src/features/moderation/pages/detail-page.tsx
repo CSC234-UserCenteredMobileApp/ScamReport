@@ -139,6 +139,20 @@ export function DetailPage() {
             </section>
           )}
 
+          {data.report.suspectedNameAtSubmit && (
+            <section className="space-y-2">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                {t('detail.suspectedNameAtSubmit')}
+              </h3>
+              <p className="text-sm">
+                <strong>{data.report.suspectedNameAtSubmit}</strong>{' '}
+                <span className="text-muted-foreground">
+                  {t('detail.suspectedNameAtSubmitHint')}
+                </span>
+              </p>
+            </section>
+          )}
+
           <section className="space-y-2">
             <div className="flex items-baseline justify-between gap-2">
               <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
@@ -218,6 +232,37 @@ export function DetailPage() {
                   : {data.report.siblingCases.map((c) => c.title).join('; ')}
                 </div>
               )}
+            </section>
+          )}
+
+          {data.report.relatedCases.length > 0 && (
+            <section className="space-y-2">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                {t('detail.relatedCases.title', { count: data.report.relatedCases.length })}
+              </h3>
+              <ul className="divide-y rounded-lg border bg-card text-sm">
+                {data.report.relatedCases.map((c) => (
+                  <li key={c.id} className="flex items-baseline gap-3 px-4 py-2">
+                    <Badge variant="outline" className="capitalize">
+                      {t(`detail.relatedCases.match.${c.matchKind}`)}
+                    </Badge>
+                    <Link
+                      to={`/moderation/${c.id}`}
+                      className="flex-1 truncate text-primary underline"
+                    >
+                      {c.title}
+                    </Link>
+                    <span className="text-xs text-muted-foreground capitalize">
+                      {c.status}
+                    </span>
+                    {c.verifiedAt && (
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(c.verifiedAt).toLocaleDateString()}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
             </section>
           )}
 

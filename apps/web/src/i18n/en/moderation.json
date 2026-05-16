@@ -80,6 +80,17 @@
       "pending": "Pending"
     },
     "printPdf": "Print / Export PDF",
+    "suspectedNameAtSubmit": "Reported suspect name",
+    "suspectedNameAtSubmitHint": "(claimed by caller/sender at submit time)",
+    "relatedCases": {
+      "title": "Related case",
+      "title_other": "Related cases ({{count}})",
+      "match": {
+        "same_scammer": "Same scammer",
+        "same_person": "Same person",
+        "same_identifier": "Same identifier"
+      }
+    },
     "scammer": {
       "title": "Linked scammer",
       "alleged": "Alleged name",
