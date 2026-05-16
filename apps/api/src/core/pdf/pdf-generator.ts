@@ -43,21 +43,20 @@ let printer: PdfPrinterInstance | null = null;
 
 function getPrinter(): PdfPrinterInstance {
   if (printer) return printer;
-  // Point pdfmake at the bundled Roboto TTF files via their `file://` URLs
-  // so the urlResolver loads them into the virtual fs at render time.
+  // Use Sarabun (vendored via @expo-google-fonts/sarabun) as the default
+  // font — covers Latin + Thai out of the box. Roboto (pdfmake's bundled
+  // default) lacks Thai glyphs, so Thai-language reports rendered as boxes.
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const path = require('node:path') as typeof import('node:path');
-  const baseDir = path.dirname(require.resolve('pdfmake/package.json'));
-  const fontDir = path.join(baseDir, 'build/fonts/Roboto');
-  const url = (file: string) => path.join(fontDir, file);
+  const resolve = (rel: string) => require.resolve(`@expo-google-fonts/sarabun/${rel}`);
   const Ctor = PdfPrinter as unknown as PdfPrinterCtor;
   printer = new Ctor(
     {
-      Roboto: {
-        normal: url('Roboto-Regular.ttf') as unknown as Buffer,
-        bold: url('Roboto-Medium.ttf') as unknown as Buffer,
-        italics: url('Roboto-Italic.ttf') as unknown as Buffer,
-        bolditalics: url('Roboto-MediumItalic.ttf') as unknown as Buffer,
+      Sarabun: {
+        normal: resolve('400Regular/Sarabun_400Regular.ttf') as unknown as Buffer,
+        bold: resolve('700Bold/Sarabun_700Bold.ttf') as unknown as Buffer,
+        italics: resolve('400Regular_Italic/Sarabun_400Regular_Italic.ttf') as unknown as Buffer,
+        bolditalics: resolve('700Bold_Italic/Sarabun_700Bold_Italic.ttf') as unknown as Buffer,
       },
     },
     undefined,
@@ -67,6 +66,9 @@ function getPrinter(): PdfPrinterInstance {
     } as unknown as { resolve: (url: string, headers?: unknown) => void },
     () => true,
   );
+  // `path` import is used implicitly by `require.resolve` plus keeps lint
+  // happy in case future templates need to compose paths manually.
+  void path;
   return printer;
 }
 
@@ -75,7 +77,7 @@ export async function renderPdf(doc: TDocumentDefinitions): Promise<Uint8Array> 
   const pdf = await p.createPdfKitDocument({
     pageSize: 'A4',
     pageMargins: [40, 60, 40, 60],
-    defaultStyle: { font: 'Roboto', fontSize: 10, color: '#1a1a1a' },
+    defaultStyle: { font: 'Sarabun', fontSize: 10, color: '#1a1a1a' },
     styles: {
       h1: { fontSize: 18, bold: true, margin: [0, 0, 0, 8] },
       h2: { fontSize: 13, bold: true, color: '#374151', margin: [0, 12, 0, 6] },
