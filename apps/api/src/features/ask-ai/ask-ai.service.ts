@@ -16,6 +16,7 @@ import type {
   AskAiTurnRequest,
   AskAiTurnResponse,
   AskAiUpsertDraftRequest,
+  ScammerProfileSummary,
 } from '@my-product/shared';
 import type { AskAiSimilarReport } from '@my-product/shared';
 import { extractIdentifiers } from '../../core/lib/identifier-extractor';
@@ -256,11 +257,12 @@ export async function handleTurn(
   // Both are best-effort — any failure leaves the array shorter; the turn
   // still produces a reply, just without that flavour of context.
   let similarHydrated: Awaited<ReturnType<typeof repo.hydrateSimilarReports>> = [];
+  let knownScammers: Awaited<ReturnType<typeof repo.findScammersByIdentifiers>> = [];
   try {
     const { phones, urls } = extractIdentifiers(content);
     const normalisedIds = [...phones, ...urls];
 
-    const [exactMatches, semantic] = await Promise.all([
+    const [exactMatches, semantic, scammers] = await Promise.all([
       normalisedIds.length > 0
         ? repo.findReportsByIdentifiers(normalisedIds)
         : Promise.resolve([] as Awaited<ReturnType<typeof repo.findReportsByIdentifiers>>),
@@ -270,7 +272,15 @@ export async function handleTurn(
           console.error('[ask-ai] semantic-rag-failure', { err });
           return [] as Awaited<ReturnType<typeof repo.hydrateSimilarReports>>;
         }),
+      normalisedIds.length > 0
+        ? repo.findScammersByIdentifiers(normalisedIds).catch((err) => {
+            console.error('[ask-ai] scammer-lookup-failure', { err });
+            return [] as Awaited<ReturnType<typeof repo.findScammersByIdentifiers>>;
+          })
+        : Promise.resolve([] as Awaited<ReturnType<typeof repo.findScammersByIdentifiers>>),
     ]);
+
+    knownScammers = scammers;
 
     // Merge — exact matches first, then semantic, deduped by report id.
     const seen = new Set<string>();
@@ -293,6 +303,16 @@ export async function handleTurn(
       scamTypeCode: r.scamTypeCode,
       scamTypeLabel: r.scamTypeLabel,
       verifiedAt: r.verifiedAt,
+    })),
+    knownScammers: knownScammers.map((s) => ({
+      id: s.id,
+      displayName: s.displayName,
+      suspectedName: s.suspectedName,
+      person: s.person,
+      aliases: s.aliases,
+      riskLevel: s.riskLevel,
+      reportCount: s.reportCount,
+      topScamTypeCodes: s.topScamTypeCodes,
     })),
     latestUserMessage: content,
     attachments: attachments.length > 0
@@ -326,6 +346,17 @@ export async function handleTurn(
       verifiedAt: r.verifiedAt,
     }));
 
+  const matchedScammers: ScammerProfileSummary[] = knownScammers.map((s) => ({
+    id: s.id,
+    displayName: s.displayName,
+    suspectedName: s.suspectedName,
+    person: s.person,
+    aliases: s.aliases,
+    riskLevel: s.riskLevel,
+    reportCount: s.reportCount,
+    topScamTypeCodes: s.topScamTypeCodes,
+  }));
+
   return {
     userMessage: await toAskAiMessage(userMessage),
     assistantMessage: await toAskAiMessage(assistantMessage),
@@ -334,6 +365,7 @@ export async function handleTurn(
     hasEnoughInfo: turn.hasEnoughInfo,
     draft: turn.draft,
     similarReports,
+    matchedScammers,
     missingFacts: turn.missingFacts,
   };
 }

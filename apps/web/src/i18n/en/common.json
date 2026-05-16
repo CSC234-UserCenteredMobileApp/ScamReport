@@ -4,6 +4,7 @@
     "moderation": "Moderation",
     "announcements": "Announcements",
     "deletionRequests": "Deletion requests",
+    "platformSummary": "Platform summary",
     "signOut": "Sign out"
   },
   "auth": {

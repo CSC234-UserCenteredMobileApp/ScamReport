@@ -57,6 +57,12 @@ const RESPONSE_SCHEMA = {
           nullable: true,
           enum: ['phone', 'url', 'other', null],
         },
+        suspectedScammerName: {
+          type: 'string',
+          nullable: true,
+          description:
+            'Name the user said the caller/sender claimed (or the suspectedName from a matched KNOWN SCAMMER when the user did not push back). Null when no name surfaced. Always framed as alleged — never asserted as fact.',
+        },
       },
       required: ['title', 'description', 'scamTypeCode'],
     },
@@ -69,10 +75,16 @@ const RESPONSE_SCHEMA = {
       type: 'array',
       items: {
         type: 'string',
-        enum: ['description', 'targetIdentifier', 'scamTypeCue', 'userAction'],
+        enum: [
+          'description',
+          'targetIdentifier',
+          'scamTypeCue',
+          'userAction',
+          'scammerAlias',
+        ],
       },
       description:
-        'Facts NOT yet gathered from the user. Empty list ONLY when hasEnoughInfo=true. When non-empty, the reply must end with one specific question targeting missingFacts[0].',
+        'Facts NOT yet gathered from the user. Empty list ONLY when hasEnoughInfo=true. When non-empty, the reply must end with one specific question targeting missingFacts[0]. Use scammerAlias only when a known scammer is in the prompt context and confirming the alias would lift confidence.',
     },
   },
   required: [
@@ -116,6 +128,11 @@ QUESTION EXAMPLES (pick by missingFacts[0])
   - targetIdentifier → "What was the phone number, link, or handle they used? If you don't remember, that's OK — just say so."
   - scamTypeCue     → "What did they want from you — money, an OTP, a link click, or personal info?"
   - userAction      → "Did you reply, click the link, share anything, or block them?"
+  - scammerAlias    → "Did the caller say their name was \"<displayName>\"? We've seen that name in prior cases."
+
+KNOWN SCAMMERS
+
+When the prompt contains a "KNOWN SCAMMERS MATCHING USER MENTIONS" block, prefer asking about a confirmed alias by displayName (use missingFacts=scammerAlias) over a generic question — confirming a known offender lifts the moderator's confidence and unlocks better matches. Only ask scammerAlias when the known scammer's reportCount >= 2.
 
 WHAT TO DO EACH TURN
 
@@ -144,6 +161,7 @@ DRAFT FIELDS (only when reportable=true)
 - scamTypeCode: one of the enum values listed in the schema. Pick the closest match; use "other" only when nothing fits.
 - targetIdentifier: the phone / URL / handle the user mentioned, or null when the user said they don't know. Strip surrounding punctuation.
 - targetIdentifierKind: 'phone', 'url', 'other', or null.
+- suspectedScammerName: when (a) the user said the caller/sender claimed a personal name, OR (b) a KNOWN SCAMMER in context has a non-null suspectedName AND the user's evidence is consistent with that scammer AND the user did not deny it — fill this field with that name AND weave it into title/description framed as a claim (e.g., "Caller who claimed to be 'Khun Somchai' demanded a tax payment"). Otherwise null. Never assert the name as fact: always phrase it as "claimed to be", "said their name was", or "ผู้โทรอ้างว่าชื่อ".
 
 TONE
 
@@ -159,6 +177,22 @@ export type SimilarReportSummary = {
   verifiedAt: string | null;
 };
 
+export type KnownScammerSummary = {
+  id: string;
+  displayName: string;
+  suspectedName: string | null;
+  person: {
+    id: string;
+    fullName: string;
+    riskLevel: 'low' | 'medium' | 'high' | 'unknown';
+    campaignCount: number;
+  } | null;
+  aliases: string[];
+  riskLevel: 'low' | 'medium' | 'high' | 'unknown';
+  reportCount: number;
+  topScamTypeCodes: string[];
+};
+
 export type GeminiInlineAttachment = {
   bytes: Uint8Array;
   mimeType: string;
@@ -167,6 +201,7 @@ export type GeminiInlineAttachment = {
 export type GeminiTurnInput = {
   history: Array<{ role: 'user' | 'assistant'; content: string }>;
   similarReports: SimilarReportSummary[];
+  knownScammers?: KnownScammerSummary[];
   latestUserMessage: string;
   attachments?: GeminiInlineAttachment[];
   locale?: AskAiLocale;
@@ -176,7 +211,8 @@ export type MissingFact =
   | 'description'
   | 'targetIdentifier'
   | 'scamTypeCue'
-  | 'userAction';
+  | 'userAction'
+  | 'scammerAlias';
 
 export type GeminiTurnOutput = {
   reply: string;
@@ -199,6 +235,23 @@ function buildPrompt(input: GeminiTurnInput): string {
   }
   lines.push(SYSTEM_PROMPT);
   lines.push('');
+  if (input.knownScammers && input.knownScammers.length > 0) {
+    lines.push('KNOWN SCAMMERS MATCHING USER MENTIONS (use as context; refer to displayName when asking follow-ups):');
+    for (const s of input.knownScammers) {
+      const aliases = s.aliases.length > 0 ? `aliases=[${s.aliases.join(', ')}]` : '';
+      const top = s.topScamTypeCodes.length > 0 ? `topCategories=[${s.topScamTypeCodes.join(', ')}]` : '';
+      const suspect = s.suspectedName ? `suspectedName="${s.suspectedName}"` : '';
+      const person = s.person
+        ? `person="${s.person.fullName}" (runs ${s.person.campaignCount} known campaigns)`
+        : '';
+      lines.push(
+        `- displayName="${s.displayName}" risk=${s.riskLevel} reportCount=${s.reportCount} ${suspect} ${person} ${aliases} ${top}`
+          .replace(/\s+/g, ' ')
+          .trim(),
+      );
+    }
+    lines.push('');
+  }
   if (input.similarReports.length > 0) {
     lines.push('Verified scam reports near this topic (use as context, do not invent IDs):');
     for (const r of input.similarReports) {
@@ -298,7 +351,8 @@ function normaliseOutput(
       f === 'description' ||
       f === 'targetIdentifier' ||
       f === 'scamTypeCue' ||
-      f === 'userAction',
+      f === 'userAction' ||
+      f === 'scammerAlias',
   );
 
   // Resolve the contradictions Gemini sometimes produces. The schema says:
@@ -331,6 +385,7 @@ function normaliseOutput(
         | 'url'
         | 'other'
         | null,
+      suspectedScammerName: draft.suspectedScammerName ?? null,
     };
   }
   return {

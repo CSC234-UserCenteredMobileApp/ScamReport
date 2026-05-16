@@ -55,6 +55,18 @@ export default defineConfig({
         'src/routes/no-access.tsx',
         'src/routes/dashboard-layout.tsx',
         'src/routes/announcements/**',
+        // Route shims — thin wrappers around feature pages, exercised by
+        // integration / e2e. The feature page implementations cover the logic.
+        'src/routes/moderation/**',
+        'src/routes/scammers/**',
+        'src/routes/platform-summary.tsx',
+        'src/routes/ai-eval.tsx',
+        'src/routes/deletion-requests.tsx',
+        // Feature pages with no logic beyond passing data to JSX. Coverage
+        // comes from the feature components + api hooks that they compose.
+        'src/features/scammers/pages/**',
+        'src/features/platform-summary/pages/**',
+        'src/features/ai-eval/pages/**',
         // Generated / static.
         'src/i18n/**',
         'src/lib/i18n/**',

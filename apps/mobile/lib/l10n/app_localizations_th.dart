@@ -329,6 +329,12 @@ class AppLocalizationsTh extends AppLocalizations {
   String get adminReviewTitle => 'ตรวจสอบรายงาน';
 
   @override
+  String get adminReviewExportPdf => 'ส่งออกเป็น PDF';
+
+  @override
+  String get platformSummaryTitle => 'สรุปแพลตฟอร์ม';
+
+  @override
   String get adminReviewApprove => 'อนุมัติ';
 
   @override

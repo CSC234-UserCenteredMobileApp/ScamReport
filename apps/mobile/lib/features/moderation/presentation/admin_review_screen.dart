@@ -1,7 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:printing/printing.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/ai_score_card.dart';
@@ -124,7 +127,7 @@ class _ReviewScaffold extends ConsumerWidget {
   }
 }
 
-class _HeaderSliver extends StatelessWidget {
+class _HeaderSliver extends ConsumerWidget {
   const _HeaderSliver({
     required this.report,
     required this.scamTypeLabel,
@@ -136,7 +139,7 @@ class _HeaderSliver extends StatelessWidget {
   final String dateStr;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
     return SliverAppBar(
@@ -144,6 +147,22 @@ class _HeaderSliver extends StatelessWidget {
       expandedHeight: 180,
       title: Text(l10n.adminReviewTitle),
       centerTitle: true,
+      actions: [
+        IconButton(
+          tooltip: l10n.adminReviewExportPdf,
+          icon: const Icon(Icons.picture_as_pdf_outlined),
+          onPressed: () async {
+            final repo = ref.read(modRepositoryProvider);
+            final bytes = Uint8List.fromList(
+              await repo.fetchReportPdf(report.id),
+            );
+            await Printing.layoutPdf(
+              name: 'scamreport-report-${report.id.substring(0, 8)}',
+              onLayout: (_) async => bytes,
+            );
+          },
+        ),
+      ],
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
           decoration: BoxDecoration(

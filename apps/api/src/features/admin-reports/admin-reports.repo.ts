@@ -38,6 +38,7 @@ export interface DetailRow {
   targetIdentifierKind: string | null;
   targetIdentifierNormalized: string | null;
   reporterId: string | null;
+  scammerId: string | null;
   aiScore: number | null;
   aiConfidence: string | null;
   createdAt: Date;
@@ -45,6 +46,21 @@ export interface DetailRow {
   verifiedAt: Date | null;
   rejectionRemark: string | null;
   scamType: { code: string; labelEn: string; labelTh: string };
+  scammer: {
+    id: string;
+    displayName: string;
+    suspectedName: string | null;
+    person: {
+      id: string;
+      fullName: string;
+      riskLevel: string;
+      campaignCountCache: number;
+    } | null;
+    aliases: string[];
+    riskLevel: string;
+    reportCountCache: number;
+    reports: { scamType: { code: string } }[];
+  } | null;
   evidenceFiles: {
     id: string;
     storagePath: string;
@@ -58,6 +74,14 @@ export interface DetailRow {
     remark: string;
     createdAt: Date;
   }[];
+}
+
+export interface SiblingCaseRow {
+  id: string;
+  title: string;
+  status: string;
+  scamTypeCode: string;
+  verifiedAt: Date | null;
 }
 
 export interface ActionResult {
@@ -122,6 +146,7 @@ export async function findDetailRow(reportId: string): Promise<DetailRow | null>
       targetIdentifierKind: true,
       targetIdentifierNormalized: true,
       reporterId: true,
+      scammerId: true,
       aiScore: true,
       aiConfidence: true,
       createdAt: true,
@@ -129,6 +154,26 @@ export async function findDetailRow(reportId: string): Promise<DetailRow | null>
       verifiedAt: true,
       rejectionRemark: true,
       scamType: { select: { code: true, labelEn: true, labelTh: true } },
+      scammer: {
+        select: {
+          id: true,
+          displayName: true,
+          suspectedName: true,
+          person: {
+            select: { id: true, fullName: true, riskLevel: true, campaignCountCache: true },
+          },
+          aliases: true,
+          riskLevel: true,
+          reportCountCache: true,
+          // Top scam-type codes — derive from latest verified linked cases.
+          reports: {
+            where: { status: 'verified' },
+            orderBy: { verifiedAt: 'desc' },
+            take: 5,
+            select: { scamType: { select: { code: true } } },
+          },
+        },
+      },
       evidenceFiles: {
         select: { id: true, storagePath: true, kind: true, mimeType: true, sizeBytes: true },
       },
@@ -138,6 +183,41 @@ export async function findDetailRow(reportId: string): Promise<DetailRow | null>
       },
     },
   }) as unknown as Promise<DetailRow | null>;
+}
+
+/**
+ * Sibling cases attributed to the same scammer profile, excluding the
+ * requested report. Limited to 5 most-recent (verified first, then
+ * pending/flagged) so the admin detail page renders quickly.
+ */
+export async function findSiblingCases(
+  scammerId: string,
+  excludeReportId: string,
+  limit = 5,
+): Promise<SiblingCaseRow[]> {
+  const prisma = getPrisma();
+  const rows = await prisma.report.findMany({
+    where: {
+      scammerId,
+      id: { not: excludeReportId },
+    },
+    orderBy: [{ verifiedAt: 'desc' }, { createdAt: 'desc' }],
+    take: limit,
+    select: {
+      id: true,
+      title: true,
+      status: true,
+      verifiedAt: true,
+      scamType: { select: { code: true } },
+    },
+  });
+  return rows.map((r) => ({
+    id: r.id,
+    title: r.title,
+    status: r.status,
+    scamTypeCode: r.scamType.code,
+    verifiedAt: r.verifiedAt,
+  }));
 }
 
 export interface EvidenceFileRow {

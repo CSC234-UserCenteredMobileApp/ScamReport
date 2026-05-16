@@ -26,3 +26,19 @@ export const THRESHOLD_MEDIUM = 0.7;
  * indicate a likely scam family.
  */
 export const THRESHOLD_TOPK_MEDIUM = 0.75;
+
+/**
+ * Minimum number of top-K verified reports sharing the same non-null
+ * `scammerId` that triggers a "known offender cluster" bump on the
+ * confidence tier (and a score floor). One report sharing a scammer is
+ * coincidence; two+ is signal.
+ */
+export const THRESHOLD_SCAMMER_CLUSTER = 2;
+
+/**
+ * Floor applied to `aiScore` when the scammer-cluster rule fires, so the
+ * admin queue always shows a triage-worthy number even if the raw cosine
+ * happened to be moderate. The dominant signal (top-1 / top-3 avg) still
+ * wins when it's higher.
+ */
+export const SCAMMER_CLUSTER_SCORE_FLOOR = 75;

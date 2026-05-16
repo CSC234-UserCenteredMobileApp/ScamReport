@@ -143,6 +143,27 @@ enum DevicePlatform {
   @@map("device_platform")
 }
 
+enum ScammerRiskLevel {
+  low
+  medium
+  high
+  unknown
+
+  @@map("scammer_risk_level")
+}
+
+enum ScammerIdentifierKind {
+  phone
+  url
+  email
+  bank_account
+  line_id
+  social_handle
+  other
+
+  @@map("scammer_identifier_kind")
+}
+
 // =============================================================================
 // Tables
 // =============================================================================
@@ -226,8 +247,11 @@ model Report {
   updatedAt                  DateTime        @default(now()) @map("updated_at") @db.Timestamptz()
   verifiedAt                 DateTime?       @map("verified_at") @db.Timestamptz()
 
+  scammerId                  String?         @map("scammer_id") @db.Uuid
+
   reporter User?    @relation(fields: [reporterId], references: [id], onDelete: SetNull)
   scamType ScamType @relation(fields: [scamTypeId], references: [id])
+  scammer  Scammer? @relation(fields: [scammerId], references: [id], onDelete: SetNull)
 
   evidenceFiles    EvidenceFile[]
   moderations      ModerationAction[]
@@ -238,7 +262,74 @@ model Report {
   @@index([status, createdAt(sort: Desc)])
   @@index([reporterId, createdAt(sort: Desc)])
   @@index([scamTypeId])
+  @@index([scammerId])
   @@map("reports")
+}
+
+/// Offender profile — separated from `reports` so the same scammer can be
+/// linked to many cases. Identifiers (phone/URL/etc.) live in
+/// `scammer_identifiers`; reports keep their `target_identifier*` columns as
+/// a denormalised cache.
+model Scammer {
+  id                String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  displayName       String           @map("display_name")
+  suspectedName     String?          @map("suspected_name")
+  personId          String?          @map("person_id") @db.Uuid
+  aliases           String[]         @default([])
+  riskLevel         ScammerRiskLevel @default(unknown) @map("risk_level")
+  notes             String?
+  reportCountCache  Int              @default(0) @map("report_count_cache")
+  firstSeenAt       DateTime?        @map("first_seen_at") @db.Timestamptz()
+  lastSeenAt        DateTime?        @map("last_seen_at") @db.Timestamptz()
+  createdAt         DateTime         @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt         DateTime         @default(now()) @map("updated_at") @db.Timestamptz()
+
+  person        Person?             @relation(fields: [personId], references: [id], onDelete: SetNull)
+  identifiers   ScammerIdentifier[]
+  reports       Report[]
+
+  @@index([personId])
+  @@map("scammers")
+}
+
+/// One real human offender. Many Scammer rows (campaigns / surfaces) may
+/// reference the same Person via Scammer.personId. NULL personId on a Scammer
+/// = anonymous campaign with no attributed human.
+model Person {
+  id                  String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fullName            String           @map("full_name")
+  aliases             String[]         @default([])
+  riskLevel           ScammerRiskLevel @default(unknown) @map("risk_level")
+  notes               String?
+  reportCountCache    Int              @default(0) @map("report_count_cache")
+  campaignCountCache  Int              @default(0) @map("campaign_count_cache")
+  firstSeenAt         DateTime?        @map("first_seen_at") @db.Timestamptz()
+  lastSeenAt          DateTime?        @map("last_seen_at") @db.Timestamptz()
+  createdAt           DateTime         @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt           DateTime         @default(now()) @map("updated_at") @db.Timestamptz()
+
+  scammers Scammer[]
+
+  @@index([fullName])
+  @@map("persons")
+}
+
+/// One scammer can present many surface identifiers (multiple phones, URLs,
+/// bank accounts). Unique on (kind, value_normalized) so a phone or URL maps
+/// to at most one scammer.
+model ScammerIdentifier {
+  id              String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  scammerId       String                @map("scammer_id") @db.Uuid
+  kind            ScammerIdentifierKind
+  valueRaw        String                @map("value_raw")
+  valueNormalized String                @map("value_normalized") @db.Citext
+  createdAt       DateTime              @default(now()) @map("created_at") @db.Timestamptz()
+
+  scammer Scammer @relation(fields: [scammerId], references: [id], onDelete: Cascade)
+
+  @@unique([kind, valueNormalized])
+  @@index([scammerId])
+  @@map("scammer_identifiers")
 }
 
 /// Up to 5 files per report. Bytes live in Supabase Storage. (DESIGN §4.5)

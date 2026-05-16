@@ -41,6 +41,33 @@ class ModApiClient {
     return jsonDecode(res.body) as Map<String, dynamic>;
   }
 
+  Future<List<int>> fetchReportPdf(String reportId) async {
+    final res = await _client.get(
+      Uri.parse('$apiBaseUrl/admin/reports/$reportId/pdf'),
+      headers: {'Authorization': (await _authHeaders())['Authorization']!},
+    );
+    _check(res, 'report-pdf');
+    return res.bodyBytes;
+  }
+
+  Future<Map<String, dynamic>> fetchPlatformSummary() async {
+    final res = await _client.get(
+      Uri.parse('$apiBaseUrl/admin/reports/platform-summary'),
+      headers: await _authHeaders(),
+    );
+    _check(res, 'platform-summary');
+    return jsonDecode(res.body) as Map<String, dynamic>;
+  }
+
+  Future<List<int>> fetchPlatformSummaryPdf() async {
+    final res = await _client.get(
+      Uri.parse('$apiBaseUrl/admin/reports/platform-summary/pdf'),
+      headers: {'Authorization': (await _authHeaders())['Authorization']!},
+    );
+    _check(res, 'platform-summary-pdf');
+    return res.bodyBytes;
+  }
+
   Future<void> postAction(String reportId, String action, String remark) async {
     final res = await _client.post(
       Uri.parse('$apiBaseUrl/admin/reports/$reportId/$action'),

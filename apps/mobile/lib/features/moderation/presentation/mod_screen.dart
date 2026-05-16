@@ -41,7 +41,7 @@ class ModScreen extends ConsumerWidget {
                       fontWeight: FontWeight.w800,
                     ),
               ),
-              actions: const [_FilterAction()],
+              actions: const [_PlatformSummaryAction(), _FilterAction()],
             ),
             const SliverToBoxAdapter(
               child: Padding(
@@ -116,6 +116,21 @@ class ModScreen extends ConsumerWidget {
 }
 
 // ---------------------------------------------------------------------------
+// Platform summary action — quick jump to the platform-wide dashboard.
+// ---------------------------------------------------------------------------
+class _PlatformSummaryAction extends StatelessWidget {
+  const _PlatformSummaryAction();
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: context.l10n.platformSummaryTitle,
+      icon: const Icon(Icons.dashboard_outlined),
+      onPressed: () => context.push('/ask-ai/platform-summary'),
+    );
+  }
+}
+
 // Filter action — IconButton with active-filter count badge
 // ---------------------------------------------------------------------------
 class _FilterAction extends ConsumerWidget {

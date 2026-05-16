@@ -11,3 +11,6 @@ export * from './schemas/scam-types';
 export * from './schemas/admin-deletion-requests';
 export * from './schemas/notifications';
 export * from './schemas/admin-notifications';
+export * from './schemas/scammers';
+export * from './schemas/persons';
+export * from './schemas/dossier';

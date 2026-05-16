@@ -16,6 +16,13 @@
 
 ## 0. What Changed
 
+### v1.7 (2026-05-15)
+
+| Area | v1.6 | v1.7 | Why |
+|---|---|---|---|
+| Scammer profile | Offender attributes (`target_identifier*`) inlined on every `reports` row | Added `scammers` + `scammer_identifiers` tables; `reports.scammer_id` (nullable FK) | Separates offender from incident so AI score / Ask AI / verdict pipeline can aggregate by scammer. `target_identifier*` columns kept as denormalised cache. |
+| AI accuracy measurement | No labelled eval surface | Added `ai_eval_cases` / `ai_eval_runs` / `ai_eval_results` | Enables `POST /admin/ai-eval/run` to compute verdict accuracy, scammer recall@1, MRR, missing-facts F1, p95 latency, and trend run-to-run. |
+
 ### v1.6 (2026-05-12)
 
 | Area | v1.5 | v1.6 | Why |
@@ -413,6 +420,71 @@ Server-side log of every `POST /check` call (PRD §3.1). Useful for the public f
 | `created_at` | `timestamptz` NOT NULL DEFAULT `now()` | |
 
 **Limits (enforced at API layer):** max 3 attachments per message, max 10 MB per file, allowed MIME types listed above.
+
+### 4.13 `scammers`
+
+Offender profile separated from `reports`. One scammer profile aggregates many cases. Linked via `reports.scammer_id` (nullable; legacy verified reports stay unlinked until a moderator assigns one).
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `uuid` PK | |
+| `display_name` | `text` NOT NULL | Internal label / primary alias. |
+| `aliases` | `text[]` NOT NULL DEFAULT `{}` | Additional names the scammer has used. |
+| `risk_level` | `scammer_risk_level` NOT NULL DEFAULT `'unknown'` | `low | medium | high | unknown`. |
+| `notes` | `text` | Free-form moderator notes. |
+| `report_count_cache` | `int` NOT NULL DEFAULT `0` | Refreshed on link / unlink / submit. |
+| `first_seen_at` | `timestamptz` | Earliest linked report. |
+| `last_seen_at` | `timestamptz` | Latest linked report. |
+| `created_at`, `updated_at` | `timestamptz` NOT NULL | |
+
+### 4.14 `scammer_identifiers`
+
+Surface identifiers (phone, URL, bank account, email, line id, social handle) that a scammer presented in their interaction with victims. The verdict pipeline looks up here **before** the legacy `reports.target_identifier_normalized` lookup.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `uuid` PK | |
+| `scammer_id` | `uuid` FK → `scammers(id)` ON DELETE CASCADE | |
+| `kind` | `scammer_identifier_kind` NOT NULL | `phone | url | email | bank_account | line_id | social_handle | other`. |
+| `value_raw` | `text` NOT NULL | As submitted. |
+| `value_normalized` | `citext` NOT NULL | Same normalisation as `reports.target_identifier_normalized` so identical inputs collide. |
+| `created_at` | `timestamptz` NOT NULL | |
+
+**Unique:** `(kind, value_normalized)` — one phone or URL belongs to at most one scammer.
+
+### 4.15 AI evaluation tables — `ai_eval_cases`, `ai_eval_runs`, `ai_eval_results`
+
+Labelled dataset + per-run summary metrics + per-case results. Drives the admin `POST /admin/ai-eval/run` endpoint that measures verdict accuracy, scammer recall@1, MRR, missing-facts F1, and p95 latency.
+
+`ai_eval_cases` — input + expected outcome:
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `uuid` PK | |
+| `label` | `text` NOT NULL | Stable slug for cross-run identification. |
+| `input_type` | `check_input_kind` NOT NULL | Drives which pipeline (phone/url/text) to invoke. |
+| `input_payload` | `text` NOT NULL | What the user-facing call would send. |
+| `expected_verdict` | `verdict_label` NOT NULL | |
+| `expected_scammer_id` | `uuid` FK → `scammers(id)` SET NULL | Nullable for "no offender expected" cases. |
+| `expected_scam_type_code` | `text` | Optional. |
+| `expected_missing_facts` | `jsonb` NOT NULL DEFAULT `[]` | string[] — what Ask AI should still be gathering on text cases. |
+| `notes` | `text` | |
+| `created_at` | `timestamptz` NOT NULL | |
+
+`ai_eval_runs` — summary row per evaluation pass:
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `uuid` PK | |
+| `run_at` | `timestamptz` NOT NULL | Indexed DESC. |
+| `total_cases` | `int` NOT NULL | |
+| `verdict_accuracy` | `double precision` NOT NULL | |
+| `scammer_recall_at_1` | `double precision` NOT NULL | |
+| `scammer_mrr` | `double precision` NOT NULL | |
+| `missing_facts_f1` | `double precision` NOT NULL | |
+| `p95_latency_ms` | `int` NOT NULL | |
+
+`ai_eval_results` — per-case row inside a run, FK cascades from the run.
 
 ### 4.12 `account_deletion_requests`
 

@@ -34,6 +34,14 @@ mock.module('../src/core/db/client', () => ({
         return [];
       },
     },
+    // Pipeline now consults scammer_identifiers first; return no hit so the
+    // legacy Phase 1b report lookup is exercised (mirrors original tests).
+    scammerIdentifier: {
+      findUnique: async () => null,
+    },
+    scammer: {
+      findUnique: async () => null,
+    },
     checkLog: {
       create: async () => ({}),
     },

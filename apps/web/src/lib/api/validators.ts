@@ -13,6 +13,11 @@ import {
   AdminDeletionRequestListResponse,
   AdminDeletionActionResponse,
   AuthSyncResponse,
+  LinkScammerResponse,
+  PersonDossierResponse,
+  PlatformSummaryResponse,
+  ScammerDossierResponse,
+  SearchScammersResponse,
 } from '@my-product/shared';
 
 // Register the JSON-Schema formats our admin payloads use.
@@ -55,6 +60,11 @@ export const validators = {
   adminDeletionList: TypeCompiler.Compile(AdminDeletionRequestListResponse),
   adminDeletionAction: TypeCompiler.Compile(AdminDeletionActionResponse),
   authSync: TypeCompiler.Compile(AuthSyncResponse),
+  scammerDossier: TypeCompiler.Compile(ScammerDossierResponse),
+  scammerSearch: TypeCompiler.Compile(SearchScammersResponse),
+  personDossier: TypeCompiler.Compile(PersonDossierResponse),
+  linkScammer: TypeCompiler.Compile(LinkScammerResponse),
+  platformSummary: TypeCompiler.Compile(PlatformSummaryResponse),
 } as const;
 
 export type Validators = typeof validators;

@@ -8,6 +8,9 @@ import AnnouncementsListPage from '@/routes/announcements/list';
 import AnnouncementsNewPage from '@/routes/announcements/new';
 import AnnouncementsEditPage from '@/routes/announcements/edit';
 import DeletionRequestsPage from '@/routes/deletion-requests';
+import ScammerDossierRoute from '@/routes/scammers/dossier';
+import PersonDossierRoute from '@/routes/persons/dossier';
+import PlatformSummaryRoute from '@/routes/platform-summary';
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -22,6 +25,9 @@ export const router = createBrowserRouter([
       { path: 'announcements/new', element: <AnnouncementsNewPage /> },
       { path: 'announcements/:id/edit', element: <AnnouncementsEditPage /> },
       { path: 'deletion-requests', element: <DeletionRequestsPage /> },
+      { path: 'scammers/:id/dossier', element: <ScammerDossierRoute /> },
+      { path: 'persons/:id/dossier', element: <PersonDossierRoute /> },
+      { path: 'platform-summary', element: <PlatformSummaryRoute /> },
     ],
   },
   { path: '*', element: <Navigate to="/" replace /> },

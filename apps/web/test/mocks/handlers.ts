@@ -90,6 +90,8 @@ export const sampleDetail: AdminReportDetail = {
       createdAt: new Date(Date.now() - 2 * 3_600_000).toISOString(),
     },
   ],
+  scammer: null,
+  siblingCases: [],
 };
 
 export const sampleDetailResponse: AdminReportDetailResponse = { report: sampleDetail };

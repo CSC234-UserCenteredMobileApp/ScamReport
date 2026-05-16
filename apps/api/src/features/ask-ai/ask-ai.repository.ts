@@ -306,6 +306,64 @@ export async function hydrateSimilarReports(reportIds: string[]) {
  * Caller passes already-normalised identifiers; see
  * `core/lib/identifier-extractor.ts`.
  */
+/**
+ * Look up scammer profiles whose identifier `value_normalized` is in
+ * `normalized`. Loads enough information to render a `ScammerProfileSummary`
+ * for the Ask AI response and to prime Gemini's prompt.
+ */
+export async function findScammersByIdentifiers(normalized: string[]) {
+  if (normalized.length === 0) return [];
+  const prisma = getPrisma();
+  const idRows = await prisma.scammerIdentifier.findMany({
+    where: { valueNormalized: { in: normalized } },
+    select: { scammerId: true },
+  });
+  const scammerIds = [...new Set(idRows.map((r) => r.scammerId))];
+  if (scammerIds.length === 0) return [];
+  const scammers = await prisma.scammer.findMany({
+    where: { id: { in: scammerIds } },
+    include: {
+      person: {
+        select: {
+          id: true,
+          fullName: true,
+          riskLevel: true,
+          campaignCountCache: true,
+        },
+      },
+      reports: {
+        where: { status: 'verified' },
+        orderBy: { verifiedAt: 'desc' },
+        take: 5,
+        select: { scamType: { select: { code: true } } },
+      },
+    },
+  });
+  return scammers.map((s) => {
+    const top: string[] = [];
+    for (const r of s.reports) {
+      if (!top.includes(r.scamType.code)) top.push(r.scamType.code);
+    }
+    return {
+      id: s.id,
+      displayName: s.displayName,
+      suspectedName: s.suspectedName,
+      person: s.person
+        ? {
+            id: s.person.id,
+            fullName: s.person.fullName,
+            riskLevel: s.person.riskLevel as 'low' | 'medium' | 'high' | 'unknown',
+            campaignCount: s.person.campaignCountCache,
+          }
+        : null,
+      aliases: s.aliases,
+      riskLevel: s.riskLevel as 'low' | 'medium' | 'high' | 'unknown',
+      reportCount: s.reportCountCache,
+      topScamTypeCodes: top,
+    };
+  });
+}
+
 export async function findReportsByIdentifiers(normalized: string[]) {
   if (normalized.length === 0) return [];
   const prisma = getPrisma();

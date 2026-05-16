@@ -1,9 +1,9 @@
 import { formatDistanceToNowStrict } from 'date-fns';
 import { enUS, th } from 'date-fns/locale';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Printer } from 'lucide-react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -12,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PageHeader } from '@/components/page-header';
 import { ApiError } from '@/lib/api/client';
+import { downloadPdf } from '@/lib/api/download-pdf';
 import { useReportDetail } from '@/features/moderation/api/detail';
 import { AuditTrail } from '@/features/moderation/components/audit-trail';
 import { DetailActionBar } from '@/features/moderation/components/detail-action-bar';
@@ -36,15 +37,33 @@ export function DetailPage() {
 
   return (
     <div className="space-y-6 pb-6">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => navigate(-1)}
-        className="-ml-2 gap-2"
-      >
-        <ArrowLeft className="size-4" aria-hidden />
-        {t('detail.back')}
-      </Button>
+      <div className="flex items-center justify-between">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate(-1)}
+          className="-ml-2 gap-2"
+        >
+          <ArrowLeft className="size-4" aria-hidden />
+          {t('detail.back')}
+        </Button>
+        {data && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              downloadPdf(
+                `/admin/reports/${data.report.id}/pdf`,
+                `scamreport-report-${data.report.id.replace(/-/g, '').slice(0, 8)}.pdf`,
+              )
+            }
+            className="gap-2"
+          >
+            <Printer className="size-4" aria-hidden />
+            {t('detail.printPdf')}
+          </Button>
+        )}
+      </div>
 
       {isLoading && (
         <div className="space-y-4">
@@ -135,6 +154,73 @@ export function DetailPage() {
             />
           </section>
 
+          {data.report.scammer && (
+            <section className="space-y-2">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                {t('detail.scammer.title')}
+              </h3>
+              <div className="rounded-lg border bg-card p-4 text-sm space-y-1">
+                <div className="flex items-baseline gap-2">
+                  <Link
+                    to={`/scammers/${data.report.scammer.id}/dossier`}
+                    className="font-semibold text-primary underline"
+                  >
+                    {data.report.scammer.displayName}
+                  </Link>
+                  <Badge variant="outline" className="capitalize">
+                    {data.report.scammer.riskLevel}
+                  </Badge>
+                </div>
+                {data.report.scammer.suspectedName && (
+                  <div>
+                    <span className="text-muted-foreground">
+                      {t('detail.scammer.alleged')}:
+                    </span>{' '}
+                    <strong>{data.report.scammer.suspectedName}</strong>
+                  </div>
+                )}
+                {data.report.scammer.person && (
+                  <div>
+                    <span className="text-muted-foreground">
+                      {t('detail.scammer.person')}:
+                    </span>{' '}
+                    <Link
+                      to={`/persons/${data.report.scammer.person.id}/dossier`}
+                      className="text-primary underline"
+                    >
+                      {data.report.scammer.person.fullName}
+                    </Link>{' '}
+                    <span className="text-muted-foreground">
+                      ({data.report.scammer.person.campaignCount} campaigns)
+                    </span>
+                  </div>
+                )}
+                {data.report.scammer.aliases.length > 0 && (
+                  <div>
+                    <span className="text-muted-foreground">
+                      {t('detail.scammer.aliases')}:
+                    </span>{' '}
+                    {data.report.scammer.aliases.join(', ')}
+                  </div>
+                )}
+                <div className="text-muted-foreground">
+                  {t('detail.scammer.totalReports', {
+                    count: data.report.scammer.reportCount,
+                  })}
+                </div>
+              </div>
+
+              {data.report.siblingCases.length > 0 && (
+                <div className="mt-2 text-xs text-muted-foreground">
+                  {t('detail.scammer.siblingCases', {
+                    count: data.report.siblingCases.length,
+                  })}
+                  : {data.report.siblingCases.map((c) => c.title).join('; ')}
+                </div>
+              )}
+            </section>
+          )}
+
           <section className="space-y-2">
             <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               {t('detail.auditTrail')}
@@ -145,7 +231,9 @@ export function DetailPage() {
             />
           </section>
 
-          <DetailActionBar report={data.report} />
+          <div>
+            <DetailActionBar report={data.report} />
+          </div>
         </>
       )}
     </div>

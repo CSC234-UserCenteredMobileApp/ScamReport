@@ -28,6 +28,9 @@ async function main() {
       fcm_devices,
       consent_records,
       reports,
+      scammer_identifiers,
+      scammers,
+      persons,
       announcements,
       users
     RESTART IDENTITY CASCADE

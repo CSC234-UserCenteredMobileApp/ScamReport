@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api_client.dart';
 import '../../../core/di/auth.dart';
 import '../../../core/di/cache.dart';
+import '../../reports/presentation/my_reports_providers.dart';
 import '../../settings/presentation/settings_providers.dart';
 import '../data/ask_ai_api_client.dart';
 import '../data/ask_ai_persistence.dart';
@@ -185,8 +186,9 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
     this._sendTurn,
     this._submit,
     this._persistence,
-    this._repo,
-  ) : super(AskAiChatState()) {
+    this._repo, {
+    this.onSubmitSuccess,
+  }) : super(AskAiChatState()) {
     _loadFromCache();
   }
 
@@ -194,6 +196,10 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
   final SubmitDraftedReport _submit;
   final AskAiPersistence _persistence;
   final AskAiRepository _repo;
+  // Fired exactly once after a draft submission resolves with a new report id.
+  // Owners of the controller use this to invalidate my-reports caches so the
+  // freshly-submitted row shows up without a pull-to-refresh.
+  final void Function()? onSubmitSuccess;
   Timer? _saveDebounce;
   Timer? _draftPushDebounce;
 
@@ -511,6 +517,7 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
       _draftPushDebounce?.cancel();
       unawaited(_persistence.clear());
       unawaited(_repo.upsertDraft(convId, null).catchError((_) {/* */}));
+      onSubmitSuccess?.call();
     } catch (err) {
       state = state.copyWith(isSubmitting: false, error: err);
     }
@@ -559,6 +566,12 @@ final askAiChatControllerProvider = StateNotifierProvider.autoDispose<
     ref.watch(submitDraftedReportProvider),
     ref.watch(askAiPersistenceProvider),
     ref.watch(askAiRepositoryProvider),
+    onSubmitSuccess: () {
+      // Freshly-submitted report should appear in My Reports without a
+      // pull-to-refresh. Invalidating the cached list re-fetches the next
+      // time the screen is read.
+      ref.invalidate(myReportsProvider);
+    },
   );
   controller.setUserId(authUser?.uid);
   ref.keepAlive(); // survive widget-tree disposal; rebuild only on auth change.
