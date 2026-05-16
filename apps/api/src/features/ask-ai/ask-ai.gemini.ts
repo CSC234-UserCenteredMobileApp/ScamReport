@@ -181,6 +181,12 @@ export type KnownScammerSummary = {
   id: string;
   displayName: string;
   suspectedName: string | null;
+  person: {
+    id: string;
+    fullName: string;
+    riskLevel: 'low' | 'medium' | 'high' | 'unknown';
+    campaignCount: number;
+  } | null;
   aliases: string[];
   riskLevel: 'low' | 'medium' | 'high' | 'unknown';
   reportCount: number;
@@ -235,8 +241,11 @@ function buildPrompt(input: GeminiTurnInput): string {
       const aliases = s.aliases.length > 0 ? `aliases=[${s.aliases.join(', ')}]` : '';
       const top = s.topScamTypeCodes.length > 0 ? `topCategories=[${s.topScamTypeCodes.join(', ')}]` : '';
       const suspect = s.suspectedName ? `suspectedName="${s.suspectedName}"` : '';
+      const person = s.person
+        ? `person="${s.person.fullName}" (runs ${s.person.campaignCount} known campaigns)`
+        : '';
       lines.push(
-        `- displayName="${s.displayName}" risk=${s.riskLevel} reportCount=${s.reportCount} ${suspect} ${aliases} ${top}`
+        `- displayName="${s.displayName}" risk=${s.riskLevel} reportCount=${s.reportCount} ${suspect} ${person} ${aliases} ${top}`
           .replace(/\s+/g, ' ')
           .trim(),
       );

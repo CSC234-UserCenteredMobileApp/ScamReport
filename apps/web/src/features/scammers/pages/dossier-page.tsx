@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useScammerDossier } from '../api/dossier';
 
@@ -32,6 +32,20 @@ export default function ScammerDossierPage() {
           <div className="mt-1 text-sm">
             <span className="text-muted-foreground">Alleged name:</span>{' '}
             <strong className="text-foreground">{data.scammer.suspectedName}</strong>
+          </div>
+        )}
+        {data.scammer.person && (
+          <div className="mt-1 text-sm">
+            <span className="text-muted-foreground">Person:</span>{' '}
+            <Link
+              to={`/persons/${data.scammer.person.id}/dossier`}
+              className="text-primary underline"
+            >
+              {data.scammer.person.fullName}
+            </Link>
+            <span className="text-muted-foreground">
+              {' '}({data.scammer.person.campaignCount} campaigns)
+            </span>
           </div>
         )}
         <div className="mt-1 text-sm text-muted-foreground">

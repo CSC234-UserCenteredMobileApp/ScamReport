@@ -12,6 +12,12 @@ export interface ScammerRow {
   id: string;
   displayName: string;
   suspectedName: string | null;
+  person: {
+    id: string;
+    fullName: string;
+    riskLevel: string;
+    campaignCountCache: number;
+  } | null;
   aliases: string[];
   riskLevel: string;
   notes: string | null;
@@ -35,6 +41,14 @@ export async function findById(id: string): Promise<ScammerRow | null> {
       id: true,
       displayName: true,
       suspectedName: true,
+      person: {
+        select: {
+          id: true,
+          fullName: true,
+          riskLevel: true,
+          campaignCountCache: true,
+        },
+      },
       aliases: true,
       riskLevel: true,
       notes: true,
@@ -99,6 +113,12 @@ export interface ScammerCandidate {
   id: string;
   displayName: string;
   suspectedName: string | null;
+  person: {
+    id: string;
+    fullName: string;
+    riskLevel: string;
+    campaignCountCache: number;
+  } | null;
   aliases: string[];
   riskLevel: string;
   reportCountCache: number;
@@ -124,6 +144,9 @@ export async function searchCandidates(opts: {
             id: true,
             displayName: true,
             suspectedName: true,
+            person: {
+              select: { id: true, fullName: true, riskLevel: true, campaignCountCache: true },
+            },
             aliases: true,
             riskLevel: true,
             reportCountCache: true,
@@ -137,6 +160,7 @@ export async function searchCandidates(opts: {
           id: r.scammer.id,
           displayName: r.scammer.displayName,
           suspectedName: r.scammer.suspectedName,
+          person: r.scammer.person,
           aliases: r.scammer.aliases,
           riskLevel: r.scammer.riskLevel,
           reportCountCache: r.scammer.reportCountCache,
@@ -154,6 +178,7 @@ export async function searchCandidates(opts: {
           { displayName: { contains: q, mode: 'insensitive' } },
           { suspectedName: { contains: q, mode: 'insensitive' } },
           { aliases: { has: q } },
+          { person: { fullName: { contains: q, mode: 'insensitive' } } },
         ],
       },
       orderBy: { reportCountCache: 'desc' },
@@ -162,6 +187,9 @@ export async function searchCandidates(opts: {
         id: true,
         displayName: true,
         suspectedName: true,
+        person: {
+          select: { id: true, fullName: true, riskLevel: true, campaignCountCache: true },
+        },
         aliases: true,
         riskLevel: true,
         reportCountCache: true,
@@ -173,6 +201,7 @@ export async function searchCandidates(opts: {
           id: r.id,
           displayName: r.displayName,
           suspectedName: r.suspectedName,
+          person: r.person,
           aliases: r.aliases,
           riskLevel: r.riskLevel,
           reportCountCache: r.reportCountCache,

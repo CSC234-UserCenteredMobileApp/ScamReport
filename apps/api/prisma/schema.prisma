@@ -274,6 +274,7 @@ model Scammer {
   id                String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   displayName       String           @map("display_name")
   suspectedName     String?          @map("suspected_name")
+  personId          String?          @map("person_id") @db.Uuid
   aliases           String[]         @default([])
   riskLevel         ScammerRiskLevel @default(unknown) @map("risk_level")
   notes             String?
@@ -283,12 +284,36 @@ model Scammer {
   createdAt         DateTime         @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt         DateTime         @default(now()) @map("updated_at") @db.Timestamptz()
 
+  person        Person?             @relation(fields: [personId], references: [id], onDelete: SetNull)
   identifiers   ScammerIdentifier[]
   reports       Report[]
   evalCases     AiEvalCase[]
   evalResults   AiEvalResult[]
 
+  @@index([personId])
   @@map("scammers")
+}
+
+/// One real human offender. Many Scammer rows (campaigns / surfaces) may
+/// reference the same Person via Scammer.personId. NULL personId on a Scammer
+/// = anonymous campaign with no attributed human.
+model Person {
+  id                  String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fullName            String           @map("full_name")
+  aliases             String[]         @default([])
+  riskLevel           ScammerRiskLevel @default(unknown) @map("risk_level")
+  notes               String?
+  reportCountCache    Int              @default(0) @map("report_count_cache")
+  campaignCountCache  Int              @default(0) @map("campaign_count_cache")
+  firstSeenAt         DateTime?        @map("first_seen_at") @db.Timestamptz()
+  lastSeenAt          DateTime?        @map("last_seen_at") @db.Timestamptz()
+  createdAt           DateTime         @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt           DateTime         @default(now()) @map("updated_at") @db.Timestamptz()
+
+  scammers Scammer[]
+
+  @@index([fullName])
+  @@map("persons")
 }
 
 /// One scammer can present many surface identifiers (multiple phones, URLs,

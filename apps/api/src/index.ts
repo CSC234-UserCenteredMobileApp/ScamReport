@@ -15,6 +15,7 @@ import { adminDeletionRequestsRoute } from './features/admin-deletion-requests/a
 import { notificationsRoute } from './features/notifications/notifications.route';
 import { adminNotificationsRoute } from './features/admin-notifications/admin-notifications.route';
 import { adminScammersRoute } from './features/admin-scammers/admin-scammers.route';
+import { adminPersonsRoute } from './features/admin-persons/admin-persons.route';
 import { adminAiEvalRoute } from './features/admin-ai-eval/admin-ai-eval.route';
 import { adminPlatformSummaryRoute } from './features/admin-platform-summary/admin-platform-summary.route';
 
@@ -52,6 +53,7 @@ export const app = new Elysia()
   .use(notificationsRoute)
   .use(adminNotificationsRoute)
   .use(adminScammersRoute)
+  .use(adminPersonsRoute)
   .use(adminAiEvalRoute)
   .use(adminPlatformSummaryRoute);
 

@@ -23,6 +23,10 @@ type SeedIdentifier = {
 type SeedScammer = {
   displayName: string;
   suspectedName: string | null;
+  // When non-null, the scammer is linked to this Person row (created
+  // upsert-by-fullName). Two scammers sharing personFullName end up under one
+  // Person — demonstrating "one human runs many campaigns".
+  personFullName: string | null;
   aliases: string[];
   riskLevel: ScammerRiskLevel;
   notes: string;
@@ -35,6 +39,7 @@ const SEEDS: SeedScammer[] = [
   {
     displayName: 'Revenue Dept Impersonator',
     suspectedName: 'Khun Somchai Wongchai',
+    personFullName: 'Khun Somchai Wongchai',
     aliases: ['Officer Anan'],
     riskLevel: 'high',
     notes:
@@ -44,8 +49,23 @@ const SEEDS: SeedScammer[] = [
     ],
   },
   {
+    // Second campaign run by the SAME person as the Revenue Dept Impersonator.
+    // Demonstrates 1 person → N scammer campaigns through Scammer.personId.
+    displayName: 'Customs Duty Scam Caller',
+    suspectedName: 'Khun Somchai Wongchai',
+    personFullName: 'Khun Somchai Wongchai',
+    aliases: ['Customs Officer Somchai'],
+    riskLevel: 'high',
+    notes:
+      'Same caller as the Revenue Dept campaign; pivots to claiming an undeclared import incurred customs duty. Demands a transfer to release the parcel.',
+    identifiers: [
+      { kind: 'phone', valueRaw: '+66 2 999 5678', valueNormalized: '+6629995678' },
+    ],
+  },
+  {
     displayName: 'Kerry Parcel Phisher',
     suspectedName: null,
+    personFullName: null,
     aliases: ['Kerry Express Notify'],
     riskLevel: 'high',
     notes:
@@ -61,6 +81,7 @@ const SEEDS: SeedScammer[] = [
   {
     displayName: 'IG Marketplace Ghost',
     suspectedName: null,
+    personFullName: null,
     aliases: ['Best Deals TH', 'IG iPhone Reseller'],
     riskLevel: 'medium',
     notes:
@@ -79,6 +100,7 @@ const SEEDS: SeedScammer[] = [
   {
     displayName: 'SCB Fraud-Team Caller',
     suspectedName: 'Khun Niran Thanachai',
+    personFullName: 'Khun Niran Thanachai',
     aliases: [],
     riskLevel: 'high',
     notes:
@@ -90,6 +112,7 @@ const SEEDS: SeedScammer[] = [
   {
     displayName: 'KTB Phishing Ring',
     suspectedName: null,
+    personFullName: null,
     aliases: ['Krungthai Secure Login'],
     riskLevel: 'high',
     notes:
@@ -105,6 +128,7 @@ const SEEDS: SeedScammer[] = [
   {
     displayName: 'QR Swap Crew',
     suspectedName: null,
+    personFullName: null,
     aliases: ['Lazada Refund QR', 'PromptPay Sticker Crew'],
     riskLevel: 'medium',
     notes:
@@ -113,7 +137,32 @@ const SEEDS: SeedScammer[] = [
   },
 ];
 
-async function upsertScammers() {
+async function upsertPersons() {
+  // Collect unique person names from the seed list and upsert one Person row
+  // per name. Returns a map fullName → personId so upsertScammers can link.
+  const fullNames = [
+    ...new Set(SEEDS.map((s) => s.personFullName).filter((x): x is string => x !== null)),
+  ];
+  const byName = new Map<string, string>();
+  for (const fullName of fullNames) {
+    const existing = await prisma.person.findFirst({
+      where: { fullName },
+      select: { id: true },
+    });
+    if (existing) {
+      byName.set(fullName, existing.id);
+    } else {
+      const row = await prisma.person.create({
+        data: { fullName, riskLevel: 'high' },
+        select: { id: true },
+      });
+      byName.set(fullName, row.id);
+    }
+  }
+  return byName;
+}
+
+async function upsertScammers(personByName: Map<string, string>) {
   const byAlias = new Map<string, string>();
   for (const s of SEEDS) {
     // Match on displayName as a stable natural key — no unique constraint at
@@ -125,6 +174,7 @@ async function upsertScammers() {
     const data = {
       displayName: s.displayName,
       suspectedName: s.suspectedName,
+      personId: s.personFullName ? personByName.get(s.personFullName) ?? null : null,
       aliases: s.aliases,
       riskLevel: s.riskLevel,
       notes: s.notes,
@@ -150,6 +200,29 @@ async function upsertScammers() {
     }
   }
   return byAlias;
+}
+
+async function recomputePersonCounts() {
+  // After scammers + reports are wired, refresh each Person's caches.
+  await prisma.$executeRaw`
+    UPDATE persons p
+    SET
+      campaign_count_cache = COALESCE(c.cnt, 0),
+      report_count_cache   = COALESCE(c.report_cnt, 0),
+      first_seen_at        = c.first_seen,
+      last_seen_at         = c.last_seen
+    FROM (
+      SELECT s.person_id,
+             COUNT(*)::int                                  AS cnt,
+             COALESCE(SUM(s.report_count_cache), 0)::int    AS report_cnt,
+             MIN(s.first_seen_at)                            AS first_seen,
+             MAX(s.last_seen_at)                             AS last_seen
+      FROM scammers s
+      WHERE s.person_id IS NOT NULL
+      GROUP BY s.person_id
+    ) AS c
+    WHERE c.person_id = p.id
+  `;
 }
 
 async function backfillReportLinks() {
@@ -189,11 +262,13 @@ async function recomputeReportCounts() {
 }
 
 async function main() {
-  const byAlias = await upsertScammers();
+  const personByName = await upsertPersons();
+  const byAlias = await upsertScammers(personByName);
   const updated = await backfillReportLinks();
   await recomputeReportCounts();
+  await recomputePersonCounts();
   console.log(
-    `seed-scammers: profiles=${byAlias.size} reports_linked=${updated}`,
+    `seed-scammers: persons=${personByName.size} profiles=${byAlias.size} reports_linked=${updated}`,
   );
 }
 

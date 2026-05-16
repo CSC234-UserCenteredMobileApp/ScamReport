@@ -29,6 +29,10 @@ export const queryKeys = {
     dossier: (id: string) => ['scammers', 'dossier', id] as const,
     search: (q: string) => ['scammers', 'search', q] as const,
   },
+  persons: {
+    all: ['persons'] as const,
+    dossier: (id: string) => ['persons', 'dossier', id] as const,
+  },
   platformSummary: {
     all: ['platform-summary'] as const,
     inRange: (from?: string, to?: string) =>

@@ -84,6 +84,26 @@ const SEEDS: Seed[] = [
     targetIdentifierKind: 'phone',
     daysAgo: 18,
   },
+  // ---------- Customs Duty Scam Caller (phone +66 2 999 5678, scamTypeId=1) ----------
+  // Same person as Revenue Dept Impersonator. Demonstrates Person → N campaigns.
+  {
+    title: 'Customs Officer Somchai demands "duty release" payment',
+    description:
+      'Caller said his name was "Khun Somchai" from Customs. Claimed I had an undeclared import being held and demanded 18,000 THB transferred to a personal account to release it. Same voice as a Revenue Dept impersonation call I got last month.',
+    scamTypeId: 1,
+    targetIdentifier: '+66 2 999 5678',
+    targetIdentifierKind: 'phone',
+    daysAgo: 4,
+  },
+  {
+    title: 'Customs Dept scam call — overdue import fee threat',
+    description:
+      'Caller introduced himself as Customs Officer Somchai, said a parcel of mine was at customs, ordered a transfer of 25,000 THB to a personal SCB account or face a fine. Refused to give a callback line.',
+    scamTypeId: 1,
+    targetIdentifier: '+66 2 999 5678',
+    targetIdentifierKind: 'phone',
+    daysAgo: 9,
+  },
   // ---------- SCB Fraud-Team Caller (phone +66 2 777 9000, scamTypeId=1) ----------
   {
     title: 'Bank impersonation call about "suspicious activity"',

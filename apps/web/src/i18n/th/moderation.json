@@ -78,6 +78,17 @@
     "ai": {
       "label": "คะแนน AI",
       "pending": "รอการประเมิน"
+    },
+    "printPdf": "พิมพ์ / ส่งออก PDF",
+    "scammer": {
+      "title": "ผู้ต้องสงสัยที่เชื่อมโยง",
+      "alleged": "ชื่อที่อ้าง",
+      "person": "บุคคล",
+      "aliases": "ชื่ออื่น",
+      "totalReports": "มีรายงาน {{count}} ฉบับ",
+      "totalReports_other": "มีรายงาน {{count}} ฉบับ",
+      "siblingCases": "คดีที่เกี่ยวข้อง",
+      "siblingCases_other": "คดีที่เกี่ยวข้อง"
     }
   },
   "evidence": {

@@ -28,12 +28,27 @@ export const ScammerIdentifier = Type.Object({
 export type ScammerIdentifier = Static<typeof ScammerIdentifier>;
 
 // Compact summary — what mobile / Ask AI / check responses show inline.
+// Inline Person reference on ScammerProfileSummary — avoids circular import
+// with persons.ts. Mirrors the shape of `PersonSummary` minus aliases/counts
+// the caller doesn't need at the scammer-summary level.
+export const ScammerPersonRef = Type.Object({
+  id: Type.String({ format: 'uuid' }),
+  fullName: Type.String(),
+  riskLevel: ScammerRiskLevel,
+  campaignCount: Type.Integer({ minimum: 0 }),
+});
+export type ScammerPersonRef = Static<typeof ScammerPersonRef>;
+
 export const ScammerProfileSummary = Type.Object({
   id: Type.String({ format: 'uuid' }),
   displayName: Type.String(),
   // Person's name the offender claimed (or is alleged to use). Null when the
-  // scam is run by an anonymous campaign with no named caller.
+  // scam is run by an anonymous campaign with no named caller. Denormalised
+  // cache; the canonical identity sits on `person` when set.
   suspectedName: Type.Union([Type.String(), Type.Null()]),
+  // Link to a `Person` row when the campaign is attributable to a known
+  // human. Multiple scammer campaigns can share the same person.
+  person: Type.Union([ScammerPersonRef, Type.Null()]),
   aliases: Type.Array(Type.String()),
   riskLevel: ScammerRiskLevel,
   reportCount: Type.Integer({ minimum: 0 }),
@@ -45,6 +60,7 @@ export const ScammerProfile = Type.Object({
   id: Type.String({ format: 'uuid' }),
   displayName: Type.String(),
   suspectedName: Type.Union([Type.String(), Type.Null()]),
+  person: Type.Union([ScammerPersonRef, Type.Null()]),
   aliases: Type.Array(Type.String()),
   riskLevel: ScammerRiskLevel,
   notes: Type.Union([Type.String(), Type.Null()]),

@@ -150,6 +150,14 @@ export async function getDetail(reportId: string): Promise<AdminReportDetail | n
       id: report.scammer.id,
       displayName: report.scammer.displayName,
       suspectedName: report.scammer.suspectedName,
+      person: report.scammer.person
+        ? {
+            id: report.scammer.person.id,
+            fullName: report.scammer.person.fullName,
+            riskLevel: report.scammer.person.riskLevel as ScammerProfileSummary['riskLevel'],
+            campaignCount: report.scammer.person.campaignCountCache,
+          }
+        : null,
       aliases: report.scammer.aliases,
       riskLevel: report.scammer.riskLevel as ScammerProfileSummary['riskLevel'],
       reportCount: report.scammer.reportCountCache,

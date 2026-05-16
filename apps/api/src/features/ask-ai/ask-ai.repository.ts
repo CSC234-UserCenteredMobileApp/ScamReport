@@ -323,6 +323,14 @@ export async function findScammersByIdentifiers(normalized: string[]) {
   const scammers = await prisma.scammer.findMany({
     where: { id: { in: scammerIds } },
     include: {
+      person: {
+        select: {
+          id: true,
+          fullName: true,
+          riskLevel: true,
+          campaignCountCache: true,
+        },
+      },
       reports: {
         where: { status: 'verified' },
         orderBy: { verifiedAt: 'desc' },
@@ -340,6 +348,14 @@ export async function findScammersByIdentifiers(normalized: string[]) {
       id: s.id,
       displayName: s.displayName,
       suspectedName: s.suspectedName,
+      person: s.person
+        ? {
+            id: s.person.id,
+            fullName: s.person.fullName,
+            riskLevel: s.person.riskLevel as 'low' | 'medium' | 'high' | 'unknown',
+            campaignCount: s.person.campaignCountCache,
+          }
+        : null,
       aliases: s.aliases,
       riskLevel: s.riskLevel as 'low' | 'medium' | 'high' | 'unknown',
       reportCount: s.reportCountCache,

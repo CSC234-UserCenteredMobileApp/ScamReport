@@ -75,6 +75,14 @@ async function loadMatchedScammer(scammerId: string): Promise<MatchedScammer | n
   const scammer = await prisma.scammer.findUnique({
     where: { id: scammerId },
     include: {
+      person: {
+        select: {
+          id: true,
+          fullName: true,
+          riskLevel: true,
+          campaignCountCache: true,
+        },
+      },
       reports: {
         where: { status: 'verified' },
         orderBy: { verifiedAt: 'desc' },
@@ -94,6 +102,7 @@ async function loadMatchedScammer(scammerId: string): Promise<MatchedScammer | n
       id: scammer.id,
       displayName: scammer.displayName,
       suspectedName: scammer.suspectedName,
+      person: scammer.person,
       aliases: scammer.aliases,
       riskLevel: scammer.riskLevel,
       reportCountCache: scammer.reportCountCache,
@@ -112,6 +121,12 @@ function toMatchedScammer(
     id: string;
     displayName: string;
     suspectedName: string | null;
+    person: {
+      id: string;
+      fullName: string;
+      riskLevel: string;
+      campaignCountCache: number;
+    } | null;
     aliases: string[];
     riskLevel: string;
     reportCountCache: number;
@@ -129,6 +144,14 @@ function toMatchedScammer(
       id: s.id,
       displayName: s.displayName,
       suspectedName: s.suspectedName,
+      person: s.person
+        ? {
+            id: s.person.id,
+            fullName: s.person.fullName,
+            riskLevel: s.person.riskLevel as MatchedScammer['summary']['riskLevel'],
+            campaignCount: s.person.campaignCountCache,
+          }
+        : null,
       aliases: s.aliases,
       riskLevel: s.riskLevel as MatchedScammer['summary']['riskLevel'],
       reportCount: s.reportCountCache,

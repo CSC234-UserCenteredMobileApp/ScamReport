@@ -67,6 +67,14 @@ export async function search(
     id: r.id,
     displayName: r.displayName,
     suspectedName: r.suspectedName,
+    person: r.person
+      ? {
+          id: r.person.id,
+          fullName: r.person.fullName,
+          riskLevel: r.person.riskLevel as ScammerProfileSummary['riskLevel'],
+          campaignCount: r.person.campaignCountCache,
+        }
+      : null,
     aliases: r.aliases,
     riskLevel: r.riskLevel as ScammerProfileSummary['riskLevel'],
     reportCount: r.reportCountCache,
@@ -194,6 +202,14 @@ export async function getDossier(
     id: scammer.id,
     displayName: scammer.displayName,
     suspectedName: scammer.suspectedName,
+    person: scammer.person
+      ? {
+          id: scammer.person.id,
+          fullName: scammer.person.fullName,
+          riskLevel: scammer.person.riskLevel as ScammerProfile['riskLevel'],
+          campaignCount: scammer.person.campaignCountCache,
+        }
+      : null,
     aliases: scammer.aliases,
     riskLevel: scammer.riskLevel as ScammerProfile['riskLevel'],
     notes: scammer.notes,

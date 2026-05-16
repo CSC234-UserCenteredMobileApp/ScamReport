@@ -78,6 +78,17 @@
     "ai": {
       "label": "AI score",
       "pending": "Pending"
+    },
+    "printPdf": "Print / Export PDF",
+    "scammer": {
+      "title": "Linked scammer",
+      "alleged": "Alleged name",
+      "person": "Person",
+      "aliases": "Aliases",
+      "totalReports": "{{count}} report on file",
+      "totalReports_other": "{{count}} reports on file",
+      "siblingCases": "Other case",
+      "siblingCases_other": "Other cases"
     }
   },
   "evidence": {

@@ -33,6 +33,7 @@ async function main() {
       reports,
       scammer_identifiers,
       scammers,
+      persons,
       announcements,
       users
     RESTART IDENTITY CASCADE

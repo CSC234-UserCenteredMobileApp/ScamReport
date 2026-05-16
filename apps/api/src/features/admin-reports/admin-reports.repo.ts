@@ -50,6 +50,12 @@ export interface DetailRow {
     id: string;
     displayName: string;
     suspectedName: string | null;
+    person: {
+      id: string;
+      fullName: string;
+      riskLevel: string;
+      campaignCountCache: number;
+    } | null;
     aliases: string[];
     riskLevel: string;
     reportCountCache: number;
@@ -153,6 +159,9 @@ export async function findDetailRow(reportId: string): Promise<DetailRow | null>
           id: true,
           displayName: true,
           suspectedName: true,
+          person: {
+            select: { id: true, fullName: true, riskLevel: true, campaignCountCache: true },
+          },
           aliases: true,
           riskLevel: true,
           reportCountCache: true,
