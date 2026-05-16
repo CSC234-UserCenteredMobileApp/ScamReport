@@ -1,0 +1,51 @@
+name: AI Eval — nightly drift alarm
+
+on:
+  schedule:
+    # 02:00 UTC daily = 09:00 ICT. After Supabase nightly backup window.
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      threshold:
+        description: 'Minimum verdictAccuracy required to pass (0..1)'
+        required: false
+        default: '0.6'
+
+jobs:
+  eval:
+    name: Run labelled-case eval against current AI pipeline
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.3.13'
+
+      - name: Install workspace deps
+        run: bun install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: bun run --filter @my-product/api prisma:generate
+
+      - name: Run eval harness
+        working-directory: apps/api
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          FIREBASE_SERVICE_ACCOUNT_PATH: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PATH }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          THRESHOLD: ${{ inputs.threshold || '0.6' }}
+        run: |
+          bun run scripts/eval-ai.ts --threshold="$THRESHOLD" --quiet | tee eval-summary.json
+
+      - name: Upload eval summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-summary
+          path: apps/api/eval-summary.json
+          retention-days: 30
