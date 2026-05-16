@@ -556,6 +556,12 @@ export async function withdrawReport(
     where: { id: reportId },
     data: { status: 'withdrawn', updatedAt: now },
   });
+  // Drop the stale embedding row — a withdrawn report should never feed
+  // RAG retrieval. status='verified' JOIN already filters it; this keeps
+  // storage tidy and shields future queries that widen the filter.
+  await prisma.$executeRaw`
+    DELETE FROM report_embeddings WHERE report_id = ${reportId}::uuid
+  `;
 
   // Mirror deletion (withdrawing removes the doc from the user's Firestore mirror)
   await mirrorMyReport({

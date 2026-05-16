@@ -368,12 +368,30 @@ export async function rejectReport(
 ): Promise<PublicActionResult | null> {
   const result = await repoApplyAction(reportId, adminId, 'reject', remark);
   if (!result) return null;
+  // Drop the stale embedding row so a previously-verified report that was
+  // later rejected stops feeding RAG retrieval. The status='verified' JOIN
+  // in `searchSimilarReports` already filters it, but cleaning the row
+  // keeps storage tidy and protects against any future query that widens
+  // the filter.
+  await clearEmbedding(reportId);
   await notifyOwner(result, 'report_rejected', {
     title: 'Your report was reviewed',
     body: remark,
   });
   await mirrorReporterView(result);
   return strip(result);
+}
+
+async function clearEmbedding(reportId: string): Promise<void> {
+  try {
+    await getPrisma().$executeRaw`
+      DELETE FROM report_embeddings WHERE report_id = ${reportId}::uuid
+    `;
+  } catch (err) {
+    // Non-fatal: report state is the source of truth, embedding cleanup
+    // is best-effort. Log so operators see lingering rows.
+    console.warn('[admin-reports] could not clear embedding', { reportId, err });
+  }
 }
 
 export async function flagReport(
