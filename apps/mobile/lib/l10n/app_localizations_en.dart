@@ -328,6 +328,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminReviewTitle => 'Review report';
 
   @override
+  String get adminReviewExportPdf => 'Export as PDF';
+
+  @override
   String get adminReviewApprove => 'Approve';
 
   @override

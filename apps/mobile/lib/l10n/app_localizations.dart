@@ -692,6 +692,12 @@ abstract class AppLocalizations {
   /// **'Review report'**
   String get adminReviewTitle;
 
+  /// No description provided for @adminReviewExportPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Export as PDF'**
+  String get adminReviewExportPdf;
+
   /// No description provided for @adminReviewApprove.
   ///
   /// In en, this message translates to:

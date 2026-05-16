@@ -130,6 +130,7 @@
   "aiConfidenceLow": "Low",
   "aiConfidenceUnknown": "Unknown",
   "adminReviewTitle": "Review report",
+  "adminReviewExportPdf": "Export as PDF",
   "adminReviewApprove": "Approve",
   "adminReviewReject": "Reject",
   "adminReviewFlag": "Flag",

@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:printing/printing.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/ai_score_card.dart';
 import '../../../l10n/l10n.dart';
+import '../data/admin_report_pdf.dart';
 import '../data/mod_action_failure.dart';
 import '../domain/mod_report.dart';
 import '../domain/mod_repository.dart';
@@ -144,6 +146,22 @@ class _HeaderSliver extends StatelessWidget {
       expandedHeight: 180,
       title: Text(l10n.adminReviewTitle),
       centerTitle: true,
+      actions: [
+        IconButton(
+          tooltip: l10n.adminReviewExportPdf,
+          icon: const Icon(Icons.picture_as_pdf_outlined),
+          onPressed: () async {
+            await Printing.layoutPdf(
+              name:
+                  'scamreport-${report.id.substring(0, 8)}-${DateTime.now().millisecondsSinceEpoch}',
+              onLayout: (_) => buildAdminReportPdf(
+                report: report,
+                scamTypeLabel: scamTypeLabel,
+              ),
+            );
+          },
+        ),
+      ],
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
           decoration: BoxDecoration(

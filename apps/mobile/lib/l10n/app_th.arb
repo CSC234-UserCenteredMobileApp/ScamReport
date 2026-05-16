@@ -120,6 +120,7 @@
   "aiConfidenceLow": "ต่ำ",
   "aiConfidenceUnknown": "ไม่ทราบ",
   "adminReviewTitle": "ตรวจสอบรายงาน",
+  "adminReviewExportPdf": "ส่งออกเป็น PDF",
   "adminReviewApprove": "อนุมัติ",
   "adminReviewReject": "ปฏิเสธ",
   "adminReviewFlag": "ตั้งสถานะ",
