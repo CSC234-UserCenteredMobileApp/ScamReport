@@ -167,6 +167,7 @@ class _AccountSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isGuest = user == null;
+    final isAdmin = user?.isAdmin == true;
 
     return Card(
       margin: EdgeInsets.zero,
@@ -175,15 +176,17 @@ class _AccountSection extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // My reports — signed-in users only
+          // My reports — signed-in non-admin users only
           if (!isGuest) ...[
-            _NavTile(
-              icon: Icons.inbox_outlined,
-              title: context.l10n.myReports,
-              onTap: () => context.push('/my-reports'),
-              isFirst: true,
-            ),
-            const Divider(height: 1, indent: 16, endIndent: 16),
+            if (!isAdmin) ...[
+              _NavTile(
+                icon: Icons.inbox_outlined,
+                title: context.l10n.myReports,
+                onTap: () => context.push('/my-reports'),
+                isFirst: true,
+              ),
+              const Divider(height: 1, indent: 16, endIndent: 16),
+            ],
             const _NotificationsNavTile(),
             const Divider(height: 1, indent: 16, endIndent: 16),
           ],
@@ -207,8 +210,10 @@ class _AccountSection extends StatelessWidget {
           if (!isGuest) ...[
             const Divider(height: 1, indent: 16, endIndent: 16),
             const _SignOutTile(),
-            const Divider(height: 1, indent: 16, endIndent: 16),
-            const _DeleteAccountExpansion(),
+            if (!isAdmin) ...[
+              const Divider(height: 1, indent: 16, endIndent: 16),
+              const _DeleteAccountExpansion(),
+            ],
           ],
         ],
       ),
