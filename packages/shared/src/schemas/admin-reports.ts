@@ -153,3 +153,22 @@ export const AdminEvidenceUrlResponse = Type.Object({
   expiresAt: Type.String({ format: 'date-time' }),
 });
 export type AdminEvidenceUrlResponse = Static<typeof AdminEvidenceUrlResponse>;
+
+export const AdminReportSearchItem = Type.Object({
+  id: Type.String({ format: 'uuid' }),
+  title: Type.String(),
+  status: Type.String(),
+  scamTypeCode: Type.String(),
+  scamTypeLabelEn: Type.String(),
+  scamTypeLabelTh: Type.String(),
+  targetIdentifier: Type.Union([Type.String(), Type.Null()]),
+  submittedAt: Type.String({ format: 'date-time' }),
+  aiScore: Type.Union([Type.Integer({ minimum: 0, maximum: 100 }), Type.Null()]),
+});
+export type AdminReportSearchItem = Static<typeof AdminReportSearchItem>;
+
+export const AdminReportSearchResponse = Type.Object({
+  items: Type.Array(AdminReportSearchItem),
+  total: Type.Integer({ minimum: 0 }),
+});
+export type AdminReportSearchResponse = Static<typeof AdminReportSearchResponse>;

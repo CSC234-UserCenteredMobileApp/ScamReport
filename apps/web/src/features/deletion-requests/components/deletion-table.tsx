@@ -31,7 +31,12 @@ export function DeletionTable({ items, onApprove, onReject }: DeletionTableProps
         id: 'handle',
         header: () => t('deletionRequests.col.handle'),
         cell: ({ row }) => (
-          <span className="font-mono text-sm">{row.original.userHandle}</span>
+          <div className="flex flex-col gap-0.5">
+            <span className="font-mono text-sm">{row.original.userHandle}</span>
+            {row.original.userEmail && (
+              <span className="text-xs text-muted-foreground">{row.original.userEmail}</span>
+            )}
+          </div>
         ),
       },
       {

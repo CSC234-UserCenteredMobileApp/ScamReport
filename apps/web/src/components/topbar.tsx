@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { GlobalSearch } from '@/components/global-search';
 import { LanguageSwitch } from '@/components/language-switch';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { UserPill } from '@/components/user-pill';
@@ -31,6 +32,7 @@ export function Topbar() {
         </Sheet>
       </div>
       <div className="flex items-center gap-1">
+        <GlobalSearch />
         <LanguageSwitch />
         <ThemeToggle />
         <UserPill />

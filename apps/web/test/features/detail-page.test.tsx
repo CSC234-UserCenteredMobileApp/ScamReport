@@ -39,7 +39,9 @@ function renderRoute(initialRoute = `/moderation/${REPORT_ID}`) {
 describe('DetailPage', () => {
   it('renders the loading skeleton then the report', async () => {
     renderRoute();
-    expect(await screen.findByText(sampleDetailResponse.report.title)).toBeInTheDocument();
+    // Title appears in both breadcrumb and report card; use getAllByText.
+    const titleEls = await screen.findAllByText(sampleDetailResponse.report.title);
+    expect(titleEls.length).toBeGreaterThan(0);
     // "Submitted anonymously" appears twice — meta card subtitle and synthetic
     // audit-trail row. Asserting >=1 is enough; multi-render is intentional.
     expect(screen.getAllByText(/Submitted anonymously/i).length).toBeGreaterThan(0);
@@ -73,7 +75,7 @@ describe('DetailPage', () => {
   it('opens the action dialog when Approve is clicked', async () => {
     const user = userEvent.setup();
     renderRoute();
-    await screen.findByText(sampleDetailResponse.report.title);
+    await screen.findAllByText(sampleDetailResponse.report.title);
     await user.click(screen.getByRole('button', { name: 'Approve' }));
     expect(await screen.findByText('Approve report')).toBeInTheDocument();
   });
@@ -108,7 +110,7 @@ describe('DetailPage', () => {
 
   it('never renders any reporter identifier in the page tree', async () => {
     renderRoute();
-    await screen.findByText(sampleDetailResponse.report.title);
+    await screen.findAllByText(sampleDetailResponse.report.title);
     const html = document.body.innerHTML;
     expect(html).not.toMatch(/reporter/i);
     expect(html).not.toMatch(/User_[0-9a-f]/i);

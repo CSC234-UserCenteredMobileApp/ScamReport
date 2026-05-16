@@ -3,6 +3,7 @@ import { TypeCompiler, type TypeCheck } from '@sinclair/typebox/compiler';
 import {
   AdminQueueResponse,
   AdminReportDetailResponse,
+  AdminReportSearchResponse,
   AdminEvidenceUrlResponse,
   AdminActionResponse,
   AdminAnnouncementListResponse,
@@ -17,6 +18,7 @@ import {
   PersonDossierResponse,
   PlatformSummaryResponse,
   ScammerDossierResponse,
+  ScamTypeListResponse,
   SearchScammersResponse,
 } from '@my-product/shared';
 
@@ -65,6 +67,8 @@ export const validators = {
   personDossier: TypeCompiler.Compile(PersonDossierResponse),
   linkScammer: TypeCompiler.Compile(LinkScammerResponse),
   platformSummary: TypeCompiler.Compile(PlatformSummaryResponse),
+  scamTypes: TypeCompiler.Compile(ScamTypeListResponse),
+  adminReportSearch: TypeCompiler.Compile(AdminReportSearchResponse),
 } as const;
 
 export type Validators = typeof validators;

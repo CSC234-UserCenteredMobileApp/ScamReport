@@ -1,7 +1,7 @@
 import { formatDistanceToNowStrict } from 'date-fns';
 import { enUS, th } from 'date-fns/locale';
-import { ArrowLeft, Printer } from 'lucide-react';
-import { useEffect } from 'react';
+import { ArrowLeft, Check, Copy, Printer } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -14,6 +14,8 @@ import { PageHeader } from '@/components/page-header';
 import { ApiError } from '@/lib/api/client';
 import { downloadPdf } from '@/lib/api/download-pdf';
 import { useReportDetail } from '@/features/moderation/api/detail';
+import { Breadcrumb } from '@/components/breadcrumb';
+import { Tooltip } from '@/components/ui/tooltip';
 import { AuditTrail } from '@/features/moderation/components/audit-trail';
 import { DetailActionBar } from '@/features/moderation/components/detail-action-bar';
 import { EvidenceGallery } from '@/features/moderation/components/evidence-gallery';
@@ -25,6 +27,14 @@ export function DetailPage() {
   const locale = i18n.language === 'th' ? th : enUS;
 
   const { data, isLoading, error, refetch } = useReportDetail(id ?? '');
+  const [copied, setCopied] = useState(false);
+
+  const copyIdentifier = (value: string) => {
+    void navigator.clipboard.writeText(value).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  };
 
   // 404 → toast and bounce back to the queue. Bouncing as an effect (not
   // during render) keeps React from complaining about a navigate-in-render.
@@ -37,6 +47,12 @@ export function DetailPage() {
 
   return (
     <div className="space-y-6 pb-6">
+      <Breadcrumb
+        items={[
+          { label: t('queueTitle'), to: '/moderation' },
+          { label: data?.report.title ?? id ?? '…' },
+        ]}
+      />
       <div className="flex items-center justify-between">
         <Button
           variant="ghost"
@@ -104,9 +120,21 @@ export function DetailPage() {
                     : data.report.scamTypeLabelEn}
                 </Badge>
                 {data.report.aiScore !== null && (
-                  <Badge variant="outline">
-                    {t('detail.ai.label')}: {data.report.aiScore}
-                  </Badge>
+                  <Tooltip
+                    content={t('detail.ai.tooltip', {
+                      score: data.report.aiScore,
+                      confidence: data.report.aiConfidence ?? 'unknown',
+                    })}
+                  >
+                    <Badge variant="outline" className="cursor-help">
+                      {t('detail.ai.label')}: {data.report.aiScore}
+                      {data.report.aiConfidence && data.report.aiConfidence !== 'unknown' && (
+                        <span className="ml-1 text-muted-foreground">
+                          ({data.report.aiConfidence})
+                        </span>
+                      )}
+                    </Badge>
+                  </Tooltip>
                 )}
                 {data.report.priorityFlag && (
                   <Badge variant="suspicious">{t('status.flagged')}</Badge>
@@ -133,9 +161,24 @@ export function DetailPage() {
               <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                 {t('detail.targetIdentifier')}
               </h3>
-              <code className="inline-block rounded border bg-muted px-3 py-1 text-sm">
-                {data.report.targetIdentifier}
-              </code>
+              <div className="flex items-center gap-2">
+                <code className="inline-block rounded border bg-muted px-3 py-1 text-sm">
+                  {data.report.targetIdentifier}
+                </code>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-7 shrink-0"
+                  aria-label={t('detail.copyIdentifier')}
+                  onClick={() => copyIdentifier(data.report.targetIdentifier!)}
+                >
+                  {copied ? (
+                    <Check className="size-3.5 text-green-600" />
+                  ) : (
+                    <Copy className="size-3.5" />
+                  )}
+                </Button>
+              </div>
             </section>
           )}
 

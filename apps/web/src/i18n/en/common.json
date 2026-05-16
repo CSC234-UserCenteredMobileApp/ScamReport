@@ -1,6 +1,7 @@
 {
   "appName": "ScamReport Admin",
   "nav": {
+    "dashboard": "Dashboard",
     "moderation": "Moderation",
     "announcements": "Announcements",
     "deletionRequests": "Deletion requests",

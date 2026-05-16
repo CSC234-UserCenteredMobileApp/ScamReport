@@ -2,6 +2,7 @@ import { Elysia, t } from 'elysia';
 import {
   AdminQueueResponse,
   AdminReportDetailResponse,
+  AdminReportSearchResponse,
   AdminEvidenceUrlResponse,
   ApproveRejectFlagRequest,
   AdminActionResponse,
@@ -11,6 +12,7 @@ import { requireRole } from '../../core/middleware/require_role';
 import {
   getQueue,
   getDetail,
+  searchReports,
   getEvidenceSignedUrl,
   approveReport,
   rejectReport,
@@ -42,6 +44,18 @@ export const adminReportsRoute = new Elysia({ prefix: '/admin/reports' })
     {
       query: t.Object({ scam_type: t.Optional(t.String()) }),
       response: AdminQueueResponse,
+    },
+  )
+
+  .get(
+    '/search',
+    async ({ query }) => searchReports(query.q, query.limit ? Number(query.limit) : undefined),
+    {
+      query: t.Object({
+        q: t.String({ minLength: 1 }),
+        limit: t.Optional(t.String()),
+      }),
+      response: AdminReportSearchResponse,
     },
   )
 

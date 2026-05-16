@@ -38,4 +38,10 @@ export const queryKeys = {
     inRange: (from?: string, to?: string) =>
       ['platform-summary', from ?? 'default', to ?? 'default'] as const,
   },
+  scamTypes: {
+    list: ['scam-types'] as const,
+  },
+  reportSearch: {
+    results: (q: string) => ['report-search', q] as const,
+  },
 } as const;
