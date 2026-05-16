@@ -14,6 +14,7 @@
       "version": "0.0.0",
       "dependencies": {
         "@elysiajs/cors": "^1.2.0",
+        "@expo-google-fonts/sarabun": "^0.4.1",
         "@google/genai": "^1.0.0",
         "@my-product/shared": "workspace:*",
         "@prisma/adapter-pg": "^7.0.0",
@@ -241,6 +242,8 @@
     "@eslint/object-schema": ["@eslint/object-schema@2.1.7", "", {}, "sha512-VtAOaymWVfZcmZbp6E2mympDIHvyjXs/12LqWYjVw6qjrfF+VK+fyG33kChz3nnK+SU5/NeHOqrTEHS8sXO3OA=="],
 
     "@eslint/plugin-kit": ["@eslint/plugin-kit@0.4.1", "", { "dependencies": { "@eslint/core": "^0.17.0", "levn": "^0.4.1" } }, "sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA=="],
+
+    "@expo-google-fonts/sarabun": ["@expo-google-fonts/sarabun@0.4.1", "", {}, "sha512-Q/mWAjNyaFT4ym8hZOdQJvTtSC56uxipJ1qzdpwW6znDCCLMas4zSnfflmnVNXPfoRVJoQCrxtTEg5yJ6BEw7w=="],
 
     "@fastify/busboy": ["@fastify/busboy@3.2.0", "", {}, "sha512-m9FVDXU3GT2ITSe0UaMA5rU3QkfC/UXtCU8y0gSN/GugTqtVldOBWIB5V6V3sbmenVZUIpU6f+mPEO2+m5iTaA=="],
 
