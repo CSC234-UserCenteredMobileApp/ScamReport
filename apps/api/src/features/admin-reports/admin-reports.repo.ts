@@ -41,6 +41,7 @@ export interface DetailRow {
   scammerId: string | null;
   aiScore: number | null;
   aiConfidence: string | null;
+  suspectedNameAtSubmit: string | null;
   createdAt: Date;
   updatedAt: Date;
   verifiedAt: Date | null;
@@ -149,6 +150,7 @@ export async function findDetailRow(reportId: string): Promise<DetailRow | null>
       scammerId: true,
       aiScore: true,
       aiConfidence: true,
+      suspectedNameAtSubmit: true,
       createdAt: true,
       updatedAt: true,
       verifiedAt: true,

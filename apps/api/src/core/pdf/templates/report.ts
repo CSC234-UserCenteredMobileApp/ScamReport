@@ -67,6 +67,16 @@ export function reportTemplate(
       ]
     : [];
 
+  const suspectedNameBlock = detail.suspectedNameAtSubmit
+    ? [
+        sectionTitle('Reported suspect name'),
+        kvTable([
+          ['Alleged name', detail.suspectedNameAtSubmit],
+          ['Source', 'Reporter / Ask AI at submit time'],
+        ]),
+      ]
+    : [];
+
   const scammerBlock = detail.scammer
     ? [
         sectionTitle('Linked scammer'),
@@ -180,6 +190,7 @@ export function reportTemplate(
     ...(headerBlock as Content[]),
     ...(descriptionBlock as Content[]),
     ...(targetBlock as Content[]),
+    ...(suspectedNameBlock as Content[]),
     ...(scammerBlock as Content[]),
     ...(evidenceBlock as Content[]),
     ...(auditBlock as Content[]),

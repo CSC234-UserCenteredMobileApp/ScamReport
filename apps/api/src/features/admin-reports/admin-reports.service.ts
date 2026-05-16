@@ -189,6 +189,7 @@ export async function getDetail(reportId: string): Promise<AdminReportDetail | n
     duplicateCount,
     aiScore,
     aiConfidence: aiConfidence as AdminReportDetail['aiConfidence'],
+    suspectedNameAtSubmit: report.suspectedNameAtSubmit ?? null,
     auditTrail,
     scammer,
     siblingCases,

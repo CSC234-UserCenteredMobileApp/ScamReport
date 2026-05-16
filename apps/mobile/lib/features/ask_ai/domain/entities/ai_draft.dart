@@ -7,6 +7,7 @@ class AiDraft {
     required this.scamTypeCode,
     this.targetIdentifier,
     this.targetIdentifierKind,
+    this.suspectedScammerName,
   });
 
   final String title;
@@ -14,6 +15,7 @@ class AiDraft {
   final String scamTypeCode;
   final String? targetIdentifier;
   final TargetIdentifierKind? targetIdentifierKind;
+  final String? suspectedScammerName;
 
   AiDraft copyWith({
     String? title,
@@ -21,7 +23,9 @@ class AiDraft {
     String? scamTypeCode,
     String? targetIdentifier,
     TargetIdentifierKind? targetIdentifierKind,
+    String? suspectedScammerName,
     bool clearTargetIdentifier = false,
+    bool clearSuspectedScammerName = false,
   }) {
     return AiDraft(
       title: title ?? this.title,
@@ -32,6 +36,9 @@ class AiDraft {
       targetIdentifierKind: clearTargetIdentifier
           ? null
           : (targetIdentifierKind ?? this.targetIdentifierKind),
+      suspectedScammerName: clearSuspectedScammerName
+          ? null
+          : (suspectedScammerName ?? this.suspectedScammerName),
     );
   }
 }

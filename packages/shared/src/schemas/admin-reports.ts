@@ -93,6 +93,9 @@ export const AdminReportDetail = Type.Object({
   duplicateCount: Type.Integer({ minimum: 0 }),
   aiScore: Type.Union([Type.Integer({ minimum: 0, maximum: 100 }), Type.Null()]),
   aiConfidence: Type.Union([AiConfidence, Type.Null()]),
+  // Snapshot of `suspectedScammerName` at submit time. Null when the
+  // reporter didn't surface a name (or the report pre-dates the field).
+  suspectedNameAtSubmit: Type.Union([Type.String(), Type.Null()]),
   auditTrail: Type.Array(ModerationRecord),
   // Linked scammer profile (when this case has been associated with one) +
   // sibling cases attributed to the same scammer.

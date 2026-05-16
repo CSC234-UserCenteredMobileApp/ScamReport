@@ -117,6 +117,8 @@ class ReportsSubmitApi {
           'targetIdentifier': draft.targetIdentifier,
         if (draft.targetIdentifierKind != null)
           'targetIdentifierKind': draft.targetIdentifierKind!.name,
+        if (draft.suspectedScammerName != null)
+          'suspectedScammerName': draft.suspectedScammerName,
         'evidenceFiles': evidenceFiles.map((e) => e.toJson()).toList(),
         'sourceConversationId': sourceConversationId,
         if (clientSubmissionId != null)

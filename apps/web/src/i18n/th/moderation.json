@@ -80,6 +80,8 @@
       "pending": "รอการประเมิน"
     },
     "printPdf": "พิมพ์ / ส่งออก PDF",
+    "suspectedNameAtSubmit": "ชื่อผู้ต้องสงสัยที่รายงาน",
+    "suspectedNameAtSubmitHint": "(ที่ผู้โทร/ผู้ส่งอ้างว่าใช้)",
     "scammer": {
       "title": "ผู้ต้องสงสัยที่เชื่อมโยง",
       "alleged": "ชื่อที่อ้าง",

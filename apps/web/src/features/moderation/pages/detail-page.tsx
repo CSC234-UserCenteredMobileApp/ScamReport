@@ -139,6 +139,20 @@ export function DetailPage() {
             </section>
           )}
 
+          {data.report.suspectedNameAtSubmit && (
+            <section className="space-y-2">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                {t('detail.suspectedNameAtSubmit')}
+              </h3>
+              <p className="text-sm">
+                <strong>{data.report.suspectedNameAtSubmit}</strong>{' '}
+                <span className="text-muted-foreground">
+                  {t('detail.suspectedNameAtSubmitHint')}
+                </span>
+              </p>
+            </section>
+          )}
+
           <section className="space-y-2">
             <div className="flex items-baseline justify-between gap-2">
               <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">

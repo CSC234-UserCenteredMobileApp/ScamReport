@@ -90,6 +90,7 @@ export const sampleDetail: AdminReportDetail = {
       createdAt: new Date(Date.now() - 2 * 3_600_000).toISOString(),
     },
   ],
+  suspectedNameAtSubmit: null,
   scammer: null,
   siblingCases: [],
 };

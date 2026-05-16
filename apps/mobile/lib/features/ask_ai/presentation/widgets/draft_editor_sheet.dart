@@ -75,6 +75,8 @@ class _DraftEditorSheetState extends ConsumerState<DraftEditorSheet> {
       scamTypeCode: _scamType,
       targetIdentifier: trimmedId.isEmpty ? null : trimmedId,
       targetIdentifierKind: trimmedId.isEmpty ? null : _kind,
+      // Preserve the AI's name inference through the manual edit path.
+      suspectedScammerName: widget.initial.suspectedScammerName,
     );
     Navigator.of(context).pop(
       DraftEditorResult(draft: result, evidence: _evidence),

@@ -91,6 +91,7 @@ class ModRepositoryImpl implements ModRepository {
         lastRemarkByAdmin: m['lastRemarkByAdmin'] as String?,
         aiScore: m['aiScore'] as int?,
         aiConfidence: m['aiConfidence'] as String?,
+        suspectedNameAtSubmit: m['suspectedNameAtSubmit'] as String?,
       );
 
   EvidenceFile _mapEvidence(Map<String, dynamic> m) => EvidenceFile(

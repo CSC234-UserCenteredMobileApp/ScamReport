@@ -94,6 +94,7 @@ describe('AdminReportDetail', () => {
     duplicateCount: 0,
     aiScore: 50,
     aiConfidence: 'low' as const,
+    suspectedNameAtSubmit: null,
     auditTrail: [],
     scammer: null,
     siblingCases: [],

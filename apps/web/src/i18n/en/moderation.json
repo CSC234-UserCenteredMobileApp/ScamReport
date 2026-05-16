@@ -80,6 +80,8 @@
       "pending": "Pending"
     },
     "printPdf": "Print / Export PDF",
+    "suspectedNameAtSubmit": "Reported suspect name",
+    "suspectedNameAtSubmitHint": "(claimed by caller/sender at submit time)",
     "scammer": {
       "title": "Linked scammer",
       "alleged": "Alleged name",
