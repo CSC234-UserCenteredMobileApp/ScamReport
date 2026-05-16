@@ -98,6 +98,7 @@ describe('AdminReportDetail', () => {
     auditTrail: [],
     scammer: null,
     siblingCases: [],
+    relatedCases: [],
   };
   test('accepts well-formed detail row', () => {
     expect(Value.Check(AdminReportDetail, baseDetail)).toBe(true);

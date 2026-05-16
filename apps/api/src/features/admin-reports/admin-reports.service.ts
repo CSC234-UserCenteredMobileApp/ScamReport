@@ -17,6 +17,7 @@
 import type {
   AdminEvidenceFile,
   AdminQueueItem,
+  AdminRelatedCase,
   AdminReportDetail,
   AdminSiblingCase,
   ModerationRecord,
@@ -36,6 +37,7 @@ import {
   findDetailRow,
   findEvidenceFile,
   findQueueRows,
+  findRelatedCases,
   findSiblingCases,
   type ActionKind,
   type ActionResult,
@@ -173,6 +175,23 @@ export async function getDetail(reportId: string): Promise<AdminReportDetail | n
     }));
   }
 
+  // High-accuracy related cases across three sources, deduped server-side.
+  // Keeps the admin a single bounded list to review without scrolling.
+  const relatedRows = await findRelatedCases({
+    reportId,
+    scammerId: report.scammerId ?? null,
+    personId: report.scammer?.person?.id ?? null,
+    targetIdentifierNormalized: report.targetIdentifierNormalized ?? null,
+  });
+  const relatedCases: AdminRelatedCase[] = relatedRows.map((r) => ({
+    id: r.id,
+    title: r.title,
+    status: r.status,
+    scamTypeCode: r.scamTypeCode,
+    verifiedAt: r.verifiedAt ? r.verifiedAt.toISOString() : null,
+    matchKind: r.matchKind,
+  }));
+
   return {
     id: report.id,
     title: report.title,
@@ -193,6 +212,7 @@ export async function getDetail(reportId: string): Promise<AdminReportDetail | n
     auditTrail,
     scammer,
     siblingCases,
+    relatedCases,
   };
 }
 

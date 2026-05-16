@@ -93,6 +93,7 @@ export const sampleDetail: AdminReportDetail = {
   suspectedNameAtSubmit: null,
   scammer: null,
   siblingCases: [],
+  relatedCases: [],
 };
 
 export const sampleDetailResponse: AdminReportDetailResponse = { report: sampleDetail };

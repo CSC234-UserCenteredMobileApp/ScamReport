@@ -235,6 +235,37 @@ export function DetailPage() {
             </section>
           )}
 
+          {data.report.relatedCases.length > 0 && (
+            <section className="space-y-2">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                {t('detail.relatedCases.title', { count: data.report.relatedCases.length })}
+              </h3>
+              <ul className="divide-y rounded-lg border bg-card text-sm">
+                {data.report.relatedCases.map((c) => (
+                  <li key={c.id} className="flex items-baseline gap-3 px-4 py-2">
+                    <Badge variant="outline" className="capitalize">
+                      {t(`detail.relatedCases.match.${c.matchKind}`)}
+                    </Badge>
+                    <Link
+                      to={`/moderation/${c.id}`}
+                      className="flex-1 truncate text-primary underline"
+                    >
+                      {c.title}
+                    </Link>
+                    <span className="text-xs text-muted-foreground capitalize">
+                      {c.status}
+                    </span>
+                    {c.verifiedAt && (
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(c.verifiedAt).toLocaleDateString()}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
           <section className="space-y-2">
             <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               {t('detail.auditTrail')}
