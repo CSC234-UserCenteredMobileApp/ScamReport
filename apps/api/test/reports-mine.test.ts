@@ -89,6 +89,9 @@ mock.module('../src/core/db/client', () => ({
       deleteMany: async () => ({ count: 0 }),
       createMany: async () => ({ count: 0 }),
     },
+    // withdrawReport drops the stale embedding row outside the tx; reject
+    // also calls this from admin-reports. Both are no-ops in tests.
+    $executeRaw: async () => 0,
     $transaction: async (fn: (tx: unknown) => Promise<unknown>) => {
       const tx = {
         evidenceFile: {
