@@ -57,7 +57,11 @@ export interface ScorableReport {
   description: string;
   targetIdentifier?: string | null;
   scamType?: { labelEn?: string | null; labelTh?: string | null } | null;
-  scammer?: { displayName?: string | null; aliases?: string[] | null } | null;
+  scammer?: {
+    displayName?: string | null;
+    aliases?: string[] | null;
+    person?: { fullName?: string | null } | null;
+  } | null;
 }
 
 /**
@@ -83,6 +87,13 @@ export function canonicalEmbedInput(report: ScorableReport): string {
       .filter(Boolean);
     const all = [scammerName, ...aliases];
     lines.push(`scammer: ${all.join(' / ')}`);
+  }
+  // Person.fullName binds embedding space by the offender's real identity
+  // across multiple scammer campaigns. Two reports tied to different
+  // campaigns of the same person now cluster more tightly.
+  const personName = report.scammer?.person?.fullName?.trim();
+  if (personName) {
+    lines.push(`person: ${personName}`);
   }
   return lines.join('\n');
 }

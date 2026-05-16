@@ -491,6 +491,11 @@ export async function updateReport(
     if (evidenceCreates.length > 0) {
       await tx.evidenceFile.createMany({ data: evidenceCreates });
     }
+    // Drop the stale fingerprint. `generate-embeddings.ts` will re-embed
+    // the row on its next run because the deleted row's content_hash no
+    // longer matches the (new) title+description hash. Cheaper than an
+    // inline Gemini call inside the edit transaction.
+    await tx.$executeRaw`DELETE FROM report_embeddings WHERE report_id = ${reportId}::uuid`;
     return tx.report.update({
       where: { id: reportId },
       data: {

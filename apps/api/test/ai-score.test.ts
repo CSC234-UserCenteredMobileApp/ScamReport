@@ -198,4 +198,32 @@ describe('canonicalEmbedInput', () => {
     });
     expect(text).toBe('t\nd');
   });
+
+  test('appends person.fullName line when linked scammer carries a person', async () => {
+    const { canonicalEmbedInput } = await import('../src/core/ai-score');
+    const text = canonicalEmbedInput({
+      title: 'Tax scam call',
+      description: 'Caller demanded transfer to verification account.',
+      targetIdentifier: '+6629991234',
+      scamType: { labelEn: 'Phone Impersonation', labelTh: 'การปลอมตัว' },
+      scammer: {
+        displayName: 'Revenue Dept Impersonator',
+        aliases: ['Officer Anan'],
+        person: { fullName: 'Khun Somchai Wongchai' },
+      },
+    });
+    expect(text).toContain('scammer: Revenue Dept Impersonator / Officer Anan');
+    expect(text).toContain('person: Khun Somchai Wongchai');
+  });
+
+  test('skips person line when scammer has no linked person', async () => {
+    const { canonicalEmbedInput } = await import('../src/core/ai-score');
+    const text = canonicalEmbedInput({
+      title: 't',
+      description: 'd',
+      scammer: { displayName: 'Anon Ring', aliases: [], person: null },
+    });
+    expect(text).toContain('scammer: Anon Ring');
+    expect(text).not.toContain('person:');
+  });
 });
