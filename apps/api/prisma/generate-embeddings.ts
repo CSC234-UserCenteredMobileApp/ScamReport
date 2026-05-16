@@ -25,9 +25,23 @@ function sleep(ms: number): Promise<void> {
 }
 
 async function main() {
+  const { canonicalEmbedInput } = await import('../src/core/ai-score');
   const reports = await prisma.report.findMany({
     where: { status: 'verified' },
-    select: { id: true, title: true, description: true },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      targetIdentifier: true,
+      scamType: { select: { labelEn: true, labelTh: true } },
+      scammer: {
+        select: {
+          displayName: true,
+          aliases: true,
+          person: { select: { fullName: true } },
+        },
+      },
+    },
   });
 
   const existingEmbeddings = await prisma.$queryRaw<{ report_id: string; content_hash: string }[]>`
@@ -39,7 +53,16 @@ async function main() {
   let skipped = 0;
 
   for (const report of reports) {
-    const content = report.title + '\n' + report.description;
+    // Canonical input now folds in the scam-type label, linked scammer
+    // name+aliases, and (new) Person.fullName so embedding space binds by
+    // offender identity, not just lexical title overlap.
+    const content = canonicalEmbedInput({
+      title: report.title,
+      description: report.description,
+      targetIdentifier: report.targetIdentifier,
+      scamType: report.scamType,
+      scammer: report.scammer,
+    });
     const hash = sha256(content);
 
     if (hashByReportId.get(report.id) === hash) {
