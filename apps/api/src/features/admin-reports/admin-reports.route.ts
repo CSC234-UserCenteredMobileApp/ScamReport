@@ -18,7 +18,13 @@ import {
   unflagReport,
 } from './admin-reports.service';
 import { renderPdf, shortId } from '../../core/pdf/pdf-generator';
-import { reportTemplate } from '../../core/pdf/templates/report';
+import { reportTemplate, type EvidenceImageMap } from '../../core/pdf/templates/report';
+import { downloadFile } from '../../core/supabase/storage';
+
+const EVIDENCE_BUCKET = 'evidence';
+const MAX_EMBEDDED_IMAGES = 5;
+const MAX_EMBEDDED_BYTES = 4 * 1024 * 1024; // 4 MB cap per file
+const SAFE_IMAGE_MIME = new Set(['image/jpeg', 'image/jpg', 'image/png']);
 
 const uuidParam = t.Object({ id: t.String({ format: 'uuid' }) });
 const evidenceParams = t.Object({
@@ -60,7 +66,29 @@ export const adminReportsRoute = new Elysia({ prefix: '/admin/reports' })
         set.status = 404;
         return { error: 'Not found' };
       }
-      const bytes = await renderPdf(reportTemplate(report));
+
+      // Download evidence images so the PDF embeds the actual screenshots
+      // instead of just a filename. PDFs / other kinds stay as table rows.
+      // Bounded to MAX_EMBEDDED_IMAGES so a report with many huge photos
+      // can't produce a 50 MB document.
+      const images: EvidenceImageMap = {};
+      const candidates = report.evidenceFiles
+        .filter((f) => f.kind === 'image' && SAFE_IMAGE_MIME.has(f.mimeType))
+        .slice(0, MAX_EMBEDDED_IMAGES);
+      await Promise.all(
+        candidates.map(async (f) => {
+          try {
+            const bytes = await downloadFile(EVIDENCE_BUCKET, f.storagePath);
+            if (bytes.length > MAX_EMBEDDED_BYTES) return;
+            const b64 = Buffer.from(bytes).toString('base64');
+            images[f.id] = `data:${f.mimeType};base64,${b64}`;
+          } catch (err) {
+            console.warn('[pdf] could not embed evidence', f.id, err);
+          }
+        }),
+      );
+
+      const bytes = await renderPdf(reportTemplate(report, images));
       return new Response(bytes as BodyInit, {
         status: 200,
         headers: {
