@@ -47,7 +47,8 @@ describe('downloadPdf', () => {
     await downloadPdf('/admin/x.pdf', 'thing.pdf');
     expect(seenAuth).toBe('Bearer the-token');
     expect(
-      (globalThis.URL as { createObjectURL: () => string }).createObjectURL,
+      (globalThis.URL as unknown as { createObjectURL: (b: Blob) => string })
+        .createObjectURL,
     ).toHaveBeenCalled();
   });
 
