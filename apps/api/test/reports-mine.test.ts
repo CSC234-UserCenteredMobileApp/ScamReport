@@ -48,6 +48,7 @@ mock.module('../src/core/supabase/storage', () => ({
   getSignedUrl: async () => 'https://signed.example/url',
   deleteFile: async () => {},
   copyFile: async () => {},
+  downloadFile: async () => new Uint8Array(),
 }));
 
 const REPORT_ID = '00000000-0000-0000-0000-000000000001';
@@ -97,6 +98,9 @@ mock.module('../src/core/db/client', () => ({
         report: {
           update: async (args: unknown) => { txUpdateCalls.push(args); return mockUpdateResult; },
         },
+        // updateReport drops the report's stale embedding row inside the
+        // same tx so the next embed cron re-fingerprints. No-op in tests.
+        $executeRaw: async () => 0,
       };
       return fn(tx);
     },
