@@ -276,12 +276,69 @@ export async function approveReport(
 ): Promise<PublicActionResult | null> {
   const result = await repoApplyAction(reportId, adminId, 'approve', remark);
   if (!result) return null;
+  // After moderator endorsement, attempt a name-based link if the report
+  // didn't already auto-link via identifier match at submit time.
+  await autoLinkByPersonName(reportId);
   await notifyOwner(result, 'report_verified', {
     title: 'Your report was verified',
     body: 'Thank you — your report has been reviewed and verified.',
   });
   await mirrorReporterView(result);
   return strip(result);
+}
+
+// On approve, link the report to a known Person + Scammer when the
+// reporter's `suspected_name_at_submit` matches an existing Person.fullName
+// (case-insensitive) AND that Person has at least one Scammer campaign.
+// Picks the Person's most-active campaign (highest reportCountCache) so
+// authority sees the case clustered with the loudest history. No-op when
+// the report already has a scammerId, the name is null, or there's no
+// matching Person.
+async function autoLinkByPersonName(reportId: string): Promise<void> {
+  const prisma = getPrisma();
+  const report = await prisma.report.findUnique({
+    where: { id: reportId },
+    select: { id: true, scammerId: true, suspectedNameAtSubmit: true },
+  });
+  if (!report || report.scammerId || !report.suspectedNameAtSubmit) return;
+  const trimmed = report.suspectedNameAtSubmit.trim();
+  if (!trimmed) return;
+
+  const person = await prisma.person.findFirst({
+    where: { fullName: { equals: trimmed, mode: 'insensitive' } },
+    select: {
+      id: true,
+      scammers: {
+        orderBy: { reportCountCache: 'desc' },
+        take: 1,
+        select: { id: true },
+      },
+    },
+  });
+  if (!person || person.scammers.length === 0) return;
+  const targetScammerId = person.scammers[0]!.id;
+
+  await prisma.report.update({
+    where: { id: reportId },
+    data: { scammerId: targetScammerId },
+  });
+  // Refresh the cached counts on the linked Scammer + Person so admin
+  // dossiers reflect the new case immediately.
+  await prisma.$executeRaw`
+    UPDATE scammers
+    SET report_count_cache = (SELECT COUNT(*)::int FROM reports WHERE scammer_id = ${targetScammerId}::uuid),
+        last_seen_at       = now()
+    WHERE id = ${targetScammerId}::uuid
+  `;
+  await prisma.$executeRaw`
+    UPDATE persons p
+    SET report_count_cache = (
+      SELECT COALESCE(SUM(s.report_count_cache), 0)::int
+      FROM scammers s WHERE s.person_id = p.id
+    ),
+    last_seen_at = now()
+    WHERE p.id = ${person.id}::uuid
+  `;
 }
 
 export async function rejectReport(
