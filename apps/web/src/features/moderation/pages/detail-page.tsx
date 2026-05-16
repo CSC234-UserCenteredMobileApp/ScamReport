@@ -12,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PageHeader } from '@/components/page-header';
 import { ApiError } from '@/lib/api/client';
+import { downloadPdf } from '@/lib/api/download-pdf';
 import { useReportDetail } from '@/features/moderation/api/detail';
 import { AuditTrail } from '@/features/moderation/components/audit-trail';
 import { DetailActionBar } from '@/features/moderation/components/detail-action-bar';
@@ -35,8 +36,8 @@ export function DetailPage() {
   }, [error, navigate, t]);
 
   return (
-    <div className="space-y-6 pb-6 print:space-y-4 print:pb-0">
-      <div className="flex items-center justify-between print:hidden">
+    <div className="space-y-6 pb-6">
+      <div className="flex items-center justify-between">
         <Button
           variant="ghost"
           size="sm"
@@ -50,7 +51,12 @@ export function DetailPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => window.print()}
+            onClick={() =>
+              downloadPdf(
+                `/admin/reports/${data.report.id}/pdf`,
+                `scamreport-report-${data.report.id.replace(/-/g, '').slice(0, 8)}.pdf`,
+              )
+            }
             className="gap-2"
           >
             <Printer className="size-4" aria-hidden />
@@ -225,7 +231,7 @@ export function DetailPage() {
             />
           </section>
 
-          <div className="print:hidden">
+          <div>
             <DetailActionBar report={data.report} />
           </div>
         </>

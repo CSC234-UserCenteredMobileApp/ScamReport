@@ -124,23 +124,6 @@ export const PlatformSummaryResponse = Type.Object({
     total: Type.Integer({ minimum: 0 }),
     verdictMix: VerdictMix,
   }),
-  aiScoreDistribution: Type.Object({
-    high: Type.Integer({ minimum: 0 }),
-    medium: Type.Integer({ minimum: 0 }),
-    low: Type.Integer({ minimum: 0 }),
-    unknown: Type.Integer({ minimum: 0 }),
-  }),
-  latestEval: Type.Union([
-    Type.Object({
-      runAt: Type.String({ format: 'date-time' }),
-      verdictAccuracy: Type.Number(),
-      scammerRecallAt1: Type.Number(),
-      scammerMrr: Type.Number(),
-      missingFactsF1: Type.Number(),
-      p95LatencyMs: Type.Integer(),
-    }),
-    Type.Null(),
-  ]),
   generatedAt: Type.String({ format: 'date-time' }),
 });
 export type PlatformSummaryResponse = Static<typeof PlatformSummaryResponse>;

@@ -1,7 +1,6 @@
 // Platform-wide overall summary for the admin web. Aggregates report counts,
-// scam-type breakdown, top scammers + identifiers, /check call volume, AI
-// score distribution, and the latest AiEvalSummary. Single endpoint —
-// designed for a printable executive view + the dashboard.
+// scam-type breakdown, top scammers + identifiers, and /check call volume.
+// Single endpoint — designed for a printable executive view + the dashboard.
 
 import type { PlatformSummaryResponse } from '@my-product/shared';
 import { getPrisma } from '../../core/db/client';
@@ -33,11 +32,6 @@ export async function getPlatformSummary(
     topUrlRows,
     checkLogsTotal,
     verdictMixRows,
-    aiHigh,
-    aiMedium,
-    aiLow,
-    aiUnknown,
-    latestEval,
   ] = await Promise.all([
     prisma.report.count({ where: reportWhere }),
     prisma.report.count({ where: { ...reportWhere, status: 'verified' } }),
@@ -91,13 +85,6 @@ export async function getPlatformSummary(
       where: { createdAt: { gte: from, lte: to } },
       _count: { verdict: true },
     }),
-    prisma.report.count({ where: { ...reportWhere, aiConfidence: 'high' } }),
-    prisma.report.count({ where: { ...reportWhere, aiConfidence: 'medium' } }),
-    prisma.report.count({ where: { ...reportWhere, aiConfidence: 'low' } }),
-    prisma.report.count({
-      where: { ...reportWhere, OR: [{ aiConfidence: null }, { aiConfidence: 'unknown' }] },
-    }),
-    prisma.aiEvalRun.findFirst({ orderBy: { runAt: 'desc' } }),
   ]);
 
   const scamTypeIds = scamTypeBreakdownRows.map((r) => r.scamTypeId);
@@ -154,22 +141,6 @@ export async function getPlatformSummary(
       total: checkLogsTotal,
       verdictMix,
     },
-    aiScoreDistribution: {
-      high: aiHigh,
-      medium: aiMedium,
-      low: aiLow,
-      unknown: aiUnknown,
-    },
-    latestEval: latestEval
-      ? {
-          runAt: latestEval.runAt.toISOString(),
-          verdictAccuracy: latestEval.verdictAccuracy,
-          scammerRecallAt1: latestEval.scammerRecallAt1,
-          scammerMrr: latestEval.scammerMrr,
-          missingFactsF1: latestEval.missingFactsF1,
-          p95LatencyMs: latestEval.p95LatencyMs,
-        }
-      : null,
     generatedAt: new Date().toISOString(),
   };
 }

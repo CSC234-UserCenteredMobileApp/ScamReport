@@ -38,8 +38,4 @@ export const queryKeys = {
     inRange: (from?: string, to?: string) =>
       ['platform-summary', from ?? 'default', to ?? 'default'] as const,
   },
-  aiEval: {
-    all: ['ai-eval'] as const,
-    runs: ['ai-eval', 'runs'] as const,
-  },
 } as const;

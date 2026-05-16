@@ -13,5 +13,4 @@ export * from './schemas/notifications';
 export * from './schemas/admin-notifications';
 export * from './schemas/scammers';
 export * from './schemas/persons';
-export * from './schemas/ai-eval';
 export * from './schemas/dossier';

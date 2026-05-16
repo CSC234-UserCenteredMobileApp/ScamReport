@@ -7,4 +7,6 @@ abstract class ModRepository {
   Future<void> reject(String reportId, String remark);
   Future<void> flag(String reportId, String remark);
   Future<void> unflag(String reportId, String remark);
+  Future<List<int>> fetchReportPdf(String reportId);
+  Future<List<int>> fetchPlatformSummaryPdf();
 }

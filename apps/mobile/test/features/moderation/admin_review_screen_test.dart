@@ -45,6 +45,12 @@ class _RecordingRepository implements ModRepository {
   Future<void> unflag(String id, String remark) async {
     calls.add((method: 'unflag', id: id, remark: remark));
   }
+
+  @override
+  Future<List<int>> fetchReportPdf(String reportId) async => [];
+
+  @override
+  Future<List<int>> fetchPlatformSummaryPdf() async => [];
 }
 
 ModReportDetail _detail({
@@ -663,6 +669,12 @@ class _FailingRepository implements ModRepository {
 
   @override
   Future<void> unflag(String id, String remark) async => throw failure;
+
+  @override
+  Future<List<int>> fetchReportPdf(String reportId) async => throw failure;
+
+  @override
+  Future<List<int>> fetchPlatformSummaryPdf() async => throw failure;
 }
 
 class _SlowRepository implements ModRepository {
@@ -687,4 +699,10 @@ class _SlowRepository implements ModRepository {
 
   @override
   Future<void> unflag(String id, String remark) => completer.future;
+
+  @override
+  Future<List<int>> fetchReportPdf(String reportId) async => [];
+
+  @override
+  Future<List<int>> fetchPlatformSummaryPdf() async => [];
 }

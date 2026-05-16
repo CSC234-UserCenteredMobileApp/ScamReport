@@ -287,8 +287,6 @@ model Scammer {
   person        Person?             @relation(fields: [personId], references: [id], onDelete: SetNull)
   identifiers   ScammerIdentifier[]
   reports       Report[]
-  evalCases     AiEvalCase[]
-  evalResults   AiEvalResult[]
 
   @@index([personId])
   @@map("scammers")
@@ -332,64 +330,6 @@ model ScammerIdentifier {
   @@unique([kind, valueNormalized])
   @@index([scammerId])
   @@map("scammer_identifiers")
-}
-
-/// Labelled eval dataset — mock data drives the AI accuracy measurement.
-model AiEvalCase {
-  id                    String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  label                 String
-  inputType             CheckInputKind @map("input_type")
-  inputPayload          String         @map("input_payload")
-  expectedVerdict       VerdictLabel   @map("expected_verdict")
-  expectedScammerId     String?        @map("expected_scammer_id") @db.Uuid
-  expectedScamTypeCode  String?        @map("expected_scam_type_code")
-  expectedMissingFacts  Json           @default("[]") @map("expected_missing_facts") @db.JsonB
-  notes                 String?
-  createdAt             DateTime       @default(now()) @map("created_at") @db.Timestamptz()
-
-  expectedScammer Scammer?       @relation(fields: [expectedScammerId], references: [id], onDelete: SetNull)
-  results         AiEvalResult[]
-
-  @@map("ai_eval_cases")
-}
-
-/// One row per evaluation pass — summary metrics.
-model AiEvalRun {
-  id                String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  runAt             DateTime         @default(now()) @map("run_at") @db.Timestamptz()
-  totalCases        Int              @map("total_cases")
-  verdictAccuracy   Float            @map("verdict_accuracy")
-  scammerRecallAt1  Float            @map("scammer_recall_at_1")
-  scammerMrr        Float            @map("scammer_mrr")
-  missingFactsF1    Float            @map("missing_facts_f1")
-  p95LatencyMs      Int              @map("p95_latency_ms")
-  createdAt         DateTime         @default(now()) @map("created_at") @db.Timestamptz()
-
-  results AiEvalResult[]
-
-  @@index([runAt(sort: Desc)])
-  @@map("ai_eval_runs")
-}
-
-/// Per-case result inside a run.
-model AiEvalResult {
-  id                  String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  runId               String       @map("run_id") @db.Uuid
-  caseId              String       @map("case_id") @db.Uuid
-  actualVerdict       VerdictLabel @map("actual_verdict")
-  actualScammerId     String?      @map("actual_scammer_id") @db.Uuid
-  actualMissingFacts  Json         @default("[]") @map("actual_missing_facts") @db.JsonB
-  scammerMatched      Boolean      @map("scammer_matched")
-  latencyMs           Int          @map("latency_ms")
-  createdAt           DateTime     @default(now()) @map("created_at") @db.Timestamptz()
-
-  run           AiEvalRun  @relation(fields: [runId], references: [id], onDelete: Cascade)
-  evalCase      AiEvalCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
-  actualScammer Scammer?   @relation(fields: [actualScammerId], references: [id], onDelete: SetNull)
-
-  @@index([runId])
-  @@index([caseId])
-  @@map("ai_eval_results")
 }
 
 /// Up to 5 files per report. Bytes live in Supabase Storage. (DESIGN §4.5)

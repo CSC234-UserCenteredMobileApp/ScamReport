@@ -41,6 +41,14 @@ class ModRepositoryImpl implements ModRepository {
   Future<void> unflag(String id, String remark) =>
       _api.postAction(id, 'unflag', remark);
 
+  @override
+  Future<List<int>> fetchReportPdf(String reportId) =>
+      _api.fetchReportPdf(reportId);
+
+  @override
+  Future<List<int>> fetchPlatformSummaryPdf() =>
+      _api.fetchPlatformSummaryPdf();
+
   // Reporter identity is intentionally not extracted from the JSON envelope
   // (PRD v1.2 FR-7.4 + FR-7.8). Even if a future server bug regressed and
   // included `reporterHandle`/`reporterId`, this mapper would silently drop

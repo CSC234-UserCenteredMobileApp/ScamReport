@@ -13,8 +13,6 @@ import {
   AdminDeletionRequestListResponse,
   AdminDeletionActionResponse,
   AuthSyncResponse,
-  AiEvalListResponse,
-  AiEvalRunResponse,
   LinkScammerResponse,
   PersonDossierResponse,
   PlatformSummaryResponse,
@@ -67,8 +65,6 @@ export const validators = {
   personDossier: TypeCompiler.Compile(PersonDossierResponse),
   linkScammer: TypeCompiler.Compile(LinkScammerResponse),
   platformSummary: TypeCompiler.Compile(PlatformSummaryResponse),
-  aiEvalRun: TypeCompiler.Compile(AiEvalRunResponse),
-  aiEvalList: TypeCompiler.Compile(AiEvalListResponse),
 } as const;
 
 export type Validators = typeof validators;

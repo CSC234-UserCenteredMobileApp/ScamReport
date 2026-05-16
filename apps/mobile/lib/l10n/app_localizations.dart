@@ -698,6 +698,12 @@ abstract class AppLocalizations {
   /// **'Export as PDF'**
   String get adminReviewExportPdf;
 
+  /// No description provided for @platformSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform summary'**
+  String get platformSummaryTitle;
+
   /// No description provided for @adminReviewApprove.
   ///
   /// In en, this message translates to:

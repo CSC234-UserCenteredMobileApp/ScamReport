@@ -12,6 +12,8 @@ import {
   linkScammer,
   search,
 } from './admin-scammers.service';
+import { renderPdf, shortId } from '../../core/pdf/pdf-generator';
+import { scammerTemplate } from '../../core/pdf/templates/scammer';
 
 const uuidParam = t.Object({ id: t.String({ format: 'uuid' }) });
 const errorBody = t.Object({ error: t.String() });
@@ -45,6 +47,27 @@ export const adminScammersRoute = new Elysia()
       params: uuidParam,
       response: { 200: ScammerDossierResponse, 404: errorBody },
     },
+  )
+
+  .get(
+    '/admin/scammers/:id/pdf',
+    async ({ params, set }) => {
+      const dossier = await getDossier(params.id);
+      if (!dossier) {
+        set.status = 404;
+        return { error: 'Scammer not found' };
+      }
+      const bytes = await renderPdf(scammerTemplate(dossier));
+      return new Response(bytes as BodyInit, {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `attachment; filename="scamreport-scammer-${shortId(dossier.scammer.id)}.pdf"`,
+          'Cache-Control': 'no-store',
+        },
+      });
+    },
+    { params: uuidParam },
   )
 
   .post(

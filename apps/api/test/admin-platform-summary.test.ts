@@ -61,17 +61,6 @@ mock.module('../src/core/db/client', () => ({
         { verdict: 'unknown', _count: { verdict: 9 } },
       ],
     },
-    aiEvalRun: {
-      findFirst: async () => ({
-        id: '33333333-3333-3333-3333-333333333333',
-        runAt: new Date('2026-05-10T00:00:00Z'),
-        verdictAccuracy: 0.8,
-        scammerRecallAt1: 0.7,
-        scammerMrr: 0.75,
-        missingFactsF1: 0.6,
-        p95LatencyMs: 250,
-      }),
-    },
     $queryRaw: async () => [],
   }),
 }));
@@ -83,7 +72,7 @@ beforeEach(() => {
 });
 
 describe('GET /admin/reports/platform-summary', () => {
-  test('admin → returns aggregates + latestEval', async () => {
+  test('admin → returns aggregates', async () => {
     const res = await app.handle(
       new Request('http://localhost/admin/reports/platform-summary', {
         method: 'GET',
@@ -98,8 +87,6 @@ describe('GET /admin/reports/platform-summary', () => {
     expect(body.topScammers[0].displayName).toBe('Revenue Dept Impersonator');
     expect(body.checkLogs.total).toBe(99);
     expect(body.checkLogs.verdictMix.scam).toBe(50);
-    expect(body.latestEval).not.toBeNull();
-    expect(body.latestEval.verdictAccuracy).toBe(0.8);
   });
 
   test('non-admin → 403', async () => {

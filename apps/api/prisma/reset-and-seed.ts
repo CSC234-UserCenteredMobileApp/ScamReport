@@ -13,7 +13,6 @@ const SCRIPTS = [
   'seed-reports.ts',
   'seed-scammers.ts',
   'seed-call-screening.ts',
-  'seed-ai-eval.ts',
   'generate-embeddings.ts',
 ];
 

@@ -16,7 +16,6 @@ import { notificationsRoute } from './features/notifications/notifications.route
 import { adminNotificationsRoute } from './features/admin-notifications/admin-notifications.route';
 import { adminScammersRoute } from './features/admin-scammers/admin-scammers.route';
 import { adminPersonsRoute } from './features/admin-persons/admin-persons.route';
-import { adminAiEvalRoute } from './features/admin-ai-eval/admin-ai-eval.route';
 import { adminPlatformSummaryRoute } from './features/admin-platform-summary/admin-platform-summary.route';
 
 // CORS allowlist for the admin web portal (apps/web).
@@ -54,7 +53,6 @@ export const app = new Elysia()
   .use(adminNotificationsRoute)
   .use(adminScammersRoute)
   .use(adminPersonsRoute)
-  .use(adminAiEvalRoute)
   .use(adminPlatformSummaryRoute);
 
 if (import.meta.main) {

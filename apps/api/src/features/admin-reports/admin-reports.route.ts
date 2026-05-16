@@ -17,6 +17,8 @@ import {
   flagReport,
   unflagReport,
 } from './admin-reports.service';
+import { renderPdf, shortId } from '../../core/pdf/pdf-generator';
+import { reportTemplate } from '../../core/pdf/templates/report';
 
 const uuidParam = t.Object({ id: t.String({ format: 'uuid' }) });
 const evidenceParams = t.Object({
@@ -48,6 +50,27 @@ export const adminReportsRoute = new Elysia({ prefix: '/admin/reports' })
       params: uuidParam,
       response: { 200: AdminReportDetailResponse, 404: notFound },
     },
+  )
+
+  .get(
+    '/:id/pdf',
+    async ({ params, set }) => {
+      const report = await getDetail(params.id);
+      if (!report) {
+        set.status = 404;
+        return { error: 'Not found' };
+      }
+      const bytes = await renderPdf(reportTemplate(report));
+      return new Response(bytes as BodyInit, {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `attachment; filename="scamreport-report-${shortId(report.id)}.pdf"`,
+          'Cache-Control': 'no-store',
+        },
+      });
+    },
+    { params: uuidParam },
   )
 
   .get(

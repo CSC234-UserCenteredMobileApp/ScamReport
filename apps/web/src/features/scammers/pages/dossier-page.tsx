@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { downloadPdf } from '@/lib/api/download-pdf';
 import { useScammerDossier } from '../api/dossier';
 
 // Per-scammer dossier — printable authority handoff. The page is intentionally
@@ -19,10 +20,18 @@ export default function ScammerDossierPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-8 print:px-0 print:py-0">
-      <div className="mb-6 flex items-center justify-between print:hidden">
+      <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Scammer Dossier</h1>
-        <Button onClick={() => window.print()} variant="outline">
-          Print / Export PDF
+        <Button
+          onClick={() =>
+            downloadPdf(
+              `/admin/scammers/${id}/pdf`,
+              `scamreport-scammer-${id.replace(/-/g, '').slice(0, 8)}.pdf`,
+            )
+          }
+          variant="outline"
+        >
+          Export PDF
         </Button>
       </div>
 

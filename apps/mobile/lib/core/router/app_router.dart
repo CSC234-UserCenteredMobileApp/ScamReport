@@ -24,6 +24,7 @@ import '../../features/legal/presentation/privacy_screen.dart';
 import '../../features/legal/presentation/terms_screen.dart';
 import '../../features/moderation/presentation/admin_review_screen.dart';
 import '../../features/moderation/presentation/mod_screen.dart';
+import '../../features/platform_summary/presentation/platform_summary_screen.dart';
 import '../../features/call_screening/presentation/call_screening_screen.dart';
 import '../../features/reports/presentation/report_detail_screen.dart';
 import '../../features/search/presentation/search_screen.dart';
@@ -147,6 +148,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   path: 'review/:id',
                   builder: (_, s) =>
                       AdminReviewScreen(reportId: s.pathParameters['id']!),
+                ),
+                GoRoute(
+                  path: 'platform-summary',
+                  builder: (_, __) => const PlatformSummaryScreen(),
                 ),
               ],
             ),

@@ -11,15 +11,14 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
 
 const counts = await prisma.$queryRaw<
-  { reports: bigint; linked: bigint; scammers: bigint; identifiers: bigint; embeddings: bigint; eval_cases: bigint }[]
+  { reports: bigint; linked: bigint; scammers: bigint; identifiers: bigint; embeddings: bigint }[]
 >`
   SELECT
     (SELECT COUNT(*) FROM reports) AS reports,
     (SELECT COUNT(*) FROM reports WHERE scammer_id IS NOT NULL) AS linked,
     (SELECT COUNT(*) FROM scammers) AS scammers,
     (SELECT COUNT(*) FROM scammer_identifiers) AS identifiers,
-    (SELECT COUNT(*) FROM report_embeddings) AS embeddings,
-    (SELECT COUNT(*) FROM ai_eval_cases) AS eval_cases
+    (SELECT COUNT(*) FROM report_embeddings) AS embeddings
 `;
 console.log('counts:', JSON.parse(JSON.stringify(counts[0], (_, v) => typeof v === 'bigint' ? Number(v) : v)));
 

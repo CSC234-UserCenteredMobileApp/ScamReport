@@ -13,21 +13,23 @@
     "promote-admin": "bun run scripts/promote-admin.ts"
   },
   "dependencies": {
-    "elysia": "^1.2.0",
     "@elysiajs/cors": "^1.2.0",
-    "@prisma/client": "^7.0.0",
-    "@prisma/adapter-pg": "^7.0.0",
-    "pg": "^8.13.0",
-    "@supabase/supabase-js": "^2.46.0",
-    "firebase-admin": "^13.0.0",
     "@google/genai": "^1.0.0",
-    "@my-product/shared": "workspace:*"
+    "@my-product/shared": "workspace:*",
+    "@prisma/adapter-pg": "^7.0.0",
+    "@prisma/client": "^7.0.0",
+    "@supabase/supabase-js": "^2.46.0",
+    "elysia": "^1.2.0",
+    "firebase-admin": "^13.0.0",
+    "pdfmake": "^0.3.8",
+    "pg": "^8.13.0"
   },
   "devDependencies": {
-    "prisma": "^7.0.0",
-    "typescript": "^5.6.0",
     "@types/bun": "^1.1.0",
+    "@types/pdfmake": "^0.3.2",
     "@types/pg": "^8.11.0",
-    "dotenv": "^16.4.0"
+    "dotenv": "^16.4.0",
+    "prisma": "^7.0.0",
+    "typescript": "^5.6.0"
   }
 }
