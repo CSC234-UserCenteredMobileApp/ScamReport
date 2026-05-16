@@ -35,6 +35,17 @@ export async function deleteFile(bucket: string, paths: string[]) {
 }
 
 /**
+ * Download raw bytes for a private storage path. Used by the server-side
+ * PDF generator to embed evidence thumbnails inline (no client round-trip).
+ */
+export async function downloadFile(bucket: string, path: string): Promise<Uint8Array> {
+  const { data, error } = await getSupabase().storage.from(bucket).download(path);
+  if (error) throw error;
+  const buf = await data.arrayBuffer();
+  return new Uint8Array(buf);
+}
+
+/**
  * Cross-bucket copy. Supabase's native `.copy()` works only within a single
  * bucket, so we download the source then re-upload to the destination. Used
  * by the Ask AI submit pipeline to promote chat-attachments → evidence

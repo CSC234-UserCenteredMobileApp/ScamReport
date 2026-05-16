@@ -26,7 +26,14 @@ function statusKind(status: string): 'scam' | 'warn' | 'ok' | 'neutral' {
   }
 }
 
-export function reportTemplate(detail: AdminReportDetail): TDocumentDefinitions {
+// Map of evidence file id → data-URL of its raw bytes (caller fetches from
+// Supabase storage). Files absent from the map render as text-only rows.
+export type EvidenceImageMap = Record<string, string>;
+
+export function reportTemplate(
+  detail: AdminReportDetail,
+  images: EvidenceImageMap = {},
+): TDocumentDefinitions {
   const generatedAt = new Date();
 
   const headerBlock = [
@@ -88,6 +95,28 @@ export function reportTemplate(detail: AdminReportDetail): TDocumentDefinitions 
       ]
     : [];
 
+  const evidenceImages: Content[] = [];
+  for (const f of detail.evidenceFiles) {
+    const dataUrl = images[f.id];
+    if (dataUrl) {
+      evidenceImages.push({
+        stack: [
+          {
+            image: dataUrl,
+            // pdfmake fits to width; cap so a tall portrait stays on one page.
+            fit: [480, 480],
+            margin: [0, 6, 0, 2],
+          },
+          {
+            text: `${f.storagePath.split('/').pop() ?? f.storagePath} · ${f.mimeType}`,
+            style: 'muted',
+            margin: [0, 0, 0, 8],
+          },
+        ],
+      });
+    }
+  }
+
   const evidenceBlock =
     detail.evidenceFiles.length === 0
       ? [
@@ -115,6 +144,7 @@ export function reportTemplate(detail: AdminReportDetail): TDocumentDefinitions 
             },
             layout: 'lightHorizontalLines',
           },
+          ...evidenceImages,
         ];
 
   const auditBlock =

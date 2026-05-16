@@ -45,6 +45,9 @@ mock.module('../src/core/supabase/storage', () => ({
   uploadFile: async () => ({}),
   deleteFile: async () => undefined,
   copyFile: async () => undefined,
+  // PDF route downloads evidence bytes to embed image thumbnails. The test
+  // doesn't care about real PNG bytes — a non-empty Uint8Array is enough.
+  downloadFile: async () => new Uint8Array([0x89, 0x50, 0x4e, 0x47]),
 }));
 
 // ---------------------------------------------------------------------------
