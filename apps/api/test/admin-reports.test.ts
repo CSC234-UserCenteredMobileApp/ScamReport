@@ -347,6 +347,17 @@ describe('GET /admin/reports/:id', () => {
     expect(body.report.aiScore).toBeNull();
     expect(body.report.aiConfidence).toBe('unknown');
   });
+
+  test('200 admin — /pdf returns application/pdf bytes', async () => {
+    mockDecoded = ADMIN;
+    mockFindUniqueReport = MOCK_DETAIL_REPORT;
+    const res = await app.handle(req(`/admin/reports/${VALID_ID}/pdf`, { token: 'tok' }));
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toBe('application/pdf');
+    const buf = new Uint8Array(await res.arrayBuffer());
+    expect(buf.length).toBeGreaterThan(100);
+    expect(String.fromCharCode(...buf.slice(0, 4))).toBe('%PDF');
+  });
 });
 
 // ---------------------------------------------------------------------------

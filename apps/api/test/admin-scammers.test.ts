@@ -179,6 +179,15 @@ describe('GET /admin/scammers/:id/dossier', () => {
     const res = await req('GET', '/admin/scammers/00000000-0000-0000-0000-000000000000/dossier');
     expect(res.status).toBe(404);
   });
+
+  test('admin → /pdf returns application/pdf bytes', async () => {
+    const res = await req('GET', `/admin/scammers/${SCAMMER_ID}/pdf`);
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toBe('application/pdf');
+    const buf = new Uint8Array(await res.arrayBuffer());
+    expect(buf.length).toBeGreaterThan(100);
+    expect(String.fromCharCode(...buf.slice(0, 4))).toBe('%PDF');
+  });
 });
 
 describe('POST /admin/reports/:id/link-scammer', () => {

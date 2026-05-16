@@ -99,4 +99,19 @@ describe('GET /admin/reports/platform-summary', () => {
     );
     expect(res.status).toBe(403);
   });
+
+  test('admin → /pdf returns application/pdf bytes', async () => {
+    mockDecoded = { uid: 'firebase-admin', email: 'admin@example.com', role: 'admin' };
+    const res = await app.handle(
+      new Request('http://localhost/admin/reports/platform-summary/pdf', {
+        method: 'GET',
+        headers: { authorization: 'Bearer test-token' },
+      }),
+    );
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toBe('application/pdf');
+    const buf = new Uint8Array(await res.arrayBuffer());
+    expect(buf.length).toBeGreaterThan(100);
+    expect(String.fromCharCode(...buf.slice(0, 4))).toBe('%PDF');
+  });
 });
