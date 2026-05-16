@@ -10,6 +10,7 @@ export type DeletionRequestStatus = Static<typeof DeletionRequestStatus>;
 export const AdminDeletionRequestItem = Type.Object({
   id:              Type.String({ format: 'uuid' }),
   userHandle:      Type.String(),
+  userEmail:       Type.Union([Type.String(), Type.Null()]),
   requestedAt:     Type.String({ format: 'date-time' }),
   purgeDueAt:      Type.String({ format: 'date-time' }),
   status:          DeletionRequestStatus,

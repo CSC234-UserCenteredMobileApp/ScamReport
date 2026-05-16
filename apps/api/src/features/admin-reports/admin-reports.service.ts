@@ -19,6 +19,7 @@ import type {
   AdminQueueItem,
   AdminRelatedCase,
   AdminReportDetail,
+  AdminReportSearchResponse,
   AdminSiblingCase,
   ModerationRecord,
   AiConfidence,
@@ -476,6 +477,67 @@ function strip(result: ActionResult): PublicActionResult {
     id: result.id,
     status: result.status,
     updatedAt: result.updatedAt,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Search
+// ---------------------------------------------------------------------------
+
+export async function searchReports(
+  q: string,
+  limit = 20,
+): Promise<AdminReportSearchResponse> {
+  const prisma = getPrisma();
+  const trimmed = q.trim();
+  if (!trimmed) return { items: [], total: 0 };
+
+  const rows = await prisma.report.findMany({
+    where: {
+      OR: [
+        { title: { contains: trimmed, mode: 'insensitive' } },
+        { targetIdentifier: { contains: trimmed, mode: 'insensitive' } },
+        { targetIdentifierNormalized: { contains: trimmed, mode: 'insensitive' } },
+        { description: { contains: trimmed, mode: 'insensitive' } },
+      ],
+    },
+    orderBy: [{ createdAt: 'desc' }],
+    take: limit,
+    select: {
+      id: true,
+      title: true,
+      status: true,
+      targetIdentifier: true,
+      aiScore: true,
+      createdAt: true,
+      scamType: { select: { code: true, labelEn: true, labelTh: true } },
+    },
+  });
+
+  const total = await prisma.report.count({
+    where: {
+      OR: [
+        { title: { contains: trimmed, mode: 'insensitive' } },
+        { targetIdentifier: { contains: trimmed, mode: 'insensitive' } },
+        { targetIdentifierNormalized: { contains: trimmed, mode: 'insensitive' } },
+        { description: { contains: trimmed, mode: 'insensitive' } },
+      ],
+    },
+  });
+
+  return {
+    items: rows.map((r) => ({
+      id: r.id,
+      title: r.title,
+      status: r.status,
+      scamTypeCode: r.scamType.code,
+      scamTypeLabelEn: r.scamType.labelEn,
+      scamTypeLabelTh: r.scamType.labelTh,
+      targetIdentifier: r.targetIdentifier,
+      submittedAt: r.createdAt.toISOString(),
+      aiScore: r.aiScore,
+    })),
+    total,
   };
 }
 

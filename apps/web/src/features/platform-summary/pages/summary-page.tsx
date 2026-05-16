@@ -1,13 +1,31 @@
+import { subDays, format as fnsFormat } from 'date-fns';
+import { RefreshCw } from 'lucide-react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { downloadPdf } from '@/lib/api/download-pdf';
 import { usePlatformSummary } from '../api/summary';
 
+const toDateStr = (d: Date) => fnsFormat(d, 'yyyy-MM-dd');
+const defaultFrom = toDateStr(subDays(new Date(), 30));
+const defaultTo = toDateStr(new Date());
+
 // Platform-wide summary — print-friendly digest for hand-off to authority /
-// internal review. Default window = last 30 days; the API derives the
-// timestamps when from/to are omitted.
+// internal review. Default window = last 30 days.
 export default function PlatformSummaryPage() {
-  const { data, isLoading, isError } = usePlatformSummary();
+  const [from, setFrom] = useState(defaultFrom);
+  const [to, setTo] = useState(defaultTo);
+  const [applied, setApplied] = useState<{ from: string; to: string }>({
+    from: defaultFrom,
+    to: defaultTo,
+  });
+
+  const { data, isLoading, isError, refetch } = usePlatformSummary(
+    applied.from ? `${applied.from}T00:00:00Z` : undefined,
+    applied.to ? `${applied.to}T23:59:59Z` : undefined,
+  );
 
   if (isLoading) return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
   if (isError || !data) return <div className="p-8 text-sm text-destructive">Could not load summary.</div>;
@@ -16,19 +34,62 @@ export default function PlatformSummaryPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-8">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold">Platform Summary</h1>
-        <Button
-          onClick={() =>
-            downloadPdf(
-              '/admin/reports/platform-summary/pdf',
-              'scamreport-platform-summary.pdf',
-            )
-          }
-          variant="outline"
-        >
-          Export PDF
-        </Button>
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="summary-from" className="text-xs text-muted-foreground">From</Label>
+            <Input
+              id="summary-from"
+              type="date"
+              value={from}
+              max={to}
+              onChange={(e) => setFrom(e.target.value)}
+              className="h-8 w-38 text-sm"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="summary-to" className="text-xs text-muted-foreground">To</Label>
+            <Input
+              id="summary-to"
+              type="date"
+              value={to}
+              min={from}
+              max={toDateStr(new Date())}
+              onChange={(e) => setTo(e.target.value)}
+              className="h-8 w-38 text-sm"
+            />
+          </div>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => setApplied({ from, to })}
+            disabled={!from || !to}
+          >
+            Apply
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="size-8"
+            aria-label="Refresh"
+            onClick={() => void refetch()}
+          >
+            <RefreshCw className="size-4" />
+          </Button>
+          <Button
+            onClick={() =>
+              downloadPdf(
+                '/admin/reports/platform-summary/pdf',
+                'scamreport-platform-summary.pdf',
+              )
+            }
+            variant="outline"
+            size="sm"
+          >
+            Export PDF
+          </Button>
+        </div>
       </div>
 
       <header className="border-b pb-3 text-sm text-muted-foreground">

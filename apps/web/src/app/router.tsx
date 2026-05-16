@@ -1,7 +1,8 @@
-import { Navigate, createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { LoginPage } from '@/routes/login';
 import { NoAccessPage } from '@/routes/no-access';
 import { DashboardLayout } from '@/routes/dashboard-layout';
+import DashboardRoute from '@/routes/dashboard';
 import QueuePage from '@/routes/moderation/queue';
 import ModerationDetailPage from '@/routes/moderation/detail';
 import AnnouncementsListPage from '@/routes/announcements/list';
@@ -18,7 +19,8 @@ export const router = createBrowserRouter([
   {
     element: <DashboardLayout />,
     children: [
-      { index: true, element: <Navigate to="/moderation" replace /> },
+      { index: true, element: <DashboardRoute /> },
+      { path: 'dashboard', element: <DashboardRoute /> },
       { path: 'moderation', element: <QueuePage /> },
       { path: 'moderation/:id', element: <ModerationDetailPage /> },
       { path: 'announcements', element: <AnnouncementsListPage /> },

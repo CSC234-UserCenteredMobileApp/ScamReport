@@ -1,6 +1,7 @@
 {
   "appName": "ScamReport Admin",
   "nav": {
+    "dashboard": "แดชบอร์ด",
     "moderation": "ตรวจสอบ",
     "announcements": "ประกาศ",
     "deletionRequests": "คำขอลบบัญชี",

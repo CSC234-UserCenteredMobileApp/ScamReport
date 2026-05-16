@@ -8,8 +8,20 @@
     "hoursUnit": "ชม."
   },
   "filter": {
-    "scamTypeAll": "ทุกประเภท",
-    "priorityOnly": "เฉพาะที่ติด Priority"
+    "label": "ตัวกรอง",
+    "statusLabel": "สถานะ",
+    "statusAll": "ทั้งหมด",
+    "typeLabel": "ประเภทการโกง",
+    "scamTypeAll": "ทั้งหมด",
+    "priorityLabel": "ความสำคัญ",
+    "priorityAll": "ทั้งหมด",
+    "priorityOnly": "เฉพาะที่ติด Priority",
+    "confidenceLabel": "ความเชื่อมั่น AI",
+    "confidenceAll": "ทั้งหมด",
+    "confidenceHigh": "สูง (≥70)",
+    "confidenceMedium": "กลาง (40–69)",
+    "confidenceLow": "ต่ำ (<40)",
+    "noMatch": "ไม่มีรายงานที่ตรงกับตัวกรองที่เลือก"
   },
   "col": {
     "type": "ประเภท",
@@ -49,6 +61,12 @@
     "unflagged": "ยกเลิก Flag แล้ว",
     "actionError": "ดำเนินการไม่สำเร็จ กรุณาลองใหม่"
   },
+  "search": {
+    "placeholder": "ค้นหารายงาน… (Ctrl+K)",
+    "searching": "กำลังค้นหา…",
+    "noResults": "ไม่พบรายงาน",
+    "moreResults": "แสดง {{shown}} จาก {{total}} รายการ"
+  },
   "empty": "คิวว่างเปล่า — เยี่ยมมาก!",
   "error": "โหลดคิวไม่สำเร็จ กรุณาลองใหม่",
   "loading": "กำลังโหลดรายงาน…",
@@ -59,6 +77,7 @@
     "submittedAnonymously": "ส่งโดยไม่ระบุตัวตน",
     "description": "รายละเอียด",
     "targetIdentifier": "ข้อมูลที่ถูกร้องเรียน",
+    "copyIdentifier": "คัดลอกไปยังคลิปบอร์ด",
     "evidence": "หลักฐาน",
     "evidenceCount": "{{count}} ไฟล์",
     "evidenceCount_other": "{{count}} ไฟล์",
@@ -77,7 +96,8 @@
     },
     "ai": {
       "label": "คะแนน AI",
-      "pending": "รอการประเมิน"
+      "pending": "รอการประเมิน",
+      "tooltip": "คะแนนความน่าจะเป็นของการโกง: {{score}}/100 (ความเชื่อมั่น: {{confidence}}) คะแนน ≥70 บ่งชี้ความเสี่ยงสูง ใช้เป็นข้อมูลประกอบการตัดสินใจเท่านั้น"
     },
     "printPdf": "พิมพ์ / ส่งออก PDF",
     "suspectedNameAtSubmit": "ชื่อผู้ต้องสงสัยที่รายงาน",

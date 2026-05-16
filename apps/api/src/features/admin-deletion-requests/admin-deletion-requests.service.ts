@@ -29,6 +29,7 @@ export async function listRequests(
     items: items.map((r) => ({
       id: r.id,
       userHandle: maskHandle(r.user.email, r.user.firebaseUid),
+      userEmail: r.user.email ?? null,
       requestedAt: r.requestedAt.toISOString(),
       purgeDueAt: r.purgeDueAt.toISOString(),
       status: r.status as AdminDeletionRequestListResponse['items'][number]['status'],

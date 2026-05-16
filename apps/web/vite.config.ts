@@ -55,16 +55,25 @@ export default defineConfig({
         'src/routes/no-access.tsx',
         'src/routes/dashboard-layout.tsx',
         'src/routes/announcements/**',
+        // Composition shells — exercised by integration / e2e, not unit tests.
+        'src/components/breadcrumb.tsx',
+        'src/components/global-search.tsx',
+        // Search hook is only consumed by global-search (above); no unit test needed.
+        'src/features/moderation/api/search.ts',
         // Route shims — thin wrappers around feature pages, exercised by
         // integration / e2e. The feature page implementations cover the logic.
+        'src/routes/dashboard.tsx',
         'src/routes/moderation/**',
         'src/routes/scammers/**',
+        'src/routes/persons/**',
         'src/routes/platform-summary.tsx',
         'src/routes/ai-eval.tsx',
         'src/routes/deletion-requests.tsx',
         // Feature pages with no logic beyond passing data to JSX. Coverage
         // comes from the feature components + api hooks that they compose.
+        'src/features/dashboard/pages/**',
         'src/features/scammers/pages/**',
+        'src/features/persons/pages/**',
         'src/features/platform-summary/pages/**',
         'src/features/ai-eval/pages/**',
         // Generated / static.

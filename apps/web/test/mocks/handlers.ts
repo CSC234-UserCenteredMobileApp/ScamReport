@@ -11,7 +11,9 @@ import type {
   AdminQueueResponse,
   AdminReportDetail,
   AdminReportDetailResponse,
+  AdminReportSearchResponse,
   AuthSyncResponse,
+  ScamTypeListResponse,
   SubscriberCountResponse,
 } from '@my-product/shared';
 
@@ -40,6 +42,46 @@ export const sampleFlagged: AdminQueueItem = {
   priorityFlag: true,
   aiScore: null,
   aiConfidence: null,
+};
+
+export const sampleMediumScore: AdminQueueItem = {
+  ...sampleItem,
+  id: '33333333-3333-3333-3333-333333333333',
+  title: 'Medium confidence report',
+  aiScore: 55,
+  aiConfidence: 'medium',
+};
+
+export const sampleLowScore: AdminQueueItem = {
+  ...sampleItem,
+  id: '44444444-4444-4444-4444-444444444444',
+  title: 'Low confidence report',
+  aiScore: 22,
+  aiConfidence: 'low',
+};
+
+export const sampleScamTypes: ScamTypeListResponse = {
+  items: [
+    { code: 'phishing_sms', labelEn: 'Phishing SMS', labelTh: 'ฟิชชิ่ง SMS', displayOrder: 1 },
+    { code: 'investment_fraud', labelEn: 'Investment Fraud', labelTh: 'หลอกลวงลงทุน', displayOrder: 2 },
+  ],
+};
+
+export const sampleSearchResponse: AdminReportSearchResponse = {
+  items: [
+    {
+      id: sampleItem.id,
+      title: sampleItem.title,
+      status: sampleItem.status,
+      scamTypeCode: sampleItem.scamTypeCode,
+      scamTypeLabelEn: sampleItem.scamTypeLabelEn,
+      scamTypeLabelTh: sampleItem.scamTypeLabelTh,
+      targetIdentifier: '0812345678',
+      submittedAt: sampleItem.submittedAt,
+      aiScore: sampleItem.aiScore,
+    },
+  ],
+  total: 1,
 };
 
 export const sampleQueue: AdminQueueResponse = {
@@ -165,6 +207,7 @@ const PURGE_OFFSET_MS = 7 * 24 * 3_600_000;
 export const samplePendingDeletion: AdminDeletionRequestItem = {
   id: '55555555-5555-5555-5555-555555555555',
   userHandle: 'User_5a8c1f0e',
+  userEmail: 'test@example.com',
   requestedAt: new Date(Date.now() - 1 * 3_600_000).toISOString(),
   purgeDueAt: new Date(Date.now() + PURGE_OFFSET_MS).toISOString(),
   status: 'pending',
@@ -267,6 +310,15 @@ export const handlers = [
       reviewedAt: new Date().toISOString(),
     }),
   ),
+  http.get(`${BASE}/scam-types`, () => HttpResponse.json(sampleScamTypes)),
+  http.get(`${BASE}/admin/reports/search`, ({ request }) => {
+    const url = new URL(request.url);
+    const q = url.searchParams.get('q') ?? '';
+    const filtered = sampleSearchResponse.items.filter((it) =>
+      it.title.toLowerCase().includes(q.toLowerCase()),
+    );
+    return HttpResponse.json<AdminReportSearchResponse>({ items: filtered, total: filtered.length });
+  }),
   http.get(`${BASE}/admin/reports/queue`, () => HttpResponse.json(sampleQueue)),
   http.get(`${BASE}/admin/reports/:id`, () => HttpResponse.json(sampleDetailResponse)),
   http.get(`${BASE}/admin/reports/:id/evidence/:fileId/url`, () =>

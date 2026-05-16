@@ -3,10 +3,11 @@ import { http, HttpResponse } from 'msw';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { server } from '../mocks/server';
-import { sampleQueue } from '../mocks/handlers';
+import { sampleQueue, sampleItem, sampleFlagged, sampleMediumScore, sampleLowScore } from '../mocks/handlers';
 import { renderWithProviders, makeQueryClient } from '../helpers';
 import { QueuePage } from '@/features/moderation/pages/queue-page';
 import { firebaseAuth } from '@/lib/auth/firebase';
+import type { AdminQueueResponse } from '@my-product/shared';
 
 Object.defineProperty(firebaseAuth, 'currentUser', {
   configurable: true,
@@ -68,5 +69,156 @@ describe('QueuePage', () => {
     await user.click(submitBtn);
     expect(await screen.findByRole('alert')).toBeInTheDocument();
     expect(firstRowTitle).toBeInTheDocument();
+  });
+});
+
+describe('Queue filter — status', () => {
+  it('status=flagged hides pending rows', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<QueuePage />, { client: makeQueryClient() });
+    await screen.findByText(sampleItem.title);
+    await user.click(screen.getByRole('button', { name: /^flagged$/i }));
+    expect(screen.queryByText(sampleItem.title)).toBeNull();
+    expect(screen.getByText(sampleFlagged.title)).toBeInTheDocument();
+  });
+
+  it('status=pending hides flagged rows', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<QueuePage />, { client: makeQueryClient() });
+    await screen.findByText(sampleFlagged.title);
+    await user.click(screen.getByRole('button', { name: /^pending$/i }));
+    expect(screen.queryByText(sampleFlagged.title)).toBeNull();
+    expect(screen.getByText(sampleItem.title)).toBeInTheDocument();
+  });
+
+  it('shows noMatch message when filters exclude all rows', async () => {
+    const user = userEvent.setup();
+    server.use(
+      http.get(`${baseUrl}/admin/reports/queue`, () =>
+        HttpResponse.json<AdminQueueResponse>({
+          items: [sampleItem],
+          pendingCount: 1,
+          flaggedCount: 0,
+        }),
+      ),
+    );
+    renderWithProviders(<QueuePage />, { client: makeQueryClient() });
+    await screen.findByText(sampleItem.title);
+    await user.click(screen.getByRole('button', { name: /^flagged$/i }));
+    expect(await screen.findByText(/no reports match/i)).toBeInTheDocument();
+  });
+});
+
+describe('Queue filter — priority', () => {
+  it('priority-only hides rows without priorityFlag', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<QueuePage />, { client: makeQueryClient() });
+    await screen.findByText(sampleItem.title); // priorityFlag=false
+    await user.click(screen.getByRole('button', { name: /priority only/i }));
+    expect(screen.queryByText(sampleItem.title)).toBeNull();
+    expect(screen.getByText(sampleFlagged.title)).toBeInTheDocument(); // priorityFlag=true
+  });
+});
+
+describe('Queue filter — confidence', () => {
+  it('high filter shows high-confidence rows and hides null-confidence rows', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<QueuePage />, { client: makeQueryClient() });
+    await screen.findByText(sampleItem.title); // aiConfidence='high'
+    await user.click(screen.getByRole('button', { name: /^high/i }));
+    expect(screen.getByText(sampleItem.title)).toBeInTheDocument();
+    expect(screen.queryByText(sampleFlagged.title)).toBeNull(); // aiConfidence=null
+  });
+
+  it('medium filter shows only medium-confidence rows', async () => {
+    const user = userEvent.setup();
+    server.use(
+      http.get(`${baseUrl}/admin/reports/queue`, () =>
+        HttpResponse.json<AdminQueueResponse>({
+          items: [sampleItem, sampleMediumScore],
+          pendingCount: 2,
+          flaggedCount: 0,
+        }),
+      ),
+    );
+    renderWithProviders(<QueuePage />, { client: makeQueryClient() });
+    await screen.findByText(sampleMediumScore.title);
+    await user.click(screen.getByRole('button', { name: /medium/i }));
+    expect(screen.queryByText(sampleItem.title)).toBeNull();
+    expect(screen.getByText(sampleMediumScore.title)).toBeInTheDocument();
+  });
+
+  it('low filter shows only low-confidence rows', async () => {
+    const user = userEvent.setup();
+    server.use(
+      http.get(`${baseUrl}/admin/reports/queue`, () =>
+        HttpResponse.json<AdminQueueResponse>({
+          items: [sampleItem, sampleLowScore],
+          pendingCount: 2,
+          flaggedCount: 0,
+        }),
+      ),
+    );
+    renderWithProviders(<QueuePage />, { client: makeQueryClient() });
+    await screen.findByText(sampleLowScore.title);
+    await user.click(screen.getByRole('button', { name: /^low/i }));
+    expect(screen.queryByText(sampleItem.title)).toBeNull();
+    expect(screen.getByText(sampleLowScore.title)).toBeInTheDocument();
+  });
+});
+
+describe('AI score badge colors', () => {
+  it('score ≥ 70 renders red badge', async () => {
+    renderWithProviders(<QueuePage />, { client: makeQueryClient() });
+    await screen.findByText(sampleItem.title);
+    const badge = screen.getByText(String(sampleItem.aiScore)); // 78
+    expect(badge).toHaveClass('bg-red-100');
+  });
+
+  it('score 40–69 renders amber badge', async () => {
+    server.use(
+      http.get(`${baseUrl}/admin/reports/queue`, () =>
+        HttpResponse.json<AdminQueueResponse>({
+          items: [sampleMediumScore],
+          pendingCount: 1,
+          flaggedCount: 0,
+        }),
+      ),
+    );
+    renderWithProviders(<QueuePage />, { client: makeQueryClient() });
+    await screen.findByText(sampleMediumScore.title);
+    const badge = screen.getByText(String(sampleMediumScore.aiScore)); // 55
+    expect(badge).toHaveClass('bg-amber-100');
+  });
+
+  it('score < 40 renders green badge', async () => {
+    server.use(
+      http.get(`${baseUrl}/admin/reports/queue`, () =>
+        HttpResponse.json<AdminQueueResponse>({
+          items: [sampleLowScore],
+          pendingCount: 1,
+          flaggedCount: 0,
+        }),
+      ),
+    );
+    renderWithProviders(<QueuePage />, { client: makeQueryClient() });
+    await screen.findByText(sampleLowScore.title);
+    const badge = screen.getByText(String(sampleLowScore.aiScore)); // 22
+    expect(badge).toHaveClass('bg-green-100');
+  });
+
+  it('null score renders a dash, not a badge', async () => {
+    server.use(
+      http.get(`${baseUrl}/admin/reports/queue`, () =>
+        HttpResponse.json<AdminQueueResponse>({
+          items: [sampleFlagged],
+          pendingCount: 0,
+          flaggedCount: 1,
+        }),
+      ),
+    );
+    renderWithProviders(<QueuePage />, { client: makeQueryClient() });
+    await screen.findByText(sampleFlagged.title);
+    expect(screen.getByText('—')).toBeInTheDocument();
   });
 });

@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom';
+import { Breadcrumb } from '@/components/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { downloadPdf } from '@/lib/api/download-pdf';
 import { useScammerDossier } from '../api/dossier';
@@ -20,6 +21,13 @@ export default function ScammerDossierPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-8 print:px-0 print:py-0">
+      <Breadcrumb
+        className="mb-4 print:hidden"
+        items={[
+          { label: 'Platform summary', to: '/platform-summary' },
+          { label: data.scammer.displayName },
+        ]}
+      />
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Scammer Dossier</h1>
         <Button

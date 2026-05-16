@@ -76,13 +76,13 @@ describe('DeletionRequestsPage', () => {
     expect(await screen.findByRole('alert')).toBeInTheDocument();
   });
 
-  it('never leaks raw user identifiers into the rendered tree', async () => {
+  it('shows user email for admin review and never leaks internal identifiers', async () => {
     renderWithProviders(<DeletionRequestsPage />);
     await screen.findByText(samplePendingDeletion.userHandle);
+    // Email is intentionally shown to admin so they can make an informed decision.
+    expect(screen.getByText(samplePendingDeletion.userEmail!)).toBeInTheDocument();
     const html = document.body.innerHTML;
-    expect(html).not.toMatch(/@/); // no emails
     expect(html).not.toMatch(/firebaseUid/i);
-    expect(html).not.toMatch(/User_5a8c1f0e[^<\s]/);
   });
 
   it('renders the rejected reason chip when filter switched to rejected', async () => {

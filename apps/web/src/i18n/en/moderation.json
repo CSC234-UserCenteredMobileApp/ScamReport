@@ -8,8 +8,20 @@
     "hoursUnit": "h"
   },
   "filter": {
-    "scamTypeAll": "All scam types",
-    "priorityOnly": "Priority flag only"
+    "label": "Filters",
+    "statusLabel": "Status",
+    "statusAll": "All",
+    "typeLabel": "Scam type",
+    "scamTypeAll": "All",
+    "priorityLabel": "Priority",
+    "priorityAll": "All",
+    "priorityOnly": "Priority only",
+    "confidenceLabel": "AI confidence",
+    "confidenceAll": "All",
+    "confidenceHigh": "High (≥70)",
+    "confidenceMedium": "Medium (40–69)",
+    "confidenceLow": "Low (<40)",
+    "noMatch": "No reports match the active filters."
   },
   "col": {
     "type": "Type",
@@ -49,6 +61,12 @@
     "unflagged": "Report unflagged.",
     "actionError": "Action failed. Please retry."
   },
+  "search": {
+    "placeholder": "Search reports… (Ctrl+K)",
+    "searching": "Searching…",
+    "noResults": "No reports found.",
+    "moreResults": "Showing {{shown}} of {{total}} results."
+  },
   "empty": "Queue is empty — nice work!",
   "error": "Could not load the queue. Try again.",
   "loading": "Loading reports…",
@@ -59,6 +77,7 @@
     "submittedAnonymously": "Submitted anonymously",
     "description": "Description",
     "targetIdentifier": "Target identifier",
+    "copyIdentifier": "Copy to clipboard",
     "evidence": "Evidence",
     "evidenceCount": "{{count}} item",
     "evidenceCount_other": "{{count}} items",
@@ -77,7 +96,8 @@
     },
     "ai": {
       "label": "AI score",
-      "pending": "Pending"
+      "pending": "Pending",
+      "tooltip": "AI scam likelihood score: {{score}}/100 (confidence: {{confidence}}). Scores ≥70 suggest high scam probability. This is advisory — use your judgement."
     },
     "printPdf": "Print / Export PDF",
     "suspectedNameAtSubmit": "Reported suspect name",
