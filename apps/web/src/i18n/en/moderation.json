@@ -9,6 +9,11 @@
   },
   "filter": {
     "label": "Filters",
+    "button": "Filters",
+    "searchPlaceholder": "Search title or description…",
+    "reset": "Reset",
+    "clearAll": "Clear all",
+    "activeLabel": "Active filters",
     "statusLabel": "Status",
     "statusAll": "All",
     "typeLabel": "Scam type",
@@ -18,10 +23,17 @@
     "priorityOnly": "Priority only",
     "confidenceLabel": "AI confidence",
     "confidenceAll": "All",
-    "confidenceHigh": "High (≥70)",
-    "confidenceMedium": "Medium (40–69)",
-    "confidenceLow": "Low (<40)",
+    "confidenceHigh": "High",
+    "confidenceMedium": "Medium",
+    "confidenceLow": "Low",
     "noMatch": "No reports match the active filters."
+  },
+  "pagination": {
+    "showing": "Showing",
+    "of": "of",
+    "pageSize": "Per page",
+    "prev": "Previous",
+    "next": "Next"
   },
   "col": {
     "type": "Type",

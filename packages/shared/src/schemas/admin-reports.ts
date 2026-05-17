@@ -55,6 +55,9 @@ export const AdminQueueResponse = Type.Object({
   items: Type.Array(AdminQueueItem),
   pendingCount: Type.Integer({ minimum: 0 }),
   flaggedCount: Type.Integer({ minimum: 0 }),
+  total: Type.Integer({ minimum: 0 }),
+  page: Type.Integer({ minimum: 1 }),
+  pageSize: Type.Integer({ minimum: 1 }),
 });
 export type AdminQueueResponse = Static<typeof AdminQueueResponse>;
 

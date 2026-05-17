@@ -1,14 +1,15 @@
 import { differenceInHours } from 'date-fns';
-import { Inbox, SlidersHorizontal } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { Inbox } from 'lucide-react';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import type { AdminQueueItem } from '@my-product/shared';
+import { z } from 'zod';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PageHeader } from '@/components/page-header';
-import { useQueue } from '@/features/moderation/api/queue';
+import { useQueue, type QueueParams } from '@/features/moderation/api/queue';
 import { useScamTypes } from '@/features/moderation/api/scam-types';
 import {
   useModerationAction,
@@ -18,6 +19,8 @@ import { useActionDialog } from '@/features/moderation/hooks/use-action-dialog';
 import { ActionDialog } from '@/features/moderation/components/action-dialog';
 import { QueueStats } from '@/features/moderation/components/queue-stats';
 import { QueueTable } from '@/features/moderation/components/queue-table';
+import { QueueToolbar } from '@/features/moderation/components/queue-toolbar';
+import { QueuePagination } from '@/features/moderation/components/queue-pagination';
 import { ExportButton } from '@/features/exports/components/export-button';
 import type { ExportConfidence, ExportFilters } from '@/features/exports/api/export';
 
@@ -28,42 +31,44 @@ const toastKey: Record<ModerationActionKind, string> = {
   unflag: 'toast.unflagged',
 };
 
-type StatusFilter = 'all' | 'pending' | 'flagged';
-type PriorityFilter = 'all' | 'priority';
-type ConfidenceFilter = 'all' | 'high' | 'medium' | 'low';
+const QueueSearchSchema = z.object({
+  q: z.string().optional(),
+  status: z.enum(['pending', 'flagged', 'all']).optional(),
+  priority: z.enum(['true', 'false']).optional(),
+  confidence: z.enum(['high', 'medium', 'low', 'all']).optional(),
+  scam_type: z.string().optional(),
+  page: z.coerce.number().int().min(1).catch(1).optional(),
+  page_size: z.coerce
+    .number()
+    .int()
+    .refine((v) => [25, 50, 100].includes(v))
+    .catch(25)
+    .optional(),
+});
+export type QueueSearch = z.infer<typeof QueueSearchSchema>;
 
-function FilterPill({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={[
-        'rounded-xl border px-3 py-1 text-xs transition-colors',
-        active
-          ? 'border-primary bg-primary text-primary-foreground'
-          : 'border-border bg-card text-foreground hover:bg-muted',
-      ].join(' ')}
-    >
-      {children}
-    </button>
-  );
+function parseSearch(sp: URLSearchParams): QueueSearch {
+  const obj = Object.fromEntries(sp.entries());
+  const parsed = QueueSearchSchema.safeParse(obj);
+  return parsed.success ? parsed.data : {};
 }
 
 export function QueuePage() {
-  const { t, i18n } = useTranslation('moderation');
-  const [scamTypeFilter, setScamTypeFilter] = useState<string | undefined>();
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
-  const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>('all');
-  const [confidenceFilter, setConfidenceFilter] = useState<ConfidenceFilter>('all');
-  const { data, isLoading, isError, refetch } = useQueue(scamTypeFilter);
+  const { t } = useTranslation('moderation');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const search = useMemo(() => parseSearch(searchParams), [searchParams]);
+
+  const queueParams: QueueParams = {
+    q: search.q,
+    status: search.status,
+    priority: search.priority,
+    confidence: search.confidence,
+    scam_type: search.scam_type,
+    page: search.page ?? 1,
+    page_size: search.page_size ?? 25,
+  };
+
+  const { data, isLoading, isError, refetch } = useQueue(queueParams);
   const { data: scamTypesData } = useScamTypes();
   const dialog = useActionDialog();
 
@@ -74,41 +79,53 @@ export function QueuePage() {
   const mutations = { approve, reject, flag, unflag } as const;
   const submitting = Object.values(mutations).some((m) => m.isPending);
 
-  const filteredItems = useMemo<AdminQueueItem[]>(() => {
-    if (!data) return [];
-    return data.items.filter((it) => {
-      if (statusFilter !== 'all' && it.status !== statusFilter) return false;
-      if (priorityFilter === 'priority' && !it.priorityFlag) return false;
-      if (confidenceFilter !== 'all') {
-        if (it.aiConfidence !== confidenceFilter) return false;
-      }
-      return true;
-    });
-  }, [data, statusFilter, priorityFilter, confidenceFilter]);
+  const setSearch = useCallback(
+    (updates: Partial<QueueSearch>, opts?: { replace?: boolean }) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          for (const [k, v] of Object.entries(updates)) {
+            if (v === undefined || v === '' || v === 'all') next.delete(k);
+            else next.set(k, String(v));
+          }
+          // Any non-page change resets pagination to 1.
+          if (Object.keys(updates).some((k) => k !== 'page')) next.delete('page');
+          return next;
+        },
+        { replace: opts?.replace ?? false },
+      );
+    },
+    [setSearchParams],
+  );
 
   const exportFilters = useMemo<ExportFilters>(() => {
     const statuses: string[] = [];
-    if (statusFilter === 'all') statuses.push('pending', 'flagged');
-    else statuses.push(statusFilter);
+    if (!search.status || search.status === 'all') {
+      statuses.push('pending', 'flagged');
+    } else {
+      statuses.push(search.status);
+    }
     return {
       status: statuses,
-      scamType: scamTypeFilter,
-      priority: priorityFilter === 'priority' ? true : undefined,
+      scamType: search.scam_type,
+      priority: search.priority === 'true' ? true : undefined,
       confidence:
-        confidenceFilter === 'all'
+        !search.confidence || search.confidence === 'all'
           ? undefined
-          : (confidenceFilter as ExportConfidence),
+          : (search.confidence as ExportConfidence),
     };
-  }, [statusFilter, priorityFilter, confidenceFilter, scamTypeFilter]);
+  }, [search.status, search.priority, search.confidence, search.scam_type]);
 
+  // Avg age is page-local — derives from currently displayed rows, not the
+  // global queue. Same behaviour as before the redesign (filtered subset).
   const avgAgeHours = useMemo(() => {
-    if (filteredItems.length === 0) return null;
-    const total = filteredItems.reduce(
+    if (!data || data.items.length === 0) return null;
+    const total = data.items.reduce(
       (sum, it) => sum + differenceInHours(new Date(), new Date(it.submittedAt)),
       0,
     );
-    return total / filteredItems.length;
-  }, [filteredItems]);
+    return total / data.items.length;
+  }, [data]);
 
   const onSubmit = (remark: string) => {
     if (!dialog.state.item || !dialog.state.kind) return;
@@ -136,57 +153,11 @@ export function QueuePage() {
         actions={<ExportButton filters={exportFilters} />}
       />
 
-      <div className="space-y-3 rounded-lg border bg-card p-4">
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          <SlidersHorizontal className="size-3.5" aria-hidden />
-          {t('filter.label')}
-        </div>
-
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-xs text-muted-foreground">{t('filter.statusLabel')}:</span>
-            <FilterPill active={statusFilter === 'all'} onClick={() => setStatusFilter('all')}>{t('filter.statusAll')}</FilterPill>
-            <FilterPill active={statusFilter === 'pending'} onClick={() => setStatusFilter('pending')}>{t('status.pending')}</FilterPill>
-            <FilterPill active={statusFilter === 'flagged'} onClick={() => setStatusFilter('flagged')}>{t('status.flagged')}</FilterPill>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-xs text-muted-foreground">{t('filter.priorityLabel')}:</span>
-            <FilterPill active={priorityFilter === 'all'} onClick={() => setPriorityFilter('all')}>{t('filter.priorityAll')}</FilterPill>
-            <FilterPill active={priorityFilter === 'priority'} onClick={() => setPriorityFilter('priority')}>🚩 {t('filter.priorityOnly')}</FilterPill>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-xs text-muted-foreground">{t('filter.confidenceLabel')}:</span>
-            <FilterPill active={confidenceFilter === 'all'} onClick={() => setConfidenceFilter('all')}>{t('filter.confidenceAll')}</FilterPill>
-            <FilterPill active={confidenceFilter === 'high'} onClick={() => setConfidenceFilter('high')}>
-              <span className="text-red-600 dark:text-red-400">{t('filter.confidenceHigh')}</span>
-            </FilterPill>
-            <FilterPill active={confidenceFilter === 'medium'} onClick={() => setConfidenceFilter('medium')}>
-              <span className="text-amber-600 dark:text-amber-400">{t('filter.confidenceMedium')}</span>
-            </FilterPill>
-            <FilterPill active={confidenceFilter === 'low'} onClick={() => setConfidenceFilter('low')}>
-              <span className="text-green-600 dark:text-green-400">{t('filter.confidenceLow')}</span>
-            </FilterPill>
-          </div>
-        </div>
-
-        {scamTypesData && scamTypesData.items.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-xs text-muted-foreground">{t('filter.typeLabel')}:</span>
-            <FilterPill active={scamTypeFilter === undefined} onClick={() => setScamTypeFilter(undefined)}>{t('filter.scamTypeAll')}</FilterPill>
-            {scamTypesData.items.map((st) => (
-              <FilterPill
-                key={st.code}
-                active={scamTypeFilter === st.code}
-                onClick={() => setScamTypeFilter(st.code)}
-              >
-                {i18n.language === 'th' ? st.labelTh : st.labelEn}
-              </FilterPill>
-            ))}
-          </div>
-        )}
-      </div>
+      <QueueToolbar
+        search={search}
+        scamTypes={scamTypesData?.items ?? []}
+        onChange={setSearch}
+      />
 
       {isLoading && (
         <div className="space-y-4">
@@ -218,15 +189,28 @@ export function QueuePage() {
             flaggedCount={data.flaggedCount}
             avgAgeHours={avgAgeHours}
           />
-          {filteredItems.length === 0 ? (
+          {data.items.length === 0 ? (
             <div className="flex flex-col items-center gap-2 rounded-lg border bg-card py-16 text-center text-muted-foreground">
               <Inbox className="size-8" aria-hidden />
               <p className="text-sm font-medium">
-                {data.items.length === 0 ? t('empty') : t('filter.noMatch')}
+                {data.total === 0 ? t('empty') : t('filter.noMatch')}
               </p>
             </div>
           ) : (
-            <QueueTable items={filteredItems} onAction={dialog.openDialog} />
+            <>
+              <QueueTable items={data.items} onAction={dialog.openDialog} />
+              <QueuePagination
+                page={data.page}
+                pageSize={data.pageSize}
+                total={data.total}
+                onChange={(u) =>
+                  setSearch({
+                    page: u.page,
+                    page_size: u.page_size,
+                  } as Partial<QueueSearch>)
+                }
+              />
+            </>
           )}
         </>
       )}

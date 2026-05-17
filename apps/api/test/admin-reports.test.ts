@@ -58,6 +58,14 @@ let mockFindManyReports: unknown[] = [];
 let mockQueryRawResults: unknown[] = [];
 let mockUpdateReport: Record<string, unknown> = {};
 let mockEvidenceFile: Record<string, unknown> | null = null;
+// Captures + per-where count overrides for queue-pagination tests. Tests set
+// `mockCountByWhere` keyed by a stable string of the `where` shape; default
+// is 0. `lastFindManyArgs` records the most recent findMany call so tests can
+// assert skip/take and the composed where clause.
+let lastFindManyArgs: Record<string, unknown> | null = null;
+let lastCountArgsList: Array<Record<string, unknown>> = [];
+let mockCountByStatus: Record<string, number> = {};
+let mockQueueTotal: number | null = null;
 
 mock.module('../src/core/db/client', () => ({
   getPrisma: () => ({
@@ -76,9 +84,26 @@ mock.module('../src/core/db/client', () => ({
       upsert: async () => ({ id: '00000000-0000-0000-0000-aaaaaaaaaaaa' }),
     },
     report: {
-      findMany: async () => mockFindManyReports,
+      findMany: async (args: Record<string, unknown>) => {
+        lastFindManyArgs = args;
+        return mockFindManyReports;
+      },
       findUnique: async () => mockFindUniqueReport,
-      count: async () => 0,
+      count: async (args: Record<string, unknown>) => {
+        lastCountArgsList.push(args);
+        const where = (args?.where ?? {}) as Record<string, unknown>;
+        // pending / flagged GLOBAL stats — `where` is just `{ status: 'pending' }`.
+        if (
+          typeof where.status === 'string' &&
+          mockCountByStatus[where.status] !== undefined &&
+          Object.keys(where).length === 1
+        ) {
+          return mockCountByStatus[where.status];
+        }
+        // Queue-filtered total — anything else.
+        if (mockQueueTotal !== null) return mockQueueTotal;
+        return 0;
+      },
       update: async () => mockUpdateReport,
     },
     person: {
@@ -232,6 +257,10 @@ beforeEach(() => {
   mockUpdateReport = ACTION_UPDATE_RESULT;
   mockEvidenceFile = null;
   mockSignedUrl = 'https://signed.example/evidence/test';
+  lastFindManyArgs = null;
+  lastCountArgsList = [];
+  mockCountByStatus = {};
+  mockQueueTotal = null;
   firestoreSets = [];
   firestoreDeletes = [];
   __setFirestoreForTest(firestoreStub);
@@ -243,6 +272,10 @@ afterEach(() => {
   mockFindManyReports = [];
   mockQueryRawResults = [];
   mockEvidenceFile = null;
+  lastFindManyArgs = null;
+  lastCountArgsList = [];
+  mockCountByStatus = {};
+  mockQueueTotal = null;
   __setFirestoreForTest(null);
 });
 
@@ -300,6 +333,94 @@ describe('GET /admin/reports/queue', () => {
     const body = await res.json();
     expect(body.items[0].aiScore).toBeNull();
     expect(body.items[0].aiConfidence).toBeNull();
+  });
+
+  test('200 admin — paginates: page=2&page_size=25 sends skip:25, take:25', async () => {
+    mockDecoded = ADMIN;
+    mockQueueTotal = 137;
+    const res = await app.handle(
+      req('/admin/reports/queue?page=2&page_size=25', { token: 'tok' }),
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body).toMatchObject({ page: 2, pageSize: 25, total: 137 });
+    expect(lastFindManyArgs).toMatchObject({ skip: 25, take: 25 });
+  });
+
+  test('200 admin — search-by-title builds OR clause on title + description', async () => {
+    mockDecoded = ADMIN;
+    const res = await app.handle(
+      req('/admin/reports/queue?q=phish', { token: 'tok' }),
+    );
+    expect(res.status).toBe(200);
+    const where = (lastFindManyArgs?.where ?? {}) as Record<string, unknown>;
+    const or = where.OR as Array<Record<string, unknown>>;
+    expect(or).toHaveLength(2);
+    expect(or[0]).toMatchObject({
+      title: { contains: 'phish', mode: 'insensitive' },
+    });
+    expect(or[1]).toMatchObject({
+      description: { contains: 'phish', mode: 'insensitive' },
+    });
+  });
+
+  test('200 admin — status=flagged + priority=true compose in where', async () => {
+    mockDecoded = ADMIN;
+    const res = await app.handle(
+      req('/admin/reports/queue?status=flagged&priority=true', { token: 'tok' }),
+    );
+    expect(res.status).toBe(200);
+    const where = (lastFindManyArgs?.where ?? {}) as Record<string, unknown>;
+    expect(where).toMatchObject({ status: 'flagged', priorityFlag: true });
+  });
+
+  test('200 admin — scam_type + confidence compose in where', async () => {
+    mockDecoded = ADMIN;
+    const res = await app.handle(
+      req('/admin/reports/queue?scam_type=phone&confidence=high', {
+        token: 'tok',
+      }),
+    );
+    expect(res.status).toBe(200);
+    const where = (lastFindManyArgs?.where ?? {}) as Record<string, unknown>;
+    expect(where).toMatchObject({
+      scamType: { code: 'phone' },
+      aiConfidence: 'high',
+    });
+  });
+
+  test('422 — invalid page_size=37 rejected by validator', async () => {
+    mockDecoded = ADMIN;
+    const res = await app.handle(
+      req('/admin/reports/queue?page_size=37', { token: 'tok' }),
+    );
+    expect(res.status).toBe(422);
+  });
+
+  test('200 admin — page=0 coerced to 1 in response', async () => {
+    mockDecoded = ADMIN;
+    const res = await app.handle(
+      req('/admin/reports/queue?page=0', { token: 'tok' }),
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.page).toBe(1);
+  });
+
+  test('200 admin — pendingCount / flaggedCount remain global across filters', async () => {
+    mockDecoded = ADMIN;
+    mockCountByStatus = { pending: 42, flagged: 7 };
+    mockQueueTotal = 3;
+    const res = await app.handle(
+      req('/admin/reports/queue?status=flagged&confidence=high', {
+        token: 'tok',
+      }),
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.pendingCount).toBe(42);
+    expect(body.flaggedCount).toBe(7);
+    expect(body.total).toBe(3);
   });
 });
 

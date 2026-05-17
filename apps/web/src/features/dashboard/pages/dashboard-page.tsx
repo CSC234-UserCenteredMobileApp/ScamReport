@@ -38,7 +38,7 @@ function StatCard({
 }
 
 export function DashboardPage() {
-  const { data: queueData } = useQueue();
+  const { data: queueData } = useQueue({ page: 1, page_size: 25 });
 
   const avgAgeHours = useMemo(() => {
     if (!queueData || queueData.items.length === 0) return null;

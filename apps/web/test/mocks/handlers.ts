@@ -86,6 +86,9 @@ export const sampleQueue: AdminQueueResponse = {
   items: [sampleItem, sampleFlagged],
   pendingCount: 1,
   flaggedCount: 1,
+  total: 2,
+  page: 1,
+  pageSize: 25,
 };
 
 export const sampleDetail: AdminReportDetail = {

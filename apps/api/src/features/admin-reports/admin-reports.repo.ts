@@ -97,12 +97,52 @@ export interface ActionResult {
   rejectionRemark: string | null;
 }
 
-export async function findQueueRows(scamTypeCode?: string): Promise<QueueRow[]> {
+export interface QueueParams {
+  q?: string;
+  status?: 'pending' | 'flagged' | 'all';
+  priority?: boolean;
+  confidence?: 'high' | 'medium' | 'low' | 'all';
+  scamType?: string;
+  page: number;
+  pageSize: number;
+}
+
+// Equality match on `aiConfidence` correctly excludes `null` and `'unknown'`
+// rows when a band is selected.
+function buildQueueWhere(p: QueueParams): Record<string, unknown> {
+  const where: Record<string, unknown> = {};
+
+  where.status =
+    p.status === 'pending' || p.status === 'flagged'
+      ? p.status
+      : { in: ['pending', 'flagged'] };
+
+  if (p.priority === true) where.priorityFlag = true;
+
+  if (p.confidence && p.confidence !== 'all') {
+    where.aiConfidence = p.confidence;
+  }
+
+  if (p.scamType) where.scamType = { code: p.scamType };
+
+  if (p.q && p.q.trim()) {
+    const q = p.q.trim();
+    where.OR = [
+      { title: { contains: q, mode: 'insensitive' } },
+      { description: { contains: q, mode: 'insensitive' } },
+    ];
+  }
+
+  return where;
+}
+
+export async function findQueueRows(params: QueueParams): Promise<QueueRow[]> {
   const prisma = getPrisma();
-  const scamTypeFilter = scamTypeCode ? { scamType: { code: scamTypeCode } } : {};
   return prisma.report.findMany({
-    where: { status: { in: ['pending', 'flagged'] }, ...scamTypeFilter },
+    where: buildQueueWhere(params) as never,
     orderBy: [{ priorityFlag: 'desc' }, { createdAt: 'asc' }],
+    skip: (params.page - 1) * params.pageSize,
+    take: params.pageSize,
     select: {
       id: true,
       title: true,
@@ -124,13 +164,16 @@ export async function findQueueRows(scamTypeCode?: string): Promise<QueueRow[]> 
   }) as unknown as Promise<QueueRow[]>;
 }
 
+export async function countQueueRows(params: QueueParams): Promise<number> {
+  const prisma = getPrisma();
+  return prisma.report.count({ where: buildQueueWhere(params) as never });
+}
+
 export async function countByStatus(
   status: 'pending' | 'flagged',
-  scamTypeCode?: string,
 ): Promise<number> {
   const prisma = getPrisma();
-  const scamTypeFilter = scamTypeCode ? { scamType: { code: scamTypeCode } } : {};
-  return prisma.report.count({ where: { status, ...scamTypeFilter } });
+  return prisma.report.count({ where: { status } });
 }
 
 export async function findDetailRow(reportId: string): Promise<DetailRow | null> {
