@@ -41,7 +41,40 @@
     "reject": "Reject",
     "flag": "Flag",
     "unflag": "Unflag",
-    "review": "Review"
+    "review": "Review",
+    "export": "Export"
+  },
+  "export": {
+    "dialog": {
+      "title": "Export reports",
+      "description": "Download report data for offline analysis.",
+      "formatLabel": "What to export",
+      "formatCsv": "Quick CSV",
+      "formatCsvHint": "One row per report from the current filtered view.",
+      "formatBundle": "Analytics bundle",
+      "formatBundleHint": "Multi-sheet file with reports, moderation actions, evidence summary, /check verdict mix, scam-type reference.",
+      "bundleFormatLabel": "Bundle file type",
+      "bundleFormatXlsx": "Excel (.xlsx)",
+      "bundleFormatZip": "ZIP of CSVs",
+      "from": "From",
+      "to": "To",
+      "toBeforeFrom": "End date must be on or after start date.",
+      "dateHintCsv": "Leave both empty to export all dates.",
+      "dateHintBundle": "Leave both empty to default to the last 30 days.",
+      "summaryLabel": "Active filters",
+      "statusPart": "Status",
+      "scamTypePart": "Scam type",
+      "priorityPart": "Priority",
+      "confidencePart": "AI confidence",
+      "partAll": "All",
+      "partPriority": "Priority only",
+      "submit": "Download",
+      "downloading": "Preparing…",
+      "cancel": "Cancel"
+    },
+    "success": "Export downloaded.",
+    "error": "Export failed. Please retry.",
+    "errorAuth": "Session expired. Sign in again."
   },
   "dialog": {
     "approveTitle": "Approve report",
