@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { LanguageSwitch } from '@/components/language-switch';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -22,7 +21,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginPage() {
   const { t } = useTranslation();
-  const { firebaseUser, ready, signInWithGoogle, signInWithEmail } = useAuth();
+  const { firebaseUser, ready, signInWithEmail } = useAuth();
   const location = useLocation();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -63,18 +62,6 @@ export function LoginPage() {
     }
   };
 
-  const onGoogle = async () => {
-    setSubmitting(true);
-    setError(null);
-    try {
-      await signInWithGoogle();
-    } catch {
-      setError(t('auth.errorGeneric'));
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
   return (
     <div className="flex min-h-full items-center justify-center bg-background p-6">
       <div className="absolute right-4 top-4 flex items-center gap-1">
@@ -92,18 +79,6 @@ export function LoginPage() {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => void onGoogle()}
-            disabled={submitting}
-          >
-            {t('auth.signInWithGoogle')}
-          </Button>
-          <div className="relative py-1 text-center text-xs uppercase text-muted-foreground">
-            <Separator className="absolute left-0 right-0 top-1/2 -z-10" />
-            <span className="bg-card px-2">{t('auth.or')}</span>
-          </div>
           <form
             onSubmit={handleSubmit(onEmail)}
             noValidate

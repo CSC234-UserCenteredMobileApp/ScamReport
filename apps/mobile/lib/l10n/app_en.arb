@@ -46,7 +46,6 @@
   "settingsSectionAppearance": "APPEARANCE",
   "settingsSectionProtection": "ALERTS & PROTECTION",
   "settingsSectionAdminTools": "ADMIN TOOLS",
-  "settingsDangerZone": "Danger zone",
   "myReports": "My reports",
   "privacyPolicy": "Privacy policy",
   "termsOfService": "Terms of service",
@@ -370,11 +369,6 @@
   "scamTypeRomance": "Romance Scam",
 
   "manageAnnouncements": "Manage Announcements",
-  "deleteAccount": "Delete account",
-  "deleteAccountDialogTitle": "Delete account?",
-  "deleteAccountDialogContent": "Your account will be permanently deleted after 7 days. All your reports and data will be lost.\n\nYou will be signed out immediately.",
-  "deleteAccountFailed": "Could not request deletion. Please try again.",
-  "deletionRequests": "Deletion Requests",
 
   "editReportTitle": "Edit Report",
   "editReportSectionDetails": "Details",

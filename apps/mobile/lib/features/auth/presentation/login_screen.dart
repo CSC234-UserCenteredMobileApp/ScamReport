@@ -50,16 +50,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  void _showForgotPasswordSnack() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Password reset is coming soon — contact support for now.',
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -94,7 +84,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: _busy ? null : _showForgotPasswordSnack,
+                    onPressed: _busy ? null : () => context.push('/forgot-password'),
                     child: const Text('Forgot password?'),
                   ),
                 ),

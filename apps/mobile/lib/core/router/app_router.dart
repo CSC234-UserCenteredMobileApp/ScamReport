@@ -13,6 +13,7 @@ import '../../features/sms_scan/presentation/sms_overlay_banner.dart';
 import '../../features/auth/presentation/auth_providers.dart';
 import '../../l10n/l10n.dart';
 import '../feature_flags/feature_flags.dart';
+import '../../features/auth/presentation/forgot_password_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/check/domain/check_result.dart';
@@ -30,7 +31,6 @@ import '../../features/reports/presentation/report_detail_screen.dart';
 import '../../features/search/presentation/search_screen.dart';
 import '../../features/announcement_editor/presentation/admin_announcements_screen.dart';
 import '../../features/announcement_editor/presentation/announcement_editor_screen.dart';
-import '../../features/deletion_requests/presentation/admin_deletion_requests_screen.dart';
 import '../../features/notifications/presentation/notifications_inbox_screen.dart';
 import '../../features/reports/presentation/edit_report_screen.dart';
 import '../../features/reports/presentation/my_reports_screen.dart';
@@ -201,6 +201,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
       GoRoute(path: '/register', builder: (_, __) => const RegisterScreen()),
       GoRoute(
+        path: '/forgot-password',
+        builder: (_, __) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
         path: '/check-input',
         builder: (_, s) => CheckInputScreen(
           initialText: s.uri.queryParameters['text'],
@@ -258,10 +262,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, s) => AnnouncementEditorScreen(
           announcementId: s.pathParameters['id'],
         ),
-      ),
-      GoRoute(
-        path: '/admin/deletion-requests',
-        builder: (_, __) => const AdminDeletionRequestsScreen(),
       ),
     ],
   );

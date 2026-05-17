@@ -10,8 +10,6 @@ import { adminAnnouncementsRoute } from './features/admin-announcements/admin-an
 import { checkRoute } from './features/check/check.route';
 import { askAiRoute } from './features/ask-ai/ask-ai.route';
 import { scamTypesRoute } from './features/scam-types/scam-types.route';
-import { userRoute } from './features/user/user.route';
-import { adminDeletionRequestsRoute } from './features/admin-deletion-requests/admin-deletion-requests.route';
 import { notificationsRoute } from './features/notifications/notifications.route';
 import { adminNotificationsRoute } from './features/admin-notifications/admin-notifications.route';
 import { adminScammersRoute } from './features/admin-scammers/admin-scammers.route';
@@ -50,8 +48,6 @@ export const app = new Elysia()
   .use(checkRoute)
   .use(askAiRoute)
   .use(scamTypesRoute)
-  .use(userRoute)
-  .use(adminDeletionRequestsRoute)
   .use(notificationsRoute)
   .use(adminNotificationsRoute)
   .use(adminScammersRoute)
