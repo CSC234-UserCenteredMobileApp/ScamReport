@@ -125,7 +125,7 @@ class _SectionLabel extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Admin tools section — announcements + deletion requests
+// Admin tools section — announcements
 // ---------------------------------------------------------------------------
 class _AdminSection extends StatelessWidget {
   @override
@@ -142,12 +142,6 @@ class _AdminSection extends StatelessWidget {
             title: context.l10n.manageAnnouncements,
             onTap: () => context.push('/admin/announcements'),
             isFirst: true,
-          ),
-          const Divider(height: 1, indent: 16, endIndent: 16),
-          _NavTile(
-            icon: Icons.person_remove_outlined,
-            title: context.l10n.deletionRequests,
-            onTap: () => context.push('/admin/deletion-requests'),
             isLast: true,
           ),
         ],
@@ -210,10 +204,6 @@ class _AccountSection extends StatelessWidget {
           if (!isGuest) ...[
             const Divider(height: 1, indent: 16, endIndent: 16),
             const _SignOutTile(),
-            if (!isAdmin) ...[
-              const Divider(height: 1, indent: 16, endIndent: 16),
-              const _DeleteAccountExpansion(),
-            ],
           ],
         ],
       ),
@@ -375,110 +365,3 @@ class _SignOutTile extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Danger zone — collapsed by default; reveals delete account on expand.
-// ---------------------------------------------------------------------------
-class _DeleteAccountExpansion extends StatelessWidget {
-  const _DeleteAccountExpansion();
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
-      child: Theme(
-        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-        child: ExpansionTile(
-          leading: Icon(Icons.warning_amber_outlined,
-              color: cs.onSurfaceVariant, size: 22),
-          title: Text(
-            context.l10n.settingsDangerZone,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: cs.onSurfaceVariant,
-                ),
-          ),
-          iconColor: cs.onSurfaceVariant,
-          collapsedIconColor: cs.onSurfaceVariant,
-          tilePadding: const EdgeInsets.symmetric(horizontal: 16),
-          childrenPadding: EdgeInsets.zero,
-          children: const [
-            Divider(height: 1, indent: 16, endIndent: 16),
-            _DeleteAccountTile(),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Delete account
-// ---------------------------------------------------------------------------
-class _DeleteAccountTile extends ConsumerWidget {
-  const _DeleteAccountTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
-    final verdict = Theme.of(context).extension<VerdictPalette>()!;
-
-    ref.listen<AsyncValue<void>>(deleteAccountProvider, (_, next) {
-      if (next is AsyncError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.deleteAccountFailed)),
-        );
-      }
-    });
-
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
-      child: ListTile(
-        leading: Icon(
-          Icons.delete_forever_outlined,
-          color: verdict.scam.accent,
-          size: 22,
-        ),
-        title: Text(
-          context.l10n.deleteAccount,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: verdict.scam.accent,
-                fontWeight: FontWeight.w500,
-              ),
-        ),
-        trailing: Icon(Icons.chevron_right, color: cs.onSurfaceVariant),
-        onTap: () => _showDeleteDialog(context, ref),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      ),
-    );
-  }
-
-  void _showDeleteDialog(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.deleteAccountDialogTitle),
-        content: Text(l10n.deleteAccountDialogContent),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () async {
-              Navigator.of(ctx).pop();
-              await ref.read(deleteAccountProvider.notifier).requestDeletion();
-            },
-            style: FilledButton.styleFrom(
-              backgroundColor:
-                  Theme.of(ctx).extension<VerdictPalette>()!.scam.accent,
-            ),
-            child: Text(l10n.deleteAccount),
-          ),
-        ],
-      ),
-    );
-  }
-}

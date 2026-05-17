@@ -129,13 +129,14 @@ class _ErrorRow extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// _SearchSection — search TextField + quick-action tiles + report button
+// _SearchSection — search TextField + report button (hidden for admins)
 // ---------------------------------------------------------------------------
-class _SearchSection extends StatelessWidget {
+class _SearchSection extends ConsumerWidget {
   const _SearchSection();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(currentUserProvider).valueOrNull;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -151,15 +152,17 @@ class _SearchSection extends StatelessWidget {
               hintText: context.l10n.searchHint,
             ),
           ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: () => context.push('/ask-ai?seed=report-intent'),
-              icon: const Icon(Icons.flag_outlined, size: 18),
-              label: Text(context.l10n.reportAScam),
+          if (user?.isAdmin != true) ...[
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () => context.push('/ask-ai?seed=report-intent'),
+                icon: const Icon(Icons.flag_outlined, size: 18),
+                label: Text(context.l10n.reportAScam),
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );

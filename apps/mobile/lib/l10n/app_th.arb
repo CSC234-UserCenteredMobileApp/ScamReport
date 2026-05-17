@@ -36,7 +36,6 @@
   "settingsSectionAppearance": "การแสดงผล",
   "settingsSectionProtection": "การแจ้งเตือนและการป้องกัน",
   "settingsSectionAdminTools": "เครื่องมือผู้ดูแล",
-  "settingsDangerZone": "โซนอันตราย",
   "myReports": "รายงานของฉัน",
   "privacyPolicy": "นโยบายความเป็นส่วนตัว",
   "termsOfService": "ข้อกำหนดการให้บริการ",
@@ -354,11 +353,6 @@
   "scamTypeRomance": "หลอกรัก",
 
   "manageAnnouncements": "จัดการประกาศ",
-  "deleteAccount": "ลบบัญชี",
-  "deleteAccountDialogTitle": "ลบบัญชีใช่ไหม?",
-  "deleteAccountDialogContent": "บัญชีของคุณจะถูกลบถาวรภายใน 7 วัน ข้อมูลและรายงานทั้งหมดจะสูญหาย\n\nคุณจะถูกออกจากระบบทันที",
-  "deleteAccountFailed": "ไม่สามารถส่งคำขอลบบัญชีได้ กรุณาลองใหม่",
-  "deletionRequests": "คำขอลบบัญชี",
 
   "editReportTitle": "แก้ไขรายงาน",
   "editReportSectionDetails": "รายละเอียด",

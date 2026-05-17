@@ -8,7 +8,6 @@ import { server } from '../mocks/server';
 import { userSyncResponse } from '../mocks/handlers';
 
 const onAuthStateChangedMock = vi.fn();
-const signInPopupMock = vi.fn(async () => undefined);
 const signInEmailMock = vi.fn(async () => undefined);
 const signOutMock = vi.fn(async () => undefined);
 
@@ -16,9 +15,7 @@ vi.mock('firebase/auth', async () => {
   const actual = await vi.importActual<typeof FirebaseAuthModule>('firebase/auth');
   return {
     ...actual,
-    GoogleAuthProvider: actual.GoogleAuthProvider,
     onAuthStateChanged: (...args: unknown[]) => onAuthStateChangedMock(...args),
-    signInWithPopup: () => signInPopupMock(),
     signInWithEmailAndPassword: () => signInEmailMock(),
     signOut: () => signOutMock(),
   };
@@ -46,7 +43,6 @@ function wrapper({ children }: { children: ReactNode }) {
 beforeEach(() => {
   onAuthStateChangedMock.mockReset();
   signOutMock.mockReset();
-  signInPopupMock.mockReset();
   signInEmailMock.mockReset();
 });
 
@@ -106,11 +102,9 @@ describe('AuthProvider', () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
     await waitFor(() => expect(result.current.ready).toBe(true));
     await act(async () => {
-      await result.current.signInWithGoogle();
       await result.current.signInWithEmail('a@b.com', 'pw');
       await result.current.signOut();
     });
-    expect(signInPopupMock).toHaveBeenCalledOnce();
     expect(signInEmailMock).toHaveBeenCalledOnce();
     expect(signOutMock).toHaveBeenCalledOnce();
   });

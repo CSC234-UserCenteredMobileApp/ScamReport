@@ -4,7 +4,6 @@
     "dashboard": "แดชบอร์ด",
     "moderation": "ตรวจสอบ",
     "announcements": "ประกาศ",
-    "deletionRequests": "คำขอลบบัญชี",
     "platformSummary": "สรุปแพลตฟอร์ม",
     "signOut": "ออกจากระบบ"
   },
@@ -14,8 +13,6 @@
     "email": "อีเมล",
     "password": "รหัสผ่าน",
     "signIn": "เข้าสู่ระบบ",
-    "signInWithGoogle": "ดำเนินการต่อด้วย Google",
-    "or": "หรือ",
     "noAccessTitle": "ไม่มีสิทธิ์ผู้ดูแลระบบ",
     "noAccessBody": "บัญชีนี้ไม่มีสิทธิ์เข้าใช้พอร์ทัลผู้ดูแลระบบ กรุณาออกจากระบบและลองใหม่ด้วยบัญชีผู้ดูแลระบบ",
     "syncErrorTitle": "ไม่สามารถยืนยันบัญชีของคุณได้",

@@ -4,8 +4,6 @@ import type {
   AdminAnnouncementDetailResponse,
   AdminAnnouncementListItem,
   AdminAnnouncementListResponse,
-  AdminDeletionRequestItem,
-  AdminDeletionRequestListResponse,
   AdminEvidenceUrlResponse,
   AdminQueueItem,
   AdminQueueResponse,
@@ -202,42 +200,6 @@ export const sampleAnnouncementList: AdminAnnouncementListResponse = {
 
 export const sampleSubscriberCount: SubscriberCountResponse = { count: 42 };
 
-const PURGE_OFFSET_MS = 7 * 24 * 3_600_000;
-
-export const samplePendingDeletion: AdminDeletionRequestItem = {
-  id: '55555555-5555-5555-5555-555555555555',
-  userHandle: 'User_5a8c1f0e',
-  userEmail: 'test@example.com',
-  requestedAt: new Date(Date.now() - 1 * 3_600_000).toISOString(),
-  purgeDueAt: new Date(Date.now() + PURGE_OFFSET_MS).toISOString(),
-  status: 'pending',
-  rejectionReason: null,
-  reviewedAt: null,
-};
-
-export const sampleApprovedDeletion: AdminDeletionRequestItem = {
-  ...samplePendingDeletion,
-  id: '66666666-6666-6666-6666-666666666666',
-  userHandle: 'User_b910c2d4',
-  status: 'approved',
-  reviewedAt: new Date(Date.now() - 12 * 3_600_000).toISOString(),
-};
-
-export const sampleRejectedDeletion: AdminDeletionRequestItem = {
-  ...samplePendingDeletion,
-  id: '77777777-7777-7777-7777-777777777777',
-  userHandle: 'User_3e5f6a7b',
-  status: 'rejected',
-  rejectionReason: 'Identity could not be verified.',
-  reviewedAt: new Date(Date.now() - 24 * 3_600_000).toISOString(),
-};
-
-const deletionByStatus: Record<string, AdminDeletionRequestListResponse> = {
-  pending: { items: [samplePendingDeletion], pendingCount: 1 },
-  approved: { items: [sampleApprovedDeletion], pendingCount: 1 },
-  rejected: { items: [sampleRejectedDeletion], pendingCount: 1 },
-};
-
 export const handlers = [
   http.post(`${BASE}/auth/sync`, () => HttpResponse.json(adminSyncResponse)),
   http.get(`${BASE}/admin/announcements`, () =>
@@ -288,27 +250,6 @@ export const handlers = [
   ),
   http.get(`${BASE}/admin/notifications/subscribers/count`, () =>
     HttpResponse.json(sampleSubscriberCount),
-  ),
-  http.get(`${BASE}/admin/deletion-requests`, ({ request }) => {
-    const url = new URL(request.url);
-    const status = url.searchParams.get('status') ?? 'pending';
-    return HttpResponse.json(
-      deletionByStatus[status] ?? deletionByStatus.pending,
-    );
-  }),
-  http.post(`${BASE}/admin/deletion-requests/:id/approve`, ({ params }) =>
-    HttpResponse.json({
-      id: params.id as string,
-      status: 'approved',
-      reviewedAt: new Date().toISOString(),
-    }),
-  ),
-  http.post(`${BASE}/admin/deletion-requests/:id/reject`, ({ params }) =>
-    HttpResponse.json({
-      id: params.id as string,
-      status: 'rejected',
-      reviewedAt: new Date().toISOString(),
-    }),
   ),
   http.get(`${BASE}/scam-types`, () => HttpResponse.json(sampleScamTypes)),
   http.get(`${BASE}/admin/reports/search`, ({ request }) => {

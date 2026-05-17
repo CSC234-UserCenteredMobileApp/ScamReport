@@ -4,7 +4,6 @@
     "dashboard": "Dashboard",
     "moderation": "Moderation",
     "announcements": "Announcements",
-    "deletionRequests": "Deletion requests",
     "platformSummary": "Platform summary",
     "signOut": "Sign out"
   },
@@ -14,8 +13,6 @@
     "email": "Email",
     "password": "Password",
     "signIn": "Sign in",
-    "signInWithGoogle": "Continue with Google",
-    "or": "or",
     "noAccessTitle": "No admin access",
     "noAccessBody": "This account is not authorised for the admin portal. Sign out and try again with an admin account.",
     "syncErrorTitle": "Couldn't verify your account",

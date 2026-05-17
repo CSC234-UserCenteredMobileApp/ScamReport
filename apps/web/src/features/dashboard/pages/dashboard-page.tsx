@@ -1,11 +1,10 @@
 import { differenceInHours } from 'date-fns';
-import { ClipboardList, Flag, ShieldCheck, Users } from 'lucide-react';
+import { ClipboardList, Flag, ShieldCheck } from 'lucide-react';
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { PageHeader } from '@/components/page-header';
 import { useQueue } from '@/features/moderation/api/queue';
-import { useDeletionRequests } from '@/features/deletion-requests/api/list';
 
 function StatCard({
   icon: Icon,
@@ -39,7 +38,6 @@ function StatCard({
 
 export function DashboardPage() {
   const { data: queueData } = useQueue();
-  const { data: deletionData } = useDeletionRequests('pending');
 
   const avgAgeHours = useMemo(() => {
     if (!queueData || queueData.items.length === 0) return null;
@@ -82,13 +80,6 @@ export function DashboardPage() {
             value={avgAgeHours !== null ? avgAgeHours : '—'}
             to="/moderation"
             color="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-          />
-          <StatCard
-            icon={Users}
-            label="Pending deletions"
-            value={deletionData?.pendingCount ?? '—'}
-            to="/deletion-requests"
-            color="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
           />
         </div>
       </section>

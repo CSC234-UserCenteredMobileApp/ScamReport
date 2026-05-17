@@ -97,9 +97,6 @@ class AppLocalizationsTh extends AppLocalizations {
   String get settingsSectionAdminTools => 'เครื่องมือผู้ดูแล';
 
   @override
-  String get settingsDangerZone => 'โซนอันตราย';
-
-  @override
   String get myReports => 'รายงานของฉัน';
 
   @override
@@ -1006,22 +1003,6 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get manageAnnouncements => 'จัดการประกาศ';
-
-  @override
-  String get deleteAccount => 'ลบบัญชี';
-
-  @override
-  String get deleteAccountDialogTitle => 'ลบบัญชีใช่ไหม?';
-
-  @override
-  String get deleteAccountDialogContent =>
-      'บัญชีของคุณจะถูกลบถาวรภายใน 7 วัน ข้อมูลและรายงานทั้งหมดจะสูญหาย\n\nคุณจะถูกออกจากระบบทันที';
-
-  @override
-  String get deleteAccountFailed => 'ไม่สามารถส่งคำขอลบบัญชีได้ กรุณาลองใหม่';
-
-  @override
-  String get deletionRequests => 'คำขอลบบัญชี';
 
   @override
   String get editReportTitle => 'แก้ไขรายงาน';

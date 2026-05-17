@@ -266,12 +266,6 @@ abstract class AppLocalizations {
   /// **'ADMIN TOOLS'**
   String get settingsSectionAdminTools;
 
-  /// No description provided for @settingsDangerZone.
-  ///
-  /// In en, this message translates to:
-  /// **'Danger zone'**
-  String get settingsDangerZone;
-
   /// No description provided for @myReports.
   ///
   /// In en, this message translates to:
@@ -1927,36 +1921,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Manage Announcements'**
   String get manageAnnouncements;
-
-  /// No description provided for @deleteAccount.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete account'**
-  String get deleteAccount;
-
-  /// No description provided for @deleteAccountDialogTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete account?'**
-  String get deleteAccountDialogTitle;
-
-  /// No description provided for @deleteAccountDialogContent.
-  ///
-  /// In en, this message translates to:
-  /// **'Your account will be permanently deleted after 7 days. All your reports and data will be lost.\n\nYou will be signed out immediately.'**
-  String get deleteAccountDialogContent;
-
-  /// No description provided for @deleteAccountFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not request deletion. Please try again.'**
-  String get deleteAccountFailed;
-
-  /// No description provided for @deletionRequests.
-  ///
-  /// In en, this message translates to:
-  /// **'Deletion Requests'**
-  String get deletionRequests;
 
   /// No description provided for @editReportTitle.
   ///

@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { BarChart3, LayoutDashboard, Megaphone, Shield, ShieldCheck, Trash2 } from 'lucide-react';
+import { BarChart3, LayoutDashboard, Megaphone, Shield, ShieldCheck } from 'lucide-react';
 import type { ComponentType, SVGProps } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -16,7 +16,6 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/dashboard', icon: LayoutDashboard, labelKey: 'nav.dashboard' },
   { to: '/moderation', icon: ShieldCheck, labelKey: 'nav.moderation' },
   { to: '/announcements', icon: Megaphone, labelKey: 'nav.announcements' },
-  { to: '/deletion-requests', icon: Trash2, labelKey: 'nav.deletionRequests' },
   { to: '/platform-summary', icon: BarChart3, labelKey: 'nav.platformSummary' },
 ];
 
