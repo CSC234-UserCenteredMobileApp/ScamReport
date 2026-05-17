@@ -6,6 +6,7 @@
     "announcements": "ประกาศ",
     "deletionRequests": "คำขอลบบัญชี",
     "platformSummary": "สรุปแพลตฟอร์ม",
+    "aiEval": "ความแม่นยำ AI",
     "signOut": "ออกจากระบบ"
   },
   "auth": {

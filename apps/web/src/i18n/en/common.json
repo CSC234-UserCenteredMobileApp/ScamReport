@@ -6,6 +6,7 @@
     "announcements": "Announcements",
     "deletionRequests": "Deletion requests",
     "platformSummary": "Platform summary",
+    "aiEval": "AI accuracy",
     "signOut": "Sign out"
   },
   "auth": {
