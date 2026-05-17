@@ -40,5 +40,22 @@
     "openMenu": "เปิดเมนู",
     "closeMenu": "ปิดเมนู",
     "comingSoon": "เร็ว ๆ นี้"
+  },
+  "scamOverview": {
+    "title": "ภาพรวมสแกม",
+    "totalReports": "รายงาน",
+    "totalScammers": "ผู้ต้องสงสัย",
+    "totalPersons": "บุคคล",
+    "byScamType": "แยกตามประเภทสแกม",
+    "bySourceSite": "แหล่งข่าว",
+    "sourceNote": "สำนักข่าวที่รายงานคดี นับเฉพาะรายงานที่นำเข้าจาก crawler",
+    "byProvince": "แยกตามจังหวัด",
+    "byNationality": "แยกตามสัญชาติ",
+    "byArrestStatus": "แยกตามสถานะการจับกุม",
+    "daily": "รายงานต่อวัน",
+    "dailyNote": "นับตามวันที่ตรวจสอบ (หรือวันที่สร้างหากไม่มี)",
+    "noData": "ไม่มีข้อมูล",
+    "loadError": "โหลดภาพรวมสแกมไม่สำเร็จ",
+    "footer": "สร้างเมื่อ {{generatedAt}}"
   }
 }

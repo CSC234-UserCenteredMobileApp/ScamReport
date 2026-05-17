@@ -218,7 +218,8 @@ export type ScamTypeCode =
   | 'ecommerce_fraud'
   | 'other'
   | 'investment_fraud'
-  | 'romance_scam';
+  | 'romance_scam'
+  | 'fake_job';
 
 export type Action = 'approve' | 'flag' | 'reject' | 'pending';
 

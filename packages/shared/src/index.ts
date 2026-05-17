@@ -16,3 +16,7 @@ export * from './schemas/scammers';
 export * from './schemas/persons';
 export * from './schemas/dossier';
 export * from './schemas/admin-ai-eval';
+export * from './schemas/admin-scam-overview';
+export * from './lookups/province-labels';
+export * from './lookups/nationality-labels';
+export * from './lookups/arrest-status-labels';

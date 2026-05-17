@@ -253,6 +253,15 @@ model Report {
 
   scammerId                  String?         @map("scammer_id") @db.Uuid
 
+  /// News-crawler import metadata. NULL for user-submitted reports.
+  /// Populated by `apps/api/scripts/import-crawler.ts`.
+  sourceUrl                  String?         @map("source_url")
+  sourceSite                 String?         @map("source_site")
+  scrapedAt                  DateTime?       @map("scraped_at") @db.Timestamptz()
+  articleTitle               String?         @map("article_title")
+  moneyLostThb               BigInt?         @map("money_lost_thb")
+  numVictims                 Int?            @map("num_victims")
+
   reporter User?    @relation(fields: [reporterId], references: [id], onDelete: SetNull)
   scamType ScamType @relation(fields: [scamTypeId], references: [id])
   scammer  Scammer? @relation(fields: [scammerId], references: [id], onDelete: SetNull)
@@ -267,6 +276,8 @@ model Report {
   @@index([reporterId, createdAt(sort: Desc)])
   @@index([scamTypeId])
   @@index([scammerId])
+  @@index([sourceSite])
+  @@index([scrapedAt(sort: Desc)])
   @@map("reports")
 }
 
@@ -287,6 +298,13 @@ model Scammer {
   lastSeenAt        DateTime?        @map("last_seen_at") @db.Timestamptz()
   createdAt         DateTime         @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt         DateTime         @default(now()) @map("updated_at") @db.Timestamptz()
+
+  /// Geo + status metadata sourced from news crawler. NULL for seed/user
+  /// scammer profiles. Stored as the original token (often Thai for province);
+  /// bilingual rendering is handled by lookup tables in `@my-product/shared`.
+  province      String?
+  nationality   String?
+  arrestStatus  String?              @map("arrest_status")
 
   person        Person?             @relation(fields: [personId], references: [id], onDelete: SetNull)
   identifiers   ScammerIdentifier[]
