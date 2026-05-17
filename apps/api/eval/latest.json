@@ -1,0 +1,712 @@
+{
+  "runAt": "2026-05-17T08:05:24.934Z",
+  "gitSha": "7a903aef3b26dbacfe6711fb084aafd8f69b968a",
+  "totalCases": 50,
+  "verdictAccuracy": 0.88,
+  "scammerRecallAt1": 0.8929,
+  "mrr": 0.8929,
+  "p95LatencyMs": 6032,
+  "byType": {
+    "phone": {
+      "n": 15,
+      "verdictAccuracy": 0.9333,
+      "scammerRecallAt1": 0.875,
+      "mrr": 0.875,
+      "p95LatencyMs": 1777
+    },
+    "url": {
+      "n": 15,
+      "verdictAccuracy": 0.8,
+      "scammerRecallAt1": 1,
+      "mrr": 1,
+      "p95LatencyMs": 4937
+    },
+    "text": {
+      "n": 20,
+      "verdictAccuracy": 0.9,
+      "scammerRecallAt1": 0.8462,
+      "mrr": 0.8462,
+      "p95LatencyMs": 10095
+    }
+  },
+  "confusionMatrix": {
+    "scam": {
+      "scam": 28,
+      "suspicious": 1,
+      "safe": 1,
+      "unknown": 0
+    },
+    "suspicious": {
+      "scam": 0,
+      "suspicious": 0,
+      "safe": 0,
+      "unknown": 0
+    },
+    "safe": {
+      "scam": 3,
+      "suspicious": 1,
+      "safe": 16,
+      "unknown": 0
+    },
+    "unknown": {
+      "scam": 0,
+      "suspicious": 0,
+      "safe": 0,
+      "unknown": 0
+    }
+  },
+  "threshold": 0.6,
+  "passed": true,
+  "results": [
+    {
+      "label": "phone-revenue-known",
+      "inputType": "phone",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "Revenue Dept Impersonator",
+      "actualScammerDisplayName": "Revenue Dept Impersonator",
+      "rankOfExpected": 1,
+      "verdictHit": true,
+      "latencyMs": 1777,
+      "tags": []
+    },
+    {
+      "label": "phone-revenue-known-thai-prefix",
+      "inputType": "phone",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "Revenue Dept Impersonator",
+      "actualScammerDisplayName": "Revenue Dept Impersonator",
+      "rankOfExpected": 1,
+      "verdictHit": true,
+      "latencyMs": 978,
+      "tags": []
+    },
+    {
+      "label": "phone-customs-known",
+      "inputType": "phone",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "Customs Duty Scam Caller",
+      "actualScammerDisplayName": "Customs Duty Scam Caller",
+      "rankOfExpected": 1,
+      "verdictHit": true,
+      "latencyMs": 978,
+      "tags": []
+    },
+    {
+      "label": "phone-scb-known",
+      "inputType": "phone",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "SCB Fraud-Team Caller",
+      "actualScammerDisplayName": "SCB Fraud-Team Caller",
+      "rankOfExpected": 1,
+      "verdictHit": true,
+      "latencyMs": 977,
+      "tags": []
+    },
+    {
+      "label": "phone-scb-known-thai-prefix",
+      "inputType": "phone",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "SCB Fraud-Team Caller",
+      "actualScammerDisplayName": "SCB Fraud-Team Caller",
+      "rankOfExpected": 1,
+      "verdictHit": true,
+      "latencyMs": 976,
+      "tags": []
+    },
+    {
+      "label": "phone-unknown-clean",
+      "inputType": "phone",
+      "expectedVerdict": "safe",
+      "actualVerdict": "safe",
+      "expectedScammerDisplayName": null,
+      "actualScammerDisplayName": null,
+      "rankOfExpected": null,
+      "verdictHit": true,
+      "latencyMs": 1401,
+      "tags": []
+    },
+    {
+      "label": "phone-unknown-thai-prefix",
+      "inputType": "phone",
+      "expectedVerdict": "safe",
+      "actualVerdict": "safe",
+      "expectedScammerDisplayName": null,
+      "actualScammerDisplayName": null,
+      "rankOfExpected": null,
+      "verdictHit": true,
+      "latencyMs": 1136,
+      "tags": []
+    },
+    {
+      "label": "phone-unknown-random",
+      "inputType": "phone",
+      "expectedVerdict": "safe",
+      "actualVerdict": "safe",
+      "expectedScammerDisplayName": null,
+      "actualScammerDisplayName": null,
+      "rankOfExpected": null,
+      "verdictHit": true,
+      "latencyMs": 1203,
+      "tags": []
+    },
+    {
+      "label": "phone-empty-pad",
+      "inputType": "phone",
+      "expectedVerdict": "safe",
+      "actualVerdict": "safe",
+      "expectedScammerDisplayName": null,
+      "actualScammerDisplayName": null,
+      "rankOfExpected": null,
+      "verdictHit": true,
+      "latencyMs": 1143,
+      "tags": []
+    },
+    {
+      "label": "phone-revenue-spaced",
+      "inputType": "phone",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "Revenue Dept Impersonator",
+      "actualScammerDisplayName": "Revenue Dept Impersonator",
+      "rankOfExpected": 1,
+      "verdictHit": true,
+      "latencyMs": 976,
+      "tags": []
+    },
+    {
+      "label": "phone-revenue-lookalike",
+      "inputType": "phone",
+      "expectedVerdict": "safe",
+      "actualVerdict": "safe",
+      "expectedScammerDisplayName": null,
+      "actualScammerDisplayName": null,
+      "rankOfExpected": null,
+      "verdictHit": true,
+      "latencyMs": 1342,
+      "tags": [
+        "adversarial",
+        "lookalike"
+      ]
+    },
+    {
+      "label": "phone-intl-foreign",
+      "inputType": "phone",
+      "expectedVerdict": "safe",
+      "actualVerdict": "safe",
+      "expectedScammerDisplayName": null,
+      "actualScammerDisplayName": null,
+      "rankOfExpected": null,
+      "verdictHit": true,
+      "latencyMs": 1138,
+      "tags": [
+        "adversarial"
+      ]
+    },
+    {
+      "label": "phone-customs-spaced",
+      "inputType": "phone",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "Customs Duty Scam Caller",
+      "actualScammerDisplayName": "Customs Duty Scam Caller",
+      "rankOfExpected": 1,
+      "verdictHit": true,
+      "latencyMs": 976,
+      "tags": []
+    },
+    {
+      "label": "phone-scb-dots",
+      "inputType": "phone",
+      "expectedVerdict": "scam",
+      "actualVerdict": "safe",
+      "expectedScammerDisplayName": "SCB Fraud-Team Caller",
+      "actualScammerDisplayName": null,
+      "rankOfExpected": null,
+      "verdictHit": false,
+      "latencyMs": 1353,
+      "tags": [
+        "adversarial"
+      ]
+    },
+    {
+      "label": "phone-unknown-mobile",
+      "inputType": "phone",
+      "expectedVerdict": "safe",
+      "actualVerdict": "safe",
+      "expectedScammerDisplayName": null,
+      "actualScammerDisplayName": null,
+      "rankOfExpected": null,
+      "verdictHit": true,
+      "latencyMs": 1132,
+      "tags": []
+    },
+    {
+      "label": "url-kerry-known",
+      "inputType": "url",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "Kerry Parcel Phisher",
+      "actualScammerDisplayName": "Kerry Parcel Phisher",
+      "rankOfExpected": 1,
+      "verdictHit": true,
+      "latencyMs": 3819,
+      "tags": []
+    },
+    {
+      "label": "url-kerry-known-no-proto",
+      "inputType": "url",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "Kerry Parcel Phisher",
+      "actualScammerDisplayName": "Kerry Parcel Phisher",
+      "rankOfExpected": 1,
+      "verdictHit": true,
+      "latencyMs": 4023,
+      "tags": []
+    },
+    {
+      "label": "url-ktb-known",
+      "inputType": "url",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "KTB Phishing Ring",
+      "actualScammerDisplayName": "KTB Phishing Ring",
+      "rankOfExpected": 1,
+      "verdictHit": true,
+      "latencyMs": 3187,
+      "tags": []
+    },
+    {
+      "label": "url-ktb-known-no-proto",
+      "inputType": "url",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "KTB Phishing Ring",
+      "actualScammerDisplayName": "KTB Phishing Ring",
+      "rankOfExpected": 1,
+      "verdictHit": true,
+      "latencyMs": 3813,
+      "tags": []
+    },
+    {
+      "label": "url-unknown-clean",
+      "inputType": "url",
+      "expectedVerdict": "safe",
+      "actualVerdict": "safe",
+      "expectedScammerDisplayName": null,
+      "actualScammerDisplayName": null,
+      "rankOfExpected": null,
+      "verdictHit": true,
+      "latencyMs": 2998,
+      "tags": []
+    },
+    {
+      "label": "url-unknown-google",
+      "inputType": "url",
+      "expectedVerdict": "safe",
+      "actualVerdict": "safe",
+      "expectedScammerDisplayName": null,
+      "actualScammerDisplayName": null,
+      "rankOfExpected": null,
+      "verdictHit": true,
+      "latencyMs": 3725,
+      "tags": []
+    },
+    {
+      "label": "url-unknown-https",
+      "inputType": "url",
+      "expectedVerdict": "safe",
+      "actualVerdict": "safe",
+      "expectedScammerDisplayName": null,
+      "actualScammerDisplayName": null,
+      "rankOfExpected": null,
+      "verdictHit": true,
+      "latencyMs": 3635,
+      "tags": []
+    },
+    {
+      "label": "url-kerry-trailing-slash",
+      "inputType": "url",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "Kerry Parcel Phisher",
+      "actualScammerDisplayName": "Kerry Parcel Phisher",
+      "rankOfExpected": 1,
+      "verdictHit": true,
+      "latencyMs": 4583,
+      "tags": []
+    },
+    {
+      "label": "url-kerry-lookalike-safe",
+      "inputType": "url",
+      "expectedVerdict": "safe",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": null,
+      "actualScammerDisplayName": null,
+      "rankOfExpected": null,
+      "verdictHit": false,
+      "latencyMs": 4008,
+      "tags": [
+        "adversarial",
+        "lookalike"
+      ]
+    },
+    {
+      "label": "url-ktb-uppercase",
+      "inputType": "url",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "KTB Phishing Ring",
+      "actualScammerDisplayName": "KTB Phishing Ring",
+      "rankOfExpected": 1,
+      "verdictHit": true,
+      "latencyMs": 4937,
+      "tags": [
+        "adversarial"
+      ]
+    },
+    {
+      "label": "url-kerry-deep-path",
+      "inputType": "url",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "Kerry Parcel Phisher",
+      "actualScammerDisplayName": "Kerry Parcel Phisher",
+      "rankOfExpected": 1,
+      "verdictHit": true,
+      "latencyMs": 4458,
+      "tags": [
+        "adversarial"
+      ]
+    },
+    {
+      "label": "url-malformed",
+      "inputType": "url",
+      "expectedVerdict": "safe",
+      "actualVerdict": "suspicious",
+      "expectedScammerDisplayName": null,
+      "actualScammerDisplayName": null,
+      "rankOfExpected": null,
+      "verdictHit": false,
+      "latencyMs": 3099,
+      "tags": [
+        "adversarial",
+        "garbage"
+      ]
+    },
+    {
+      "label": "url-shortener-bitly",
+      "inputType": "url",
+      "expectedVerdict": "safe",
+      "actualVerdict": "safe",
+      "expectedScammerDisplayName": null,
+      "actualScammerDisplayName": null,
+      "rankOfExpected": null,
+      "verdictHit": true,
+      "latencyMs": 4617,
+      "tags": [
+        "adversarial"
+      ]
+    },
+    {
+      "label": "url-typo-google",
+      "inputType": "url",
+      "expectedVerdict": "safe",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": null,
+      "actualScammerDisplayName": null,
+      "rankOfExpected": null,
+      "verdictHit": false,
+      "latencyMs": 3650,
+      "tags": [
+        "adversarial",
+        "lookalike"
+      ]
+    },
+    {
+      "label": "url-unknown-thai-co",
+      "inputType": "url",
+      "expectedVerdict": "safe",
+      "actualVerdict": "safe",
+      "expectedScammerDisplayName": null,
+      "actualScammerDisplayName": null,
+      "rankOfExpected": null,
+      "verdictHit": true,
+      "latencyMs": 4174,
+      "tags": []
+    },
+    {
+      "label": "text-revenue-narrative",
+      "inputType": "text",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "Revenue Dept Impersonator",
+      "actualScammerDisplayName": "Revenue Dept Impersonator",
+      "rankOfExpected": 1,
+      "verdictHit": true,
+      "latencyMs": 4820,
+      "tags": []
+    },
+    {
+      "label": "text-kerry-sms-narrative",
+      "inputType": "text",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "Kerry Parcel Phisher",
+      "actualScammerDisplayName": "Kerry Parcel Phisher",
+      "rankOfExpected": 1,
+      "verdictHit": true,
+      "latencyMs": 3573,
+      "tags": []
+    },
+    {
+      "label": "text-ktb-narrative",
+      "inputType": "text",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "KTB Phishing Ring",
+      "actualScammerDisplayName": "KTB Phishing Ring",
+      "rankOfExpected": 1,
+      "verdictHit": true,
+      "latencyMs": 5171,
+      "tags": []
+    },
+    {
+      "label": "text-scb-otp",
+      "inputType": "text",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "SCB Fraud-Team Caller",
+      "actualScammerDisplayName": "SCB Fraud-Team Caller",
+      "rankOfExpected": 1,
+      "verdictHit": true,
+      "latencyMs": 3994,
+      "tags": []
+    },
+    {
+      "label": "text-ig-shop",
+      "inputType": "text",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "IG Marketplace Ghost",
+      "actualScammerDisplayName": null,
+      "rankOfExpected": null,
+      "verdictHit": true,
+      "latencyMs": 10095,
+      "tags": []
+    },
+    {
+      "label": "text-safe-question",
+      "inputType": "text",
+      "expectedVerdict": "safe",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": null,
+      "actualScammerDisplayName": "Lazada Coupon Phisher",
+      "rankOfExpected": null,
+      "verdictHit": false,
+      "latencyMs": 6032,
+      "tags": []
+    },
+    {
+      "label": "text-safe-weather",
+      "inputType": "text",
+      "expectedVerdict": "safe",
+      "actualVerdict": "safe",
+      "expectedScammerDisplayName": null,
+      "actualScammerDisplayName": null,
+      "rankOfExpected": null,
+      "verdictHit": true,
+      "latencyMs": 2657,
+      "tags": []
+    },
+    {
+      "label": "text-revenue-paraphrase",
+      "inputType": "text",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "Revenue Dept Impersonator",
+      "actualScammerDisplayName": "Revenue Dept Impersonator",
+      "rankOfExpected": 1,
+      "verdictHit": true,
+      "latencyMs": 4100,
+      "tags": [
+        "paraphrase"
+      ]
+    },
+    {
+      "label": "text-kerry-paraphrase",
+      "inputType": "text",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "Kerry Parcel Phisher",
+      "actualScammerDisplayName": "Kerry Parcel Phisher",
+      "rankOfExpected": 1,
+      "verdictHit": true,
+      "latencyMs": 3604,
+      "tags": [
+        "paraphrase"
+      ]
+    },
+    {
+      "label": "text-ktb-paraphrase",
+      "inputType": "text",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "KTB Phishing Ring",
+      "actualScammerDisplayName": "KTB Phishing Ring",
+      "rankOfExpected": 1,
+      "verdictHit": true,
+      "latencyMs": 3827,
+      "tags": [
+        "paraphrase"
+      ]
+    },
+    {
+      "label": "text-customs-paraphrase",
+      "inputType": "text",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "Customs Duty Scam Caller",
+      "actualScammerDisplayName": "Customs Duty Scam Caller",
+      "rankOfExpected": 1,
+      "verdictHit": true,
+      "latencyMs": 4184,
+      "tags": [
+        "paraphrase"
+      ]
+    },
+    {
+      "label": "text-scb-paraphrase",
+      "inputType": "text",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "SCB Fraud-Team Caller",
+      "actualScammerDisplayName": "SCB Fraud-Team Caller",
+      "rankOfExpected": 1,
+      "verdictHit": true,
+      "latencyMs": 3864,
+      "tags": [
+        "paraphrase"
+      ]
+    },
+    {
+      "label": "text-ig-paraphrase",
+      "inputType": "text",
+      "expectedVerdict": "scam",
+      "actualVerdict": "suspicious",
+      "expectedScammerDisplayName": "IG Marketplace Ghost",
+      "actualScammerDisplayName": null,
+      "rankOfExpected": null,
+      "verdictHit": false,
+      "latencyMs": 7505,
+      "tags": [
+        "paraphrase"
+      ]
+    },
+    {
+      "label": "text-investment-paraphrase",
+      "inputType": "text",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": null,
+      "actualScammerDisplayName": null,
+      "rankOfExpected": null,
+      "verdictHit": true,
+      "latencyMs": 2824,
+      "tags": [
+        "paraphrase"
+      ]
+    },
+    {
+      "label": "text-otp-paraphrase",
+      "inputType": "text",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": null,
+      "actualScammerDisplayName": "SCB Fraud-Team Caller",
+      "rankOfExpected": null,
+      "verdictHit": true,
+      "latencyMs": 5086,
+      "tags": [
+        "paraphrase"
+      ]
+    },
+    {
+      "label": "text-safe-tone-bank-verified",
+      "inputType": "text",
+      "expectedVerdict": "safe",
+      "actualVerdict": "safe",
+      "expectedScammerDisplayName": null,
+      "actualScammerDisplayName": null,
+      "rankOfExpected": null,
+      "verdictHit": true,
+      "latencyMs": 2802,
+      "tags": [
+        "adversarial"
+      ]
+    },
+    {
+      "label": "text-safe-courier-real",
+      "inputType": "text",
+      "expectedVerdict": "safe",
+      "actualVerdict": "safe",
+      "expectedScammerDisplayName": null,
+      "actualScammerDisplayName": null,
+      "rankOfExpected": null,
+      "verdictHit": true,
+      "latencyMs": 3161,
+      "tags": [
+        "adversarial"
+      ]
+    },
+    {
+      "label": "text-safe-tax-real",
+      "inputType": "text",
+      "expectedVerdict": "safe",
+      "actualVerdict": "safe",
+      "expectedScammerDisplayName": null,
+      "actualScammerDisplayName": null,
+      "rankOfExpected": null,
+      "verdictHit": true,
+      "latencyMs": 2861,
+      "tags": [
+        "adversarial"
+      ]
+    },
+    {
+      "label": "text-mixed-otp",
+      "inputType": "text",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "SCB Fraud-Team Caller",
+      "actualScammerDisplayName": "SCB Fraud-Team Caller",
+      "rankOfExpected": 1,
+      "verdictHit": true,
+      "latencyMs": 4664,
+      "tags": [
+        "paraphrase",
+        "mixed-lang"
+      ]
+    },
+    {
+      "label": "text-mixed-courier",
+      "inputType": "text",
+      "expectedVerdict": "scam",
+      "actualVerdict": "scam",
+      "expectedScammerDisplayName": "Kerry Parcel Phisher",
+      "actualScammerDisplayName": "Kerry Parcel Phisher",
+      "rankOfExpected": 1,
+      "verdictHit": true,
+      "latencyMs": 4245,
+      "tags": [
+        "paraphrase",
+        "mixed-lang"
+      ]
+    }
+  ]
+}

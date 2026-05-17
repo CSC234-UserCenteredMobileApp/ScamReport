@@ -11,6 +11,9 @@ on:
         required: false
         default: '0.6'
 
+permissions:
+  contents: write
+
 jobs:
   eval:
     name: Run labelled-case eval against current AI pipeline
@@ -40,6 +43,7 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           THRESHOLD: ${{ inputs.threshold || '0.6' }}
         run: |
+          set -o pipefail
           bun run scripts/eval-ai.ts --threshold="$THRESHOLD" --quiet | tee eval-summary.json
 
       - name: Upload eval summary
@@ -49,3 +53,12 @@ jobs:
           name: eval-summary
           path: apps/api/eval-summary.json
           retention-days: 30
+
+      - name: Commit history if changed
+        if: success()
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore(ai-eval): nightly history append [skip ci]'
+          file_pattern: 'apps/api/eval/history.jsonl apps/api/eval/latest.json'
+          commit_user_name: 'github-actions[bot]'
+          commit_user_email: '41898282+github-actions[bot]@users.noreply.github.com'

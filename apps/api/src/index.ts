@@ -15,6 +15,9 @@ import { adminNotificationsRoute } from './features/admin-notifications/admin-no
 import { adminScammersRoute } from './features/admin-scammers/admin-scammers.route';
 import { adminPersonsRoute } from './features/admin-persons/admin-persons.route';
 import { adminPlatformSummaryRoute } from './features/admin-platform-summary/admin-platform-summary.route';
+import { adminExportsRoute } from './features/admin-exports/admin-exports.route';
+import { adminAiEvalRoute } from './features/admin-ai-eval/admin-ai-eval.route';
+import { adminScamOverviewRoute } from './features/admin-scam-overview/admin-scam-overview.route';
 
 // CORS allowlist for the admin web portal (apps/web).
 // Project-scoped Vercel preview pattern intentionally NOT `*.vercel.app` —
@@ -49,7 +52,10 @@ export const app = new Elysia()
   .use(adminNotificationsRoute)
   .use(adminScammersRoute)
   .use(adminPersonsRoute)
-  .use(adminPlatformSummaryRoute);
+  .use(adminPlatformSummaryRoute)
+  .use(adminExportsRoute)
+  .use(adminAiEvalRoute)
+  .use(adminScamOverviewRoute);
 
 if (import.meta.main) {
   const port = Number(process.env.PORT ?? 3000);

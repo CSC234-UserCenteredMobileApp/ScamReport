@@ -5,6 +5,7 @@
     "moderation": "Moderation",
     "announcements": "Announcements",
     "platformSummary": "Platform summary",
+    "aiEval": "AI accuracy",
     "signOut": "Sign out"
   },
   "auth": {
@@ -36,5 +37,22 @@
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "comingSoon": "Coming soon"
+  },
+  "scamOverview": {
+    "title": "Scam landscape",
+    "totalReports": "Reports",
+    "totalScammers": "Scammers",
+    "totalPersons": "Persons",
+    "byScamType": "By scam type",
+    "bySourceSite": "News sources",
+    "sourceNote": "News outlet that reported the case. Counts only crawler-imported reports.",
+    "byProvince": "By province",
+    "byNationality": "By nationality",
+    "byArrestStatus": "By arrest status",
+    "daily": "Reports per day",
+    "dailyNote": "Bucketed by verified date (falls back to created date).",
+    "noData": "No data.",
+    "loadError": "Could not load scam overview.",
+    "footer": "Generated {{generatedAt}}"
   }
 }

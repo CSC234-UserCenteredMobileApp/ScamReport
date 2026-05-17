@@ -1,38 +1,45 @@
 // Headless AI accuracy harness. Runs every case in `apps/api/eval/cases.ts`
-// through `runCheck()`, computes verdict accuracy + scammer recall@1 + MRR,
-// prints a JSON report.
+// through `runCheck()`, computes verdict accuracy + per-type breakdown +
+// confusion matrix + scammer recall@1 + MRR, and appends a one-line summary
+// to `apps/api/eval/history.jsonl` for longitudinal drift tracking.
 //
 // Designed to run from a cron (or GitHub Action) — exit code is non-zero
-// when verdictAccuracy drops below MIN_VERDICT_ACCURACY so an alert fires.
+// when verdictAccuracy drops below the configured threshold so an alert fires.
 //
 // Run from apps/api:
-//   bun run scripts/eval-ai.ts [--threshold=0.7] [--quiet]
+//   bun run scripts/eval-ai.ts \
+//     [--threshold=0.7] [--quiet] [--format=json|table] [--no-history]
 //
 // Output (stdout):
-//   { runAt, totalCases, verdictAccuracy, scammerRecallAt1, mrr,
-//     p95LatencyMs, results: [...] }
+//   --format=json  → full JSON summary
+//   --format=table → human-readable report
+//
+// Exit codes: 0 pass, 1 threshold fail, 2 crash.
 
 import { config } from 'dotenv';
-import { resolve } from 'path';
+import { readFileSync, existsSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
 config({ path: resolve(import.meta.dirname, '../.env') });
 
 import { runCheck } from '../src/features/check/check.service';
 import { getPrisma } from '../src/core/db/client';
 import { EVAL_CASES, type EvalCase } from '../eval/cases';
+import {
+  buildConfusionMatrix,
+  buildHistoryEntry,
+  groupByType,
+  percentile,
+  pruneHistory,
+  type CaseResult,
+} from '../eval/metrics';
+import { formatTableReport } from '../eval/format';
 
 const DEFAULT_THRESHOLD = 0.7;
-
-interface CaseResult {
-  label: string;
-  inputType: string;
-  expectedVerdict: string;
-  actualVerdict: string;
-  expectedScammerDisplayName: string | null;
-  actualScammerDisplayName: string | null;
-  rankOfExpected: number | null;
-  verdictHit: boolean;
-  latencyMs: number;
-}
+const HISTORY_MAX_LINES = 365;
+const HISTORY_PATH = resolve(import.meta.dirname, '../eval/history.jsonl');
+const LATEST_PATH = resolve(import.meta.dirname, '../eval/latest.json');
+const REPO_ROOT = resolve(import.meta.dirname, '../../..');
 
 async function resolveExpectedScammerIds(): Promise<Map<string, string>> {
   const prisma = getPrisma();
@@ -66,8 +73,6 @@ async function runOne(
   if (expectedId) {
     if (actualId === expectedId) rankOfExpected = 1;
     else if (result.matches.length > 0) {
-      // Resolve each matched report's scammerId; if the expected scammer
-      // appears further down, record its rank for MRR.
       const prisma = getPrisma();
       const rows = await prisma.report.findMany({
         where: { id: { in: result.matches.map((m) => m.id) } },
@@ -93,33 +98,76 @@ async function runOne(
     rankOfExpected,
     verdictHit: result.verdict === c.expectedVerdict,
     latencyMs,
+    tags: c.tags ?? [],
   };
 }
 
-function percentile(values: number[], p: number): number {
-  if (values.length === 0) return 0;
-  const sorted = [...values].sort((a, b) => a - b);
-  const idx = Math.min(sorted.length - 1, Math.floor(p * sorted.length));
-  return sorted[idx]!;
+// Resolve git sha without shelling out. Prefers GITHUB_SHA (set by Actions),
+// falls back to reading .git/HEAD and its referenced ref file directly.
+function resolveGitSha(): string | null {
+  const env = process.env.GITHUB_SHA;
+  if (env && /^[0-9a-f]{40}$/i.test(env)) return env;
+  try {
+    const headPath = resolve(REPO_ROOT, '.git/HEAD');
+    if (!existsSync(headPath)) return null;
+    const head = readFileSync(headPath, 'utf8').trim();
+    if (head.startsWith('ref: ')) {
+      const ref = head.slice(5).trim();
+      const refPath = resolve(REPO_ROOT, '.git', ref);
+      if (!existsSync(refPath)) return null;
+      const sha = readFileSync(refPath, 'utf8').trim();
+      return /^[0-9a-f]{40}$/i.test(sha) ? sha : null;
+    }
+    return /^[0-9a-f]{40}$/i.test(head) ? head : null;
+  } catch {
+    return null;
+  }
 }
 
-async function main() {
-  const args = process.argv.slice(2);
-  const quiet = args.includes('--quiet');
-  const thresholdArg = args.find((a) => a.startsWith('--threshold='));
+function appendHistoryLine(entry: object): void {
+  const lines = existsSync(HISTORY_PATH)
+    ? readFileSync(HISTORY_PATH, 'utf8')
+        .split('\n')
+        .filter((l) => l.length > 0)
+    : [];
+  lines.push(JSON.stringify(entry));
+  const pruned = pruneHistory(lines, HISTORY_MAX_LINES);
+  writeFileSync(HISTORY_PATH, pruned.join('\n') + '\n');
+}
+
+interface CliFlags {
+  threshold: number;
+  quiet: boolean;
+  format: 'json' | 'table';
+  noHistory: boolean;
+}
+
+function parseFlags(argv: string[]): CliFlags {
+  const quiet = argv.includes('--quiet');
+  const noHistory = argv.includes('--no-history');
+  const thresholdArg = argv.find((a) => a.startsWith('--threshold='));
   const threshold = thresholdArg
     ? Number(thresholdArg.split('=')[1])
     : DEFAULT_THRESHOLD;
+  const formatArg = argv.find((a) => a.startsWith('--format='));
+  const formatVal = formatArg ? formatArg.split('=')[1] : 'json';
+  const format: 'json' | 'table' = formatVal === 'table' ? 'table' : 'json';
+  return { threshold, quiet, format, noHistory };
+}
+
+async function main() {
+  const flags = parseFlags(process.argv.slice(2));
 
   const expectedByName = await resolveExpectedScammerIds();
   const results: CaseResult[] = [];
   for (const c of EVAL_CASES) {
     const r = await runOne(c, expectedByName);
     results.push(r);
-    if (!quiet) {
-      const tick = r.verdictHit ? '✓' : '✗';
+    if (!flags.quiet && flags.format !== 'table') {
+      const tick = r.verdictHit ? 'ok' : 'XX';
       process.stdout.write(
-        `${tick} ${r.label.padEnd(36)} expect=${r.expectedVerdict.padEnd(11)} actual=${r.actualVerdict.padEnd(11)} rank=${r.rankOfExpected ?? '-'}\n`,
+        `${tick} ${r.label.padEnd(36)} expect=${r.expectedVerdict.padEnd(11)} ` +
+          `actual=${r.actualVerdict.padEnd(11)} rank=${r.rankOfExpected ?? '-'}\n`,
       );
     }
   }
@@ -128,11 +176,14 @@ async function main() {
   const correctVerdicts = results.filter((r) => r.verdictHit).length;
   const verdictAccuracy = total === 0 ? 0 : correctVerdicts / total;
 
-  const withExpected = results.filter((r) => r.expectedScammerDisplayName !== null);
+  const withExpected = results.filter(
+    (r) => r.expectedScammerDisplayName !== null,
+  );
   const recallAt1 =
     withExpected.length === 0
       ? 0
-      : withExpected.filter((r) => r.rankOfExpected === 1).length / withExpected.length;
+      : withExpected.filter((r) => r.rankOfExpected === 1).length /
+        withExpected.length;
   const mrr =
     withExpected.length === 0
       ? 0
@@ -145,23 +196,59 @@ async function main() {
     0.95,
   );
 
+  const byType = groupByType(results);
+  const confusionMatrix = buildConfusionMatrix(results);
+  const gitSha = resolveGitSha();
+  const runAt = new Date().toISOString();
+  const passed = verdictAccuracy >= flags.threshold;
+
   const summary = {
-    runAt: new Date().toISOString(),
+    runAt,
+    gitSha,
     totalCases: total,
     verdictAccuracy: Number(verdictAccuracy.toFixed(4)),
     scammerRecallAt1: Number(recallAt1.toFixed(4)),
     mrr: Number(mrr.toFixed(4)),
     p95LatencyMs,
-    threshold,
-    passed: verdictAccuracy >= threshold,
+    byType,
+    confusionMatrix,
+    threshold: flags.threshold,
+    passed,
     results,
   };
 
-  console.log('\n' + JSON.stringify(summary, null, 2));
+  if (flags.format === 'table') {
+    console.log('\n' + formatTableReport(summary));
+  } else {
+    console.log('\n' + JSON.stringify(summary, null, 2));
+  }
 
-  if (!summary.passed) {
+  if (!flags.noHistory) {
+    try {
+      appendHistoryLine(
+        buildHistoryEntry({
+          runAt,
+          gitSha,
+          totalCases: total,
+          verdictAccuracy: summary.verdictAccuracy,
+          byType,
+          threshold: flags.threshold,
+          passed,
+        }),
+      );
+    } catch (err) {
+      console.error('[eval-ai] failed to append history line:', err);
+    }
+    try {
+      writeFileSync(LATEST_PATH, JSON.stringify(summary, null, 2));
+    } catch (err) {
+      console.error('[eval-ai] failed to write latest.json:', err);
+    }
+  }
+
+  if (!passed) {
     console.error(
-      `\n[eval-ai] verdictAccuracy ${verdictAccuracy.toFixed(3)} below threshold ${threshold} — failing cron.`,
+      `\n[eval-ai] verdictAccuracy ${verdictAccuracy.toFixed(3)} below threshold ${flags.threshold} — failing cron.`,
     );
     process.exit(1);
   }

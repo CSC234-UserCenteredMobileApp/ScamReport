@@ -18,6 +18,8 @@ import { useActionDialog } from '@/features/moderation/hooks/use-action-dialog';
 import { ActionDialog } from '@/features/moderation/components/action-dialog';
 import { QueueStats } from '@/features/moderation/components/queue-stats';
 import { QueueTable } from '@/features/moderation/components/queue-table';
+import { ExportButton } from '@/features/exports/components/export-button';
+import type { ExportConfidence, ExportFilters } from '@/features/exports/api/export';
 
 const toastKey: Record<ModerationActionKind, string> = {
   approve: 'toast.approved',
@@ -84,6 +86,21 @@ export function QueuePage() {
     });
   }, [data, statusFilter, priorityFilter, confidenceFilter]);
 
+  const exportFilters = useMemo<ExportFilters>(() => {
+    const statuses: string[] = [];
+    if (statusFilter === 'all') statuses.push('pending', 'flagged');
+    else statuses.push(statusFilter);
+    return {
+      status: statuses,
+      scamType: scamTypeFilter,
+      priority: priorityFilter === 'priority' ? true : undefined,
+      confidence:
+        confidenceFilter === 'all'
+          ? undefined
+          : (confidenceFilter as ExportConfidence),
+    };
+  }, [statusFilter, priorityFilter, confidenceFilter, scamTypeFilter]);
+
   const avgAgeHours = useMemo(() => {
     if (filteredItems.length === 0) return null;
     const total = filteredItems.reduce(
@@ -113,7 +130,11 @@ export function QueuePage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={t('queueTitle')} subtitle={t('queueSubtitle')} />
+      <PageHeader
+        title={t('queueTitle')}
+        subtitle={t('queueSubtitle')}
+        actions={<ExportButton filters={exportFilters} />}
+      />
 
       <div className="space-y-3 rounded-lg border bg-card p-4">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">

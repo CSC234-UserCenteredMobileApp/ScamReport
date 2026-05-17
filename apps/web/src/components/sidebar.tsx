@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { BarChart3, LayoutDashboard, Megaphone, Shield, ShieldCheck } from 'lucide-react';
+import { Activity, BarChart3, LayoutDashboard, Megaphone, Shield, ShieldCheck, Trash2 } from 'lucide-react';
 import type { ComponentType, SVGProps } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -17,6 +18,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/moderation', icon: ShieldCheck, labelKey: 'nav.moderation' },
   { to: '/announcements', icon: Megaphone, labelKey: 'nav.announcements' },
   { to: '/platform-summary', icon: BarChart3, labelKey: 'nav.platformSummary' },
+  { to: '/ai-eval', icon: Activity, labelKey: 'nav.aiEval' },
 ];
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {

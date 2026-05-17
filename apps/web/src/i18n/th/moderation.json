@@ -41,7 +41,40 @@
     "reject": "ปฏิเสธ",
     "flag": "Flag",
     "unflag": "ยกเลิก Flag",
-    "review": "ตรวจสอบ"
+    "review": "ตรวจสอบ",
+    "export": "ส่งออก"
+  },
+  "export": {
+    "dialog": {
+      "title": "ส่งออกรายงาน",
+      "description": "ดาวน์โหลดข้อมูลรายงานเพื่อนำไปวิเคราะห์",
+      "formatLabel": "เลือกรูปแบบที่ต้องการส่งออก",
+      "formatCsv": "CSV แบบเร็ว",
+      "formatCsvHint": "หนึ่งบรรทัดต่อหนึ่งรายงานตามตัวกรองปัจจุบัน",
+      "formatBundle": "ชุดข้อมูลวิเคราะห์",
+      "formatBundleHint": "ไฟล์หลายชีต ประกอบด้วยรายงาน ประวัติการตรวจสอบ สรุปหลักฐาน สัดส่วน /check และตารางอ้างอิงประเภทการโกง",
+      "bundleFormatLabel": "ชนิดไฟล์ของชุดข้อมูล",
+      "bundleFormatXlsx": "Excel (.xlsx)",
+      "bundleFormatZip": "ZIP ของ CSV",
+      "from": "ตั้งแต่",
+      "to": "ถึง",
+      "toBeforeFrom": "วันที่สิ้นสุดต้องไม่น้อยกว่าวันที่เริ่มต้น",
+      "dateHintCsv": "ปล่อยว่างทั้งสองช่องเพื่อส่งออกทุกช่วงวัน",
+      "dateHintBundle": "ปล่อยว่างทั้งสองช่องเพื่อใช้ค่าเริ่มต้น 30 วันล่าสุด",
+      "summaryLabel": "ตัวกรองที่ใช้งานอยู่",
+      "statusPart": "สถานะ",
+      "scamTypePart": "ประเภทการโกง",
+      "priorityPart": "ความสำคัญ",
+      "confidencePart": "ความเชื่อมั่น AI",
+      "partAll": "ทั้งหมด",
+      "partPriority": "เฉพาะที่ติด Priority",
+      "submit": "ดาวน์โหลด",
+      "downloading": "กำลังเตรียม…",
+      "cancel": "ยกเลิก"
+    },
+    "success": "ดาวน์โหลดเรียบร้อย",
+    "error": "ส่งออกไม่สำเร็จ กรุณาลองใหม่",
+    "errorAuth": "เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่"
   },
   "dialog": {
     "approveTitle": "อนุมัติรายงาน",

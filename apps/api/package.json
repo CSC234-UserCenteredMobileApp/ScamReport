@@ -10,6 +10,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "seed:call-screening": "bun run prisma/seed-call-screening.ts",
+    "seed:reset": "bun run prisma/reset-and-seed.ts",
     "promote-admin": "bun run scripts/promote-admin.ts"
   },
   "dependencies": {
@@ -21,6 +22,8 @@
     "@prisma/client": "^7.0.0",
     "@supabase/supabase-js": "^2.46.0",
     "elysia": "^1.2.0",
+    "exceljs": "^4.4.0",
+    "fflate": "^0.8.3",
     "firebase-admin": "^13.0.0",
     "pdfmake": "^0.3.8",
     "pg": "^8.13.0"

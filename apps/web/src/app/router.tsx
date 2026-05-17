@@ -11,6 +11,7 @@ import AnnouncementsEditPage from '@/routes/announcements/edit';
 import ScammerDossierRoute from '@/routes/scammers/dossier';
 import PersonDossierRoute from '@/routes/persons/dossier';
 import PlatformSummaryRoute from '@/routes/platform-summary';
+import AiEvalRoute from '@/routes/ai-eval';
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -28,6 +29,7 @@ export const router = createBrowserRouter([
       { path: 'scammers/:id/dossier', element: <ScammerDossierRoute /> },
       { path: 'persons/:id/dossier', element: <PersonDossierRoute /> },
       { path: 'platform-summary', element: <PlatformSummaryRoute /> },
+      { path: 'ai-eval', element: <AiEvalRoute /> },
     ],
   },
   { path: '*', element: <Navigate to="/" replace /> },

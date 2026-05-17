@@ -39,4 +39,12 @@ export const queryKeys = {
   reportSearch: {
     results: (q: string) => ['report-search', q] as const,
   },
+  aiEval: {
+    all: ['ai-eval'] as const,
+    latest: ['ai-eval', 'latest'] as const,
+    history: (limit: number) => ['ai-eval', 'history', limit] as const,
+  },
+  scamOverview: {
+    all: ['scam-overview'] as const,
+  },
 } as const;

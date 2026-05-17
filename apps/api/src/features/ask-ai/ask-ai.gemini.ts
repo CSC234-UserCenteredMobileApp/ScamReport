@@ -49,6 +49,7 @@ const RESPONSE_SCHEMA = {
             'other',
             'investment_fraud',
             'romance_scam',
+            'fake_job',
           ],
         },
         targetIdentifier: { type: 'string', nullable: true },

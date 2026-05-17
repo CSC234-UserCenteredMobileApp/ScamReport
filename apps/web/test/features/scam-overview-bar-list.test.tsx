@@ -1,0 +1,40 @@
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { BarList, type BarListRow } from '@/features/scam-overview/components/bar-list';
+
+const rows: BarListRow[] = [
+  { key: 'investment_fraud', primaryLabel: 'Investment fraud', secondaryLabel: 'ลงทุนหลอกลวง', count: 49 },
+  { key: 'phone_impersonation', primaryLabel: 'Phone impersonation', secondaryLabel: 'แอบอ้างทางโทรศัพท์', count: 28 },
+];
+
+describe('BarList', () => {
+  it('renders primary + secondary labels with counts', () => {
+    render(<BarList rows={rows} emptyLabel="No data." />);
+    expect(screen.getByText('Investment fraud')).toBeInTheDocument();
+    expect(screen.getByText('ลงทุนหลอกลวง')).toBeInTheDocument();
+    expect(screen.getByText('49')).toBeInTheDocument();
+    expect(screen.getByText('Phone impersonation')).toBeInTheDocument();
+    expect(screen.getByText('28')).toBeInTheDocument();
+  });
+
+  it('omits the secondary label when same as primary', () => {
+    const sameRows: BarListRow[] = [
+      { key: 'matichon', primaryLabel: 'matichon', secondaryLabel: 'matichon', count: 100 },
+    ];
+    const { container } = render(<BarList rows={sameRows} emptyLabel="No data." />);
+    expect(screen.getByText('matichon')).toBeInTheDocument();
+    expect(container.querySelectorAll('.text-muted-foreground.text-xs')).toHaveLength(0);
+  });
+
+  it('renders empty label when rows is empty', () => {
+    render(<BarList rows={[]} emptyLabel="No data." />);
+    expect(screen.getByText('No data.')).toBeInTheDocument();
+  });
+
+  it('largest row gets a 100% width bar', () => {
+    const { container } = render(<BarList rows={rows} emptyLabel="No data." />);
+    const bars = container.querySelectorAll<HTMLDivElement>('.bg-primary');
+    expect(bars[0]?.style.width).toBe('100%');
+    expect(bars[1]?.style.width.startsWith('57')).toBe(true);
+  });
+});
