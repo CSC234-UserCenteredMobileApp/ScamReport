@@ -93,6 +93,15 @@ Three admin screens + their API contracts:
 
 All action bodies: `{ remark: string }` (required, non-empty).
 
+### Admin exports — `apps/api/src/features/admin-exports/`
+
+| Method | Path | What it does |
+|---|---|---|
+| `GET` | `/admin/exports/reports.csv` | Quick CSV of one row per report (column allow-list in `privacy.ts`). Default scope mirrors the queue (`status=pending,flagged`, no date bound). Filters: `status`, `scamType`, `priority`, `confidence`, `from`, `to`, `limit`. No reporter fields. |
+| `GET` | `/admin/exports/bundle` | Analytics bundle as XLSX (default) or `?format=zip`. 8 sheets: `_meta`, `summary`, `reports`, `moderation_actions`, `evidence_summary`, `check_logs`, `ai_eval_summary` (placeholder), `scam_types_reference`. Default scope = last 30 days; same filter set as CSV. Admin IDs hashed via salted SHA-256 (`EXPORT_ADMIN_ID_SALT` required in prod). Evidence storage paths + signed URLs categorically omitted. |
+
+Row cap: 50000. Streamed via `Content-Disposition: attachment` with server-stamped UTC timestamp filename.
+
 ### Admin announcements — `apps/api/src/features/admin-announcements/`
 
 | Method | Path | What it does |
