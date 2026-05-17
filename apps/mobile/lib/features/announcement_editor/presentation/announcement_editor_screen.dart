@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/api_client.dart';
+import '../../../core/theme/app_theme.dart';
 import '../domain/admin_announcement.dart';
 import 'announcement_editor_providers.dart';
 
@@ -23,6 +24,7 @@ class _AnnouncementEditorScreenState
   late final TextEditingController _titleCtrl;
   late final TextEditingController _bodyCtrl;
   AdminAnnouncementCategory _category = AdminAnnouncementCategory.fraudAlert;
+  bool _pushToFcm = true;
 
   bool _saving = false;
   bool _loaded = false;
@@ -117,17 +119,34 @@ class _AnnouncementEditorScreenState
   Future<void> _publish() async {
     if (!await _ensureSaved()) return;
     if (!mounted) return;
-    // Show confirmation bottom sheet with FCM push toggle
-    final result = await showModalBottomSheet<({bool confirmed, bool pushToFcm})>(
-      context: context,
-      builder: (ctx) => _PublishSheet(),
-    );
-    if (result == null || !result.confirmed) return;
+    // Confirm dialog only when push is on — safety check per design spec.
+    if (_pushToFcm) {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Send push to all subscribed users?'),
+          content: const Text(
+            'A push notification will broadcast to every subscribed user.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Send'),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true) return;
+    }
 
     setState(() => _saving = true);
     try {
       final repo = ref.read(announcementEditorRepositoryProvider);
-      await repo.publish(_effectiveId!, pushToFcm: result.pushToFcm);
+      await repo.publish(_effectiveId!, pushToFcm: _pushToFcm);
       ref.invalidate(adminAnnouncementsListProvider);
       ref.invalidate(adminAnnouncementDetailProvider(_effectiveId!));
       if (mounted) context.pop();
@@ -313,23 +332,11 @@ class _AnnouncementEditorScreenState
             ),
             const SizedBox(height: 16),
 
-            // Category dropdown
-            DropdownButtonFormField<AdminAnnouncementCategory>(
-              // ignore: deprecated_member_use
+            // Category chip group
+            _CategoryChipGroup(
               value: _category,
-              decoration: const InputDecoration(
-                labelText: 'Category',
-                border: OutlineInputBorder(),
-              ),
-              items: AdminAnnouncementCategory.values.map((c) {
-                return DropdownMenuItem(
-                  value: c,
-                  child: Text(c.displayLabel),
-                );
-              }).toList(),
-              onChanged: isPublished || _saving
-                  ? null
-                  : (v) => setState(() => _category = v!),
+              enabled: !isPublished && !_saving,
+              onChanged: (c) => setState(() => _category = c),
             ),
             const SizedBox(height: 16),
 
@@ -349,6 +356,19 @@ class _AnnouncementEditorScreenState
                   (v == null || v.trim().isEmpty) ? 'Body is required' : null,
             ),
             const SizedBox(height: 16),
+
+            // Push notification toggle
+            // TODO(announcement): wire subscriber count from
+            // /admin/notifications/subscribers/count once endpoint exists.
+            SwitchListTile(
+              value: _pushToFcm,
+              onChanged: (isPublished || _saving)
+                  ? null
+                  : (v) => setState(() => _pushToFcm = v),
+              title: const Text('Send as push notification'),
+              subtitle: const Text('To all subscribed users'),
+              contentPadding: EdgeInsets.zero,
+            ),
 
             // Attachment section
             const SizedBox(height: 8),
@@ -415,57 +435,96 @@ class _AnnouncementEditorScreenState
   }
 }
 
-class _PublishSheet extends ConsumerStatefulWidget {
-  @override
-  ConsumerState<_PublishSheet> createState() => _PublishSheetState();
-}
+class _CategoryChipGroup extends StatelessWidget {
+  const _CategoryChipGroup({
+    required this.value,
+    required this.enabled,
+    required this.onChanged,
+  });
 
-class _PublishSheetState extends ConsumerState<_PublishSheet> {
-  bool _pushToFcm = true;
+  final AdminAnnouncementCategory value;
+  final bool enabled;
+  final ValueChanged<AdminAnnouncementCategory> onChanged;
+
+  ({Color bg, Color fg}) _tones(BuildContext context, AdminAnnouncementCategory c) {
+    final verdict = Theme.of(context).extension<VerdictPalette>();
+    final scheme = Theme.of(context).colorScheme;
+    switch (c) {
+      case AdminAnnouncementCategory.fraudAlert:
+        final v = verdict?.scam;
+        return (bg: v?.bg ?? scheme.errorContainer, fg: v?.fg ?? scheme.onErrorContainer);
+      case AdminAnnouncementCategory.tips:
+        final v = verdict?.safe;
+        return (bg: v?.bg ?? scheme.secondaryContainer, fg: v?.fg ?? scheme.onSecondaryContainer);
+      case AdminAnnouncementCategory.platformUpdate:
+        return (bg: scheme.primaryContainer, fg: scheme.onPrimaryContainer);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Category',
+          style: theme.textTheme.labelMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
           children: [
-            const Text(
-              'Publish Announcement',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            SwitchListTile(
-              value: _pushToFcm,
-              onChanged: (v) => setState(() => _pushToFcm = v),
-              title: const Text('Send push notification'),
-              subtitle: const Text('Broadcast to all users via FCM'),
-              contentPadding: EdgeInsets.zero,
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.of(context).pop(null),
-                    child: const Text('Cancel'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: FilledButton(
-                    onPressed: () => Navigator.of(context)
-                        .pop((confirmed: true, pushToFcm: _pushToFcm)),
-                    child: const Text('Publish'),
-                  ),
-                ),
-              ],
-            ),
+            for (final c in AdminAnnouncementCategory.values)
+              _CategoryChoice(
+                label: c.displayLabel,
+                selected: c == value,
+                enabled: enabled,
+                tones: _tones(context, c),
+                onTap: () => onChanged(c),
+              ),
           ],
         ),
+      ],
+    );
+  }
+}
+
+class _CategoryChoice extends StatelessWidget {
+  const _CategoryChoice({
+    required this.label,
+    required this.selected,
+    required this.enabled,
+    required this.tones,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final bool enabled;
+  final ({Color bg, Color fg}) tones;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: enabled ? (_) => onTap() : null,
+      selectedColor: tones.bg,
+      labelStyle: TextStyle(
+        color: selected ? tones.fg : scheme.onSurface,
+        fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
       ),
+      side: BorderSide(
+        color: selected ? tones.bg : scheme.outlineVariant,
+      ),
+      showCheckmark: false,
     );
   }
 }

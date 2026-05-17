@@ -55,6 +55,30 @@ describe('AnnouncementsNewPage', () => {
     ).toBeInTheDocument();
   });
 
+  it('publishes inline from the new page in one flow', async () => {
+    renderRoute();
+    const user = userEvent.setup();
+    await user.type(screen.getByLabelText('Title'), 'Inline publish');
+    await user.type(screen.getByLabelText('Body'), 'Going live now.');
+    await user.click(screen.getByRole('button', { name: 'Publish' }));
+    // Confirm dialog appears (subscriber count copy comes from the
+    // /admin/notifications/subscribers/count handler).
+    await waitFor(() => {
+      expect(screen.getByText('Publish and send push?')).toBeInTheDocument();
+    });
+    // Click the dialog's "Publish" button (a second button with the same
+    // accessible name now exists alongside the form's primary button).
+    const publishButtons = screen.getAllByRole('button', { name: 'Publish' });
+    const confirmBtn = publishButtons[publishButtons.length - 1];
+    if (!confirmBtn) throw new Error('confirm Publish button not found');
+    await user.click(confirmBtn);
+    await waitFor(() => {
+      expect(screen.getByTestId('edit-page')).toBeInTheDocument();
+    });
+    expect(toastMock.success).toHaveBeenCalled();
+    expect(sampleAnnouncementDraft.id).toBeTruthy();
+  });
+
   // The new-page form starts on fraud_alert by default; this verifies the
   // create flow still uses the form's selected category when the user picks
   // a different one before saving.
