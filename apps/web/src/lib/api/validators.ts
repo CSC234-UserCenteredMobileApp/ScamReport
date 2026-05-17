@@ -20,6 +20,8 @@ import {
   ScammerDossierResponse,
   ScamTypeListResponse,
   SearchScammersResponse,
+  AdminAiEvalLatestResponse,
+  AdminAiEvalHistoryResponse,
 } from '@my-product/shared';
 
 // Register the JSON-Schema formats our admin payloads use.
@@ -69,6 +71,8 @@ export const validators = {
   platformSummary: TypeCompiler.Compile(PlatformSummaryResponse),
   scamTypes: TypeCompiler.Compile(ScamTypeListResponse),
   adminReportSearch: TypeCompiler.Compile(AdminReportSearchResponse),
+  aiEvalLatest: TypeCompiler.Compile(AdminAiEvalLatestResponse),
+  aiEvalHistory: TypeCompiler.Compile(AdminAiEvalHistoryResponse),
 } as const;
 
 export type Validators = typeof validators;
