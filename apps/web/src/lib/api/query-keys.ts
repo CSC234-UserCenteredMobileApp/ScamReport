@@ -49,4 +49,7 @@ export const queryKeys = {
     latest: ['ai-eval', 'latest'] as const,
     history: (limit: number) => ['ai-eval', 'history', limit] as const,
   },
+  scamOverview: {
+    all: ['scam-overview'] as const,
+  },
 } as const;
