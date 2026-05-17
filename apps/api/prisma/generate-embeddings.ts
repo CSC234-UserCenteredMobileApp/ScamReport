@@ -51,6 +51,7 @@ async function main() {
 
   let generated = 0;
   let skipped = 0;
+  let failed = 0;
 
   for (const report of reports) {
     // Canonical input now folds in the scam-type label, linked scammer
@@ -70,7 +71,18 @@ async function main() {
       continue;
     }
 
-    const vector = await embed(content);
+    let vector: number[];
+    try {
+      vector = await embed(content);
+    } catch (err) {
+      failed++;
+      // Soft-fail: log and continue so a leaked Gemini key (or transient
+      // rate-limit) doesn't abort the orchestrator. Re-run this script
+      // after rotating the key to backfill.
+      console.error(`\ngenerate-embeddings: embed() failed for report ${report.id}: ${(err as Error).message}`);
+      await sleep(200);
+      continue;
+    }
     const vectorLiteral = `[${vector.join(',')}]`;
 
     await prisma.$executeRaw`
@@ -84,11 +96,11 @@ async function main() {
     `;
 
     generated++;
-    process.stdout.write(`\rgenerate-embeddings: ${generated} generated, ${skipped} skipped`);
+    process.stdout.write(`\rgenerate-embeddings: ${generated} generated, ${skipped} skipped, ${failed} failed`);
     await sleep(200);
   }
 
-  console.log(`\ngenerate-embeddings: done. generated=${generated} skipped=${skipped} total=${reports.length}`);
+  console.log(`\ngenerate-embeddings: done. generated=${generated} skipped=${skipped} failed=${failed} total=${reports.length}`);
 }
 
 main()
