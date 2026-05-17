@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { PageHeader } from '@/components/page-header';
 import { useQueue } from '@/features/moderation/api/queue';
-import { useDeletionRequests } from '@/features/deletion-requests/api/list';
 import { ScamOverviewSection } from '@/features/scam-overview/components/scam-overview-section';
 
 function StatCard({

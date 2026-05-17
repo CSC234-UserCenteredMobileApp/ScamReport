@@ -1,7 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { BarChart3, LayoutDashboard, Megaphone, Shield, ShieldCheck } from 'lucide-react';
-import { Activity, BarChart3, LayoutDashboard, Megaphone, Shield, ShieldCheck, Trash2 } from 'lucide-react';
+import { Activity, BarChart3, LayoutDashboard, Megaphone, Shield, ShieldCheck } from 'lucide-react';
 import type { ComponentType, SVGProps } from 'react';
 import { cn } from '@/lib/utils';
 
