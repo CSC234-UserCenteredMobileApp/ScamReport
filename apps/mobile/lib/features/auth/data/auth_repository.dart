@@ -40,6 +40,10 @@ class AuthRepository {
 
   Future<void> signOut() => _firebaseAuth.signOut();
 
+  Future<void> sendPasswordResetEmail(String email) {
+    return _firebaseAuth.sendPasswordResetEmail(email: email);
+  }
+
   // Re-sync the backend user without re-authenticating. Useful after the
   // mobile app rehydrates and Firebase already has a current user.
   Future<AuthUser> sync() => _api.sync();

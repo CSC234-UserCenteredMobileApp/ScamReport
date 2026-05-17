@@ -203,12 +203,7 @@ export function QueuePage() {
                 page={data.page}
                 pageSize={data.pageSize}
                 total={data.total}
-                onChange={(u) =>
-                  setSearch({
-                    page: u.page,
-                    page_size: u.page_size,
-                  } as Partial<QueueSearch>)
-                }
+                onChange={(u) => setSearch(u as Partial<QueueSearch>)}
               />
             </>
           )}

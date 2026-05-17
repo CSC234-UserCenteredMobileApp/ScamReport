@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import { z } from 'zod';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -104,6 +104,14 @@ export function LoginPage() {
                 aria-invalid={errors.password ? 'true' : undefined}
                 {...register('password')}
               />
+            </div>
+            <div className="flex justify-end">
+              <Link
+                to="/forgot-password"
+                className="text-sm text-primary hover:underline"
+              >
+                {t('auth.forgotPassword')}
+              </Link>
             </div>
             <Button type="submit" className="w-full" disabled={submitting}>
               {t('auth.signIn')}
