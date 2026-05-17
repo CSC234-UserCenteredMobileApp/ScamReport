@@ -19,7 +19,14 @@
     "syncErrorTitle": "Couldn't verify your account",
     "syncErrorBody": "We signed you in, but couldn't reach the server to confirm your access. Check your connection and try again.",
     "errorInvalid": "Invalid email or password.",
-    "errorGeneric": "Something went wrong. Please try again."
+    "errorGeneric": "Something went wrong. Please try again.",
+    "forgotPassword": "Forgot password?",
+    "forgotTitle": "Reset your password",
+    "forgotSubtitle": "Enter your email and we'll send a reset link.",
+    "forgotSubmit": "Send reset link",
+    "forgotSent": "Check your inbox",
+    "forgotSentBody": "We sent a reset link to {{email}}. Check your spam folder if it doesn't arrive.",
+    "backToSignIn": "Back to sign in"
   },
   "common": {
     "loading": "Loading…",

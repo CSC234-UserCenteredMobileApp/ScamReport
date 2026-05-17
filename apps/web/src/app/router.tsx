@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { LoginPage } from '@/routes/login';
+import { ForgotPasswordPage } from '@/routes/forgot-password';
 import { NoAccessPage } from '@/routes/no-access';
 import { DashboardLayout } from '@/routes/dashboard-layout';
 import DashboardRoute from '@/routes/dashboard';
@@ -15,6 +16,7 @@ import AiEvalRoute from '@/routes/ai-eval';
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
+  { path: '/forgot-password', element: <ForgotPasswordPage /> },
   { path: '/no-access', element: <NoAccessPage /> },
   {
     element: <DashboardLayout />,
