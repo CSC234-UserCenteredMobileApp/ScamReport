@@ -1,0 +1,1 @@
+{"runAt":"2026-05-17T08:05:24.934Z","gitSha":"7a903aef3b26dbacfe6711fb084aafd8f69b968a","totalCases":50,"verdictAccuracy":0.88,"byType":{"phone":0.9333,"url":0.8,"text":0.9},"threshold":0.6,"passed":true}
