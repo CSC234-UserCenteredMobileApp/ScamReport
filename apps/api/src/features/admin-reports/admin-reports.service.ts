@@ -35,6 +35,7 @@ import {
   applyAction as repoApplyAction,
   countByStatus,
   countDuplicates,
+  countQueueRows,
   findDetailRow,
   findEvidenceFile,
   findQueueRows,
@@ -42,7 +43,10 @@ import {
   findSiblingCases,
   type ActionKind,
   type ActionResult,
+  type QueueParams,
 } from './admin-reports.repo';
+
+export type { QueueParams } from './admin-reports.repo';
 
 const EVIDENCE_BUCKET = 'evidence';
 const EVIDENCE_URL_TTL_SECONDS = 3600;
@@ -51,15 +55,21 @@ const EVIDENCE_URL_TTL_SECONDS = 3600;
 // Queue
 // ---------------------------------------------------------------------------
 
-export async function getQueue(scamTypeCode?: string): Promise<{
+export async function getQueue(params: QueueParams): Promise<{
   items: AdminQueueItem[];
   pendingCount: number;
   flaggedCount: number;
+  total: number;
+  page: number;
+  pageSize: number;
 }> {
-  const [rows, pendingCount, flaggedCount] = await Promise.all([
-    findQueueRows(scamTypeCode),
-    countByStatus('pending', scamTypeCode),
-    countByStatus('flagged', scamTypeCode),
+  const [rows, total, pendingCount, flaggedCount] = await Promise.all([
+    findQueueRows(params),
+    countQueueRows(params),
+    // Pending / Flagged stats stay GLOBAL — unaffected by filters so the
+    // dashboard health number doesn't shift when a moderator narrows the view.
+    countByStatus('pending'),
+    countByStatus('flagged'),
   ]);
 
   const items: AdminQueueItem[] = rows.map((r) => ({
@@ -77,7 +87,14 @@ export async function getQueue(scamTypeCode?: string): Promise<{
     aiConfidence: (r.aiConfidence ?? null) as AdminQueueItem['aiConfidence'],
   }));
 
-  return { items, pendingCount, flaggedCount };
+  return {
+    items,
+    pendingCount,
+    flaggedCount,
+    total,
+    page: params.page,
+    pageSize: params.pageSize,
+  };
 }
 
 // ---------------------------------------------------------------------------

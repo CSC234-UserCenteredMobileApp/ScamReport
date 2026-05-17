@@ -23,7 +23,7 @@ function wrapperFor(qc: QueryClient) {
 }
 
 function seedQueueCache(qc: QueryClient) {
-  qc.setQueryData(queryKeys.moderation.queue(), structuredClone(sampleQueue));
+  qc.setQueryData(queryKeys.moderation.queue({ page: 1, page_size: 25 }), structuredClone(sampleQueue));
 }
 
 beforeEach(() => {
@@ -50,7 +50,7 @@ describe('useModerationAction', () => {
 
     // After mutate kicks in, optimistic update fires
     await waitFor(() => {
-      const snap = qc.getQueryData(queryKeys.moderation.queue()) as typeof sampleQueue;
+      const snap = qc.getQueryData(queryKeys.moderation.queue({ page: 1, page_size: 25 })) as typeof sampleQueue;
       expect(snap.items.find((it) => it.id === targetId)).toBeUndefined();
       expect(snap.pendingCount).toBe(sampleQueue.pendingCount - 1);
     });
@@ -79,7 +79,7 @@ describe('useModerationAction', () => {
       result.current.mutateAsync({ id: targetId, remark: 'nope' }),
     ).rejects.toBeTruthy();
 
-    const snap = qc.getQueryData(queryKeys.moderation.queue()) as typeof sampleQueue;
+    const snap = qc.getQueryData(queryKeys.moderation.queue({ page: 1, page_size: 25 })) as typeof sampleQueue;
     expect(snap.items.find((it) => it.id === targetId)).toBeDefined();
     expect(snap.pendingCount).toBe(sampleQueue.pendingCount);
   });
@@ -98,7 +98,7 @@ describe('useModerationAction', () => {
     await result.current.mutateAsync({ id: targetId, remark: 'discuss' });
 
     await waitFor(() => {
-      const snap = qc.getQueryData(queryKeys.moderation.queue()) as typeof sampleQueue;
+      const snap = qc.getQueryData(queryKeys.moderation.queue({ page: 1, page_size: 25 })) as typeof sampleQueue;
       const row = snap.items.find((it) => it.id === targetId);
       // After settled, the cache is invalidated and refetched from msw default
       // (which still has the row as pending). Test the optimistic path instead via state machine:

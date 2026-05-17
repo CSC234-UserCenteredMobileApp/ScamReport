@@ -40,9 +40,42 @@ export const adminReportsRoute = new Elysia({ prefix: '/admin/reports' })
 
   .get(
     '/queue',
-    async ({ query }) => getQueue(query.scam_type),
+    async ({ query }) =>
+      getQueue({
+        q: query.q,
+        status: query.status,
+        priority:
+          query.priority === 'true'
+            ? true
+            : query.priority === 'false'
+              ? false
+              : undefined,
+        confidence: query.confidence,
+        scamType: query.scam_type,
+        page: query.page ? Math.max(1, parseInt(query.page, 10)) : 1,
+        pageSize: query.page_size ? parseInt(query.page_size, 10) : 25,
+      }),
     {
-      query: t.Object({ scam_type: t.Optional(t.String()) }),
+      query: t.Object({
+        q: t.Optional(t.String({ maxLength: 200 })),
+        status: t.Optional(
+          t.Union([t.Literal('pending'), t.Literal('flagged'), t.Literal('all')]),
+        ),
+        priority: t.Optional(t.Union([t.Literal('true'), t.Literal('false')])),
+        confidence: t.Optional(
+          t.Union([
+            t.Literal('high'),
+            t.Literal('medium'),
+            t.Literal('low'),
+            t.Literal('all'),
+          ]),
+        ),
+        scam_type: t.Optional(t.String()),
+        page: t.Optional(t.String({ pattern: '^[0-9]+$' })),
+        page_size: t.Optional(
+          t.Union([t.Literal('25'), t.Literal('50'), t.Literal('100')]),
+        ),
+      }),
       response: AdminQueueResponse,
     },
   )

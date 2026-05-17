@@ -19,6 +19,21 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
+// jsdom lacks pointer-capture APIs that Radix UI components (Select, etc.)
+// invoke on focus/hover paths. Polyfill as no-ops so tests can interact.
+if (!Element.prototype.hasPointerCapture) {
+  Element.prototype.hasPointerCapture = () => false;
+}
+if (!Element.prototype.setPointerCapture) {
+  Element.prototype.setPointerCapture = () => {};
+}
+if (!Element.prototype.releasePointerCapture) {
+  Element.prototype.releasePointerCapture = () => {};
+}
+if (!Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = () => {};
+}
+
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => {
   server.resetHandlers();

@@ -9,6 +9,11 @@
   },
   "filter": {
     "label": "ตัวกรอง",
+    "button": "ตัวกรอง",
+    "searchPlaceholder": "ค้นหาหัวข้อหรือรายละเอียด…",
+    "reset": "รีเซ็ต",
+    "clearAll": "ล้างทั้งหมด",
+    "activeLabel": "ตัวกรองที่ใช้งาน",
     "statusLabel": "สถานะ",
     "statusAll": "ทั้งหมด",
     "typeLabel": "ประเภทการโกง",
@@ -18,10 +23,17 @@
     "priorityOnly": "เฉพาะที่ติด Priority",
     "confidenceLabel": "ความเชื่อมั่น AI",
     "confidenceAll": "ทั้งหมด",
-    "confidenceHigh": "สูง (≥70)",
-    "confidenceMedium": "กลาง (40–69)",
-    "confidenceLow": "ต่ำ (<40)",
+    "confidenceHigh": "สูง",
+    "confidenceMedium": "กลาง",
+    "confidenceLow": "ต่ำ",
     "noMatch": "ไม่มีรายงานที่ตรงกับตัวกรองที่เลือก"
+  },
+  "pagination": {
+    "showing": "กำลังแสดง",
+    "of": "จาก",
+    "pageSize": "ต่อหน้า",
+    "prev": "ก่อนหน้า",
+    "next": "ถัดไป"
   },
   "col": {
     "type": "ประเภท",
