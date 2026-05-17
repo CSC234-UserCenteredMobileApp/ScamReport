@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
@@ -5,16 +6,22 @@ import 'package:http/http.dart' as http;
 
 import '../../../core/api_client.dart';
 import '../../../core/cache/app_database.dart' as $db;
+import '../../../core/observability/crash_reporter.dart';
 import '../domain/sms_alert.dart';
 import 'sms_event_channel.dart';
 
 class SmsScanRepository {
-  SmsScanRepository({required http.Client http, required $db.AppDatabase db})
-      : _http = http,
-        _db = db;
+  SmsScanRepository({
+    required http.Client http,
+    required $db.AppDatabase db,
+    CrashReporter crashReporter = const CrashReporter(),
+  })  : _http = http,
+        _db = db,
+        _crashReporter = crashReporter;
 
   final http.Client _http;
   final $db.AppDatabase _db;
+  final CrashReporter _crashReporter;
 
   Future<SmsAlert?> processEvent(SmsEvent event) async {
     final http.Response response;
@@ -24,7 +31,14 @@ class SmsScanRepository {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'type': 'text', 'payload': event.body}),
       );
-    } catch (_) {
+    } catch (e, st) {
+      // Silent network drop here hides real connectivity bugs. Record as
+      // non-fatal so the dashboard surfaces a spike if /check goes down.
+      unawaited(_crashReporter.recordNonFatal(
+        e,
+        st,
+        reason: 'sms_scan /check request failed',
+      ));
       return null;
     }
 

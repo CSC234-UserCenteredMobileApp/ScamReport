@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api_client.dart';
 import '../../../core/di/cache.dart';
 import '../../../core/di/notifications.dart';
+import '../../../core/observability/crash_reporter.dart';
 import '../../settings/presentation/settings_providers.dart';
 import '../data/sms_event_channel.dart';
 import '../data/sms_scan_repository.dart';
@@ -12,6 +13,7 @@ final smsScanRepositoryProvider = Provider<SmsScanRepository>((ref) {
   return SmsScanRepository(
     http: ref.watch(httpClientProvider),
     db: ref.watch(appDatabaseProvider),
+    crashReporter: ref.watch(crashReporterProvider),
   );
 });
 

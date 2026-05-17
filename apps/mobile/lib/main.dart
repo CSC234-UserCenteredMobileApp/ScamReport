@@ -10,6 +10,7 @@ import 'core/di/auth.dart';
 import 'core/di/firebase.dart';
 import 'core/notifications/fcm_registrar.dart';
 import 'core/notifications/foreground_listener.dart';
+import 'core/observability/crash_reporter.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/ask_ai/presentation/ask_ai_providers.dart';
@@ -63,6 +64,16 @@ class _MyAppState extends ConsumerState<MyApp> {
         // ignore the future — purge is best-effort + idempotent.
         persistence.clearForUser(prev?.valueOrNull?.uid as String? ?? '');
       }
+    });
+
+    // Tag every Crashlytics report with the current Firebase uid (empty
+    // string when signed out) so support can pivot incidents by user. We
+    // also seed it from the build-time snapshot since `ref.listen` only
+    // fires on subsequent changes.
+    final reporter = ref.read(crashReporterProvider);
+    reporter.setUserId(ref.read(authStateProvider).valueOrNull?.uid);
+    ref.listen<AsyncValue<dynamic>>(authStateProvider, (prev, next) {
+      reporter.setUserId(next.valueOrNull?.uid);
     });
 
     return MaterialApp.router(

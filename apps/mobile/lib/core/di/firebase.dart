@@ -3,8 +3,10 @@ import 'dart:developer' as developer;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../firebase_options.dart';
 
@@ -26,6 +28,20 @@ Future<bool> initializeFirebase() async {
       stackTrace: st,
     );
     return false;
+  }
+
+  // Crashlytics: disabled in debug so dev crashes don't pollute the prod
+  // dashboard. Release builds collect + upload as soon as init succeeds.
+  try {
+    await FirebaseCrashlytics.instance
+        .setCrashlyticsCollectionEnabled(!kDebugMode);
+  } catch (e, st) {
+    developer.log(
+      '[crashlytics] collection toggle failed',
+      name: 'firebase',
+      error: e,
+      stackTrace: st,
+    );
   }
 
   // Firestore offline persistence — required for PRD §6.5: alerts +
