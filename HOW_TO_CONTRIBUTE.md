@@ -45,6 +45,13 @@ We use three external services. None of their secrets are committed; ask the tea
 **Mobile config files** (gitignored — place locally):
 - Android: `apps/mobile/android/app/google-services.json`
 - Web: configured via `apps/mobile/web/firebase-config.js` per Firebase Hosting setup (see Firebase Console → Project settings → Your apps → Web app → SDK setup and configuration).
+- FlutterFire options: `apps/mobile/lib/firebase_options.dart` is **gitignored**. A template lives at `apps/mobile/lib/firebase_options.dart.example`. Generate the real file once per clone with:
+
+  ```bash
+  cd apps/mobile && dart pub global activate flutterfire_cli && flutterfire configure --project=<your-firebase-project>
+  ```
+
+  The CLI emits the same shape as the `.example` file with real keys for the platforms you select (pick **android** + **web**; iOS / desktop are out of scope per PRD §6.6).
 
 Mobile init runs from `apps/mobile/lib/core/di/firebase.dart`. If the config files aren't present, init logs a warning and returns false — the app still boots, just without Firebase features.
 

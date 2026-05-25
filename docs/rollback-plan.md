@@ -16,7 +16,7 @@ Trigger a rollback when **any** of:
 Every feature shipped in S2+ is wrapped in a Firebase Remote Config boolean flag (default-off in prod). To disable:
 
 1. Open Firebase Console → Remote Config → `<project>`.
-2. Find the flag key (e.g. `enable_biometric_login`, `enable_clipboard_scanner`).
+2. Find the flag key (e.g. `enable_biometric_login`, `enable_clipboard_scanner`, `enable_sms_scan`, `enable_call_screening`).
 3. Set the production value to `false`. Save + Publish.
 4. Mobile clients pick up the change on the next `RemoteConfig.fetchAndActivate()` call (cold start, or on resume after the cache window).
 5. Post in `#scamreport-incidents` (or course Slack) with: flag flipped, why, ETA on the fix, owner.

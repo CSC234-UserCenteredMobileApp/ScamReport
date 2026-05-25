@@ -187,6 +187,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 ),
                 GoRoute(
                   path: 'call-screening',
+                  // FR-9.3 stretch — Remote Config gate (PRD §6.8). Deep links
+                  // bounce back to /me when the flag is off.
+                  redirect: (_, __) =>
+                      ref.read(featureFlagProvider('enable_call_screening'))
+                          ? null
+                          : '/me',
                   builder: (_, __) => const CallScreeningScreen(),
                 ),
               ],

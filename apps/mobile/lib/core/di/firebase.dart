@@ -75,12 +75,14 @@ Future<bool> initializeFirebase() async {
     );
     await remoteConfig.setDefaults(<String, dynamic>{
       // One key per feature shipping behind a flag. Add as features land.
+      // Rubric (PRD §6.8): default-off in prod until promoted via Firebase Console.
       'enable_biometric_login': false,
       'enable_clipboard_scanner': false,
       'enable_share_target': false,
       'enable_ai_search': false,
       'enable_ask_ai': false,
-      'enable_call_screening': true,
+      'enable_call_screening': false,
+      'enable_sms_scan': false,
     });
     unawaited(remoteConfig.fetchAndActivate());
   } catch (e, st) {

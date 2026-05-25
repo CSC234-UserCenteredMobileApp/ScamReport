@@ -11,6 +11,13 @@ class _NotificationsSection extends ConsumerWidget {
     final settingsAsync = ref.watch(settingsProvider);
     final isAndroid =
         !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+    // FR-9.3 / FR-9.4 stretches — gated by Remote Config (PRD §6.8).
+    final callScreeningEnabled =
+        ref.watch(featureFlagProvider('enable_call_screening'));
+    final smsScanEnabled = ref.watch(featureFlagProvider('enable_sms_scan'));
+    final showCallScreening = isAndroid && callScreeningEnabled;
+    final showSmsScan = isAndroid && smsScanEnabled;
+    final hasAndroidExtras = showCallScreening || showSmsScan;
 
     return settingsAsync.when(
       loading: () => const _SettingsSkeleton(height: 160),
@@ -39,11 +46,13 @@ class _NotificationsSection extends ConsumerWidget {
               onChanged: (v) => ref
                   .read(settingsProvider.notifier)
                   .save(settings.copyWith(smsPhishingAlerts: v)),
-              isLast: !isAndroid,
+              isLast: !hasAndroidExtras,
             ),
-            if (isAndroid) ...[
+            if (showCallScreening) ...[
               const Divider(height: 1, indent: 16, endIndent: 16),
               const _CallScreeningTile(),
+            ],
+            if (showSmsScan) ...[
               const Divider(height: 1, indent: 16, endIndent: 16),
               _SmsToggleTile(settings: settings),
             ],
