@@ -78,6 +78,13 @@ jobs:
       - name: Fetch Flutter deps
         run: flutter pub get
 
+      - name: Bootstrap firebase_options.dart from .example
+        # The real file is gitignored (HOW_TO_CONTRIBUTE.md §3.1 — each dev
+        # regenerates it via `flutterfire configure`). CI does not have
+        # Firebase credentials and only needs the file to satisfy the import
+        # in core/di/firebase.dart for `dart analyze` and widget tests.
+        run: cp lib/firebase_options.dart.example lib/firebase_options.dart
+
       - name: Run tests with coverage
         run: flutter test --coverage
 

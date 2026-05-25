@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobile/core/feature_flags/feature_flags.dart';
 import 'package:mobile/core/theme/app_theme.dart';
 import 'package:mobile/features/auth/domain/auth_user.dart';
 import 'package:mobile/features/auth/presentation/auth_providers.dart';
@@ -55,6 +56,10 @@ Future<Widget> _buildSettings({AuthUser? user}) async {
       currentUserProvider.overrideWith((ref) async => user),
       settingsProvider.overrideWith(_FakeSettingsNotifier.new),
       settingsRepositoryProvider.overrideWithValue(SettingsRepository(prefs)),
+      // Stretch features default-off in prod; the layout tests don't care
+      // either way but the gate must not blow up reading Remote Config.
+      featureFlagProvider('enable_sms_scan').overrideWith((_) => false),
+      featureFlagProvider('enable_call_screening').overrideWith((_) => false),
     ],
     child: _wrap(const SettingsScreen()),
   );

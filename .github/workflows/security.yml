@@ -80,5 +80,10 @@ jobs:
       - name: Fetch Flutter deps
         run: flutter pub get
 
+      - name: Bootstrap firebase_options.dart from .example
+        # firebase_options.dart is gitignored; analyze needs the file to
+        # resolve the import in core/di/firebase.dart.
+        run: cp lib/firebase_options.dart.example lib/firebase_options.dart
+
       - name: Static analysis
         run: dart analyze --fatal-infos

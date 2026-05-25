@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/feature_flags/feature_flags.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../l10n/l10n.dart';
 import '../../alerts/presentation/alerts_providers.dart';
@@ -30,6 +31,11 @@ class _SmsAlertOverlayWrapperState
 
   @override
   Widget build(BuildContext context) {
+    // FR-9.4 stretch — gated by Remote Config until promoted (PRD §6.8).
+    final enabled = ref.watch(featureFlagProvider('enable_sms_scan'));
+    if (!enabled) {
+      return widget.child;
+    }
     ref.listen(smsScannerProvider, (_, next) {
       final alert = next.valueOrNull;
       if (alert != null) _showBanner(context, alert);
