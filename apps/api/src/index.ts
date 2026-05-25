@@ -19,13 +19,16 @@ import { adminExportsRoute } from './features/admin-exports/admin-exports.route'
 import { adminAiEvalRoute } from './features/admin-ai-eval/admin-ai-eval.route';
 import { adminScamOverviewRoute } from './features/admin-scam-overview/admin-scam-overview.route';
 
-// CORS allowlist for the admin web portal (apps/web).
+// CORS allowlist for the admin web portal (apps/web) and Flutter web dev (apps/mobile).
 // Project-scoped Vercel preview pattern intentionally NOT `*.vercel.app` —
 // wildcard would allow any Vercel-hosted site to call this API.
+// Localhost regex covers Flutter web's random dev port plus any other local tooling.
 export const WEB_ORIGINS: (string | RegExp)[] = [
   'http://localhost:5173',
   'https://scamreport-admin.vercel.app',
   /^https:\/\/scamreport-admin-[a-z0-9-]+\.vercel\.app$/,
+  /^http:\/\/localhost:\d+$/,
+  /^http:\/\/127\.0\.0\.1:\d+$/,
 ];
 
 export const app = new Elysia()
