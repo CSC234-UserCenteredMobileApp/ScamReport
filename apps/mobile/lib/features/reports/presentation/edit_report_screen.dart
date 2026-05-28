@@ -85,8 +85,7 @@ class _EditReportScreenState extends ConsumerState<EditReportScreen> {
                 leading: const Icon(Icons.photo_library_outlined),
                 title: Text(l10n.askAiAttachGallery),
                 onTap: () async {
-                  final f =
-                      await picker.pickImage(source: ImageSource.gallery);
+                  final f = await picker.pickImage(source: ImageSource.gallery);
                   if (ctx.mounted) Navigator.of(ctx).pop(f);
                 },
               ),
@@ -219,8 +218,7 @@ class _EditReportScreenState extends ConsumerState<EditReportScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final detailAsync =
-        ref.watch(editReportDetailProvider(widget.reportId));
+    final detailAsync = ref.watch(editReportDetailProvider(widget.reportId));
     final scamTypesAsync = ref.watch(editScamTypesProvider);
     final canSave = _initialized && _scamTypeCode != null;
 
@@ -233,9 +231,8 @@ class _EditReportScreenState extends ConsumerState<EditReportScreen> {
         children: [
           if (_saving)
             LinearProgressIndicator(
-              value: _totalNewFiles > 0
-                  ? _uploadedCount / _totalNewFiles
-                  : null,
+              value:
+                  _totalNewFiles > 0 ? _uploadedCount / _totalNewFiles : null,
               minHeight: 6,
             ),
           Expanded(
@@ -527,20 +524,17 @@ class _ScamTypeField extends StatelessWidget {
       error: (_, __) => TextField(
         readOnly: true,
         controller: TextEditingController(text: scamTypeCode ?? ''),
-        decoration:
-            InputDecoration(labelText: l10n.askAiDraftFieldScamType),
+        decoration: InputDecoration(labelText: l10n.askAiDraftFieldScamType),
       ),
       data: (types) {
         final codes = types.map((t) => t.code).toSet();
-        final safeValue =
-            (scamTypeCode != null && codes.contains(scamTypeCode))
-                ? scamTypeCode
-                : null;
+        final safeValue = (scamTypeCode != null && codes.contains(scamTypeCode))
+            ? scamTypeCode
+            : null;
         return DropdownButtonFormField<String>(
           // ignore: deprecated_member_use
           value: safeValue,
-          decoration:
-              InputDecoration(labelText: l10n.askAiDraftFieldScamType),
+          decoration: InputDecoration(labelText: l10n.askAiDraftFieldScamType),
           items: [
             for (final t in types)
               DropdownMenuItem(value: t.code, child: Text(t.labelEn)),
@@ -720,8 +714,9 @@ class _EvidenceChipFrame extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
-              border:
-                  hasBorder ? Border.all(color: borderColor!, width: 2.5) : null,
+              border: hasBorder
+                  ? Border.all(color: borderColor!, width: 2.5)
+                  : null,
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(hasBorder ? 8 : 10),
@@ -760,9 +755,7 @@ class _FileIcon extends StatelessWidget {
     return Container(
       color: Theme.of(context).colorScheme.surfaceContainerHighest,
       child: Icon(
-        kind == 'pdf'
-            ? Icons.picture_as_pdf_outlined
-            : Icons.image_outlined,
+        kind == 'pdf' ? Icons.picture_as_pdf_outlined : Icons.image_outlined,
         color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
     );

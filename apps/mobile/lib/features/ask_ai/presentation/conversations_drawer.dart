@@ -157,7 +157,8 @@ class _ConversationTile extends ConsumerWidget {
             await repo.deleteConversation(item.id);
             ref.invalidate(conversationListProvider);
           } catch (_) {
-            messenger.showSnackBar(SnackBar(content: Text(l.askAiDeleteFailed)));
+            messenger
+                .showSnackBar(SnackBar(content: Text(l.askAiDeleteFailed)));
           }
         }
       },

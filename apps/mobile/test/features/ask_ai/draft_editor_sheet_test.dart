@@ -80,7 +80,8 @@ void main() {
     await _showSheet(tester);
     expect(find.byKey(const Key('askAiDraftTitle')), findsOneWidget);
     expect(find.text('Original title that is long enough'), findsOneWidget);
-    expect(find.text('Original description that is long enough.'), findsOneWidget);
+    expect(
+        find.text('Original description that is long enough.'), findsOneWidget);
   });
 
   testWidgets('Save returns edited AiDraft', (tester) async {

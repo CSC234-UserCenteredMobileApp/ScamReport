@@ -31,8 +31,9 @@ class AiDraft {
       title: title ?? this.title,
       description: description ?? this.description,
       scamTypeCode: scamTypeCode ?? this.scamTypeCode,
-      targetIdentifier:
-          clearTargetIdentifier ? null : (targetIdentifier ?? this.targetIdentifier),
+      targetIdentifier: clearTargetIdentifier
+          ? null
+          : (targetIdentifier ?? this.targetIdentifier),
       targetIdentifierKind: clearTargetIdentifier
           ? null
           : (targetIdentifierKind ?? this.targetIdentifierKind),

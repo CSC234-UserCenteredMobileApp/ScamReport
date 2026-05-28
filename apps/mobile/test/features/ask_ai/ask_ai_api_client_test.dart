@@ -45,7 +45,8 @@ void main() {
   group('AskAiApiClient — auth', () {
     test('throws AskAiUnauthorizedFailure when no current user', () async {
       when(() => auth.currentUser).thenReturn(null);
-      final api = AskAiApiClient(_StubClient((_) async => _streamed(200, '{}')), auth);
+      final api =
+          AskAiApiClient(_StubClient((_) async => _streamed(200, '{}')), auth);
       await expectLater(
         () => api.createConversation(),
         throwsA(isA<AskAiUnauthorizedFailure>()),
@@ -54,7 +55,8 @@ void main() {
 
     test('throws AskAiUnauthorizedFailure when token is empty', () async {
       when(() => user.getIdToken()).thenAnswer((_) async => '');
-      final api = AskAiApiClient(_StubClient((_) async => _streamed(200, '{}')), auth);
+      final api =
+          AskAiApiClient(_StubClient((_) async => _streamed(200, '{}')), auth);
       await expectLater(
         () => api.createConversation(),
         throwsA(isA<AskAiUnauthorizedFailure>()),
@@ -71,7 +73,8 @@ void main() {
           expect(req.headers['Authorization'], 'Bearer tok-123');
           return _streamed(
             200,
-            jsonEncode({'conversationId': 'c-1', 'createdAt': '2026-05-07T00:00:00Z'}),
+            jsonEncode(
+                {'conversationId': 'c-1', 'createdAt': '2026-05-07T00:00:00Z'}),
           );
         }),
         auth,
@@ -193,7 +196,8 @@ void main() {
       expect(detail.linkedReportId, 'rep-9');
       expect(detail.messages, hasLength(2));
       expect(detail.messages[0].role, ChatRole.user);
-      expect(detail.messages[0].attachments.first.signedUrl, 'https://signed/x');
+      expect(
+          detail.messages[0].attachments.first.signedUrl, 'https://signed/x');
       expect(detail.messages[1].intentDetected, isTrue);
     });
 
@@ -309,7 +313,8 @@ void main() {
                 'hasEnoughInfo': true,
                 'draft': {
                   'title': 'Fake parcel SMS',
-                  'description': 'I got an SMS asking me to click a tracking link.',
+                  'description':
+                      'I got an SMS asking me to click a tracking link.',
                   'scamTypeCode': 'phishing_sms',
                   'targetIdentifier': 'kerry-th.net',
                   'targetIdentifierKind': 'url',
@@ -423,7 +428,8 @@ void main() {
 
     test('throws unauth when not signed in', () async {
       when(() => auth.currentUser).thenReturn(null);
-      final api = AskAiApiClient(_StubClient((_) async => _streamed(200, '{}')), auth);
+      final api =
+          AskAiApiClient(_StubClient((_) async => _streamed(200, '{}')), auth);
       await expectLater(
         () => api.sendMessageMultipart('c-1', 'hi', const []),
         throwsA(isA<AskAiUnauthorizedFailure>()),
@@ -432,8 +438,8 @@ void main() {
 
     test('maps 413 from server to validation failure', () async {
       final api = AskAiApiClient(
-        _StubClient((_) async =>
-            _streamed(413, '{"error":"too big","code":"attachment_too_large"}')),
+        _StubClient((_) async => _streamed(
+            413, '{"error":"too big","code":"attachment_too_large"}')),
         auth,
       );
       // 413 isn't in the explicit map; falls through to AskAiUnknownFailure.
@@ -608,7 +614,9 @@ void main() {
                 'targetIdentifier': null,
                 'targetIdentifierKind': null,
                 'userEditedDraft': false,
-                'evidenceAttachmentIds': ['aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa'],
+                'evidenceAttachmentIds': [
+                  'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa'
+                ],
               },
               'evidenceAttachments': [
                 {

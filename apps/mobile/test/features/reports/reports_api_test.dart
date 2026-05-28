@@ -67,7 +67,8 @@ void main() {
     when(() => user.getIdToken()).thenAnswer((_) async => 'tok-abc');
   });
 
-  ReportsApi makeApi(Future<http.StreamedResponse> Function(http.BaseRequest) handler) =>
+  ReportsApi makeApi(
+          Future<http.StreamedResponse> Function(http.BaseRequest) handler) =>
       ReportsApi(_StubClient(handler), auth);
 
   // ─────────────────────────────────────────────
@@ -78,7 +79,9 @@ void main() {
     test('returns mapped list on 200', () async {
       final api = makeApi((_) async => _streamed(
             200,
-            jsonEncode({'items': [_myReportJson()]}),
+            jsonEncode({
+              'items': [_myReportJson()]
+            }),
           ));
       final reports = await api.fetchMyReports();
       expect(reports, hasLength(1));
@@ -87,7 +90,8 @@ void main() {
     });
 
     test('returns empty list when items is empty', () async {
-      final api = makeApi((_) async => _streamed(200, jsonEncode({'items': []})));
+      final api =
+          makeApi((_) async => _streamed(200, jsonEncode({'items': []})));
       expect(await api.fetchMyReports(), isEmpty);
     });
 
@@ -120,7 +124,8 @@ void main() {
 
   group('fetchMyReportDetail', () {
     test('returns map on 200', () async {
-      final api = makeApi((_) async => _streamed(200, jsonEncode(_editDetailJson())));
+      final api =
+          makeApi((_) async => _streamed(200, jsonEncode(_editDetailJson())));
       final detail = await api.fetchMyReportDetail(_reportId);
       expect(detail['id'], _reportId);
     });
@@ -257,7 +262,8 @@ void main() {
     });
 
     test('throws ReportValidationException on 409', () async {
-      final api = makeApi((_) async => _streamed(409, '{"error":"not editable"}'));
+      final api =
+          makeApi((_) async => _streamed(409, '{"error":"not editable"}'));
       await expectLater(
         () => api.updateReport(
           reportId: _reportId,

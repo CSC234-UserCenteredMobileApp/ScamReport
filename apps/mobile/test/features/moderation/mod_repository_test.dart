@@ -119,7 +119,8 @@ void main() {
       expect(data.items.first.lastRemarkByAdmin, 'Needs more evidence');
     });
 
-    test('mapper does not throw when server includes reporter fields', () async {
+    test('mapper does not throw when server includes reporter fields',
+        () async {
       when(() => mockApi.fetchQueue()).thenAnswer((_) async => {
             'items': [_itemMap(injectReporterFields: true)],
             'pendingCount': 1,
@@ -209,8 +210,9 @@ void main() {
     });
 
     test('isFlagged and isPending computed correctly on detail', () async {
-      when(() => mockApi.fetchDetail(any())).thenAnswer(
-          (_) async => {'report': {..._detailMap(), 'status': 'flagged'}});
+      when(() => mockApi.fetchDetail(any())).thenAnswer((_) async => {
+            'report': {..._detailMap(), 'status': 'flagged'}
+          });
 
       final detail = await repo.getDetail('r1');
       expect(detail.isFlagged, true);
@@ -219,8 +221,8 @@ void main() {
 
     test('detail mapper does not throw when server includes reporter fields',
         () async {
-      when(() => mockApi.fetchDetail(any())).thenAnswer((_) async =>
-          {'report': _detailMap(injectReporterFields: true)});
+      when(() => mockApi.fetchDetail(any())).thenAnswer(
+          (_) async => {'report': _detailMap(injectReporterFields: true)});
 
       final detail = await repo.getDetail('r1');
       // Sanity: the entity simply doesn't have anywhere to put the leaked

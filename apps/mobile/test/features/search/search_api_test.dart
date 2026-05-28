@@ -69,8 +69,8 @@ void main() {
     });
 
     test('throws on 4xx response', () {
-      final api = SearchApi(
-          MockClient((_) async => http.Response('bad request', 400)));
+      final api =
+          SearchApi(MockClient((_) async => http.Response('bad request', 400)));
       expect(api.searchReports(q: 'test'), throwsA(isA<Exception>()));
     });
 
@@ -114,8 +114,8 @@ void main() {
     });
 
     test('throws on 5xx response', () {
-      final api = SearchApi(
-          MockClient((_) async => http.Response('error', 503)));
+      final api =
+          SearchApi(MockClient((_) async => http.Response('error', 503)));
       expect(api.fetchScamTypes(), throwsA(isA<Exception>()));
     });
   });

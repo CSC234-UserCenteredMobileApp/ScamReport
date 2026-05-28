@@ -115,6 +115,7 @@ class ModReportDetail {
   final String? lastRemarkByAdmin;
   final int? aiScore;
   final String? aiConfidence;
+
   /// Name the reporter (or Ask AI) attributed to the caller at submit time.
   /// Independent of any linked scammer profile.
   final String? suspectedNameAtSubmit;

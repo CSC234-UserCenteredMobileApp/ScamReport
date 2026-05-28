@@ -109,8 +109,7 @@ void main() {
 
   group('withdrawReport', () {
     test('delegates to api.withdrawReport', () async {
-      when(() => mockApi.withdrawReport(_reportId))
-          .thenAnswer((_) async {});
+      when(() => mockApi.withdrawReport(_reportId)).thenAnswer((_) async {});
       await repo.withdrawReport(_reportId);
       verify(() => mockApi.withdrawReport(_reportId)).called(1);
     });

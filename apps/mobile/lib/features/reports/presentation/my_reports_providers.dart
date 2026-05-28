@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../domain/my_report.dart';
 import 'report_detail_providers.dart';
 
-export 'report_detail_providers.dart' show reportsApiProvider, reportsRepositoryProvider;
+export 'report_detail_providers.dart'
+    show reportsApiProvider, reportsRepositoryProvider;
 
 final myReportsProvider = FutureProvider<List<MyReport>>((ref) {
   return ref.watch(reportsRepositoryProvider).getMyReports();

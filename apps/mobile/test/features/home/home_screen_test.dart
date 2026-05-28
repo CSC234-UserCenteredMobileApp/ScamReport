@@ -154,15 +154,15 @@ void main() {
               (ref) => Future<HomeStats>.delayed(const Duration(seconds: 30)),
             ),
             recentAlertsProvider.overrideWith(
-              (ref) =>
-                  Future<List<RecentAlert>>.delayed(const Duration(seconds: 30)),
+              (ref) => Future<List<RecentAlert>>.delayed(
+                  const Duration(seconds: 30)),
             ),
             recentReportsProvider.overrideWith(
-              (ref) =>
-                  Future<List<RecentReport>>.delayed(const Duration(seconds: 30)),
+              (ref) => Future<List<RecentReport>>.delayed(
+                  const Duration(seconds: 30)),
             ),
-            httpClientProvider
-                .overrideWithValue(MockClient((_) async => http.Response('{}', 200))),
+            httpClientProvider.overrideWithValue(
+                MockClient((_) async => http.Response('{}', 200))),
           ],
           child: _themed(const HomeScreen()),
         ),
@@ -248,8 +248,7 @@ void main() {
         ProviderScope(
           overrides: [
             // Seed the clipboard provider so the banner renders immediately.
-            clipboardValueProvider
-                .overrideWith((ref) => '+66844192270'),
+            clipboardValueProvider.overrideWith((ref) => '+66844192270'),
             httpClientProvider.overrideWithValue(_happyClient()),
           ],
           child: _themed(const HomeScreen()),

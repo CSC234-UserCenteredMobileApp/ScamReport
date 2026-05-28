@@ -161,9 +161,8 @@ class AskAiChatState {
       messages: messages ?? this.messages,
       lastOutcome: clearOutcome ? null : (lastOutcome ?? this.lastOutcome),
       activeDraft: clearDraft ? null : (activeDraft ?? this.activeDraft),
-      activeEvidence: clearActiveEvidence
-          ? null
-          : (activeEvidence ?? this.activeEvidence),
+      activeEvidence:
+          clearActiveEvidence ? null : (activeEvidence ?? this.activeEvidence),
       stagedAttachments: stagedAttachments ?? this.stagedAttachments,
       conversationAttachments:
           conversationAttachments ?? this.conversationAttachments,
@@ -417,11 +416,10 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
         attachments: result.outcome.assistantMessage.attachments,
         similarReports: result.outcome.similarReports,
       );
-      final swapped = state.messages
-          .where((m) => m.id != tempId)
-          .toList(growable: true)
-        ..add(result.outcome.userMessage)
-        ..add(assistantWithCards);
+      final swapped =
+          state.messages.where((m) => m.id != tempId).toList(growable: true)
+            ..add(result.outcome.userMessage)
+            ..add(assistantWithCards);
       // Redraft preservation rules (iter-4):
       //  • If the user has edited the draft (`userEditedDraft`), keep
       //    `activeDraft` exactly as-is — the AI just refines reasoning, the
@@ -535,7 +533,8 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
   /// `activeEvidence` from the conversation detail (server PATCHed via
   /// updateDraft). Local drift snapshot is no longer the source of truth
   /// for drafts — it only carries composer state (stagedAttachments).
-  Future<void> loadConversation(AskAiRepository repo, String conversationId) async {
+  Future<void> loadConversation(
+      AskAiRepository repo, String conversationId) async {
     state = state.copyWith(isSending: true, clearError: true);
     try {
       final detail = await repo.getConversation(conversationId);
@@ -555,8 +554,9 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
   }
 }
 
-final askAiChatControllerProvider = StateNotifierProvider.autoDispose<
-    AskAiChatController, AskAiChatState>((ref) {
+final askAiChatControllerProvider =
+    StateNotifierProvider.autoDispose<AskAiChatController, AskAiChatState>(
+        (ref) {
   // Re-evaluate the provider whenever auth state changes — controller
   // disposes on sign-out / user swap so the next session boots fresh.
   // iter-5 black-screen + cross-account hardening.

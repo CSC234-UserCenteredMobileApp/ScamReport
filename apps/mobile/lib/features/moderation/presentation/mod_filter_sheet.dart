@@ -59,23 +59,21 @@ class ModFilterSheet extends ConsumerWidget {
             Expanded(
               child: ListView(
                 controller: scrollController,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 children: [
                   _SectionLabel(l10n.modFilterSectionSort),
                   const SizedBox(height: 4),
                   const _SortRadios(),
                   const SizedBox(height: 16),
-
                   _SectionLabel(l10n.modFilterSectionScamType),
                   const SizedBox(height: 4),
                   const _ScamTypeCheckboxes(codes: _scamTypes),
                   const SizedBox(height: 16),
-
                   _SectionLabel(l10n.modFilterSectionAiConfidence),
                   const SizedBox(height: 8),
                   const _AiConfidenceChips(tiers: _aiConfidences),
                   const SizedBox(height: 16),
-
                   _SectionLabel(l10n.modFilterSectionFlags),
                   _ToggleRow(
                     icon: Icons.bolt_outlined,
@@ -353,7 +351,8 @@ class _ToggleRow extends ConsumerWidget {
       contentPadding: EdgeInsets.zero,
       dense: true,
       title: Text(label, style: const TextStyle(fontSize: 14)),
-      secondary: Icon(icon, color: Theme.of(context).colorScheme.onSurfaceVariant),
+      secondary:
+          Icon(icon, color: Theme.of(context).colorScheme.onSurfaceVariant),
       value: value,
       onChanged: (v) => ref.read(provider.notifier).state = v,
     );

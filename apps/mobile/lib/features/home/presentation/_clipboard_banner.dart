@@ -25,8 +25,7 @@ class _ClipboardBannerState extends ConsumerState<_ClipboardBanner> {
     final text = data?.text?.trim();
     if (text == null || text.isEmpty) return;
     final isPhone = _phoneRegex.hasMatch(text);
-    final isUrl =
-        text.startsWith('http://') || text.startsWith('https://');
+    final isUrl = text.startsWith('http://') || text.startsWith('https://');
     if (isPhone || isUrl) {
       // Only update if not already dismissed.
       if (ref.read(clipboardValueProvider) == null) {
@@ -41,8 +40,7 @@ class _ClipboardBannerState extends ConsumerState<_ClipboardBanner> {
     if (value == null) return const SizedBox.shrink();
 
     final theme = Theme.of(context);
-    final truncated =
-        value.length > 40 ? '${value.substring(0, 40)}…' : value;
+    final truncated = value.length > 40 ? '${value.substring(0, 40)}…' : value;
 
     return Card(
       color: theme.colorScheme.primary.withValues(alpha: 0.12),

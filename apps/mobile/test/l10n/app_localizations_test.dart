@@ -41,8 +41,8 @@ void main() {
     });
 
     test('clipboard', () {
-      expect(l10n.clipboardBannerTitle,
-          'We noticed something on your clipboard');
+      expect(
+          l10n.clipboardBannerTitle, 'We noticed something on your clipboard');
       expect(l10n.checkIt, 'Check it');
     });
 

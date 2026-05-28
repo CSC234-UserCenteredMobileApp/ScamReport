@@ -350,7 +350,9 @@ String _formatSendError(Object error, String fallback) {
   }
   // Last resort — keep the visible message short.
   final s = error.toString();
-  return s.length > 200 ? '$fallback: ${s.substring(0, 200)}…' : '$fallback: $s';
+  return s.length > 200
+      ? '$fallback: ${s.substring(0, 200)}…'
+      : '$fallback: $s';
 }
 
 class _EmptyState extends StatelessWidget {
@@ -424,7 +426,8 @@ class _MessageBubble extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
                   color: bg,
                   borderRadius: BorderRadius.circular(16),
@@ -628,7 +631,8 @@ class _SubmittedBanner extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(Icons.check_circle, color: theme.colorScheme.onPrimaryContainer),
+            Icon(Icons.check_circle,
+                color: theme.colorScheme.onPrimaryContainer),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

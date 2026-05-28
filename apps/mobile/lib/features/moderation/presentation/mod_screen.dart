@@ -163,7 +163,8 @@ class _FilterAction extends ConsumerWidget {
                     color: theme.colorScheme.primary,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  constraints: const BoxConstraints(minWidth: 18, minHeight: 16),
+                  constraints:
+                      const BoxConstraints(minWidth: 18, minHeight: 16),
                   child: Text(
                     '$activeCount',
                     textAlign: TextAlign.center,
@@ -426,7 +427,8 @@ class _ModEmpty extends ConsumerWidget {
     final l10n = context.l10n;
 
     final palette = filtersActive ? verdict.unknown : verdict.safe;
-    final icon = filtersActive ? Icons.filter_alt_off_outlined : Icons.inbox_rounded;
+    final icon =
+        filtersActive ? Icons.filter_alt_off_outlined : Icons.inbox_rounded;
     final title =
         filtersActive ? l10n.modEmptyFilteredTitle : l10n.modQueueEmpty;
 

@@ -52,7 +52,8 @@ class _FilterSheet extends ConsumerWidget {
                   TextButton(
                     onPressed: () {
                       ref.read(searchSortByProvider.notifier).state = 'latest';
-                      ref.read(searchScamTypeFilterProvider.notifier).state = const [];
+                      ref.read(searchScamTypeFilterProvider.notifier).state =
+                          const [];
                     },
                     child: Text(l10n.searchFilterReset),
                   ),
@@ -63,7 +64,8 @@ class _FilterSheet extends ConsumerWidget {
             Expanded(
               child: ListView(
                 controller: scrollController,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 children: [
                   _SectionLabel(l10n.searchFilterSortLabel),
                   const SizedBox(height: 8),

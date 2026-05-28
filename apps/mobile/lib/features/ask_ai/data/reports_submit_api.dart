@@ -133,7 +133,8 @@ class ReportsSubmitApi {
       throw AskAiValidationFailure(_extractMessage(res));
     }
     if (res.statusCode != 200) {
-      throw AskAiUnknownFailure('HTTP ${res.statusCode}: ${_extractMessage(res)}');
+      throw AskAiUnknownFailure(
+          'HTTP ${res.statusCode}: ${_extractMessage(res)}');
     }
 
     final body = jsonDecode(res.body) as Map<String, dynamic>;

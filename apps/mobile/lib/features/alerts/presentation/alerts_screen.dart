@@ -47,9 +47,9 @@ class AlertsScreen extends ConsumerWidget {
                   child: FilterChipBar<AlertCategory?>(
                     options: _filterOptions,
                     selected: selected,
-                    onSelected: (option) =>
-                        ref.read(selectedCategoryProvider.notifier).state =
-                            option,
+                    onSelected: (option) => ref
+                        .read(selectedCategoryProvider.notifier)
+                        .state = option,
                     labelBuilder: _filterLabel,
                   ),
                 ),
@@ -256,7 +256,8 @@ class _AlertListItem extends StatelessWidget {
         iconBg = isScam ? verdict.scam.bg : verdict.suspicious.bg;
         iconFg = isScam ? verdict.scam.fg : verdict.suspicious.fg;
         iconData = Icons.sms_failed_outlined;
-        chipLabel = isScam ? context.l10n.verdictScam : context.l10n.verdictSuspicious;
+        chipLabel =
+            isScam ? context.l10n.verdictScam : context.l10n.verdictSuspicious;
         onTap = null; // no detail screen in v1
     }
 

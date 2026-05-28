@@ -6,7 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mobile/features/call_screening/data/call_screening_api_client.dart';
 import 'package:mobile/features/call_screening/data/call_screening_repository_impl.dart';
 
-
 void main() {
   group('CallScreeningRepositoryImpl', () {
     setUp(() {

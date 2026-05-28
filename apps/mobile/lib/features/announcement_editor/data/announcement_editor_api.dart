@@ -28,7 +28,8 @@ class AnnouncementEditorApi {
       headers: await _authHeaders(),
     );
     _check(res, 'GET /admin/announcements');
-    return (jsonDecode(res.body) as Map<String, dynamic>)['items'] as List<dynamic>;
+    return (jsonDecode(res.body) as Map<String, dynamic>)['items']
+        as List<dynamic>;
   }
 
   Future<Map<String, dynamic>> fetchDetail(String id) async {
@@ -37,7 +38,8 @@ class AnnouncementEditorApi {
       headers: await _authHeaders(),
     );
     _check(res, 'GET /admin/announcements/$id');
-    return (jsonDecode(res.body) as Map<String, dynamic>)['item'] as Map<String, dynamic>;
+    return (jsonDecode(res.body) as Map<String, dynamic>)['item']
+        as Map<String, dynamic>;
   }
 
   Future<Map<String, dynamic>> postCreate(Map<String, dynamic> body) async {
@@ -47,17 +49,20 @@ class AnnouncementEditorApi {
       body: jsonEncode(body),
     );
     _check(res, 'POST /admin/announcements');
-    return (jsonDecode(res.body) as Map<String, dynamic>)['item'] as Map<String, dynamic>;
+    return (jsonDecode(res.body) as Map<String, dynamic>)['item']
+        as Map<String, dynamic>;
   }
 
-  Future<Map<String, dynamic>> putUpdate(String id, Map<String, dynamic> body) async {
+  Future<Map<String, dynamic>> putUpdate(
+      String id, Map<String, dynamic> body) async {
     final res = await _client.put(
       Uri.parse('$apiBaseUrl/admin/announcements/$id'),
       headers: await _authHeaders(),
       body: jsonEncode(body),
     );
     _check(res, 'PUT /admin/announcements/$id');
-    return (jsonDecode(res.body) as Map<String, dynamic>)['item'] as Map<String, dynamic>;
+    return (jsonDecode(res.body) as Map<String, dynamic>)['item']
+        as Map<String, dynamic>;
   }
 
   Future<void> deleteAnnouncement(String id) async {
@@ -68,14 +73,16 @@ class AnnouncementEditorApi {
     _check(res, 'DELETE /admin/announcements/$id');
   }
 
-  Future<Map<String, dynamic>> postPublish(String id, {required bool pushToFcm}) async {
+  Future<Map<String, dynamic>> postPublish(String id,
+      {required bool pushToFcm}) async {
     final res = await _client.post(
       Uri.parse('$apiBaseUrl/admin/announcements/$id/publish'),
       headers: await _authHeaders(),
       body: jsonEncode({'pushToFcm': pushToFcm}),
     );
     _check(res, 'POST /admin/announcements/$id/publish');
-    return (jsonDecode(res.body) as Map<String, dynamic>)['item'] as Map<String, dynamic>;
+    return (jsonDecode(res.body) as Map<String, dynamic>)['item']
+        as Map<String, dynamic>;
   }
 
   Future<Map<String, dynamic>> postUnpublish(String id) async {
@@ -95,7 +102,8 @@ class AnnouncementEditorApi {
     // Remove content-type from auth headers — multipart sets its own boundary
     headers.remove('content-type');
 
-    final uri = Uri.parse('$apiBaseUrl/admin/announcements/$announcementId/attachments');
+    final uri = Uri.parse(
+        '$apiBaseUrl/admin/announcements/$announcementId/attachments');
     final request = http.MultipartRequest('POST', uri)
       ..headers.addAll(headers)
       ..files.add(
@@ -122,7 +130,8 @@ class AnnouncementEditorApi {
           '$apiBaseUrl/admin/announcements/$announcementId/attachments/$attachmentId'),
       headers: await _authHeaders(),
     );
-    _check(res, 'DELETE /admin/announcements/$announcementId/attachments/$attachmentId');
+    _check(res,
+        'DELETE /admin/announcements/$announcementId/attachments/$attachmentId');
   }
 
   String _mimeFromExt(String ext) => switch (ext.toLowerCase()) {

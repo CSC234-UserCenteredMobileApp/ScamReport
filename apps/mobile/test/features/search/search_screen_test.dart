@@ -90,7 +90,8 @@ void main() {
       expect(find.text('Filter & Sort'), findsOneWidget);
     });
 
-    testWidgets('shows empty prompt on initial load with no query', (tester) async {
+    testWidgets('shows empty prompt on initial load with no query',
+        (tester) async {
       await tester.pumpWidget(_themed(
         const SearchScreen(),
         overrides: [
@@ -99,7 +100,8 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      expect(find.text('Type something to search verified reports.'), findsOneWidget);
+      expect(find.text('Type something to search verified reports.'),
+          findsOneWidget);
     });
 
     testWidgets('shows results after typing a query', (tester) async {
@@ -145,8 +147,7 @@ void main() {
       await tester.pumpWidget(_themed(
         const SearchScreen(),
         overrides: [
-          httpClientProvider
-              .overrideWithValue(_reportsClient(statusCode: 500)),
+          httpClientProvider.overrideWithValue(_reportsClient(statusCode: 500)),
         ],
       ));
       await tester.pumpAndSettle();

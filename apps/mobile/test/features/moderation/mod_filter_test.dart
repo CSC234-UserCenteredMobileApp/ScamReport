@@ -122,8 +122,10 @@ void main() {
       addTearDown(c.dispose);
       await c.read(modQueueProvider.future);
 
-      c.read(modScamTypeFilterProvider.notifier).state =
-          const {'phishing_sms', 'investment'};
+      c.read(modScamTypeFilterProvider.notifier).state = const {
+        'phishing_sms',
+        'investment'
+      };
       final items = c.read(modFilteredQueueProvider).requireValue;
 
       expect(items.map((i) => i.id).toSet(), {'r1', 'r3'});
@@ -167,10 +169,14 @@ void main() {
       addTearDown(c.dispose);
       await c.read(modQueueProvider.future);
 
-      c.read(modScamTypeFilterProvider.notifier).state =
-          const {'phishing_sms', 'ecommerce_fraud'};
-      c.read(modAiConfidenceFilterProvider.notifier).state =
-          const {'high', 'low'};
+      c.read(modScamTypeFilterProvider.notifier).state = const {
+        'phishing_sms',
+        'ecommerce_fraud'
+      };
+      c.read(modAiConfidenceFilterProvider.notifier).state = const {
+        'high',
+        'low'
+      };
       c.read(modHasEvidenceOnlyProvider.notifier).state = true;
       c.read(modSortNewestFirstProvider.notifier).state = true;
 

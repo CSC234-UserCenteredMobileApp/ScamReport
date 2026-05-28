@@ -47,8 +47,9 @@ class AskAiStateCodec {
       'v': currentVersion,
       'conversationId': state.conversationId,
       'userId': state.userId,
-      'stagedAttachments':
-          state.stagedAttachments.map(_attachmentToJson).toList(growable: false),
+      'stagedAttachments': state.stagedAttachments
+          .map(_attachmentToJson)
+          .toList(growable: false),
       'conversationAttachments': state.conversationAttachments
           .map(_attachmentToJson)
           .toList(growable: false),
@@ -70,8 +71,8 @@ class AskAiStateCodec {
             _attachmentsFromJson(j['stagedAttachments']) ?? const [],
         conversationAttachments:
             _attachmentsFromJson(j['conversationAttachments']) ?? const [],
-        savedAt: DateTime.tryParse(j['savedAt'] as String? ?? '') ??
-            DateTime.now(),
+        savedAt:
+            DateTime.tryParse(j['savedAt'] as String? ?? '') ?? DateTime.now(),
       );
     } catch (_) {
       return null;

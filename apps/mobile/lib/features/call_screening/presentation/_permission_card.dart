@@ -24,8 +24,8 @@ class PermissionCard extends StatelessWidget {
                 Text(
                   context.l10n.callScreeningSetupTitle,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: colors.onSecondaryContainer,
-                  ),
+                        color: colors.onSecondaryContainer,
+                      ),
                 ),
               ],
             ),
@@ -33,8 +33,8 @@ class PermissionCard extends StatelessWidget {
             Text(
               context.l10n.callScreeningSetupBody,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: colors.onSecondaryContainer,
-              ),
+                    color: colors.onSecondaryContainer,
+                  ),
             ),
             const SizedBox(height: 12),
             FilledButton.tonal(

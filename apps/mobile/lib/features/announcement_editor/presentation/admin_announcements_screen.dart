@@ -41,8 +41,7 @@ class AdminAnnouncementsScreen extends ConsumerWidget {
                         _AnnouncementListTile(item: items[i]),
                   );
                 },
-                loading: () =>
-                    const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(child: CircularProgressIndicator()),
                 error: (e, _) => Center(child: Text(e.toString())),
               ),
             ),
@@ -118,10 +117,8 @@ class _AnnouncementListTile extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
-        onTap: () =>
-            context.push('/admin/announcements/${item.id}/edit'),
-        title: Text(item.title,
-            maxLines: 2, overflow: TextOverflow.ellipsis),
+        onTap: () => context.push('/admin/announcements/${item.id}/edit'),
+        title: Text(item.title, maxLines: 2, overflow: TextOverflow.ellipsis),
         subtitle: Row(
           children: [
             _Chip(label: item.category.displayLabel),

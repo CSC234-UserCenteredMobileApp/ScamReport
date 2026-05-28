@@ -85,7 +85,8 @@ void main() {
   });
 
   testWidgets('tap navigates to /report-detail/:id', (tester) async {
-    await tester.pumpWidget(_wrap(SimilarReportCard(report: _fixture(id: 'rep-42'))));
+    await tester
+        .pumpWidget(_wrap(SimilarReportCard(report: _fixture(id: 'rep-42'))));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byType(SimilarReportCard));

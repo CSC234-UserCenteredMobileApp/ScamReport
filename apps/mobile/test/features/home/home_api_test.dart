@@ -8,12 +8,16 @@ import 'package:mobile/features/home/data/home_api.dart';
 void main() {
   group('HomeApi.fetchStats', () {
     test('returns parsed map on 200', () async {
-      final body = jsonEncode({'data': {
-        'verifiedTotal': 100, 'newThisWeek': 5,
-        'topScamTypeLabelEn': 'Phishing', 'topScamTypeLabelTh': 'Phishing TH',
-      }});
-      final api = HomeApi(MockClient((_) async =>
-          http.Response.bytes(utf8.encode(body), 200)));
+      final body = jsonEncode({
+        'data': {
+          'verifiedTotal': 100,
+          'newThisWeek': 5,
+          'topScamTypeLabelEn': 'Phishing',
+          'topScamTypeLabelTh': 'Phishing TH',
+        }
+      });
+      final api = HomeApi(
+          MockClient((_) async => http.Response.bytes(utf8.encode(body), 200)));
 
       final result = await api.fetchStats();
       expect(result['data'], isA<Map>());
@@ -33,7 +37,11 @@ void main() {
   group('HomeApi.fetchRecentAlerts', () {
     test('returns list on 200', () async {
       final api = HomeApi(MockClient((_) async => http.Response(
-            jsonEncode({'items': [{'id': 'a1'}]}),
+            jsonEncode({
+              'items': [
+                {'id': 'a1'}
+              ]
+            }),
             200,
           )));
 
@@ -59,7 +67,11 @@ void main() {
   group('HomeApi.fetchRecentReports', () {
     test('returns list on 200', () async {
       final api = HomeApi(MockClient((_) async => http.Response(
-            jsonEncode({'items': [{'id': 'r1'}]}),
+            jsonEncode({
+              'items': [
+                {'id': 'r1'}
+              ]
+            }),
             200,
           )));
 

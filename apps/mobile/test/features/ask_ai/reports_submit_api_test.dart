@@ -51,7 +51,8 @@ void main() {
 
   test('throws unauth when no user', () async {
     when(() => auth.currentUser).thenReturn(null);
-    final api = ReportsSubmitApi(_StubClient((_) async => _streamed(200, '{}')), auth);
+    final api =
+        ReportsSubmitApi(_StubClient((_) async => _streamed(200, '{}')), auth);
     await expectLater(
       () => api.submit(draft: _draft, sourceConversationId: 'c-1'),
       throwsA(isA<AskAiUnauthorizedFailure>()),
@@ -60,14 +61,16 @@ void main() {
 
   test('throws unauth when token empty', () async {
     when(() => user.getIdToken()).thenAnswer((_) async => '');
-    final api = ReportsSubmitApi(_StubClient((_) async => _streamed(200, '{}')), auth);
+    final api =
+        ReportsSubmitApi(_StubClient((_) async => _streamed(200, '{}')), auth);
     await expectLater(
       () => api.submit(draft: _draft, sourceConversationId: 'c-1'),
       throwsA(isA<AskAiUnauthorizedFailure>()),
     );
   });
 
-  test('builds request body with draft fields and conversation linkage', () async {
+  test('builds request body with draft fields and conversation linkage',
+      () async {
     String? sentBody;
     final api = ReportsSubmitApi(
       _StubClient((req) async {
@@ -211,8 +214,7 @@ void main() {
 
     test('413 → AskAiValidationFailure', () async {
       final api = ReportsSubmitApi(
-        _StubClient(
-            (_) async => _streamed(413, '{"error":"too big"}')),
+        _StubClient((_) async => _streamed(413, '{"error":"too big"}')),
         auth,
       );
       await expectLater(
@@ -227,8 +229,7 @@ void main() {
 
     test('415 → AskAiValidationFailure', () async {
       final api = ReportsSubmitApi(
-        _StubClient(
-            (_) async => _streamed(415, '{"error":"bad mime"}')),
+        _StubClient((_) async => _streamed(415, '{"error":"bad mime"}')),
         auth,
       );
       await expectLater(

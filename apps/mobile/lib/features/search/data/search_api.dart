@@ -21,8 +21,10 @@ class SearchApi {
       params['scamTypeCodes'] = scamTypeCodes.join(',');
     }
 
-    final uri = Uri.parse('$apiBaseUrl/reports').replace(queryParameters: params);
-    final res = await _client.get(uri, headers: {'content-type': 'application/json'});
+    final uri =
+        Uri.parse('$apiBaseUrl/reports').replace(queryParameters: params);
+    final res =
+        await _client.get(uri, headers: {'content-type': 'application/json'});
     if (res.statusCode < 200 || res.statusCode >= 300) {
       throw Exception('GET /reports failed ${res.statusCode}: ${res.body}');
     }
@@ -32,7 +34,8 @@ class SearchApi {
 
   Future<List<dynamic>> fetchScamTypes() async {
     final uri = Uri.parse('$apiBaseUrl/scam-types');
-    final res = await _client.get(uri, headers: {'content-type': 'application/json'});
+    final res =
+        await _client.get(uri, headers: {'content-type': 'application/json'});
     if (res.statusCode < 200 || res.statusCode >= 300) {
       throw Exception('GET /scam-types failed ${res.statusCode}: ${res.body}');
     }

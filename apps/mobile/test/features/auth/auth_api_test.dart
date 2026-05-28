@@ -9,7 +9,9 @@ import 'package:mobile/features/auth/data/auth_api.dart';
 import 'package:mobile/features/auth/domain/auth_user.dart';
 
 class MockHttpClient extends Mock implements http.Client {}
+
 class MockFirebaseAuth extends Mock implements FirebaseAuth {}
+
 class MockUser extends Mock implements User {}
 
 void main() {
@@ -21,7 +23,7 @@ void main() {
     mockHttpClient = MockHttpClient();
     mockFirebaseAuth = MockFirebaseAuth();
     authApi = AuthApi(mockHttpClient, mockFirebaseAuth);
-    
+
     registerFallbackValue(Uri());
   });
 
@@ -66,7 +68,7 @@ void main() {
 
       expect(result.id, testUser.id);
       expect(result.email, testUser.email);
-      
+
       verify(() => mockHttpClient.post(
             Uri.parse('$apiBaseUrl/auth/sync'),
             headers: {

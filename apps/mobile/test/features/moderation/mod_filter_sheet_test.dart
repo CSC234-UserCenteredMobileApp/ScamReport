@@ -23,7 +23,8 @@ void main() {
     // (sort + scam types + AI confidence + flags) measured + built.
   });
 
-  Future<void> pumpSheet(WidgetTester tester, ProviderContainer container) async {
+  Future<void> pumpSheet(
+      WidgetTester tester, ProviderContainer container) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 2.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -66,8 +67,7 @@ void main() {
         isFalse);
   });
 
-  testWidgets('priority + has-evidence switches flip booleans',
-      (tester) async {
+  testWidgets('priority + has-evidence switches flip booleans', (tester) async {
     final container = ProviderContainer();
     addTearDown(container.dispose);
 
@@ -91,10 +91,12 @@ void main() {
 
     // Pre-seed all five filters.
     container.read(modSearchQueryProvider.notifier).state = 'bank';
-    container.read(modScamTypeFilterProvider.notifier).state =
-        const {'phishing_sms'};
-    container.read(modAiConfidenceFilterProvider.notifier).state =
-        const {'high'};
+    container.read(modScamTypeFilterProvider.notifier).state = const {
+      'phishing_sms'
+    };
+    container.read(modAiConfidenceFilterProvider.notifier).state = const {
+      'high'
+    };
     container.read(modPriorityOnlyProvider.notifier).state = true;
     container.read(modHasEvidenceOnlyProvider.notifier).state = true;
 

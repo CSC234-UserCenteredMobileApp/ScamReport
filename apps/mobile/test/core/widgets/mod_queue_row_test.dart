@@ -28,7 +28,8 @@ ModQueueItem _item({
       scamTypeCode: 'phishing_sms',
       scamTypeLabelEn: 'Phishing SMS',
       scamTypeLabelTh: 'ฟิชชิง SMS',
-      submittedAt: submittedAt ?? DateTime.now().subtract(const Duration(hours: 3)),
+      submittedAt:
+          submittedAt ?? DateTime.now().subtract(const Duration(hours: 3)),
       status: status,
       priorityFlag: priorityFlag,
       evidenceCount: evidenceCount,
@@ -46,7 +47,8 @@ void main() {
       expect(find.text('Phishing SMS'), findsOneWidget);
     });
 
-    testWidgets('renders Thai scam-type label when locale is th', (tester) async {
+    testWidgets('renders Thai scam-type label when locale is th',
+        (tester) async {
       await tester.pumpWidget(
         _themed(
           ModQueueRow(item: _item(), onTap: () {}),

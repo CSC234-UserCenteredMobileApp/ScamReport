@@ -29,7 +29,8 @@ class _BrandHeader extends ConsumerWidget {
           : (user.email?.split('@').first ?? '');
       final String displayFirst = rawName.split(' ').first;
       greeting = context.l10n.greetingWithName(displayFirst);
-      final String initials = rawName.isNotEmpty ? rawName[0].toUpperCase() : '?';
+      final String initials =
+          rawName.isNotEmpty ? rawName[0].toUpperCase() : '?';
       avatar = CircleAvatar(
         radius: 20,
         backgroundColor: theme.colorScheme.primary,

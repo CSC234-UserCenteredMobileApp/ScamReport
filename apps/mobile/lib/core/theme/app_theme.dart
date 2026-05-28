@@ -182,7 +182,6 @@ ThemeData _buildTheme({
     scaffoldBackgroundColor: bg,
     canvasColor: bg,
     textTheme: textTheme,
-
     appBarTheme: AppBarTheme(
       backgroundColor: bg,
       foregroundColor: onSurface,
@@ -193,7 +192,6 @@ ThemeData _buildTheme({
         letterSpacing: -0.01,
       ),
     ),
-
     cardTheme: CardThemeData(
       color: surface,
       elevation: 0,
@@ -203,7 +201,6 @@ ThemeData _buildTheme({
       ),
       margin: EdgeInsets.zero,
     ),
-
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: surface,
@@ -222,7 +219,6 @@ ThemeData _buildTheme({
       hintStyle: TextStyle(color: mutedHint),
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
     ),
-
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         backgroundColor: _brandPrimary,
@@ -250,7 +246,6 @@ ThemeData _buildTheme({
         textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
       ),
     ),
-
     chipTheme: ChipThemeData(
       backgroundColor: surfaceContainer,
       labelStyle: TextStyle(
@@ -262,7 +257,6 @@ ThemeData _buildTheme({
       side: BorderSide.none,
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
     ),
-
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: surface,
       selectedItemColor: _brandPrimary,
@@ -272,9 +266,7 @@ ThemeData _buildTheme({
       selectedLabelStyle: _navLabelStyle,
       unselectedLabelStyle: _navLabelStyle,
     ),
-
     dividerTheme: DividerThemeData(color: outline, thickness: 1, space: 1),
-
     extensions: [verdict],
   );
 }
