@@ -82,6 +82,7 @@ mock.module('../src/core/supabase/storage', () => ({
   getSignedUrl: async () => 'https://signed.example/url',
   deleteFile: async () => {},
   copyFile: async () => {},
+  downloadFile: async () => new Uint8Array(),
 }));
 
 mock.module('../src/core/db/client', () => ({

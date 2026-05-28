@@ -30,6 +30,7 @@ mock.module('../src/core/db/client', () => ({
 
 mock.module('../src/core/supabase/storage', () => ({
   getSignedUrl: async () => 'https://example.com/signed-url',
+  downloadFile: async () => new Uint8Array(),
 }));
 
 describe('GET /reports', () => {

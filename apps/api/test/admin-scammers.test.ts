@@ -26,6 +26,7 @@ mock.module('../src/core/supabase/storage', () => ({
   uploadFile: async () => ({}),
   deleteFile: async () => undefined,
   copyFile: async () => undefined,
+  downloadFile: async () => new Uint8Array(),
 }));
 
 // Prisma double -------------------------------------------------------------

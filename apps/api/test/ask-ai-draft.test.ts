@@ -63,6 +63,7 @@ mock.module('../src/core/supabase/storage', () => ({
     `https://signed.example/${path}`,
   deleteFile: async () => {},
   copyFile: async () => {},
+  downloadFile: async () => new Uint8Array(),
 }));
 
 mock.module('../src/core/gemini/client', () => ({

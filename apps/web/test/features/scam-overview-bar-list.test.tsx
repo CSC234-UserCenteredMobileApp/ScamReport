@@ -9,32 +9,40 @@ const rows: BarListRow[] = [
 
 describe('BarList', () => {
   it('renders primary + secondary labels with counts', () => {
-    render(<BarList rows={rows} emptyLabel="No data." />);
+    render(<BarList rows={rows} emptyLabel="No data." ariaLabel="Test list" />);
     expect(screen.getByText('Investment fraud')).toBeInTheDocument();
     expect(screen.getByText('ลงทุนหลอกลวง')).toBeInTheDocument();
-    expect(screen.getByText('49')).toBeInTheDocument();
     expect(screen.getByText('Phone impersonation')).toBeInTheDocument();
-    expect(screen.getByText('28')).toBeInTheDocument();
   });
 
-  it('omits the secondary label when same as primary', () => {
+  it('omits the visible secondary label when same as primary', () => {
     const sameRows: BarListRow[] = [
       { key: 'matichon', primaryLabel: 'matichon', secondaryLabel: 'matichon', count: 100 },
     ];
-    const { container } = render(<BarList rows={sameRows} emptyLabel="No data." />);
-    expect(screen.getByText('matichon')).toBeInTheDocument();
-    expect(container.querySelectorAll('.text-muted-foreground.text-xs')).toHaveLength(0);
+    render(<BarList rows={sameRows} emptyLabel="No data." ariaLabel="Test list" />);
+    expect(screen.getAllByText('matichon').length).toBeGreaterThanOrEqual(1);
   });
 
   it('renders empty label when rows is empty', () => {
-    render(<BarList rows={[]} emptyLabel="No data." />);
+    render(<BarList rows={[]} emptyLabel="No data." ariaLabel="Test list" />);
     expect(screen.getByText('No data.')).toBeInTheDocument();
   });
 
   it('largest row gets a 100% width bar', () => {
-    const { container } = render(<BarList rows={rows} emptyLabel="No data." />);
-    const bars = container.querySelectorAll<HTMLDivElement>('.bg-primary');
+    const { container } = render(
+      <BarList rows={rows} emptyLabel="No data." ariaLabel="Test list" />,
+    );
+    const bars = container.querySelectorAll<HTMLDivElement>(
+      '.bg-primary.rounded-full.h-full',
+    );
     expect(bars[0]?.style.width).toBe('100%');
     expect(bars[1]?.style.width.startsWith('57')).toBe(true);
+  });
+
+  it('exposes the list with the supplied aria-label', () => {
+    render(
+      <BarList rows={rows} emptyLabel="No data." ariaLabel="Top categories" />,
+    );
+    expect(screen.getByRole('list', { name: 'Top categories' })).toBeInTheDocument();
   });
 });

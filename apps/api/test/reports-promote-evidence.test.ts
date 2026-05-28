@@ -66,6 +66,7 @@ mock.module('../src/core/supabase/storage', () => ({
   ) => {
     copyFileCalls.push({ srcBucket, srcPath, dstBucket, dstPath });
   },
+  downloadFile: async () => new Uint8Array(),
 }));
 
 mock.module('../src/core/db/client', () => ({
