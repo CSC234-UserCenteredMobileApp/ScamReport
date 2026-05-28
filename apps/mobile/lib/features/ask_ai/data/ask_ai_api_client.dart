@@ -220,8 +220,8 @@ class AskAiApiClient {
           description: draftJson['description'] as String,
           scamTypeCode: draftJson['scamTypeCode'] as String,
           targetIdentifier: draftJson['targetIdentifier'] as String?,
-          targetIdentifierKind:
-              switch (draftJson['targetIdentifierKind'] as String?) {
+          targetIdentifierKind: switch (
+              draftJson['targetIdentifierKind'] as String?) {
             'phone' => TargetIdentifierKind.phone,
             'url' => TargetIdentifierKind.url,
             'other' => TargetIdentifierKind.other,
@@ -307,8 +307,7 @@ class AskAiApiClient {
       draft: _draftFromJson(j['draft'] as Map<String, dynamic>?),
       // Default to empty list when older servers don't include the field —
       // mobile's fallback is "no question pending".
-      missingFacts:
-          (j['missingFacts'] as List? ?? const []).cast<String>(),
+      missingFacts: (j['missingFacts'] as List? ?? const []).cast<String>(),
     );
   }
 }

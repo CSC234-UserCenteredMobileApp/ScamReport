@@ -43,7 +43,8 @@ AlertsRepositoryImpl _repo(http.Client client) =>
 void main() {
   group('AlertsRepositoryImpl.listAlerts', () {
     test('parses alert list correctly', () async {
-      final repo = _repo(_listClient([_alertJson(body: 'Full body', slug: 'test-slug')]));
+      final repo = _repo(
+          _listClient([_alertJson(body: 'Full body', slug: 'test-slug')]));
       final alerts = await repo.listAlerts();
 
       expect(alerts, hasLength(1));
@@ -118,7 +119,8 @@ void main() {
     });
 
     test('platform_update → platformUpdate', () async {
-      final repo = _repo(_listClient([_alertJson(category: 'platform_update')]));
+      final repo =
+          _repo(_listClient([_alertJson(category: 'platform_update')]));
       final alerts = await repo.listAlerts();
       expect(alerts.first.category, AlertCategory.platformUpdate);
     });

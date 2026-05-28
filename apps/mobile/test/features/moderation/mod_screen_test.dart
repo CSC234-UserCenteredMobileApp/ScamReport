@@ -217,7 +217,8 @@ void main() {
       expect(find.textContaining('Queue is empty'), findsOneWidget);
     });
 
-    testWidgets('shows error text when modQueueProvider errors', (tester) async {
+    testWidgets('shows error text when modQueueProvider errors',
+        (tester) async {
       await tester.pumpWidget(_wrap(
         const ModScreen(),
         overrides: [
@@ -225,7 +226,8 @@ void main() {
             (ref) => Future<ModQueueData>.error(Exception('network error')),
           ),
           modFilteredQueueProvider.overrideWith(
-            (ref) => AsyncValue.error(Exception('network error'), StackTrace.empty),
+            (ref) =>
+                AsyncValue.error(Exception('network error'), StackTrace.empty),
           ),
         ],
       ));
@@ -243,7 +245,8 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
 
       final item = _item('r1', aiScore: 91, aiConfidence: 'high');
-      final queue = ModQueueData(items: [item], pendingCount: 1, flaggedCount: 0);
+      final queue =
+          ModQueueData(items: [item], pendingCount: 1, flaggedCount: 0);
       await tester.pumpWidget(_wrap(
         const ModScreen(),
         overrides: [

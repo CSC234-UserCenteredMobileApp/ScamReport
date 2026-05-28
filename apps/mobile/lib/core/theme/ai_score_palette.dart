@@ -22,7 +22,8 @@ class AiScorePalette {
 
   /// Resolves the tier label to the `VerdictColors` bundle. Returns `null`
   /// when the caller should render no badge (no score available).
-  static VerdictColors? forConfidence(BuildContext context, String? confidence) {
+  static VerdictColors? forConfidence(
+      BuildContext context, String? confidence) {
     if (confidence == null) return null;
     final palette = Theme.of(context).extension<VerdictPalette>();
     if (palette == null) return null;

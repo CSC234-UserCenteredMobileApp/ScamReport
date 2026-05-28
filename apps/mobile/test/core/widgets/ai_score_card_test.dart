@@ -41,7 +41,8 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsNothing);
     });
 
-    testWidgets('renders full card with score ring + verdict label', (tester) async {
+    testWidgets('renders full card with score ring + verdict label',
+        (tester) async {
       await tester.pumpWidget(_themed(
         const AiScoreCard(
           score: 87,
@@ -55,7 +56,8 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('compact variant shows score number + AI label', (tester) async {
+    testWidgets('compact variant shows score number + AI label',
+        (tester) async {
       await tester.pumpWidget(_themed(
         const AiScoreCard(
           score: 64,
@@ -78,7 +80,8 @@ void main() {
       expect(semantics.label, contains('medium'));
     });
 
-    testWidgets('renders unknown verdict copy for unknown confidence', (tester) async {
+    testWidgets('renders unknown verdict copy for unknown confidence',
+        (tester) async {
       await tester.pumpWidget(_themed(
         const AiScoreCard(
           score: 30,
@@ -89,7 +92,8 @@ void main() {
       expect(find.text('Inconclusive'), findsOneWidget);
     });
 
-    testWidgets('renders nothing when palette resolution returns null', (tester) async {
+    testWidgets('renders nothing when palette resolution returns null',
+        (tester) async {
       // No VerdictPalette extension installed → forConfidence returns null.
       await tester.pumpWidget(
         MaterialApp(
@@ -141,7 +145,8 @@ void main() {
       expect(result, isNull);
     });
 
-    testWidgets('unrecognised confidence falls back to unknown bundle', (tester) async {
+    testWidgets('unrecognised confidence falls back to unknown bundle',
+        (tester) async {
       late dynamic result;
       await tester.pumpWidget(_themed(
         Builder(builder: (context) {

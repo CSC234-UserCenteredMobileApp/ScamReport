@@ -162,8 +162,8 @@ class _ResultView extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(8),
@@ -201,8 +201,7 @@ class _ResultView extends StatelessWidget {
 
                 // Report this (always visible)
                 OutlinedButton(
-                  onPressed: () =>
-                      context.push('/ask-ai?seed=report-intent'),
+                  onPressed: () => context.push('/ask-ai?seed=report-intent'),
                   child: Text(l.verdictReportThis),
                 ),
               ],

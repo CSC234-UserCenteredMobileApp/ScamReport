@@ -44,12 +44,14 @@ class CallScreeningScreen extends ConsumerWidget {
                   isDefaultAsync.when(
                     loading: () => const SizedBox.shrink(),
                     error: (_, __) => const SizedBox.shrink(),
-                    data: (isDefault) =>
-                        isDefault ? const SizedBox.shrink() : const PermissionCard(),
+                    data: (isDefault) => isDefault
+                        ? const SizedBox.shrink()
+                        : const PermissionCard(),
                   ),
                   const SizedBox(height: 16),
                   blockedAsync.when(
-                    loading: () => const Center(child: CircularProgressIndicator()),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
                     error: (_, __) => const SizedBox.shrink(),
                     data: (calls) => _BlockedCallsSection(calls: calls),
                   ),
@@ -76,9 +78,7 @@ class _EnableTile extends ConsumerWidget {
       value: enabled,
       onChanged: (v) async {
         try {
-          await ref
-              .read(callScreeningEnabledProvider.notifier)
-              .setEnabled(v);
+          await ref.read(callScreeningEnabledProvider.notifier).setEnabled(v);
         } catch (_) {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(

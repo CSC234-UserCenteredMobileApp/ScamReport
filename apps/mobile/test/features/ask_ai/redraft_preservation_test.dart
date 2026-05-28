@@ -53,10 +53,12 @@ class _StubRepo implements AskAiRepository {
   ) async =>
       next ?? _basic(content, draft: _aiDraft);
 
-  final List<({String conversationId, PersistedDraft? payload})> draftUpserts = [];
+  final List<({String conversationId, PersistedDraft? payload})> draftUpserts =
+      [];
 
   @override
-  Future<void> upsertDraft(String conversationId, PersistedDraft? payload) async {
+  Future<void> upsertDraft(
+      String conversationId, PersistedDraft? payload) async {
     draftUpserts.add((conversationId: conversationId, payload: payload));
   }
 }
@@ -83,11 +85,13 @@ class _StubPersistence implements AskAiPersistence {
     saveCalls++;
     loaded = state;
   }
+
   @override
   Future<void> clear() async {
     clearCalls++;
     loaded = null;
   }
+
   @override
   Future<void> clearForUser(String userId) async {
     clearCalls++;

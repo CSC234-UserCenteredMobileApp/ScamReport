@@ -23,8 +23,7 @@ class MyReportsScreen extends ConsumerWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go('/'),
+          onPressed: () => context.canPop() ? context.pop() : context.go('/'),
         ),
         title: Text(l10n.myReportsTitle),
         centerTitle: true,
@@ -58,8 +57,7 @@ class MyReportsScreen extends ConsumerWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 12),
                         itemCount: items.length,
-                        separatorBuilder: (_, __) =>
-                            const SizedBox(height: 10),
+                        separatorBuilder: (_, __) => const SizedBox(height: 10),
                         itemBuilder: (_, i) => _ReportRow(
                           report: items[i],
                           onEdit: () =>
@@ -162,8 +160,7 @@ class _StatusFilterBar extends StatelessWidget {
   final MyReportStatus? selected;
   final void Function(MyReportStatus?) onSelected;
 
-  int _count(MyReportStatus s) =>
-      items.where((r) => r.status == s).length;
+  int _count(MyReportStatus s) => items.where((r) => r.status == s).length;
 
   @override
   Widget build(BuildContext context) {

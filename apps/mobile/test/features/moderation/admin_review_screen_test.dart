@@ -103,7 +103,8 @@ Widget _wrap(
 
 void main() {
   group('AdminReviewScreen', () {
-    testWidgets('renders title, description, English scam-type label', (tester) async {
+    testWidgets('renders title, description, English scam-type label',
+        (tester) async {
       tester.view.physicalSize = const Size(1080, 1920);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -123,7 +124,8 @@ void main() {
       expect(find.text('Phishing SMS'), findsOneWidget);
     });
 
-    testWidgets('renders Thai scam-type label when locale is th', (tester) async {
+    testWidgets('renders Thai scam-type label when locale is th',
+        (tester) async {
       tester.view.physicalSize = const Size(1080, 1920);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -191,8 +193,8 @@ void main() {
       await tester.pumpWidget(_wrap(
         const AdminReviewScreen(reportId: 'r1'),
         overrides: [
-          modDetailProvider('r1').overrideWith((ref) async =>
-              _detail(aiScore: 87, aiConfidence: 'high')),
+          modDetailProvider('r1').overrideWith(
+              (ref) async => _detail(aiScore: 87, aiConfidence: 'high')),
         ],
       ));
 
@@ -331,8 +333,8 @@ void main() {
       await tester.pumpWidget(_wrap(
         const AdminReviewScreen(reportId: 'r1'),
         overrides: [
-          modDetailProvider('r1').overrideWith(
-              (ref) async => _detail(status: 'flagged')),
+          modDetailProvider('r1')
+              .overrideWith((ref) async => _detail(status: 'flagged')),
         ],
       ));
 
@@ -342,7 +344,8 @@ void main() {
       expect(find.text('Flag'), findsNothing);
     });
 
-    testWidgets('approve flow opens dialog, requires non-empty remark, and calls repo',
+    testWidgets(
+        'approve flow opens dialog, requires non-empty remark, and calls repo',
         (tester) async {
       tester.view.physicalSize = const Size(1080, 1920);
       tester.view.devicePixelRatio = 2.0;
@@ -456,8 +459,8 @@ void main() {
       await tester.pumpWidget(_wrap(
         const AdminReviewScreen(reportId: 'r1'),
         overrides: [
-          modDetailProvider('r1').overrideWith(
-              (ref) async => _detail(status: 'flagged')),
+          modDetailProvider('r1')
+              .overrideWith((ref) async => _detail(status: 'flagged')),
           modRepositoryProvider.overrideWithValue(repo),
         ],
       ));
@@ -557,8 +560,7 @@ void main() {
       expect(find.textContaining('ModActionFailure'), findsNothing);
     });
 
-    testWidgets(
-        '401 from reject surfaces localised Unauthorized snackbar',
+    testWidgets('401 from reject surfaces localised Unauthorized snackbar',
         (tester) async {
       tester.view.physicalSize = const Size(1080, 1920);
       tester.view.devicePixelRatio = 2.0;
@@ -633,8 +635,8 @@ void main() {
       );
 
       // Reject + Flag are now disabled (onPressed is null).
-      final rejectBtn = tester
-          .widget<OutlinedButton>(find.widgetWithText(OutlinedButton, 'Reject'));
+      final rejectBtn = tester.widget<OutlinedButton>(
+          find.widgetWithText(OutlinedButton, 'Reject'));
       final flagBtn = tester
           .widget<OutlinedButton>(find.widgetWithText(OutlinedButton, 'Flag'));
       expect(rejectBtn.onPressed, isNull);

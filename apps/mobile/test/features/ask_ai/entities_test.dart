@@ -31,7 +31,8 @@ void main() {
     });
 
     test('copyWith preserves identifier kind when overriding', () {
-      final updated = base.copyWith(targetIdentifierKind: TargetIdentifierKind.phone);
+      final updated =
+          base.copyWith(targetIdentifierKind: TargetIdentifierKind.phone);
       expect(updated.targetIdentifierKind, TargetIdentifierKind.phone);
     });
   });

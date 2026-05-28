@@ -51,7 +51,8 @@ class _StubRepo implements AskAiRepository {
   }
 
   @override
-  Future<void> upsertDraft(String conversationId, PersistedDraft? payload) async {}
+  Future<void> upsertDraft(
+      String conversationId, PersistedDraft? payload) async {}
 }
 
 class _StubSubmit implements SubmitDraftedReport {
@@ -113,7 +114,8 @@ Widget _wrap(_StubRepo repo) => ProviderScope(
     );
 
 void main() {
-  testWidgets('image attachment with null signedUrl renders broken-image placeholder',
+  testWidgets(
+      'image attachment with null signedUrl renders broken-image placeholder',
       (tester) async {
     final repo = _StubRepo()
       ..next = TurnOutcome(
@@ -168,7 +170,8 @@ void main() {
     expect(find.byIcon(Icons.picture_as_pdf_outlined), findsOneWidget);
   });
 
-  testWidgets('attachment-only message bubble renders without text', (tester) async {
+  testWidgets('attachment-only message bubble renders without text',
+      (tester) async {
     final repo = _StubRepo()
       ..next = TurnOutcome(
         userMessage: _userMessage(

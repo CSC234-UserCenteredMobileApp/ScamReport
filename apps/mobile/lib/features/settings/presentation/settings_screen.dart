@@ -365,4 +365,3 @@ class _SignOutTile extends StatelessWidget {
     );
   }
 }
-

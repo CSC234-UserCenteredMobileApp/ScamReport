@@ -65,10 +65,12 @@ class _StubRepo implements AskAiRepository {
     return next ?? _basicOutcome(content);
   }
 
-  final List<({String conversationId, PersistedDraft? payload})> draftUpserts = [];
+  final List<({String conversationId, PersistedDraft? payload})> draftUpserts =
+      [];
 
   @override
-  Future<void> upsertDraft(String conversationId, PersistedDraft? payload) async {
+  Future<void> upsertDraft(
+      String conversationId, PersistedDraft? payload) async {
     draftUpserts.add((conversationId: conversationId, payload: payload));
   }
 }
@@ -122,10 +124,12 @@ class _StubPersistence implements AskAiPersistence {
   Future<void> save(AskAiPersistedState state) async {
     saved.add(state);
   }
+
   @override
   Future<void> clear() async {
     clearCalls++;
   }
+
   @override
   Future<void> clearForUser(String userId) async {
     clearCalls++;
@@ -301,10 +305,7 @@ void main() {
         filename: 'b.png',
       ));
       expect(
-          container
-              .read(askAiChatControllerProvider)
-              .stagedAttachments
-              .length,
+          container.read(askAiChatControllerProvider).stagedAttachments.length,
           2);
       notifier.removeStagedAttachment(0);
       final remaining =
@@ -314,10 +315,7 @@ void main() {
       // Out-of-bounds index — no-op.
       notifier.removeStagedAttachment(99);
       expect(
-          container
-              .read(askAiChatControllerProvider)
-              .stagedAttachments
-              .length,
+          container.read(askAiChatControllerProvider).stagedAttachments.length,
           1);
     });
 
@@ -333,10 +331,7 @@ void main() {
         ));
       }
       expect(
-          container
-              .read(askAiChatControllerProvider)
-              .stagedAttachments
-              .length,
+          container.read(askAiChatControllerProvider).stagedAttachments.length,
           maxAttachmentsPerMessage);
     });
 
@@ -346,8 +341,7 @@ void main() {
       final notifier = container.read(askAiChatControllerProvider.notifier);
       await notifier.sendMessage('hi');
       notifier.reset();
-      expect(
-          container.read(askAiChatControllerProvider).messages, isEmpty);
+      expect(container.read(askAiChatControllerProvider).messages, isEmpty);
       expect(
           container.read(askAiChatControllerProvider).conversationId, isNull);
     });

@@ -60,10 +60,12 @@ void main() {
 
       // Skeleton renders AppBar + no content text
       expect(find.byType(AppBar), findsOneWidget);
-      expect(find.text('Fake Kerry parcel SMS with phishing link'), findsNothing);
+      expect(
+          find.text('Fake Kerry parcel SMS with phishing link'), findsNothing);
     });
 
-    testWidgets('renders title and description when data loads', (tester) async {
+    testWidgets('renders title and description when data loads',
+        (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -231,7 +233,8 @@ void main() {
       expect(find.text('Report a similar scam'), findsOneWidget);
     });
 
-    testWidgets('shows error state with retry when fetch fails', (tester) async {
+    testWidgets('shows error state with retry when fetch fails',
+        (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [

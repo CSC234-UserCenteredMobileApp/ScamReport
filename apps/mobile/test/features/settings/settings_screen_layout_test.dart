@@ -91,7 +91,8 @@ void main() {
       expect(find.text('ALERTS & PROTECTION'), findsOneWidget);
     });
 
-    testWidgets('language and theme prefs are under APPEARANCE, not mixed with alerts',
+    testWidgets(
+        'language and theme prefs are under APPEARANCE, not mixed with alerts',
         (tester) async {
       tester.view.physicalSize = const Size(1080, 1920);
       tester.view.devicePixelRatio = 2.0;
@@ -134,7 +135,8 @@ void main() {
   });
 
   group('SettingsScreen — danger zone', () {
-    testWidgets('Delete account and Danger zone are not present', (tester) async {
+    testWidgets('Delete account and Danger zone are not present',
+        (tester) async {
       tester.view.physicalSize = const Size(1080, 1920);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(tester.view.resetPhysicalSize);

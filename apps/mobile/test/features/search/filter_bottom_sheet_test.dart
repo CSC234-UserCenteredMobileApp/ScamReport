@@ -8,8 +8,16 @@ import 'package:mobile/features/search/presentation/search_providers.dart';
 import 'package:mobile/l10n/l10n.dart';
 
 const _scamTypes = [
-  ScamTypeItem(code: 'phone', labelEn: 'Phone Scam', labelTh: 'หลอกลวง', displayOrder: 1),
-  ScamTypeItem(code: 'phishing', labelEn: 'Phishing', labelTh: 'ฟิชชิ่ง', displayOrder: 2),
+  ScamTypeItem(
+      code: 'phone',
+      labelEn: 'Phone Scam',
+      labelTh: 'หลอกลวง',
+      displayOrder: 1),
+  ScamTypeItem(
+      code: 'phishing',
+      labelEn: 'Phishing',
+      labelTh: 'ฟิชชิ่ง',
+      displayOrder: 2),
 ];
 
 Widget _wrap({
@@ -182,7 +190,8 @@ void main() {
       await tester.tap(find.text('Phone Scam'));
       await tester.pumpAndSettle();
 
-      expect(container.read(searchScamTypeFilterProvider), isNot(contains('phone')));
+      expect(container.read(searchScamTypeFilterProvider),
+          isNot(contains('phone')));
     });
 
     testWidgets('shows Thai labels when locale is Thai', (tester) async {

@@ -17,7 +17,8 @@ Widget _wrap(ConsentCard card) => MaterialApp(
     );
 
 void main() {
-  testWidgets('submit button is disabled until checkbox is ticked', (tester) async {
+  testWidgets('submit button is disabled until checkbox is ticked',
+      (tester) async {
     var submitted = false;
     await tester.pumpWidget(
       _wrap(ConsentCard(
@@ -39,7 +40,8 @@ void main() {
     expect(submitted, isTrue);
   });
 
-  testWidgets('shows submitting spinner when isSubmitting=true', (tester) async {
+  testWidgets('shows submitting spinner when isSubmitting=true',
+      (tester) async {
     await tester.pumpWidget(
       _wrap(ConsentCard(
         draft: _draft,

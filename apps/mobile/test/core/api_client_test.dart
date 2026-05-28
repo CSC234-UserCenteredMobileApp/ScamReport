@@ -5,8 +5,9 @@ import 'package:mobile/core/api_client.dart';
 
 void main() {
   group('apiBaseUrl', () {
-    test('returns default localhost url when no environment define is present', () {
-      // Note: testing Platform.isAndroid logic is hard in plain unit tests 
+    test('returns default localhost url when no environment define is present',
+        () {
+      // Note: testing Platform.isAndroid logic is hard in plain unit tests
       // as Platform is from dart:io.
       // But we can check the general logic.
       final url = apiBaseUrl;
@@ -21,7 +22,7 @@ void main() {
 
       final client = container.read(httpClientProvider);
       expect(client, isA<http.Client>());
-      
+
       container.dispose();
       // Verifying close is hard without mocks, but we at least cover the provider logic.
     });

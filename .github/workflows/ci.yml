@@ -78,6 +78,9 @@ jobs:
       - name: Fetch Flutter deps
         run: flutter pub get
 
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed .
+
       - name: Bootstrap firebase_options.dart from .example
         # The real file is gitignored (HOW_TO_CONTRIBUTE.md §3.1 — each dev
         # regenerates it via `flutterfire configure`). CI does not have

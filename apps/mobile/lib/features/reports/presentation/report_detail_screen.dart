@@ -145,8 +145,7 @@ class _ReportDetailBody extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
-                onPressed: () =>
-                    context.push('/ask-ai?seed=report-intent'),
+                onPressed: () => context.push('/ask-ai?seed=report-intent'),
                 icon: const Icon(Icons.flag_outlined),
                 label: Text(context.l10n.reportDetailCta),
               ),
@@ -197,7 +196,8 @@ class _MetaRow extends StatelessWidget {
         Icon(Icons.calendar_today_outlined, size: 14, color: muted),
         const SizedBox(width: 4),
         Text(
-          context.l10n.reportDetailVerifiedOn(_formatDateFull(detail.verifiedAt)),
+          context.l10n
+              .reportDetailVerifiedOn(_formatDateFull(detail.verifiedAt)),
           style: style,
         ),
         const SizedBox(width: 16),

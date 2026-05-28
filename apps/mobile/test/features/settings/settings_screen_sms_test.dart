@@ -102,7 +102,8 @@ void main() {
       }
     });
 
-    testWidgets('consent dialog skipped when already consented', (tester) async {
+    testWidgets('consent dialog skipped when already consented',
+        (tester) async {
       tester.view.physicalSize = const Size(1080, 1920);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(tester.view.resetPhysicalSize);

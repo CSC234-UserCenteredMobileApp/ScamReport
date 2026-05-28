@@ -65,7 +65,8 @@ class ModQueueRow extends StatelessWidget {
                 Container(width: 4, color: _stripeColor(context, palette)),
                 if (item.aiScore != null) ...[
                   Padding(
-                    padding: const EdgeInsets.only(left: 12, top: 12, bottom: 12),
+                    padding:
+                        const EdgeInsets.only(left: 12, top: 12, bottom: 12),
                     child: AiScoreCard(
                       score: item.aiScore,
                       confidence: item.aiConfidence,
@@ -121,7 +122,8 @@ class ModQueueRow extends StatelessWidget {
                             ),
                           ],
                         ),
-                        if (item.isFlagged && item.lastRemarkByAdmin != null) ...[
+                        if (item.isFlagged &&
+                            item.lastRemarkByAdmin != null) ...[
                           const SizedBox(height: 4),
                           Text(
                             l10n.modTeamNote(item.lastRemarkByAdmin!),

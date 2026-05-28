@@ -107,8 +107,7 @@ class _FeedBody extends ConsumerWidget {
                   ref.read(feedFilterProvider.notifier).state = code,
             ),
           ),
-          orElse: () =>
-              const SliverToBoxAdapter(child: SizedBox(height: 48)),
+          orElse: () => const SliverToBoxAdapter(child: SizedBox(height: 48)),
         ),
 
         const SliverToBoxAdapter(child: SizedBox(height: 12)),
@@ -236,8 +235,7 @@ class _FilterChipBar extends StatelessWidget {
               child: _FilterChip(
                 label: t.label,
                 selected: selected == t.code,
-                onTap: () =>
-                    onSelected(selected == t.code ? null : t.code),
+                onTap: () => onSelected(selected == t.code ? null : t.code),
               ),
             ),
           ),
@@ -265,8 +263,7 @@ class _FilterChip extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: selected
               ? theme.colorScheme.primary

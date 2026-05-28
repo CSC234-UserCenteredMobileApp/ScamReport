@@ -50,7 +50,8 @@ class AiScoreCard extends StatelessWidget {
       label: a11y,
       container: true,
       child: variant == AiScoreCardVariant.compact
-          ? _CompactBadge(score: score!, colors: colors, badgeLabel: l10n.aiScoreBadgeLabel)
+          ? _CompactBadge(
+              score: score!, colors: colors, badgeLabel: l10n.aiScoreBadgeLabel)
           : _FullCard(
               score: score!,
               colors: colors,

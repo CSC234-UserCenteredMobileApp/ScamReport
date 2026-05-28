@@ -75,7 +75,8 @@ class _StubRepo implements AskAiRepository {
   }
 
   @override
-  Future<void> upsertDraft(String conversationId, PersistedDraft? payload) async {}
+  Future<void> upsertDraft(
+      String conversationId, PersistedDraft? payload) async {}
 }
 
 class _StubSubmit implements SubmitDraftedReport {
@@ -106,7 +107,8 @@ class _NoopPersistence implements AskAiPersistence {
   Future<void> clearForUser(String userId) async {}
 }
 
-Widget _wrap(_StubRepo repo, {_StubSubmit? submit, bool autoSeedReport = false}) {
+Widget _wrap(_StubRepo repo,
+    {_StubSubmit? submit, bool autoSeedReport = false}) {
   final stubSubmit = submit ?? _StubSubmit();
   return ProviderScope(
     overrides: [
@@ -124,7 +126,8 @@ Widget _wrap(_StubRepo repo, {_StubSubmit? submit, bool autoSeedReport = false})
 }
 
 void main() {
-  testWidgets('renders empty state with welcome bubble + BETA badge', (tester) async {
+  testWidgets('renders empty state with welcome bubble + BETA badge',
+      (tester) async {
     await tester.pumpWidget(_wrap(_StubRepo()));
     await tester.pumpAndSettle();
 
@@ -134,12 +137,14 @@ void main() {
     expect(find.text('Hi, I\'m your scam radar.'), findsOneWidget);
   });
 
-  testWidgets('sending a message renders user bubble + assistant bubble', (tester) async {
+  testWidgets('sending a message renders user bubble + assistant bubble',
+      (tester) async {
     final repo = _StubRepo();
     await tester.pumpWidget(_wrap(repo));
     await tester.pumpAndSettle();
 
-    await tester.enterText(find.byKey(const Key('askAiComposer')), 'I got a weird SMS');
+    await tester.enterText(
+        find.byKey(const Key('askAiComposer')), 'I got a weird SMS');
     await tester.tap(find.byKey(const Key('askAiSendButton')));
     await tester.pumpAndSettle();
 
@@ -164,7 +169,8 @@ void main() {
     (tester) async {
       await tester.pumpWidget(_wrap(_StubRepo()));
       await tester.pumpAndSettle();
-      final btn = tester.widget<IconButton>(find.byKey(const Key('askAiViewDraft')));
+      final btn =
+          tester.widget<IconButton>(find.byKey(const Key('askAiViewDraft')));
       expect(btn.onPressed, isNull);
     },
   );

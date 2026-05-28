@@ -43,7 +43,8 @@ class _FakeRepo implements AskAiRepository {
   }
 
   @override
-  Future<void> upsertDraft(String conversationId, PersistedDraft? payload) async {}
+  Future<void> upsertDraft(
+      String conversationId, PersistedDraft? payload) async {}
 
   @override
   Future<TurnOutcome> sendMessage(
@@ -91,7 +92,8 @@ void main() {
       expect(repo.sendContent, 'hi');
     });
 
-    test('reuses an existing conversation id without creating a new one', () async {
+    test('reuses an existing conversation id without creating a new one',
+        () async {
       final repo = _FakeRepo();
       final useCase = SendTurnUseCase(repo);
 

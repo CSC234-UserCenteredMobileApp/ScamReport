@@ -6,8 +6,11 @@ import 'package:mobile/features/auth/data/auth_repository.dart';
 import 'package:mobile/features/auth/domain/auth_user.dart';
 
 class MockFirebaseAuth extends Mock implements FirebaseAuth {}
+
 class MockAuthApi extends Mock implements AuthApi {}
+
 class MockUserCredential extends Mock implements UserCredential {}
+
 class MockUser extends Mock implements User {}
 
 void main() {
@@ -51,12 +54,13 @@ void main() {
       verify(() => mockAuthApi.sync()).called(1);
     });
 
-    test('registerWithEmail calls firebase, updates display name, and syncs', () async {
+    test('registerWithEmail calls firebase, updates display name, and syncs',
+        () async {
       final mockUser = MockUser();
       final mockCred = MockUserCredential();
       when(() => mockCred.user).thenReturn(mockUser);
       when(() => mockUser.updateDisplayName(any())).thenAnswer((_) async {});
-      
+
       when(() => mockFirebaseAuth.createUserWithEmailAndPassword(
             email: 'test@example.com',
             password: 'password',

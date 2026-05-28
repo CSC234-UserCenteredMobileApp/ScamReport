@@ -49,10 +49,10 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    onUpgrade: (m, from, to) async {
-      if (from < 2) {
-        await m.createTable(smsAlerts);
-      }
-    },
-  );
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            await m.createTable(smsAlerts);
+          }
+        },
+      );
 }

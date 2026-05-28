@@ -12,8 +12,7 @@ const _kPrivacySections = [
   ),
   LegalSection(
     heading: 'How we use it',
-    body:
-        'Reports approved by moderators are shared publicly without your '
+    body: 'Reports approved by moderators are shared publicly without your '
         'identity. Search queries are logged per user for abuse detection only.',
   ),
   LegalSection(

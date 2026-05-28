@@ -66,8 +66,7 @@ class _ShareIntentListenerState extends ConsumerState<ShareIntentListener> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<AsyncValue<SharedPayload>>(shareIntentStreamProvider,
-        (_, next) {
+    ref.listen<AsyncValue<SharedPayload>>(shareIntentStreamProvider, (_, next) {
       final payload = next.valueOrNull;
       if (payload == null) return;
       if (!ref.read(featureFlagProvider(shareTargetFlagKey))) return;

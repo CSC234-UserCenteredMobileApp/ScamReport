@@ -63,11 +63,12 @@ class _AnnouncementEditorScreenState
     if (!_formKey.currentState!.validate()) return false;
     setState(() => _saving = true);
     try {
-      final created = await ref.read(announcementEditorRepositoryProvider).create(
-        title: _titleCtrl.text.trim(),
-        body: _bodyCtrl.text.trim(),
-        category: _category,
-      );
+      final created =
+          await ref.read(announcementEditorRepositoryProvider).create(
+                title: _titleCtrl.text.trim(),
+                body: _bodyCtrl.text.trim(),
+                category: _category,
+              );
       ref.invalidate(adminAnnouncementsListProvider);
       if (mounted) setState(() => _savedId = created.id);
       return true;
@@ -185,7 +186,9 @@ class _AnnouncementEditorScreenState
 
     setState(() => _saving = true);
     try {
-      await ref.read(announcementEditorRepositoryProvider).delete(_effectiveId!);
+      await ref
+          .read(announcementEditorRepositoryProvider)
+          .delete(_effectiveId!);
       ref.invalidate(adminAnnouncementsListProvider);
       if (mounted) context.pop();
     } catch (e) {
@@ -285,7 +288,9 @@ class _AnnouncementEditorScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.announcementId != null ? 'Edit Announcement' : 'New Announcement'),
+        title: Text(widget.announcementId != null
+            ? 'Edit Announcement'
+            : 'New Announcement'),
         centerTitle: true,
         actions: [
           if (_isEdit && !isPublished)
@@ -446,16 +451,23 @@ class _CategoryChipGroup extends StatelessWidget {
   final bool enabled;
   final ValueChanged<AdminAnnouncementCategory> onChanged;
 
-  ({Color bg, Color fg}) _tones(BuildContext context, AdminAnnouncementCategory c) {
+  ({Color bg, Color fg}) _tones(
+      BuildContext context, AdminAnnouncementCategory c) {
     final verdict = Theme.of(context).extension<VerdictPalette>();
     final scheme = Theme.of(context).colorScheme;
     switch (c) {
       case AdminAnnouncementCategory.fraudAlert:
         final v = verdict?.scam;
-        return (bg: v?.bg ?? scheme.errorContainer, fg: v?.fg ?? scheme.onErrorContainer);
+        return (
+          bg: v?.bg ?? scheme.errorContainer,
+          fg: v?.fg ?? scheme.onErrorContainer
+        );
       case AdminAnnouncementCategory.tips:
         final v = verdict?.safe;
-        return (bg: v?.bg ?? scheme.secondaryContainer, fg: v?.fg ?? scheme.onSecondaryContainer);
+        return (
+          bg: v?.bg ?? scheme.secondaryContainer,
+          fg: v?.fg ?? scheme.onSecondaryContainer
+        );
       case AdminAnnouncementCategory.platformUpdate:
         return (bg: scheme.primaryContainer, fg: scheme.onPrimaryContainer);
     }

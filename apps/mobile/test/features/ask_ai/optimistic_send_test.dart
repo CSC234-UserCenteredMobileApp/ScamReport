@@ -57,7 +57,8 @@ class _StubRepo implements AskAiRepository {
   }
 
   @override
-  Future<void> upsertDraft(String conversationId, PersistedDraft? payload) async {}
+  Future<void> upsertDraft(
+      String conversationId, PersistedDraft? payload) async {}
 }
 
 class _StubSubmit implements SubmitDraftedReport {
@@ -81,10 +82,12 @@ class _StubPersistence implements AskAiPersistence {
   Future<void> save(AskAiPersistedState state) async {
     saveCalls++;
   }
+
   @override
   Future<void> clear() async {
     clearCalls++;
   }
+
   @override
   Future<void> clearForUser(String userId) async {
     clearCalls++;
@@ -212,8 +215,7 @@ void main() {
           ),
         ],
       );
-    final container =
-        _container(repo: _StubRepo(), persistence: stub);
+    final container = _container(repo: _StubRepo(), persistence: stub);
     addTearDown(container.dispose);
     // Force construction (Riverpod is lazy).
     container.read(askAiChatControllerProvider);

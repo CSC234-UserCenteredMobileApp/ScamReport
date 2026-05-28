@@ -43,7 +43,8 @@ Future<Widget> _buildSettings({
       currentUserProvider.overrideWith((ref) async => null),
       settingsProvider.overrideWith(_FakeSettingsNotifier.new),
       settingsRepositoryProvider.overrideWithValue(SettingsRepository(prefs)),
-      featureFlagProvider('enable_sms_scan').overrideWith((_) => smsScanEnabled),
+      featureFlagProvider('enable_sms_scan')
+          .overrideWith((_) => smsScanEnabled),
       featureFlagProvider('enable_call_screening')
           .overrideWith((_) => callScreeningEnabled),
     ],

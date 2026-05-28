@@ -121,7 +121,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 _ConsentBlock(
                   acceptedTos: _acceptedTos,
                   acceptedPrivacy: _acceptedPrivacy,
-                  onChangedTos: (v) => setState(() => _acceptedTos = v ?? false),
+                  onChangedTos: (v) =>
+                      setState(() => _acceptedTos = v ?? false),
                   onChangedPrivacy: (v) =>
                       setState(() => _acceptedPrivacy = v ?? false),
                 ),

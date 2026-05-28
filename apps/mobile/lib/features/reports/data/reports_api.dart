@@ -107,7 +107,8 @@ class ReportsApi {
         if (targetIdentifierKind != null)
           'targetIdentifierKind': targetIdentifierKind,
         'evidenceFiles': evidenceFiles,
-        if (clientSubmissionId != null) 'clientSubmissionId': clientSubmissionId,
+        if (clientSubmissionId != null)
+          'clientSubmissionId': clientSubmissionId,
       }),
     );
 

@@ -94,7 +94,8 @@ void main() {
       );
       await service.showSmsAlert(alert);
 
-      verify(() => mockPlugin.show(any(), any(), 'XXXX-1234: Win a prize', any()))
+      verify(() =>
+              mockPlugin.show(any(), any(), 'XXXX-1234: Win a prize', any()))
           .called(1);
     });
   });

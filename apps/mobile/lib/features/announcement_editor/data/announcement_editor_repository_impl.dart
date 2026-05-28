@@ -55,7 +55,8 @@ class AnnouncementEditorRepositoryImpl implements AnnouncementEditorRepository {
   Future<void> delete(String id) => _api.deleteAnnouncement(id);
 
   @override
-  Future<AdminAnnouncementDetail> publish(String id, {required bool pushToFcm}) async {
+  Future<AdminAnnouncementDetail> publish(String id,
+      {required bool pushToFcm}) async {
     final raw = await _api.postPublish(id, pushToFcm: pushToFcm);
     return _mapDetail(raw);
   }

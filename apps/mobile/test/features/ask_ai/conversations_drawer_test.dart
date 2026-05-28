@@ -72,7 +72,8 @@ class _StubRepo implements AskAiRepository {
   }
 
   @override
-  Future<void> upsertDraft(String conversationId, PersistedDraft? payload) async {}
+  Future<void> upsertDraft(
+      String conversationId, PersistedDraft? payload) async {}
 }
 
 class _StubSubmit implements SubmitDraftedReport {
@@ -121,7 +122,8 @@ void main() {
     expect(find.byKey(const Key('askAiDrawerNewChat')), findsOneWidget);
   });
 
-  testWidgets('renders conversation tiles when list is non-empty', (tester) async {
+  testWidgets('renders conversation tiles when list is non-empty',
+      (tester) async {
     await tester.pumpWidget(_wrap(_StubRepo(list: [
       ConversationSummary(
         id: 'c-1',
@@ -149,7 +151,8 @@ void main() {
   testWidgets('renders error state when list throws', (tester) async {
     await tester.pumpWidget(_wrap(_StubRepo(shouldThrowList: true)));
     await _openDrawer(tester);
-    expect(find.textContaining('Could not load conversations.'), findsOneWidget);
+    expect(
+        find.textContaining('Could not load conversations.'), findsOneWidget);
   });
 
   testWidgets('Refresh icon invalidates the provider', (tester) async {
@@ -161,7 +164,8 @@ void main() {
     expect(find.byKey(const Key('askAiDrawerNewChat')), findsOneWidget);
   });
 
-  testWidgets('New chat button resets controller and pops drawer', (tester) async {
+  testWidgets('New chat button resets controller and pops drawer',
+      (tester) async {
     await tester.pumpWidget(_wrap(_StubRepo()));
     await _openDrawer(tester);
     await tester.tap(find.byKey(const Key('askAiDrawerNewChat')));

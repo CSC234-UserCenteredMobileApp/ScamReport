@@ -24,9 +24,8 @@ class AttachmentChip extends StatefulWidget {
 }
 
 class _AttachmentChipState extends State<AttachmentChip> {
-  late final ImageProvider? _provider = widget.mimeType.startsWith('image/')
-      ? MemoryImage(widget.bytes)
-      : null;
+  late final ImageProvider? _provider =
+      widget.mimeType.startsWith('image/') ? MemoryImage(widget.bytes) : null;
 
   @override
   void dispose() {

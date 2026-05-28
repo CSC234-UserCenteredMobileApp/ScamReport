@@ -108,7 +108,8 @@ void main() {
       expect(find.text('Report'), findsNothing);
     });
 
-    testWidgets('shows "Ask AI" label when user is null (guest)', (tester) async {
+    testWidgets('shows "Ask AI" label when user is null (guest)',
+        (tester) async {
       final router = _buildRouter(user: null);
       await tester.pumpWidget(_pumpApp(router, null));
       await tester.pumpAndSettle();

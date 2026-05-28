@@ -18,7 +18,8 @@ final searchRepositoryProvider = Provider<SearchRepository>((ref) {
 final searchQueryProvider = StateProvider<String>((ref) => '');
 
 /// Selected scam type codes for filter; empty = all types.
-final searchScamTypeFilterProvider = StateProvider<List<String>>((ref) => const []);
+final searchScamTypeFilterProvider =
+    StateProvider<List<String>>((ref) => const []);
 
 /// Sort mode: 'latest' or 'reportCount'.
 final searchSortByProvider = StateProvider<String>((ref) => 'latest');
@@ -38,8 +39,8 @@ final searchResultsProvider = FutureProvider<List<RecentReport>>((ref) async {
   if (q.trim().isEmpty && codes.isEmpty && sortBy == 'latest') return [];
 
   return ref.read(searchRepositoryProvider).searchReports(
-    q: q.trim().isEmpty ? null : q.trim(),
-    scamTypeCodes: codes,
-    sortBy: sortBy,
-  );
+        q: q.trim().isEmpty ? null : q.trim(),
+        scamTypeCodes: codes,
+        sortBy: sortBy,
+      );
 });

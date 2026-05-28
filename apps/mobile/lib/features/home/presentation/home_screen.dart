@@ -64,41 +64,41 @@ class HomeScreen extends ConsumerWidget {
           child: const CustomScrollView(
             physics: AlwaysScrollableScrollPhysics(),
             slivers: [
-            // 1. Brand header
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.only(top: 16, left: 16, right: 16),
-                child: _BrandHeader(),
+              // 1. Brand header
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.only(top: 16, left: 16, right: 16),
+                  child: _BrandHeader(),
+                ),
               ),
-            ),
-            SliverToBoxAdapter(child: SizedBox(height: 16)),
+              SliverToBoxAdapter(child: SizedBox(height: 16)),
 
-            // 2. Clipboard banner (conditional)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: _ClipboardBanner(),
+              // 2. Clipboard banner (conditional)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: _ClipboardBanner(),
+                ),
               ),
-            ),
 
-            // 3. Search input + Ask AI button
-            SliverToBoxAdapter(child: _SearchSection()),
-            SliverToBoxAdapter(child: SizedBox(height: 16)),
+              // 3. Search input + Ask AI button
+              SliverToBoxAdapter(child: _SearchSection()),
+              SliverToBoxAdapter(child: SizedBox(height: 16)),
 
-            // 4. This Week stats
-            SliverToBoxAdapter(child: _StatsSection()),
-            SliverToBoxAdapter(child: SizedBox(height: 16)),
+              // 4. This Week stats
+              SliverToBoxAdapter(child: _StatsSection()),
+              SliverToBoxAdapter(child: SizedBox(height: 16)),
 
-            // 5. Recent Fraud Alerts
-            SliverToBoxAdapter(child: _AlertsSection()),
-            SliverToBoxAdapter(child: SizedBox(height: 16)),
+              // 5. Recent Fraud Alerts
+              SliverToBoxAdapter(child: _AlertsSection()),
+              SliverToBoxAdapter(child: SizedBox(height: 16)),
 
-            // 6. Recently Verified
-            SliverToBoxAdapter(child: _ReportsSection()),
+              // 6. Recently Verified
+              SliverToBoxAdapter(child: _ReportsSection()),
 
-            // 7. Bottom padding
-            SliverToBoxAdapter(child: SizedBox(height: 24)),
-          ],
+              // 7. Bottom padding
+              SliverToBoxAdapter(child: SizedBox(height: 24)),
+            ],
           ),
         ),
       ),

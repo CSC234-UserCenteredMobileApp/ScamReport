@@ -96,7 +96,9 @@ void main() {
       expect(result, outcome);
     });
 
-    test('sendMessageWithAttachments converts TurnAttachment → StagedAttachment', () async {
+    test(
+        'sendMessageWithAttachments converts TurnAttachment → StagedAttachment',
+        () async {
       final outcome = TurnOutcome(
         userMessage: ChatMessage(
           id: 'u',
@@ -131,7 +133,8 @@ void main() {
         ],
       );
       expect(result, outcome);
-      final captured = verify(() => api.sendMessageMultipart('c-1', 'with image', captureAny()))
+      final captured = verify(
+              () => api.sendMessageMultipart('c-1', 'with image', captureAny()))
           .captured
           .single as List<StagedAttachment>;
       expect(captured, hasLength(1));

@@ -88,7 +88,8 @@ class _DraftEditorSheetState extends ConsumerState<DraftEditorSheet> {
     final messenger = ScaffoldMessenger.of(context);
     final l = context.l10n;
     if (_evidence.length >= maxAttachmentsPerMessage) {
-      messenger.showSnackBar(SnackBar(content: Text(l.askAiEvidenceCapReached)));
+      messenger
+          .showSnackBar(SnackBar(content: Text(l.askAiEvidenceCapReached)));
       return;
     }
     try {
@@ -159,8 +160,8 @@ class _DraftEditorSheetState extends ConsumerState<DraftEditorSheet> {
                 TextField(
                   key: const Key('askAiDraftDescription'),
                   controller: _description,
-                  decoration: InputDecoration(
-                      labelText: l.askAiDraftFieldDescription),
+                  decoration:
+                      InputDecoration(labelText: l.askAiDraftFieldDescription),
                   minLines: 3,
                   maxLines: 6,
                   maxLength: 2000,
@@ -191,11 +192,9 @@ class _DraftEditorSheetState extends ConsumerState<DraftEditorSheet> {
                   key: const Key('askAiDraftIdentifierKind'),
                   // ignore: deprecated_member_use
                   value: _kind,
-                  decoration:
-                      InputDecoration(labelText: l.askAiDraftFieldKind),
+                  decoration: InputDecoration(labelText: l.askAiDraftFieldKind),
                   items: [
-                    DropdownMenuItem(
-                        value: null, child: Text(l.askAiKindNone)),
+                    DropdownMenuItem(value: null, child: Text(l.askAiKindNone)),
                     DropdownMenuItem(
                         value: TargetIdentifierKind.phone,
                         child: Text(l.askAiKindPhone)),
