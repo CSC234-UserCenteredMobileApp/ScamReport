@@ -61,5 +61,33 @@
     "noData": "No data.",
     "loadError": "Could not load scam overview.",
     "footer": "Generated {{generatedAt}}"
+  },
+  "charts": {
+    "category": "Category",
+    "count": "Count",
+    "ofMax": "of max",
+    "date": "Date",
+    "reports": "Reports",
+    "total": "Total",
+    "threshold": "Threshold {{value}}",
+    "peakSuffix": "{{count}}/day",
+    "peakPerDay": "Peak {{count}} reports per day",
+    "pass": "Pass",
+    "fail": "Fail",
+    "passFail": "Result",
+    "weekend": "Weekend"
+  },
+  "aiEval": {
+    "trendTitle": "Accuracy trend (last {{count}} runs)",
+    "trendNote": "Hover or focus a point for the exact value. Filled dot = pass, square = fail.",
+    "perTypeTitle": "Per-type accuracy",
+    "perTypeNote": "Bars below the {{threshold}} threshold are flagged.",
+    "accuracyBar": "Accuracy (0–100%)",
+    "confusionTitle": "Confusion matrix",
+    "confusionNote": "Rows = expected, columns = actual. Diagonal = correct. Each cell shows count and row-percent.",
+    "confusionCaption": "Confusion matrix of expected versus actual verdicts.",
+    "expectedVsActual": "Expected ↓ / Actual →",
+    "mostCommonError": "Most common error: expected {{expected}}, got {{actual}} ({{n}}).",
+    "verdictAccuracy": "Verdict accuracy"
   }
 }
