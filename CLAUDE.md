@@ -47,3 +47,17 @@ Tokens in `apps/mobile/lib/core/theme/app_theme.dart` (warm coral primary, `Verd
 Four specialised Claude Code agents — `engineer`, `architect`, `qa`, `security-reviewer` — defined in [`.claude/agents/`](./.claude/agents/). AI that **writes** code may not **approve** it: engineer ships PR, fresh architect session reviews, qa extends tests + runs gates, security-reviewer audits PRs touching auth / RBAC / Firestore / secrets / validation. Human approver signs off last.
 
 Full loop, per-agent rules, evidence-trail conventions in [`docs/ai-workflow.md`](./docs/ai-workflow.md). Plan-Mode discipline + team role split described there. Update both this section and `docs/ai-workflow.md` in same PR when workflow changes.
+
+## Agent skills
+
+### Issue tracker
+
+GitHub issues at `CSC234-UserCenteredMobileApp/ScamReport` (via `gh` CLI). See [`docs/agents/issue-tracker.md`](./docs/agents/issue-tracker.md).
+
+### Triage labels
+
+Canonical labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See [`docs/agents/triage-labels.md`](./docs/agents/triage-labels.md).
+
+### Domain docs
+
+Single-context — `CONTEXT.md` at repo root, ADRs at `docs/decisions/`. See [`docs/agents/domain.md`](./docs/agents/domain.md).
