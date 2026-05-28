@@ -56,6 +56,7 @@ mock.module('../src/core/db/client', () => ({
 
 mock.module('../src/core/supabase/storage', () => ({
   getSignedUrl: async () => 'https://example.com/signed',
+  downloadFile: async () => new Uint8Array(),
 }));
 
 describe('GET /reports — text search', () => {
