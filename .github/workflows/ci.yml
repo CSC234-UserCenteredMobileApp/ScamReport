@@ -79,7 +79,11 @@ jobs:
         run: flutter pub get
 
       - name: Check formatting
-        run: dart format --output=none --set-exit-if-changed .
+        # Scope to git-tracked Dart files so the gitignored, locally
+        # bootstrapped `lib/firebase_options.dart` doesn't trip the check.
+        run: |
+          mapfile -t DART_FILES < <(git ls-files '*.dart')
+          dart format --output=none --set-exit-if-changed "${DART_FILES[@]}"
 
       - name: Bootstrap firebase_options.dart from .example
         # The real file is gitignored (HOW_TO_CONTRIBUTE.md §3.1 — each dev
