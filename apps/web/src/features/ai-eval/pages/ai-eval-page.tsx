@@ -12,11 +12,19 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  ChartContainer,
-  ChartHoverTarget,
+  Area,
+  CartesianGrid,
+  ComposedChart,
+  Legend,
+  Line,
   ReferenceLine,
-  XAxisLabels,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
   YAxis,
+} from 'recharts';
+import {
+  ChartContainer,
   type ChartColumn,
 } from '@/components/charts';
 import { useFormat } from '@/lib/format';
@@ -177,13 +185,6 @@ function Metric({
   );
 }
 
-const TREND_VB_W = 600;
-const TREND_VB_H = 160;
-const TREND_PAD_TOP = 12;
-const TREND_PAD_BOTTOM = 24;
-const TREND_PAD_LEFT = 4;
-const TREND_PAD_RIGHT = 44;
-
 function TrendCard({
   history,
   threshold,
@@ -196,57 +197,20 @@ function TrendCard({
   const { t } = useTranslation();
   const fmt = useFormat();
 
-  const usableW = TREND_VB_W - TREND_PAD_LEFT - TREND_PAD_RIGHT;
-  const usableH = TREND_VB_H - TREND_PAD_TOP - TREND_PAD_BOTTOM;
-  const yMin = 0.7;
-  const yMax = 1.0;
-  const yScale = (v: number) =>
-    TREND_VB_H -
-    TREND_PAD_BOTTOM -
-    ((Math.min(yMax, Math.max(yMin, v)) - yMin) / (yMax - yMin)) * usableH;
-  const stepX = history.length > 1 ? usableW / (history.length - 1) : 0;
-
-  const points = history.map((e, i) => ({
-    entry: e,
-    x: TREND_PAD_LEFT + i * stepX,
-    y: yScale(e.verdictAccuracy),
-    leftPct:
-      history.length > 1
-        ? ((TREND_PAD_LEFT + i * stepX) / TREND_VB_W) * 100
-        : ((TREND_PAD_LEFT + usableW / 2) / TREND_VB_W) * 100,
+  const chartData = history.map((e) => ({
+    runAt: e.runAt,
+    verdictAccuracy: e.verdictAccuracy,
+    phone: e.byType.phone,
+    url: e.byType.url,
+    text: e.byType.text,
+    passed: e.passed,
+    gitSha: e.gitSha,
   }));
-  const line = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
 
   const accs = history.map((e) => e.verdictAccuracy);
   const min = Math.min(...accs);
   const max = Math.max(...accs);
   const last = history[history.length - 1]!;
-
-  const yTicks = [
-    { value: 0, label: fmt.percent(yMin, { digits: 0 }) },
-    { value: (0.8 - yMin) / (yMax - yMin), label: fmt.percent(0.8, { digits: 0 }) },
-    { value: (0.9 - yMin) / (yMax - yMin), label: fmt.percent(0.9, { digits: 0 }) },
-    { value: 1, label: fmt.percent(yMax, { digits: 0 }) },
-  ];
-
-  const xTicks =
-    history.length >= 3
-      ? [
-          { x: points[0]!.x, label: fmt.dateShort(points[0]!.entry.runAt) },
-          {
-            x: points[Math.floor((history.length - 1) / 2)]!.x,
-            label: fmt.dateShort(
-              points[Math.floor((history.length - 1) / 2)]!.entry.runAt,
-            ),
-          },
-          {
-            x: points[points.length - 1]!.x,
-            label: fmt.dateShort(points[points.length - 1]!.entry.runAt),
-          },
-        ]
-      : points.map((p) => ({ x: p.x, label: fmt.dateShort(p.entry.runAt) }));
-
-  const thresholdNorm = (threshold - yMin) / (yMax - yMin);
 
   const columns: ReadonlyArray<ChartColumn<(typeof history)[number]>> = [
     { key: 'runAt', label: t('charts.date'), format: (r) => fmt.dateTime(r.runAt) },
@@ -279,84 +243,96 @@ function TrendCard({
           data={history}
           columns={columns}
         >
-          <div className="relative">
-            <svg
-              viewBox={`0 0 ${TREND_VB_W} ${TREND_VB_H}`}
-              className="h-40 w-full"
-              preserveAspectRatio="none"
-              role="img"
-              aria-label={t('aiEval.trendTitle', { count: history.length })}
-            >
-              <YAxis
-                ticks={yTicks}
-                height={TREND_VB_H}
-                width={TREND_VB_W - TREND_PAD_RIGHT}
-                padTop={TREND_PAD_TOP}
-                padBottom={TREND_PAD_BOTTOM}
-              />
-              <ReferenceLine
-                value={thresholdNorm}
-                height={TREND_VB_H}
-                width={TREND_VB_W - TREND_PAD_RIGHT}
-                padTop={TREND_PAD_TOP}
-                padBottom={TREND_PAD_BOTTOM}
-                padLeft={TREND_PAD_LEFT}
-                label={t('charts.threshold', { value: fmt.percent(threshold, { digits: 0 }) })}
-              />
-              <path
-                d={line}
-                fill="none"
-                stroke="hsl(var(--primary))"
-                strokeWidth={1.5}
-              />
-              {points.map((p, i) =>
-                p.entry.passed ? (
-                  <circle
-                    key={i}
-                    cx={p.x}
-                    cy={p.y}
-                    r={3}
-                    fill="hsl(var(--primary))"
-                  />
-                ) : (
-                  <rect
-                    key={i}
-                    x={p.x - 3.5}
-                    y={p.y - 3.5}
-                    width={7}
-                    height={7}
-                    fill="hsl(var(--background))"
-                    stroke="hsl(var(--destructive))"
-                    strokeWidth={1.5}
-                  />
-                ),
-              )}
-              <XAxisLabels ticks={xTicks} y={TREND_VB_H - 6} />
-            </svg>
-
-            {points.map((p, i) => (
-              <ChartHoverTarget
-                key={i}
-                leftPct={p.leftPct}
-                ariaLabel={`${fmt.dateShort(p.entry.runAt)} ${fmt.percent(p.entry.verdictAccuracy)}`}
-                tooltip={
-                  <div className="space-y-0.5">
-                    <div className="font-medium">
-                      {fmt.dateTime(p.entry.runAt)}
-                    </div>
-                    <div className="tabular-nums">
-                      {fmt.percent(p.entry.verdictAccuracy)} ·{' '}
-                      {p.entry.passed ? t('charts.pass') : t('charts.fail')}
-                    </div>
-                    {p.entry.gitSha ? (
-                      <div className="text-[10px] opacity-80">
-                        {shortSha(p.entry.gitSha)}
-                      </div>
-                    ) : null}
-                  </div>
-                }
-              />
-            ))}
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart
+                data={chartData}
+                margin={{ top: 16, right: 24, bottom: 8, left: 0 }}
+              >
+                <defs>
+                  <linearGradient id="trend-grad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="hsl(var(--border))"
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="runAt"
+                  tickFormatter={(v: string) => fmt.dateShort(v)}
+                  stroke="hsl(var(--muted-foreground))"
+                  fontSize={11}
+                  minTickGap={24}
+                />
+                <YAxis
+                  domain={[0.7, 1]}
+                  ticks={[0.7, 0.8, 0.9, 1.0]}
+                  tickFormatter={(v: number) => fmt.percent(v, { digits: 0 })}
+                  stroke="hsl(var(--muted-foreground))"
+                  fontSize={11}
+                  width={40}
+                />
+                <Tooltip
+                  content={(props) => (
+                    <TrendTooltip {...props} fmt={fmt} t={t} />
+                  )}
+                />
+                <Legend
+                  iconSize={10}
+                  wrapperStyle={{ fontSize: 11, paddingTop: 4 }}
+                />
+                <ReferenceLine
+                  y={threshold}
+                  stroke="hsl(var(--destructive))"
+                  strokeDasharray="4 4"
+                  label={{
+                    value: t('charts.threshold', {
+                      value: fmt.percent(threshold, { digits: 0 }),
+                    }),
+                    fill: 'hsl(var(--destructive))',
+                    fontSize: 10,
+                    position: 'insideTopRight',
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="verdictAccuracy"
+                  name={t('aiEval.verdictAccuracy')}
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={2}
+                  fill="url(#trend-grad)"
+                  dot={<PassFailDot />}
+                  activeDot={{ r: 5 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="phone"
+                  name="phone"
+                  stroke="hsl(var(--verdict-safe-fg))"
+                  strokeWidth={1.5}
+                  dot={false}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="url"
+                  name="url"
+                  stroke="hsl(var(--verdict-suspicious-fg))"
+                  strokeWidth={1.5}
+                  dot={false}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="text"
+                  name="text"
+                  stroke="hsl(var(--verdict-scam-fg))"
+                  strokeWidth={1.5}
+                  dot={false}
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
           </div>
         </ChartContainer>
 
@@ -377,6 +353,83 @@ function TrendCard({
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function PassFailDot(props: {
+  cx?: number;
+  cy?: number;
+  payload?: { passed?: boolean };
+}) {
+  const { cx, cy, payload } = props;
+  if (cx === undefined || cy === undefined) return null;
+  if (payload?.passed) {
+    return (
+      <circle cx={cx} cy={cy} r={3.5} fill="hsl(var(--primary))" />
+    );
+  }
+  return (
+    <rect
+      x={cx - 4}
+      y={cy - 4}
+      width={8}
+      height={8}
+      fill="hsl(var(--background))"
+      stroke="hsl(var(--destructive))"
+      strokeWidth={1.5}
+    />
+  );
+}
+
+type TrendTooltipPayload = {
+  runAt: string;
+  verdictAccuracy: number;
+  phone: number;
+  url: number;
+  text: number;
+  passed: boolean;
+  gitSha: string | null;
+};
+
+function TrendTooltip({
+  active,
+  payload,
+  fmt,
+  t,
+}: {
+  active?: boolean;
+  payload?: ReadonlyArray<{ payload?: TrendTooltipPayload }>;
+  fmt: ReturnType<typeof useFormat>;
+  t: ReturnType<typeof useTranslation>['t'];
+}) {
+  if (!active || !payload || payload.length === 0) return null;
+  const e = payload[0]?.payload;
+  if (!e) return null;
+  return (
+    <div className="rounded-md border border-border bg-popover px-3 py-2 text-xs shadow-md">
+      <div className="font-medium text-foreground">{fmt.dateTime(e.runAt)}</div>
+      <div className="mt-1 tabular-nums text-foreground">
+        {fmt.percent(e.verdictAccuracy)} ·{' '}
+        <span
+          className={cn(
+            'font-medium',
+            e.passed ? 'text-primary' : 'text-destructive',
+          )}
+        >
+          {e.passed ? t('charts.pass') : t('charts.fail')}
+        </span>
+      </div>
+      <div className="mt-1 grid grid-cols-3 gap-x-3 text-[10px] tabular-nums text-muted-foreground">
+        <span>phone {fmt.percent(e.phone, { digits: 0 })}</span>
+        <span>url {fmt.percent(e.url, { digits: 0 })}</span>
+        <span>text {fmt.percent(e.text, { digits: 0 })}</span>
+      </div>
+      {e.gitSha ? (
+        <div className="mt-1 text-[10px] text-muted-foreground">
+          {shortSha(e.gitSha)}
+        </div>
+      ) : null}
+    </div>
   );
 }
 
