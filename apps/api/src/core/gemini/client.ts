@@ -30,6 +30,7 @@ export async function generateText(
   const response = await getClient().models.generateContent({
     model,
     contents: prompt,
+    config: { temperature: 0 },
   });
   return response.text ?? '';
 }

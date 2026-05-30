@@ -254,7 +254,7 @@ export async function runCheck(
     try {
       const results = await searchSimilarReports(payload, 5);
       const top = results[0];
-      if (top !== undefined && top.similarity >= 0.7) {
+      if (top !== undefined && top.similarity >= 0.8) {
         verdict = 'suspicious';
 
         // Scammer-cluster signal: 2+ of the semantic top-K share a scammerId.
