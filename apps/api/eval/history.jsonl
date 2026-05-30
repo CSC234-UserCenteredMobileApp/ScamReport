@@ -5,3 +5,4 @@
 {"runAt":"2026-05-28T06:20:48.010Z","gitSha":"f7f2da68e6fb8d303188f34dce0b5522967bd57d","totalCases":50,"verdictAccuracy":0.82,"byType":{"phone":0.9333,"url":0.6667,"text":0.85},"threshold":0.6,"passed":true}
 {"runAt":"2026-05-29T06:22:34.440Z","gitSha":"2e4fc765fa02c8c5d95e056b4f57a52071811d72","totalCases":50,"verdictAccuracy":0.86,"byType":{"phone":0.9333,"url":0.8,"text":0.85},"threshold":0.6,"passed":true}
 {"runAt":"2026-05-30T04:14:02.256Z","gitSha":"438a354c18eea18df7b34447763e066d4f74b05f","totalCases":50,"verdictAccuracy":0.84,"byType":{"phone":0.9333,"url":0.6667,"text":0.9},"threshold":0.6,"passed":true}
+{"runAt":"2026-05-30T05:54:35.953Z","gitSha":"51441de82c70240129af6d828f8e0e0810508252","totalCases":50,"verdictAccuracy":0.82,"byType":{"phone":0.9333,"url":0.6667,"text":0.85},"threshold":0.6,"passed":true}
