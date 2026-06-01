@@ -45,4 +45,22 @@ describe('BarList', () => {
     );
     expect(screen.getByRole('list', { name: 'Top categories' })).toBeInTheDocument();
   });
+
+  it('share mode (total given): bar width + percent are share of total, not of max', () => {
+    // total=140 → shares 35% / 20%; of-max would have been 100% / 57%.
+    const { container } = render(
+      <BarList
+        rows={rows}
+        emptyLabel="No data."
+        ariaLabel="Test list"
+        total={140}
+      />,
+    );
+    const bars = container.querySelectorAll<HTMLDivElement>(
+      '.bg-primary.rounded-full.h-full',
+    );
+    expect(bars[0]?.style.width).toBe('35%');
+    expect(bars[1]?.style.width).toBe('20%');
+    expect(screen.getByText(/35%/)).toBeInTheDocument();
+  });
 });

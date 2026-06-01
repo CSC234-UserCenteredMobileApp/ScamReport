@@ -107,6 +107,7 @@ export function ScamOverviewSection() {
               rows={scamTypeRows}
               emptyLabel={t('scamOverview.noData')}
               ariaLabel={t('scamOverview.byScamType')}
+              total={data.totalReports}
             />
           </CardContent>
         </Card>
