@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../l10n/l10n.dart';
-import '../data/check_api_client.dart';
 import '../domain/check_result.dart';
+import '../domain/detect_type.dart';
 
 class CheckInputScreen extends StatefulWidget {
   const CheckInputScreen({super.key, this.initialText});

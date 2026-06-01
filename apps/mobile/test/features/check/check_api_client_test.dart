@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mobile/features/check/data/check_api_client.dart';
 import 'package:mobile/features/check/domain/check_result.dart';
+import 'package:mobile/features/check/domain/detect_type.dart';
 
 void main() {
   group('detectType', () {

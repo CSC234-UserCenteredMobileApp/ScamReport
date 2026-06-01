@@ -6,6 +6,7 @@ import '../../../core/cache/app_database.dart';
 import '../domain/check_repository.dart';
 import '../domain/check_result.dart';
 import 'check_api_client.dart';
+import 'check_mappers.dart';
 
 class CheckRepositoryImpl implements CheckRepository {
   CheckRepositoryImpl(this._api, this._db);
@@ -15,8 +16,12 @@ class CheckRepositoryImpl implements CheckRepository {
 
   static const _maxCachedEntries = 100;
 
+  // Key on the trimmed raw payload, case-sensitive — mirroring the server's
+  // text normalisation (a case-sensitive trim) so the cache never serves a
+  // verdict the server computed for a differently-cased input. Stays in step
+  // with CheckQuery's case-sensitive == / hashCode.
   String _cacheKey(CheckQuery query) =>
-      'check:${query.type}:${query.payload.toLowerCase().trim()}';
+      'check:${query.type}:${query.payload.trim()}';
 
   @override
   Future<CheckResult> runCheck(CheckQuery query) async {
@@ -84,6 +89,7 @@ class CheckRepositoryImpl implements CheckRepository {
                   'verifiedAt': m.verifiedAt,
                 })
             .toList(),
+        'matchedScammer': matchedScammerToJson(r.matchedScammer),
       };
 
   CheckResult _fromJson(Map<String, dynamic> json, {required bool fromCache}) {
@@ -100,6 +106,7 @@ class CheckRepositoryImpl implements CheckRepository {
           verifiedAt: item['verifiedAt'] as String,
         );
       }).toList(),
+      matchedScammer: matchedScammerFromJson(json['matchedScammer']),
       fromCache: fromCache,
     );
   }

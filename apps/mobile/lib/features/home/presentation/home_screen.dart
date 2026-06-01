@@ -9,8 +9,8 @@ import '../../../core/widgets/section_header.dart';
 import '../../../core/widgets/stat_card_row.dart';
 import '../../../l10n/l10n.dart';
 import '../../auth/presentation/auth_providers.dart';
-import '../../check/data/check_api_client.dart';
 import '../../check/domain/check_result.dart';
+import '../../check/domain/detect_type.dart';
 import 'home_providers.dart';
 
 part '_brand_header.dart';

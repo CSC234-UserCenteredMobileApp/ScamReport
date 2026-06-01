@@ -1076,6 +1076,60 @@ abstract class AppLocalizations {
   /// **'Cached result'**
   String get verdictCachedResult;
 
+  /// No description provided for @verdictKnownScammer.
+  ///
+  /// In en, this message translates to:
+  /// **'Known scammer'**
+  String get verdictKnownScammer;
+
+  /// No description provided for @verdictRiskHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High risk'**
+  String get verdictRiskHigh;
+
+  /// No description provided for @verdictRiskMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium risk'**
+  String get verdictRiskMedium;
+
+  /// No description provided for @verdictRiskLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low risk'**
+  String get verdictRiskLow;
+
+  /// No description provided for @verdictRiskUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Risk unknown'**
+  String get verdictRiskUnknown;
+
+  /// No description provided for @verdictClaimedToBe.
+  ///
+  /// In en, this message translates to:
+  /// **'Claimed to be {name}'**
+  String verdictClaimedToBe(String name);
+
+  /// No description provided for @verdictAlsoKnownAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Also known as'**
+  String get verdictAlsoKnownAs;
+
+  /// No description provided for @verdictLinkedReports.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 linked report} other{{count} linked reports}}'**
+  String verdictLinkedReports(int count);
+
+  /// No description provided for @verdictRecentCases.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent cases'**
+  String get verdictRecentCases;
+
   /// No description provided for @reportDetailVerified.
   ///
   /// In en, this message translates to:

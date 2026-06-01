@@ -6,9 +6,10 @@ import { MatchedScammer } from './scammers';
 // Schema is the team-locked contract from Plan-Mode decision D8 (2026-04-28).
 // Both the verdict screen on mobile and the share-target / clipboard banner
 // entry points produce a CheckRequest. The api fans out the matching logic
-// (Postgres lookup; pgvector retrieval lives behind /search, NOT here) and
-// always returns a CheckResponse — even Unknown is a successful response, not
-// an HTTP error.
+// inline in runCheck (check.service.ts): exact scammer-identifier + report
+// lookups, then pgvector semantic retrieval, then Gemini content analysis —
+// all inside /check, not behind a separate /search route. It always returns a
+// CheckResponse — even Unknown is a successful response, not an HTTP error.
 
 export const CheckType = Type.Union(
   [Type.Literal('phone'), Type.Literal('url'), Type.Literal('text')],

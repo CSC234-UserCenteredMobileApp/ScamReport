@@ -539,6 +539,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verdictCachedResult => 'Cached result';
 
   @override
+  String get verdictKnownScammer => 'Known scammer';
+
+  @override
+  String get verdictRiskHigh => 'High risk';
+
+  @override
+  String get verdictRiskMedium => 'Medium risk';
+
+  @override
+  String get verdictRiskLow => 'Low risk';
+
+  @override
+  String get verdictRiskUnknown => 'Risk unknown';
+
+  @override
+  String verdictClaimedToBe(String name) {
+    return 'Claimed to be $name';
+  }
+
+  @override
+  String get verdictAlsoKnownAs => 'Also known as';
+
+  @override
+  String verdictLinkedReports(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count linked reports',
+      one: '1 linked report',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get verdictRecentCases => 'Recent cases';
+
+  @override
   String get reportDetailVerified => 'Verified';
 
   @override

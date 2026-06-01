@@ -6,6 +6,7 @@ import '../../../core/widgets/verdict_pill.dart';
 import '../../../l10n/l10n.dart';
 import '../domain/check_result.dart';
 import 'check_providers.dart';
+import 'widgets/matched_scammer_card.dart';
 
 class VerdictScreen extends ConsumerWidget {
   const VerdictScreen({super.key, required this.query});
@@ -151,6 +152,12 @@ class _ResultView extends StatelessWidget {
                 ),
 
                 const SizedBox(height: 24),
+
+                // Known-scammer profile (when the identifier matched one)
+                if (result.matchedScammer != null) ...[
+                  MatchedScammerCard(scammer: result.matchedScammer!),
+                  const SizedBox(height: 24),
+                ],
 
                 // YOU CHECKED section
                 Text(
