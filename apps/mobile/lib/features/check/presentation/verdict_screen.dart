@@ -200,7 +200,7 @@ class _ResultView extends StatelessWidget {
                 // See matched reports (only when matches exist)
                 if (result.matchedCount > 0)
                   OutlinedButton(
-                    onPressed: () => context.push('/feed'),
+                    onPressed: () => context.go('/feed'),
                     child: Text(l.verdictSeeReports),
                   ),
 
@@ -208,7 +208,7 @@ class _ResultView extends StatelessWidget {
 
                 // Report this (always visible)
                 OutlinedButton(
-                  onPressed: () => context.push('/ask-ai?seed=report-intent'),
+                  onPressed: () => context.go('/ask-ai?seed=report-intent'),
                   child: Text(l.verdictReportThis),
                 ),
               ],

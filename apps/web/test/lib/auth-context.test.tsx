@@ -79,6 +79,48 @@ describe('AuthProvider', () => {
     expect(result.current.role).toBe('user');
   });
 
+  it('drops ready=false during re-sync after sign-in (no unauthorized flash)', async () => {
+    // Gate /auth/sync so we can observe the in-flight window.
+    let release!: () => void;
+    const gate = new Promise<void>((r) => {
+      release = r;
+    });
+    server.use(
+      http.post('*/auth/sync', async () => {
+        await gate;
+        return HttpResponse.json(userSyncResponse);
+      }),
+    );
+    let fire: ((fb: unknown) => void) | null = null;
+    onAuthStateChangedMock.mockImplementation((_auth, cb: (fb: unknown) => void) => {
+      fire = cb;
+      return () => undefined;
+    });
+    const { result } = renderHook(() => useAuth(), { wrapper });
+
+    // Logged-out resolves ready=true (the stale value that used to leak through).
+    await act(async () => {
+      fire?.(null);
+    });
+    await waitFor(() => expect(result.current.ready).toBe(true));
+
+    // Sign-in: while /auth/sync is in flight, ready MUST drop to false so the
+    // route gate spins instead of flashing SyncErrorScreen / no-access.
+    await act(async () => {
+      fire?.({ uid: 'fb-uid' });
+    });
+    expect(result.current.ready).toBe(false);
+    expect(result.current.firebaseUser).not.toBeNull();
+    expect(result.current.role).toBeNull();
+
+    // Sync resolves: ready=true and role hydrated in the same batch.
+    await act(async () => {
+      release();
+    });
+    await waitFor(() => expect(result.current.ready).toBe(true));
+    expect(result.current.role).toBe('user');
+  });
+
   it('clears the user when /auth/sync returns 401', async () => {
     server.use(http.post('*/auth/sync', () => new HttpResponse(null, { status: 401 })));
     let fire: ((fb: unknown) => void) | null = null;

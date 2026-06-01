@@ -244,7 +244,7 @@ function TrendCard({
           columns={columns}
         >
           <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
               <ComposedChart
                 data={chartData}
                 margin={{ top: 16, right: 24, bottom: 8, left: 0 }}
