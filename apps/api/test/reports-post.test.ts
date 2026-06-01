@@ -24,6 +24,7 @@ let conversationUpdateCalls: unknown[] = [];
 let uploadCalls: Array<{ bucket: string; path: string; bytes: number }> = [];
 let uploadShouldFail = false;
 let txReturn: unknown = null;
+let txCreateArgs: { data: Record<string, unknown> } | null = null;
 let reportUpdateCalls: Array<{ where: unknown; data: unknown }> = [];
 let aiScoreReturn: { aiScore: number | null; aiConfidence: string | null } = {
   aiScore: 88,
@@ -103,6 +104,9 @@ mock.module('../src/core/db/client', () => ({
         return { id: (args.where as { id: string }).id };
       },
     },
+    scammerIdentifier: {
+      findUnique: async () => null,
+    },
     aiConversation: {
       updateMany: async (args: unknown) => {
         conversationUpdateCalls.push(args);
@@ -112,7 +116,10 @@ mock.module('../src/core/db/client', () => ({
     $transaction: async (fn: (tx: unknown) => Promise<unknown>) => {
       const tx = {
         report: {
-          create: async () => txReturn,
+          create: async (args: { data: Record<string, unknown> }) => {
+            txCreateArgs = args;
+            return txReturn;
+          },
         },
         evidenceFile: {
           createMany: async () => ({ count: 0 }),
@@ -175,6 +182,7 @@ beforeEach(() => {
   uploadCalls = [];
   uploadShouldFail = false;
   txReturn = null;
+  txCreateArgs = null;
   reportUpdateCalls = [];
   aiScoreReturn = { aiScore: 88, aiConfidence: 'high' };
   aiScoreShouldThrow = false;
@@ -261,6 +269,36 @@ describe('POST /reports', () => {
     expect(json.id).toBe('11111111-1111-1111-1111-111111111111');
     expect(mirrorWrites).toHaveLength(1);
     expect(mirrorWrites[0]?.collectionPath).toBe('my-reports/reporter-1/items');
+  });
+
+  test('normalises a Thai phone identifier to E.164 before storing (matches /check)', async () => {
+    mockDecoded = { uid: 'reporter-phone', email: 'r@example.com' };
+    mockScamType = { id: 2, isActive: true };
+    txReturn = {
+      id: '66666666-6666-6666-6666-666666666666',
+      status: 'pending',
+      createdAt: new Date('2026-05-07T00:00:00Z'),
+      title: VALID_REPORT.title,
+      scamType: { code: 'phishing_sms' },
+    };
+
+    const res = await app.handle(
+      jsonReq('/reports', {
+        token: 'tok',
+        body: {
+          ...VALID_REPORT,
+          targetIdentifier: '087-123 4567',
+          targetIdentifierKind: 'phone',
+        },
+      }),
+    );
+
+    expect(res.status).toBe(200);
+    // The /check read path queries `target_identifier_normalized` with the
+    // canonical `normalizePhone` (→ +66…). The write path MUST store the same
+    // form, or a real verified report never matches a check. Regression guard
+    // for the old strip-only normaliser that stored `0871234567`.
+    expect(txCreateArgs?.data.targetIdentifierNormalized).toBe('+66871234567');
   });
 
   test('links conversation when sourceConversationId is provided', async () => {

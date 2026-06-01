@@ -42,6 +42,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setReady(true);
         return;
       }
+      // Re-entering role hydration for this user: drop ready so the route gate
+      // shows the spinner (not SyncErrorScreen/no-access) and LoginPage doesn't
+      // navigate before /auth/sync resolves. Without this, a stale ready=true
+      // from the prior logged-out state flashes the "unauthorized" card.
+      setReady(false);
       try {
         const sync = await apiFetch('/auth/sync', validators.authSync, {
           method: 'POST',

@@ -36,6 +36,7 @@ import { Prisma } from '../../generated/prisma/client';
 import { copyFile, getSignedUrl, uploadFile } from '../../core/supabase/storage';
 import { mirrorMyReport } from '../../sync/firestore_sync';
 import { canonicalEmbedInput, computeAiScore } from '../../core/ai-score';
+import { normalizePhone, normalizeUrl } from '../../core/lib/identifier-extractor';
 
 const ATTACHMENTS_BUCKET = 'chat-attachments';
 const MAX_EVIDENCE_PER_REPORT = 5;
@@ -635,8 +636,11 @@ export async function getMyReportDetail(
   };
 }
 
-// Lightweight normalisation for the verdict-lookup index. A heavier pass
-// (E.164 phone, full URL canonicalisation) lives in the check pipeline.
+// Normalisation for the verdict-lookup index. MUST stay identical to the
+// `/check` read path — it queries `target_identifier_normalized` with the same
+// canonical `normalizePhone`/`normalizeUrl` (and the opportunistic scammer
+// auto-link matches it against `ScammerIdentifier.value_normalized`, also
+// canonical). A divergent local normaliser here silently breaks both matches.
 function normalizeIdentifier(
   raw: string | null,
   kind: 'phone' | 'url' | 'other' | null,
@@ -644,14 +648,7 @@ function normalizeIdentifier(
   if (!raw) return null;
   const trimmed = raw.trim();
   if (!trimmed) return null;
-  if (kind === 'phone') return trimmed.replace(/[^\d+]/g, '');
-  if (kind === 'url') {
-    try {
-      const u = new URL(trimmed.startsWith('http') ? trimmed : `https://${trimmed}`);
-      return u.host.toLowerCase();
-    } catch {
-      return trimmed.toLowerCase();
-    }
-  }
+  if (kind === 'phone') return normalizePhone(trimmed);
+  if (kind === 'url') return normalizeUrl(trimmed);
   return trimmed.toLowerCase();
 }

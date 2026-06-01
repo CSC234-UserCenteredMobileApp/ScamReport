@@ -157,7 +157,7 @@ class _SearchSection extends ConsumerWidget {
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
-                onPressed: () => context.push('/ask-ai?seed=report-intent'),
+                onPressed: () => context.go('/ask-ai?seed=report-intent'),
                 icon: const Icon(Icons.flag_outlined, size: 18),
                 label: Text(context.l10n.reportAScam),
               ),
@@ -219,7 +219,7 @@ class _AlertsSection extends ConsumerWidget {
           padding: px16,
           child: SectionHeader(
             title: context.l10n.sectionRecentAlerts,
-            onSeeAll: () => context.push('/alerts'),
+            onSeeAll: () => context.go('/alerts'),
           ),
         ),
         const SizedBox(height: 12),
@@ -268,7 +268,7 @@ class _ReportsSection extends ConsumerWidget {
           padding: px16,
           child: SectionHeader(
             title: context.l10n.sectionRecentlyVerified,
-            onSeeAll: () => context.push('/feed'),
+            onSeeAll: () => context.go('/feed'),
           ),
         ),
         const SizedBox(height: 12),
