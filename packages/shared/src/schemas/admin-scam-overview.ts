@@ -43,6 +43,15 @@ export const AdminScamOverviewResponse = Type.Object({
   byProvince: Type.Array(ProvinceCount),
   byNationality: Type.Array(NationalityCount),
   byArrestStatus: Type.Array(BilingualCount),
+  // Denominators for the breakdowns above. byScamType partitions every report
+  // (use totalReports). The others count only reports that carry the relevant
+  // attribute (source_site / scammer province / nationality / arrest_status)
+  // and are truncated to a top-N, so each needs its own full-population total
+  // for an honest share-of-total percentage.
+  sourceSiteTotal: Type.Integer({ minimum: 0 }),
+  provinceTotal: Type.Integer({ minimum: 0 }),
+  nationalityTotal: Type.Integer({ minimum: 0 }),
+  arrestStatusTotal: Type.Integer({ minimum: 0 }),
   dailyReports: Type.Array(DailyBucket),
   generatedAt: Type.String({ format: 'date-time' }),
 });

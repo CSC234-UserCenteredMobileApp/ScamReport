@@ -38,6 +38,10 @@ export async function getScamOverview(): Promise<AdminScamOverviewResponse> {
     nationalityRows,
     arrestStatusRows,
     dailyRows,
+    sourceSiteTotalRows,
+    provinceTotalRows,
+    nationalityTotalRows,
+    arrestStatusTotalRows,
   ] = await Promise.all([
     prisma.report.count(),
     prisma.scammer.count(),
@@ -85,6 +89,26 @@ export async function getScamOverview(): Promise<AdminScamOverviewResponse> {
       FROM reports
       GROUP BY 1
       ORDER BY 1 ASC
+    `,
+    // Full-population denominators for the truncated/filtered breakdowns, so the
+    // dashboard can show an honest share-of-total (top-N rows won't sum to 100%).
+    prisma.$queryRaw<{ count: bigint }[]>`
+      SELECT COUNT(*)::bigint AS count FROM reports WHERE source_site IS NOT NULL
+    `,
+    prisma.$queryRaw<{ count: bigint }[]>`
+      SELECT COUNT(r.id)::bigint AS count
+      FROM reports r JOIN scammers s ON s.id = r.scammer_id
+      WHERE s.province IS NOT NULL
+    `,
+    prisma.$queryRaw<{ count: bigint }[]>`
+      SELECT COUNT(r.id)::bigint AS count
+      FROM reports r JOIN scammers s ON s.id = r.scammer_id
+      WHERE s.nationality IS NOT NULL
+    `,
+    prisma.$queryRaw<{ count: bigint }[]>`
+      SELECT COUNT(r.id)::bigint AS count
+      FROM reports r JOIN scammers s ON s.id = r.scammer_id
+      WHERE s.arrest_status IS NOT NULL
     `,
   ]);
 
@@ -167,6 +191,8 @@ export async function getScamOverview(): Promise<AdminScamOverviewResponse> {
     count: Number(r.count),
   }));
 
+  const scalar = (rows: { count: bigint }[]) => Number(rows[0]?.count ?? 0n);
+
   return {
     totalReports,
     totalScammers,
@@ -176,6 +202,10 @@ export async function getScamOverview(): Promise<AdminScamOverviewResponse> {
     byProvince,
     byNationality,
     byArrestStatus,
+    sourceSiteTotal: scalar(sourceSiteTotalRows),
+    provinceTotal: scalar(provinceTotalRows),
+    nationalityTotal: scalar(nationalityTotalRows),
+    arrestStatusTotal: scalar(arrestStatusTotalRows),
     dailyReports,
     generatedAt: new Date().toISOString(),
   };

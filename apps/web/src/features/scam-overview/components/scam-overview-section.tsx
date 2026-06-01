@@ -107,6 +107,7 @@ export function ScamOverviewSection() {
               rows={scamTypeRows}
               emptyLabel={t('scamOverview.noData')}
               ariaLabel={t('scamOverview.byScamType')}
+              total={data.totalReports}
             />
           </CardContent>
         </Card>
@@ -125,6 +126,7 @@ export function ScamOverviewSection() {
               rows={sourceSiteRows}
               emptyLabel={t('scamOverview.noData')}
               ariaLabel={t('scamOverview.bySourceSite')}
+              total={data.sourceSiteTotal}
             />
           </CardContent>
         </Card>
@@ -140,6 +142,7 @@ export function ScamOverviewSection() {
               rows={provinceRows}
               emptyLabel={t('scamOverview.noData')}
               ariaLabel={t('scamOverview.byProvince')}
+              total={data.provinceTotal}
             />
           </CardContent>
         </Card>
@@ -155,6 +158,7 @@ export function ScamOverviewSection() {
               rows={nationalityRows}
               emptyLabel={t('scamOverview.noData')}
               ariaLabel={t('scamOverview.byNationality')}
+              total={data.nationalityTotal}
             />
           </CardContent>
         </Card>
@@ -170,6 +174,7 @@ export function ScamOverviewSection() {
               rows={arrestRows}
               emptyLabel={t('scamOverview.noData')}
               ariaLabel={t('scamOverview.byArrestStatus')}
+              total={data.arrestStatusTotal}
             />
           </CardContent>
         </Card>

@@ -15,10 +15,17 @@ export function BarList({
   rows,
   emptyLabel,
   ariaLabel,
+  total,
 }: {
   rows: BarListRow[];
   emptyLabel: string;
   ariaLabel: string;
+  // When the rows partition a known whole (e.g. every report has exactly one
+  // scam type), pass that whole here. The percentage then reads as a share of
+  // the total — what most people intuitively expect — and the bar matches it.
+  // Omit it for top-N / non-exhaustive lists; the bar then scales to the
+  // largest row and the percentage is explicitly labelled "of max".
+  total?: number;
 }) {
   const { t } = useTranslation();
   const fmt = useFormat();
@@ -28,11 +35,13 @@ export function BarList({
   }
 
   const max = Math.max(1, ...rows.map((r) => r.count));
+  const shareMode = typeof total === 'number' && total > 0;
 
   return (
     <ol role="list" aria-label={ariaLabel} className="space-y-2">
       {rows.map((row) => {
-        const pct = (row.count / max) * 100;
+        const fraction = shareMode ? row.count / total : row.count / max;
+        const barPct = Math.min(100, fraction * 100);
         const hasSecondary =
           row.secondaryLabel && row.secondaryLabel !== row.primaryLabel;
         const tooltipBody = (
@@ -42,8 +51,8 @@ export function BarList({
               <div className="opacity-80">{row.secondaryLabel}</div>
             ) : null}
             <div className="tabular-nums">
-              {fmt.number(row.count)} · {fmt.percent(row.count / max)}{' '}
-              {t('charts.ofMax')}
+              {fmt.number(row.count)} · {fmt.percent(fraction)}{' '}
+              {t(shareMode ? 'charts.ofTotal' : 'charts.ofMax')}
             </div>
           </div>
         );
@@ -85,7 +94,7 @@ export function BarList({
               <div className="absolute inset-0 overflow-hidden rounded-full bg-muted">
                 <div
                   className="h-full rounded-full bg-primary"
-                  style={{ width: `${pct}%` }}
+                  style={{ width: `${barPct}%` }}
                 />
               </div>
             </div>
@@ -94,7 +103,10 @@ export function BarList({
               <span className="font-medium text-foreground">
                 {fmt.number(row.count)}
               </span>{' '}
-              · {fmt.percent(row.count / max, { digits: 0 })}
+              · {fmt.percent(fraction, { digits: 0 })}
+              {shareMode ? null : (
+                <span className="ml-1 opacity-70">{t('charts.ofMax')}</span>
+              )}
             </span>
           </li>
         );
