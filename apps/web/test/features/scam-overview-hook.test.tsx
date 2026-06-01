@@ -37,6 +37,10 @@ const samplePayload = {
   byArrestStatus: [
     { code: 'arrested', labelEn: 'Arrested', labelTh: 'ถูกจับกุม', count: 90 },
   ],
+  sourceSiteTotal: 120,
+  provinceTotal: 40,
+  nationalityTotal: 150,
+  arrestStatusTotal: 100,
   dailyReports: [{ date: '2026-05-02', count: 141 }],
   generatedAt: new Date().toISOString(),
 };
