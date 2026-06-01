@@ -49,8 +49,8 @@ void main() {
       expect(m.summary.riskLevel, 'high');
       expect(m.summary.reportCount, 7);
       expect(m.summary.aliases, ['Tax Office', 'Gov Refund']);
-      expect(m.summary.topScamTypeCodes,
-          ['phone_impersonation', 'phishing_sms']);
+      expect(
+          m.summary.topScamTypeCodes, ['phone_impersonation', 'phishing_sms']);
       expect(m.summary.person!.fullName, 'John Doe');
       expect(m.summary.person!.campaignCount, 3);
       expect(m.recentCases.length, 2);
@@ -82,8 +82,8 @@ void main() {
       expect(reparsed.summary.riskLevel, original.summary.riskLevel);
       expect(reparsed.summary.reportCount, original.summary.reportCount);
       expect(reparsed.summary.aliases, original.summary.aliases);
-      expect(reparsed.summary.topScamTypeCodes,
-          original.summary.topScamTypeCodes);
+      expect(
+          reparsed.summary.topScamTypeCodes, original.summary.topScamTypeCodes);
       expect(reparsed.summary.person!.id, original.summary.person!.id);
       expect(reparsed.recentCases.length, original.recentCases.length);
       expect(reparsed.recentCases.last.verifiedAt, isNull);
