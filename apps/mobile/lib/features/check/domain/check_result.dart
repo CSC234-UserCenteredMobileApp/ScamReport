@@ -1,3 +1,5 @@
+import 'matched_scammer.dart';
+
 class CheckQuery {
   const CheckQuery({
     required this.payload,
@@ -36,11 +38,15 @@ class CheckResult {
     required this.verdict,
     required this.matchedCount,
     required this.matches,
+    this.matchedScammer,
     this.fromCache = false,
   });
 
   final String verdict; // 'scam' | 'suspicious' | 'safe' | 'unknown'
   final int matchedCount;
   final List<ReportSummaryItem> matches;
+
+  /// Known-scammer profile when the identifier matched one. Null otherwise.
+  final MatchedScammer? matchedScammer;
   final bool fromCache;
 }

@@ -4,13 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../../../core/api_client.dart';
 import '../domain/check_result.dart';
-
-String detectType(String raw) {
-  final trimmed = raw.trim();
-  if (RegExp(r'^\+?[\d\s\-\(\)]{7,}$').hasMatch(trimmed)) return 'phone';
-  if (RegExp(r'https?://|www\.').hasMatch(trimmed)) return 'url';
-  return 'text';
-}
+import 'check_mappers.dart';
 
 class CheckApiClient {
   CheckApiClient(this._client);
@@ -48,6 +42,7 @@ class CheckApiClient {
           verifiedAt: item['verifiedAt'] as String,
         );
       }).toList(),
+      matchedScammer: matchedScammerFromJson(json['matchedScammer']),
     );
   }
 }

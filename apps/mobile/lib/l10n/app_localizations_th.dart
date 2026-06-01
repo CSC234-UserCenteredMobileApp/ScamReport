@@ -539,6 +539,42 @@ class AppLocalizationsTh extends AppLocalizations {
   String get verdictCachedResult => 'ผลลัพธ์ที่แคชไว้';
 
   @override
+  String get verdictKnownScammer => 'มิจฉาชีพที่รู้จัก';
+
+  @override
+  String get verdictRiskHigh => 'ความเสี่ยงสูง';
+
+  @override
+  String get verdictRiskMedium => 'ความเสี่ยงปานกลาง';
+
+  @override
+  String get verdictRiskLow => 'ความเสี่ยงต่ำ';
+
+  @override
+  String get verdictRiskUnknown => 'ไม่ทราบความเสี่ยง';
+
+  @override
+  String verdictClaimedToBe(String name) {
+    return 'อ้างว่าเป็น $name';
+  }
+
+  @override
+  String get verdictAlsoKnownAs => 'หรือที่รู้จักในชื่อ';
+
+  @override
+  String verdictLinkedReports(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'มีรายงานที่เชื่อมโยง $count รายการ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get verdictRecentCases => 'กรณีล่าสุด';
+
+  @override
   String get reportDetailVerified => 'ตรวจสอบแล้ว';
 
   @override

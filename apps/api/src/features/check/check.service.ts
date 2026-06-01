@@ -47,7 +47,8 @@ Criteria:
       return parsed.verdict as 'scam' | 'suspicious' | 'safe';
     }
     return 'unknown';
-  } catch (_e) {
+  } catch (e) {
+    console.warn('[check] Gemini content analysis failed; defaulting to unknown', e);
     return 'unknown';
   }
 }
@@ -303,8 +304,9 @@ export async function runCheck(
       } else {
         verdict = type === 'text' ? 'unknown' : 'safe';
       }
-    } catch (_e) {
+    } catch (e) {
       // Gemini unavailable or no embeddings — fall back gracefully
+      console.warn('[check] semantic retrieval failed; falling back', e);
       if (type === 'text') verdict = 'unknown';
     }
   }
@@ -331,8 +333,9 @@ export async function runCheck(
         latencyMs: Date.now() - start,
       },
     });
-  } catch (_e) {
+  } catch (e) {
     // Log write failure must never surface to the caller
+    console.warn('[check] check_log write failed (non-fatal)', e);
   }
 
   return {

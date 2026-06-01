@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/feature_flags/feature_flags.dart';
-import '../../check/data/check_api_client.dart';
 import '../../check/domain/check_result.dart';
+import '../../check/domain/detect_type.dart';
 import '../domain/shared_payload.dart';
 import 'share_intent_providers.dart';
 
