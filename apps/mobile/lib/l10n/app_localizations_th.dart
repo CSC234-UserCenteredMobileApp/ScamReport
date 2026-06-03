@@ -1224,4 +1224,22 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get appLockDeleteKey => 'ลบ';
+
+  @override
+  String get profileEditTile => 'โปรไฟล์สาธารณะ';
+
+  @override
+  String get profileEditHeading => 'แก้ไขโปรไฟล์สาธารณะ';
+
+  @override
+  String get profileDisplayNameLabel => 'ชื่อที่แสดง';
+
+  @override
+  String get profileDisplayNameInvalid => 'กรอก 1–50 ตัวอักษร';
+
+  @override
+  String get profileSave => 'บันทึก';
+
+  @override
+  String get profileSaved => 'อัปเดตโปรไฟล์แล้ว';
 }

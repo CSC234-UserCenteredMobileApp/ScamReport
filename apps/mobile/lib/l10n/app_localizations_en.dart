@@ -1227,4 +1227,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appLockDeleteKey => 'Delete';
+
+  @override
+  String get profileEditTile => 'Public profile';
+
+  @override
+  String get profileEditHeading => 'Edit public profile';
+
+  @override
+  String get profileDisplayNameLabel => 'Display name';
+
+  @override
+  String get profileDisplayNameInvalid => 'Enter 1–50 characters';
+
+  @override
+  String get profileSave => 'Save';
+
+  @override
+  String get profileSaved => 'Profile updated';
 }

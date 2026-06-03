@@ -2317,6 +2317,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete'**
   String get appLockDeleteKey;
+
+  /// No description provided for @profileEditTile.
+  ///
+  /// In en, this message translates to:
+  /// **'Public profile'**
+  String get profileEditTile;
+
+  /// No description provided for @profileEditHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit public profile'**
+  String get profileEditHeading;
+
+  /// No description provided for @profileDisplayNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Display name'**
+  String get profileDisplayNameLabel;
+
+  /// No description provided for @profileDisplayNameInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 1–50 characters'**
+  String get profileDisplayNameInvalid;
+
+  /// No description provided for @profileSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get profileSave;
+
+  /// No description provided for @profileSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated'**
+  String get profileSaved;
 }
 
 class _AppLocalizationsDelegate

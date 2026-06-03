@@ -461,5 +461,12 @@
   "appLockPinMismatch": "PINs didn't match. Start again.",
   "appLockBiometricUnavailable": "Biometric unavailable — use your PIN",
   "appLockDisableHeading": "Unlock to turn off App Lock",
-  "appLockDeleteKey": "Delete"
+  "appLockDeleteKey": "Delete",
+
+  "profileEditTile": "Public profile",
+  "profileEditHeading": "Edit public profile",
+  "profileDisplayNameLabel": "Display name",
+  "profileDisplayNameInvalid": "Enter 1\u201350 characters",
+  "profileSave": "Save",
+  "profileSaved": "Profile updated"
 }

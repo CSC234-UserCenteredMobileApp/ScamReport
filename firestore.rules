@@ -10,10 +10,31 @@ rules_version = '2';
 //
 //   alerts/**                    public read,  server-only write
 //   my-reports/{uid}/items/**    owner-only read, server-only write
+//   profiles/{uid}               owner-only read/write, field-level validated
 //
 // Anything not explicitly allowed below is denied.
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // All profile fields must be well-typed and bounded. Evaluated against
+    // request.resource.data, which on update is the full post-write document.
+    function validProfile() {
+      let d = request.resource.data;
+      return d.displayName is string
+          && d.displayName.size() >= 1
+          && d.displayName.size() <= 50
+          && d.preferredLanguage in ['en', 'th']
+          && (!('avatarUrl' in d)
+              || (d.avatarUrl is string && d.avatarUrl.size() <= 500))
+          // Server-side timestamp validation: the client must write
+          // FieldValue.serverTimestamp(), which the rules engine sees as
+          // request.time. A client-supplied clock value is rejected.
+          && d.updatedAt == request.time;
+    }
 
     // Announcements mirror — sourced from Postgres `announcements` table by
     // apps/api/src/sync/firestore_sync.ts::mirrorAlert(...). Public-readable
@@ -33,6 +54,27 @@ service cloud.firestore {
     match /my-reports/{uid}/items/{reportId} {
       allow read: if request.auth != null && request.auth.uid == uid;
       allow write: if false;
+    }
+
+    // Editable user profile card — the ONE client-writable surface.
+    // Owner-isolated, field-level validated, server-timestamped.
+    //   create: full key-set check (diff() is unavailable — resource is null)
+    //   update: granular diff().affectedKeys() so a write may only touch the
+    //           whitelisted fields, even via merge.
+    match /profiles/{uid} {
+      allow read: if isOwner(uid);
+
+      allow create: if isOwner(uid)
+          && request.resource.data.keys().hasOnly(
+               ['displayName', 'avatarUrl', 'preferredLanguage', 'updatedAt'])
+          && validProfile();
+
+      allow update: if isOwner(uid)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(
+               ['displayName', 'avatarUrl', 'preferredLanguage', 'updatedAt'])
+          && validProfile();
+
+      allow delete: if isOwner(uid);
     }
 
     // Default deny.

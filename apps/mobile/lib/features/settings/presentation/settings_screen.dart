@@ -11,6 +11,7 @@ import '../../../l10n/l10n.dart';
 import '../../app_lock/presentation/app_lock_providers.dart';
 import '../../app_lock/presentation/pin_setup_sheet.dart';
 import '../../app_lock/presentation/pin_verify_sheet.dart';
+import '../../profile/presentation/edit_profile_sheet.dart';
 import '../../auth/domain/auth_user.dart';
 import '../../auth/presentation/auth_providers.dart';
 import '../../notifications/presentation/notifications_providers.dart';
@@ -194,12 +195,20 @@ class _AccountSection extends StatelessWidget {
         children: [
           // My reports — signed-in non-admin users only
           if (!isGuest) ...[
+            // Public profile — writes Firestore profiles/{uid} directly
+            // (the rules-validated client-write surface).
+            _NavTile(
+              icon: Icons.badge_outlined,
+              title: context.l10n.profileEditTile,
+              onTap: () => showEditProfileSheet(context),
+              isFirst: true,
+            ),
+            const Divider(height: 1, indent: 16, endIndent: 16),
             if (!isAdmin) ...[
               _NavTile(
                 icon: Icons.inbox_outlined,
                 title: context.l10n.myReports,
                 onTap: () => context.push('/my-reports'),
-                isFirst: true,
               ),
               const Divider(height: 1, indent: 16, endIndent: 16),
             ],

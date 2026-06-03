@@ -430,5 +430,12 @@
   "appLockPinMismatch": "PIN ไม่ตรงกัน เริ่มใหม่อีกครั้ง",
   "appLockBiometricUnavailable": "ใช้ไบโอเมตริกไม่ได้ — ใช้ PIN แทน",
   "appLockDisableHeading": "ปลดล็อกเพื่อปิดการล็อกแอป",
-  "appLockDeleteKey": "ลบ"
+  "appLockDeleteKey": "ลบ",
+
+  "profileEditTile": "โปรไฟล์สาธารณะ",
+  "profileEditHeading": "แก้ไขโปรไฟล์สาธารณะ",
+  "profileDisplayNameLabel": "ชื่อที่แสดง",
+  "profileDisplayNameInvalid": "กรอก 1\u201350 ตัวอักษร",
+  "profileSave": "บันทึก",
+  "profileSaved": "อัปเดตโปรไฟล์แล้ว"
 }
