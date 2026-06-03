@@ -41,7 +41,7 @@ In-scope vulnerabilities include (but aren't limited to):
 - Leakage of secrets via logs, responses, or generated artefacts
 - Mobile-side handling of sensitive data (token storage, Firebase config exposure, biometric state in `flutter_secure_storage`)
 - Misconfigured Supabase RLS / storage permissions
-- Misconfigured Firestore rules (`firestore.rules`) — `alerts/**` must be read-public / write-server-only; `my-reports/{uid}/items/**` must be read-iff-owner / write-server-only
+- Misconfigured Firestore rules (`firestore.rules`) — `alerts/**` must be read-public / write-server-only; `my-reports/{uid}/items/**` must be read-iff-owner / write-server-only; `profiles/{uid}` must be owner-only with `diff().affectedKeys()` whitelist + `request.time` timestamp validation
 
 Out-of-scope:
 
@@ -60,7 +60,7 @@ These are the controls the team enforces in CI + code review. External researche
 | Static analysis | `dart analyze --fatal-infos`, `bun run typecheck` | CI |
 | Auth gate on mutating routes | every Elysia route uses `requireAuth()` or `requireRole(...)` | `security-reviewer` agent + architect agent |
 | Reporter anonymisation | admin route serializers strip reporter fields; verified via API response shape test | `security-reviewer` agent |
-| Firestore rules | emulator-based tests for the policy table above | `qa` agent (rules tests) + `security-reviewer` agent |
+| Firestore rules | emulator suite `apps/api/test/firestore-rules/` (12 cases; `bun run test:rules`, CI job in security.yml) | `qa` agent (rules tests) + `security-reviewer` agent |
 | Biometric gate | Android-only; Web no-op; biometric never replaces password — only unlocks stored token | `security-reviewer` agent on PR touching `biometric_service.dart` |
 | `.env` hygiene | `.env*` gitignored; `.env.example` is the only template committed | `security-reviewer` agent |
 

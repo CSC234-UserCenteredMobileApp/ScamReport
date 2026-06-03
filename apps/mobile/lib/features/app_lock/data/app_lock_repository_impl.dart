@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
@@ -88,6 +89,10 @@ class AppLockRepositoryImpl implements AppLockRepository {
 
   @override
   Future<bool> canUseBiometrics() async {
+    // local_auth has no web implementation — its MethodChannel throws
+    // MissingPluginException (which `on PlatformException` does NOT catch).
+    // On web the lock degrades to PIN-only.
+    if (kIsWeb) return false;
     try {
       if (!await _localAuth.isDeviceSupported()) return false;
       if (!await _localAuth.canCheckBiometrics) return false;
@@ -100,6 +105,7 @@ class AppLockRepositoryImpl implements AppLockRepository {
 
   @override
   Future<bool> authenticateBiometric(String localizedReason) async {
+    if (kIsWeb) return false; // see canUseBiometrics
     try {
       return await _localAuth.authenticate(
         localizedReason: localizedReason,

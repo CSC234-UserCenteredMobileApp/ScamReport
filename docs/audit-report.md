@@ -317,3 +317,45 @@ Mobile coverage is 81.04% (`docs/test-report.md`), API is above the 80% gate, sh
 | WBS / Gantt / UJM | `docs/pm/` | user task |
 
 The "user task" rows are deliverables that require live captures (production dashboards, device screenshots, course-specific project management artefacts) and are owned by the team rather than generated from the code. Everything in the codebase column is committed in this branch.
+
+---
+
+# Addendum — 2026-06-03 rubric-closure pass
+
+A final audit against the term-assignment rubric drove one feature + seven
+compliance work-packages (branch `feat/app-lock-biometric-pin`). Summary for
+graders; details in the named docs/tests.
+
+## New since 2026-05-29
+
+| Item | Evidence |
+| --- | --- |
+| Biometric app-lock + 6-digit PIN fallback (R1) | `apps/mobile/lib/features/app_lock/` — Keystore-backed PIN (PBKDF2-HMAC-SHA256, vector-tested), persisted lockout w/ backoff, fail-closed overlay gate, `FlutterFragmentActivity`; 66 feature tests |
+| Firestore rules demonstration (R1/C) | `firestore.rules` `profiles/{uid}`: owner isolation, **`diff().affectedKeys()`** whitelist on update, field-level type/size checks, **`request.time == updatedAt`** server-timestamp validation. 12-case emulator suite `apps/api/test/firestore-rules/` + `security.yml` CI job. Mobile edit-profile slice writes it |
+| Clean-Architecture guard (R2) | `settings` domain purified (`AppThemeMode`); `test/arch/domain_purity_test.dart` fails any future Flutter/Firebase/Riverpod import under `domain/` |
+| Riverpod code generation (R2) | `home`, `platform_summary`, `profile` use `@riverpod` (riverpod_generator). **Justification for hybrid:** the remaining hand-written providers predate codegen, are equally type-safe under Riverpod 2, and a wholesale migration would churn ~19 files + every test override for zero behavioural gain; codegen is demonstrated on three representative shapes (function provider, FutureProvider, class notifier) and is the default for new features |
+| A11y quality gate (R5) | `test/a11y/a11y_sweep_test.dart` — contrast / tap-target / labeled-tap guidelines + textScale-2.0 across 5 core screens. Fixes: light-theme primary `#C8481B` (white-on-primary 4.77:1; coral text 4.57:1 — original `#F25F2A` failed at 3.26/3.12), 48 dp targets, labeled back button, dynamic-type-safe rows. `docs/accessibility-checklist.md` |
+| Performance (R5) | All 9 `Image.network` sites → `CachedNetworkImage`; `image_picker` `imageQuality: 80, maxWidth: 1920`; `docs/performance-budget.md`; bounded `ListView(children:)` audit recorded there |
+| Integration tests (R5) | `integration_test/app_flows_test.dart` — 3 flows (home stats, check→verdict, login→settings→sign-out) with faked Firebase/API via Riverpod seams; `integration.yml` CI: Android emulator (API 34) + headless-Chrome `flutter drive`; `flutter build web` added to ci.yml |
+| Widget-test backfill | +8 screen suites (44 tests): legal ×2, notifications inbox, my-reports, edit-report, admin announcements ×2, platform summary. The platform-summary suite caught a live `ParentDataWidget` defect (`Expanded` under `SizedBox` in a `Wrap`) — fixed |
+| D4 artefacts | `docs/project-plan.md` (WBS + Gantt + PDM), `docs/design/personas.md`, debug-only Crashlytics evidence button in Settings (tap = non-fatal, long-press = fatal) |
+
+## Notes for graders (interpretations + accepted risks)
+
+- **"Web WebAuthn" (R1):** read as *Android Keystore **or** WebAuthn* for the
+  biometric fallback. The shipped lock uses Android Keystore + biometrics; on
+  Flutter web it degrades to PIN-only (no `local_auth` web implementation).
+- **Composite indexes (R4):** `firestore.indexes.json` is intentionally empty —
+  Firestore is a 3-collection read surface (2 server-written mirrors + the
+  rules-validated profile doc) addressed by path; Postgres is the system of
+  record for every compound query. An index added here would be dead config.
+- **Secret history:** Firebase *client* keys (not service credentials) were
+  committed early in the project; the files are now gitignored with `.example`
+  templates and gitleaks gates CI. Recommendation on record: rotate the keys
+  before the public showcase. No server-side secrets ever committed.
+- **Recents privacy:** app-lock masks the task-switcher thumbnail with a
+  best-effort widget cover (product decision: screenshots stay allowed, no
+  `FLAG_SECURE`); a snapshot race on some OEMs can briefly show the last frame.
+- **Lockout clock:** PIN lockout is wall-clock based; a user who can change the
+  system clock gains ~1 extra guess per change against a 10⁶ keyspace stored
+  in Keystore-backed storage. Accepted.

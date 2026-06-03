@@ -1,0 +1,85 @@
+name: Integration
+
+# Rubric R5: integration tests verifying functionality on BOTH Android and
+# Web. Backend/Firebase are faked via Riverpod overrides inside the test
+# target (integration_test/app_flows_test.dart) — no emulator credentials.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    name: Integration — Android emulator (API 34)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.x'
+          channel: stable
+          cache: true
+
+      - name: Fetch Flutter deps
+        working-directory: apps/mobile
+        run: flutter pub get
+
+      - name: Bootstrap firebase_options.dart from .example
+        working-directory: apps/mobile
+        run: cp lib/firebase_options.dart.example lib/firebase_options.dart
+
+      - name: Enable KVM for hardware acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run integration tests on the emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          profile: pixel_5
+          disable-animations: true
+          working-directory: apps/mobile
+          script: flutter test integration_test/app_flows_test.dart
+
+  web:
+    name: Integration — Chrome (web)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.x'
+          channel: stable
+          cache: true
+
+      - uses: nanasess/setup-chromedriver@v2
+
+      - name: Fetch Flutter deps
+        run: flutter pub get
+
+      - name: Bootstrap firebase_options.dart from .example
+        run: cp lib/firebase_options.dart.example lib/firebase_options.dart
+
+      - name: Run integration tests against headless Chrome
+        run: |
+          chromedriver --port=4444 &
+          sleep 2
+          flutter drive \
+            --driver=test_driver/integration_test.dart \
+            --target=integration_test/app_flows_test.dart \
+            -d web-server --browser-name=chrome --headless

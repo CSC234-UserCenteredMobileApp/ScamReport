@@ -31,18 +31,20 @@ class ForegroundNotificationListener extends ConsumerStatefulWidget {
 class _ForegroundNotificationListenerState
     extends ConsumerState<ForegroundNotificationListener> {
   @override
-  void initState() {
-    super.initState();
-    FirebaseMessaging.onMessageOpenedApp.listen(_handleTap);
-    FirebaseMessaging.instance.getInitialMessage().then((msg) {
-      if (msg != null) _handleTap(msg);
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     ref.listen(fcmForegroundMessagesProvider, (_, next) {
       next.whenData((message) => _handleForeground(context, message));
+    });
+    // Tap-on-push + cold-start notification, via DI providers (not the
+    // FirebaseMessaging statics) so errors stay contained and tests can
+    // override them.
+    ref.listen(fcmOpenedAppMessagesProvider, (_, next) {
+      next.whenData(_handleTap);
+    });
+    ref.listen(fcmInitialMessageProvider, (_, next) {
+      next.whenData((msg) {
+        if (msg != null) _handleTap(msg);
+      });
     });
     return widget.child;
   }

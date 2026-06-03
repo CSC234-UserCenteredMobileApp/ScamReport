@@ -16,3 +16,15 @@ final fcmTokenProvider = FutureProvider<String?>((ref) async {
 final fcmForegroundMessagesProvider = StreamProvider<RemoteMessage>((ref) {
   return FirebaseMessaging.onMessage;
 });
+
+// Tap-on-push stream (app in background -> opened via notification). Routed
+// through a provider so widgets never touch the FirebaseMessaging statics
+// directly (overridable in tests; errors contained as AsyncError).
+final fcmOpenedAppMessagesProvider = StreamProvider<RemoteMessage>((ref) {
+  return FirebaseMessaging.onMessageOpenedApp;
+});
+
+// The notification that cold-started the app, if any.
+final fcmInitialMessageProvider = FutureProvider<RemoteMessage?>((ref) {
+  return ref.watch(firebaseMessagingProvider).getInitialMessage();
+});

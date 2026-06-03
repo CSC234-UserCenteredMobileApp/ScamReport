@@ -95,6 +95,9 @@ jobs:
       - name: Run tests with coverage
         run: flutter test --coverage
 
+      - name: Build web (Definition of Done — app compiles for Android AND Web)
+        run: flutter build web
+
       - name: Strip generated files from coverage report
         run: |
           python3 - <<'EOF'
