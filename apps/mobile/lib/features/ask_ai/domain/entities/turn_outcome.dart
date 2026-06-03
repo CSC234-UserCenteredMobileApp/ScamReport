@@ -10,6 +10,7 @@ class TurnOutcome {
     required this.reportable,
     required this.hasEnoughInfo,
     required this.similarReports,
+    this.searchIntent = false,
     this.draft,
     this.missingFacts = const [],
   });
@@ -17,6 +18,11 @@ class TurnOutcome {
   final ChatMessage userMessage;
   final ChatMessage assistantMessage;
   final bool intentDetected;
+
+  /// True when the user was looking up existing reports (search mode) rather
+  /// than describing their own incident. In that case `similarReports` are the
+  /// answer and `reportable`/`draft` are always false/null.
+  final bool searchIntent;
   final bool reportable;
   final bool hasEnoughInfo;
 

@@ -12,6 +12,7 @@ class ChatMessage {
     required this.createdAt,
     this.attachments = const [],
     this.similarReports = const [],
+    this.searchIntent = false,
   });
 
   final String id;
@@ -20,6 +21,11 @@ class ChatMessage {
   final bool intentDetected;
   final DateTime createdAt;
   final List<ChatAttachment> attachments;
+
+  /// True when this assistant turn answered a report lookup (search mode).
+  /// Drives the cards-section label ("Reports I found" vs "Matched verified
+  /// reports"). Always false for user messages and reloaded history.
+  final bool searchIntent;
 
   /// Verified-report cards the AI surfaced alongside this assistant turn.
   /// Always empty for user messages and for assistant messages reloaded

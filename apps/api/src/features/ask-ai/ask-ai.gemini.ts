@@ -25,6 +25,11 @@ const RESPONSE_SCHEMA = {
       type: 'boolean',
       description: 'True iff the user describes a scam they personally experienced and may want to report.',
     },
+    searchIntent: {
+      type: 'boolean',
+      description:
+        'True iff the user is looking up whether reports already exist about something (a company, app, phone, URL, or scam pattern) rather than describing their own incident. Mutually exclusive with intentDetected — when both could apply, the report track wins.',
+    },
     hasEnoughInfo: {
       type: 'boolean',
       description: 'True iff there is enough information in the conversation to draft a useful report (title, description, scam type at minimum).',
@@ -91,6 +96,7 @@ const RESPONSE_SCHEMA = {
   required: [
     'reply',
     'intentDetected',
+    'searchIntent',
     'hasEnoughInfo',
     'reportable',
     'similarReportIds',
@@ -107,6 +113,7 @@ GENERAL RULES
 3. Keep replies under 150 words. Use short sentences. Do not bullet-list options unless the user asks for steps.
 4. NEVER ask more than ONE question per turn. Pick the single most useful question.
 5. similarReportIds: echo at most 5 of the provided "Verified scam reports near this topic" IDs that genuinely match. NEVER fabricate IDs.
+6. searchIntent: set true when the user is LOOKING UP whether reports already exist about something (a company, app, phone number, URL, or scam pattern) instead of describing their own incident — e.g. "are there reports about a fake SCB loan app?", "any scams from this number?", "search investment scams". In that case present the matched verified reports as the answer (see branch E): do NOT run the fact-gathering interview and do NOT append a follow-up question. If the user is BOTH reporting a personal incident AND asking whether others reported it, treat it as a report (intentDetected wins) — you can still reference matching reports in your reply.
 
 REQUIRED FACTS BEFORE \`hasEnoughInfo=true\`
 
@@ -142,8 +149,9 @@ A) intentDetected=true + missingFacts non-empty (the user describes a personal i
    - End with EXACTLY ONE question targeting missingFacts[0] (see examples above).
    - Do NOT produce a draft. reportable=false. hasEnoughInfo=false.
 
-B) intentDetected=false + missingFacts non-empty (general question, vague)
-   - Answer briefly using the verified-reports context.
+B) intentDetected=false + missingFacts non-empty (general question, vague — and NOT a lookup)
+   - If the user is only looking something up, this is search: use branch E instead.
+   - Otherwise answer briefly using the verified-reports context.
    - End with ONE friendly, curious question to draw out context. Counselor, not interrogator.
    - reportable=false unless the described item itself clearly looks scammy.
 
@@ -154,6 +162,14 @@ C) intentDetected=true + missingFacts empty (all four facts gathered)
 
 D) intentDetected=false + missingFacts empty (asking for advice, e.g., "what are common parcel scams?")
    - Answer the question. Reference matched IDs. No draft. No follow-up question.
+
+E) searchIntent=true (the user is looking up existing reports, NOT reporting their own incident)
+   - Set searchIntent=true, intentDetected=false, reportable=false, hasEnoughInfo=false, missingFacts=[], no draft.
+   - The "Verified scam reports near this topic" list is your candidate set — these are nearest-neighbour matches, NOT guaranteed to be about what the user asked. YOUR echo is the relevance filter.
+   - Echo in similarReportIds EVERY candidate that is genuinely about the same entity/topic the user asked about — those become the result cards.
+   - If matches exist: say in ONE short sentence that you found related reports and the cards below are the closest. No follow-up question.
+   - If NONE of the candidates are actually about it: echo an empty similarReportIds list, say plainly you couldn't find verified reports matching that yet (never invent any), and invite them to describe it if it happened to them.
+   - Never use a verdict label.
 
 DRAFT FIELDS (only when reportable=true)
 
@@ -218,6 +234,7 @@ export type MissingFact =
 export type GeminiTurnOutput = {
   reply: string;
   intentDetected: boolean;
+  searchIntent: boolean;
   hasEnoughInfo: boolean;
   reportable: boolean;
   draft: AskAiDraft | null;
@@ -282,6 +299,7 @@ function fallbackOutput(locale?: AskAiLocale): GeminiTurnOutput {
         ? 'ขออภัย ขณะนี้ระบบไม่สามารถสร้างคำตอบได้ กรุณาลองใหม่อีกครั้งในอีกสักครู่'
         : "I'm having trouble generating a response right now. Please try rephrasing your question, or try again in a moment.",
     intentDetected: false,
+    searchIntent: false,
     hasEnoughInfo: false,
     reportable: false,
     draft: null,
@@ -356,11 +374,18 @@ function normaliseOutput(
       f === 'scammerAlias',
   );
 
+  // Tie-break (victim safety): a message that both describes a personal
+  // incident AND asks whether others reported it stays on the report track —
+  // the user may need to file. intentDetected wins; searchIntent is cleared.
+  const intentDetected = Boolean(raw.intentDetected);
+  const searchIntent = !intentDetected && Boolean(raw.searchIntent);
+
   // Resolve the contradictions Gemini sometimes produces. The schema says:
   // missingFacts non-empty XOR hasEnoughInfo. When both are true we trust
   // the missingFacts list (fact gathering takes priority over premature
   // drafting).
-  const hasEnoughInfo = missingFacts.length === 0 && Boolean(raw.hasEnoughInfo);
+  let effectiveMissingFacts = missingFacts;
+  let hasEnoughInfo = effectiveMissingFacts.length === 0 && Boolean(raw.hasEnoughInfo);
 
   let draft = raw.draft ?? null;
   // If the model claims reportable but produced no draft, OR claims
@@ -370,6 +395,17 @@ function normaliseOutput(
   if ((reportable && !draft) || (reportable && !hasEnoughInfo)) {
     reportable = false;
     draft = null;
+  }
+
+  // Search mode is a lookup, never a report: clear the drafting signals so the
+  // UI never offers "Submit report?" for a search turn. hasEnoughInfo means
+  // "enough to draft a report" — false here. Cards still flow from
+  // similarReportIds (the echo above is the relevance filter).
+  if (searchIntent) {
+    reportable = false;
+    draft = null;
+    effectiveMissingFacts = [];
+    hasEnoughInfo = false;
   }
 
   // Ensure optional fields have explicit nulls (TypeBox response schema is
@@ -391,12 +427,13 @@ function normaliseOutput(
   }
   return {
     reply: raw.reply ?? fallbackOutput(input.locale).reply,
-    intentDetected: Boolean(raw.intentDetected),
+    intentDetected,
+    searchIntent,
     hasEnoughInfo,
     reportable,
     draft,
     similarReportIds,
-    missingFacts,
+    missingFacts: effectiveMissingFacts,
   };
 }
 
