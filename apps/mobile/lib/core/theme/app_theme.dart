@@ -4,7 +4,12 @@ import 'package:google_fonts/google_fonts.dart';
 // Design tokens — translated from the Claude Design prototype's styles.css.
 // See `docs/design-review.md` for the full token table and rationale.
 
-const Color _brandPrimary = Color(0xFFF25F2A); // --brand-500
+// --brand-500. Light theme uses a darkened coral so both white-on-primary
+// (4.77:1) and primary-as-text-on-bg (4.57:1) clear WCAG AA — the original
+// #F25F2A only reaches 3.26:1 / 3.12:1 (see test/a11y/). Dark theme keeps the
+// bright coral (5.55:1 on the dark bg) with dark-ink onPrimary (5.2:1).
+const Color _brandPrimary = Color(0xFFF25F2A);
+const Color _brandPrimaryLight = Color(0xFFC8481B);
 
 // Light surfaces
 const Color _bgLight = Color(0xFFFAFAF7);
@@ -76,8 +81,14 @@ const _unknownDark = VerdictColors(
   soft: Color(0xFF2D2F36),
 );
 
-ThemeData lightTheme() => _buildTheme(
+/// [useGoogleFonts] exists for widget tests (e.g. the a11y sweep): GoogleFonts
+/// fires async asset loads that throw when runtime fetching is disabled and
+/// the fonts aren't bundled. Color tokens are unaffected by the font family.
+ThemeData lightTheme({bool useGoogleFonts = true}) => _buildTheme(
+      useGoogleFonts: useGoogleFonts,
       brightness: Brightness.light,
+      primary: _brandPrimaryLight,
+      onPrimary: Colors.white,
       bg: _bgLight,
       surface: _surfaceLight,
       surfaceContainer: _surface2Light,
@@ -93,8 +104,11 @@ ThemeData lightTheme() => _buildTheme(
       ),
     );
 
-ThemeData darkTheme() => _buildTheme(
+ThemeData darkTheme({bool useGoogleFonts = true}) => _buildTheme(
+      useGoogleFonts: useGoogleFonts,
       brightness: Brightness.dark,
+      primary: _brandPrimary,
+      onPrimary: _inkLight,
       bg: _bgDark,
       surface: _surfaceDark,
       surfaceContainer: _surface2Dark,
@@ -135,15 +149,20 @@ TextTheme _applyThaiFont(TextTheme t) => TextTheme(
       labelSmall: _patch(t.labelSmall),
     );
 
-// Bottom-nav label style — must include fallback manually (not inherited from textTheme).
-final _navLabelStyle = TextStyle(
-  fontSize: 11,
-  fontWeight: FontWeight.w600,
-  fontFamilyFallback: [_thaiFontFamily],
-);
+// Bottom-nav label style — must include fallback manually (not inherited from
+// textTheme). Function (not a top-level final) so the GoogleFonts lookup only
+// runs when fonts are enabled.
+TextStyle _navLabelStyle({required bool useGoogleFonts}) => TextStyle(
+      fontSize: 11,
+      fontWeight: FontWeight.w600,
+      fontFamilyFallback: useGoogleFonts ? [_thaiFontFamily] : null,
+    );
 
 ThemeData _buildTheme({
+  bool useGoogleFonts = true,
   required Brightness brightness,
+  required Color primary,
+  required Color onPrimary,
   required Color bg,
   required Color surface,
   required Color surfaceContainer,
@@ -157,7 +176,8 @@ ThemeData _buildTheme({
     seedColor: _brandPrimary,
     brightness: brightness,
   ).copyWith(
-    primary: _brandPrimary,
+    primary: primary,
+    onPrimary: onPrimary,
     surface: surface,
     surfaceContainerHighest: surfaceContainer,
     outline: outline,
@@ -168,12 +188,17 @@ ThemeData _buildTheme({
   final baseTextTheme = brightness == Brightness.light
       ? Typography.material2021().black
       : Typography.material2021().white;
-  final textTheme = _applyThaiFont(
-    GoogleFonts.plusJakartaSansTextTheme(baseTextTheme).apply(
-      bodyColor: onSurface,
-      displayColor: onSurface,
-    ),
-  );
+  final textTheme = useGoogleFonts
+      ? _applyThaiFont(
+          GoogleFonts.plusJakartaSansTextTheme(baseTextTheme).apply(
+            bodyColor: onSurface,
+            displayColor: onSurface,
+          ),
+        )
+      : baseTextTheme.apply(
+          bodyColor: onSurface,
+          displayColor: onSurface,
+        );
 
   return ThemeData(
     useMaterial3: true,
@@ -214,15 +239,15 @@ ThemeData _buildTheme({
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: _brandPrimary, width: 1.5),
+        borderSide: BorderSide(color: primary, width: 1.5),
       ),
       hintStyle: TextStyle(color: mutedHint),
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        backgroundColor: _brandPrimary,
-        foregroundColor: Colors.white,
+        backgroundColor: primary,
+        foregroundColor: onPrimary,
         shape: const StadiumBorder(),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
@@ -241,7 +266,7 @@ ThemeData _buildTheme({
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
-        foregroundColor: _brandPrimary,
+        foregroundColor: primary,
         shape: const StadiumBorder(),
         textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
       ),
@@ -259,12 +284,12 @@ ThemeData _buildTheme({
     ),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: surface,
-      selectedItemColor: _brandPrimary,
+      selectedItemColor: primary,
       unselectedItemColor: mutedHint,
       type: BottomNavigationBarType.fixed,
       showUnselectedLabels: true,
-      selectedLabelStyle: _navLabelStyle,
-      unselectedLabelStyle: _navLabelStyle,
+      selectedLabelStyle: _navLabelStyle(useGoogleFonts: useGoogleFonts),
+      unselectedLabelStyle: _navLabelStyle(useGoogleFonts: useGoogleFonts),
     ),
     dividerTheme: DividerThemeData(color: outline, thickness: 1, space: 1),
     extensions: [verdict],

@@ -145,8 +145,13 @@ class _FooterLink extends StatelessWidget {
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
-        GestureDetector(
-          onTap: onTap,
+        TextButton(
+          onPressed: onTap,
+          style: TextButton.styleFrom(
+            // a11y: tap target >= 48dp (androidTapTargetGuideline).
+            minimumSize: const Size(48, 48),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+          ),
           child: Text(
             linkLabel,
             style: theme.textTheme.bodyMedium?.copyWith(
