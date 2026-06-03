@@ -8,6 +8,9 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../core/feature_flags/feature_flags.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../l10n/l10n.dart';
+import '../../app_lock/presentation/app_lock_providers.dart';
+import '../../app_lock/presentation/pin_setup_sheet.dart';
+import '../../app_lock/presentation/pin_verify_sheet.dart';
 import '../../auth/domain/auth_user.dart';
 import '../../auth/presentation/auth_providers.dart';
 import '../../notifications/presentation/notifications_providers.dart';
@@ -17,6 +20,7 @@ import 'settings_providers.dart';
 part '_account_card.dart';
 part '_notifications_section.dart';
 part '_preferences_section.dart';
+part '_security_section.dart';
 
 // ---------------------------------------------------------------------------
 // Skeleton placeholder — shared by loading states in part files.
@@ -72,6 +76,23 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: 8),
             const _NotificationsSection(),
             const SizedBox(height: 24),
+
+            // Security — biometric / PIN app lock (Remote Config gated).
+            // Also shown whenever the lock is already ON, so flipping the
+            // flag off remotely can never strand a user behind a lock they
+            // have no UI to disable.
+            if (ref.watch(featureFlagProvider('enable_biometric_login')) ||
+                (ref
+                        .watch(appLockControllerProvider)
+                        .valueOrNull
+                        ?.config
+                        .enabled ??
+                    false)) ...[
+              _SectionLabel(context.l10n.appLockSectionTitle),
+              const SizedBox(height: 8),
+              const _SecuritySection(),
+              const SizedBox(height: 24),
+            ],
 
             // Admin tools — only visible to admins
             if (user?.isAdmin == true) ...[

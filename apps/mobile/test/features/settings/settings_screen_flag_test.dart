@@ -47,6 +47,7 @@ Future<Widget> _buildSettings({
           .overrideWith((_) => smsScanEnabled),
       featureFlagProvider('enable_call_screening')
           .overrideWith((_) => callScreeningEnabled),
+      featureFlagProvider('enable_biometric_login').overrideWith((_) => false),
     ],
     child: _wrap(const SettingsScreen()),
   );

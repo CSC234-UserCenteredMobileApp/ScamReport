@@ -13,6 +13,8 @@ import 'core/notifications/foreground_listener.dart';
 import 'core/observability/crash_reporter.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'features/app_lock/presentation/app_lock_gate.dart';
+import 'features/app_lock/presentation/app_lock_lifecycle.dart';
 import 'features/ask_ai/presentation/ask_ai_providers.dart';
 import 'features/settings/presentation/settings_providers.dart';
 
@@ -40,12 +42,25 @@ class MyApp extends ConsumerStatefulWidget {
 
 class _MyAppState extends ConsumerState<MyApp> {
   final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+  late final AppLockObserver _appLockObserver;
 
   @override
   void initState() {
     super.initState();
     // FcmRegistrar listens to auth state internally; safe to fire-and-forget.
     ref.read(fcmRegistrarProvider).start();
+
+    // App-lock: relock on resume past the timeout + paint the privacy cover
+    // while backgrounded. The controller's initial config load is kicked off
+    // by AppLockGate watching the provider in build().
+    _appLockObserver = AppLockObserver(ref);
+    WidgetsBinding.instance.addObserver(_appLockObserver);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(_appLockObserver);
+    super.dispose();
   }
 
   @override
@@ -87,7 +102,12 @@ class _MyAppState extends ConsumerState<MyApp> {
       scaffoldMessengerKey: _scaffoldMessengerKey,
       routerConfig: router,
       builder: (context, child) {
-        return ForegroundNotificationListener(child: child ?? const SizedBox());
+        // AppLockGate is outermost so the lock/privacy cover sits above all
+        // app content, including notification overlays.
+        return AppLockGate(
+          child:
+              ForegroundNotificationListener(child: child ?? const SizedBox()),
+        );
       },
     );
   }
