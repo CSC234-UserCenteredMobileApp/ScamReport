@@ -17,6 +17,7 @@ import 'features/app_lock/presentation/app_lock_gate.dart';
 import 'features/app_lock/presentation/app_lock_lifecycle.dart';
 import 'features/ask_ai/presentation/ask_ai_providers.dart';
 import 'features/settings/presentation/settings_providers.dart';
+import 'features/settings/presentation/theme_mode_x.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -95,7 +96,7 @@ class _MyAppState extends ConsumerState<MyApp> {
       title: 'ScamReport',
       theme: lightTheme(),
       darkTheme: darkTheme(),
-      themeMode: settings?.themeMode ?? ThemeMode.system,
+      themeMode: settings?.themeMode.material ?? ThemeMode.system,
       locale: settings != null ? Locale(settings.language) : null,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,

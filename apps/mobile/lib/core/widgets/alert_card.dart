@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -55,12 +56,12 @@ class AlertCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (imageUrl != null)
-              Image.network(
-                imageUrl,
+              CachedNetworkImage(
+                imageUrl: imageUrl,
                 height: 160,
                 width: double.infinity,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                errorWidget: (_, __, ___) => const SizedBox.shrink(),
               ),
             Padding(
               padding: const EdgeInsets.all(12),

@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -402,22 +403,20 @@ class _EvidenceTile extends StatelessWidget {
         ),
         clipBehavior: Clip.antiAlias,
         child: _canPreview
-            ? Image.network(
-                url!,
+            ? CachedNetworkImage(
+                imageUrl: url!,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _FilePlaceholder(file: file),
-                loadingBuilder: (_, child, progress) => progress == null
-                    ? child
-                    : Center(
-                        child: SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                      ),
+                errorWidget: (_, __, ___) => _FilePlaceholder(file: file),
+                placeholder: (_, __) => Center(
+                  child: SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
               )
             : _FilePlaceholder(file: file),
       ),
@@ -481,9 +480,9 @@ class _ImageViewer extends StatelessWidget {
         child: InteractiveViewer(
           minScale: 0.5,
           maxScale: 5,
-          child: Image.network(
-            url,
-            errorBuilder: (_, __, ___) => const Icon(
+          child: CachedNetworkImage(
+            imageUrl: url,
+            errorWidget: (_, __, ___) => const Icon(
               Icons.broken_image_outlined,
               color: Colors.white54,
               size: 64,

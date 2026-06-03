@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -65,6 +66,17 @@ class _AskAiScreenState extends ConsumerState<AskAiScreen> {
     if (content.trim().isEmpty && state.stagedAttachments.isEmpty) return;
     _controller.clear();
     await ref.read(askAiChatControllerProvider.notifier).sendMessage(content);
+    _scrollToBottom();
+  }
+
+  /// Send a canned prompt (e.g. an empty-state suggestion chip). Mirrors
+  /// `_send` minus the composer/attachment plumbing.
+  Future<void> _sendPrompt(String prompt) async {
+    await ref.read(askAiChatControllerProvider.notifier).sendMessage(prompt);
+    _scrollToBottom();
+  }
+
+  void _scrollToBottom() {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent + 200,
@@ -180,7 +192,7 @@ class _AskAiScreenState extends ConsumerState<AskAiScreen> {
         children: [
           Expanded(
             child: state.messages.isEmpty
-                ? const _EmptyState()
+                ? _EmptyState(onPromptTap: _sendPrompt)
                 : ListView.builder(
                     key: const Key('askAiMessageList'),
                     controller: _scrollController,
@@ -356,12 +368,21 @@ String _formatSendError(Object error, String fallback) {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState();
+  const _EmptyState({required this.onPromptTap});
+
+  /// Called with the chip's prompt text when a suggestion is tapped. The
+  /// screen sends it as a normal chat message (no business logic here).
+  final ValueChanged<String> onPromptTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l = context.l10n;
+    final suggestions = <String>[
+      l.askAiSuggestion0,
+      l.askAiSuggestion1,
+      l.askAiSuggestion2,
+    ];
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -382,6 +403,28 @@ class _EmptyState extends StatelessWidget {
                 Text(l.askAiWelcomeBody, style: theme.textTheme.bodyMedium),
               ],
             ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            l.askAiSuggestionsTitle,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.4,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (var i = 0; i < suggestions.length; i++)
+                ActionChip(
+                  key: Key('askAiSuggestion$i'),
+                  label: Text(suggestions[i]),
+                  onPressed: () => onPromptTap(suggestions[i]),
+                ),
+            ],
           ),
           const SizedBox(height: 12),
           Text(
@@ -459,7 +502,9 @@ class _MessageBubble extends StatelessWidget {
               if (hasSimilarReports) ...[
                 const SizedBox(height: 8),
                 Text(
-                  context.l10n.askAiSimilarReportsLabel,
+                  message.searchIntent
+                      ? context.l10n.askAiSearchResultsLabel
+                      : context.l10n.askAiSimilarReportsLabel,
                   style: theme.textTheme.labelMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w700,
@@ -541,27 +586,24 @@ class _BubbleAttachmentState extends State<_BubbleAttachment> {
     if (_isImage && url != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(10),
-        child: Image.network(
-          url,
+        child: CachedNetworkImage(
+          imageUrl: url,
           width: 160,
           height: 160,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => placeholder,
-          loadingBuilder: (ctx, child, progress) {
-            if (progress == null) return child;
-            return SizedBox(
-              width: 160,
-              height: 160,
-              child: Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: widget.onPrimary
-                      ? theme.colorScheme.onPrimary
-                      : theme.colorScheme.primary,
-                ),
+          errorWidget: (_, __, ___) => placeholder,
+          placeholder: (_, __) => SizedBox(
+            width: 160,
+            height: 160,
+            child: Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: widget.onPrimary
+                    ? theme.colorScheme.onPrimary
+                    : theme.colorScheme.primary,
               ),
-            );
-          },
+            ),
+          ),
         ),
       );
     }

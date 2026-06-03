@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -403,10 +404,10 @@ class _EvidenceTile extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           if (file.signedUrl != null)
-            Image.network(
-              file.signedUrl!,
+            CachedNetworkImage(
+              imageUrl: file.signedUrl!,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => _PlaceholderTile(theme: theme),
+              errorWidget: (_, __, ___) => _PlaceholderTile(theme: theme),
             )
           else
             _PlaceholderTile(theme: theme),

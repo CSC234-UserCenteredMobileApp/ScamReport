@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/features/settings/data/settings_repository.dart';
 import 'package:mobile/features/settings/domain/settings_state.dart';
@@ -15,27 +14,27 @@ void main() {
 
       expect(state.language, 'th');
       expect(state.smsScanning, false);
-      expect(state.themeMode, ThemeMode.system);
+      expect(state.themeMode, AppThemeMode.system);
       expect(state.phoneScamAlerts, true);
       expect(state.smsPhishingAlerts, true);
     });
 
-    test('maps stored theme value "light" to ThemeMode.light', () async {
+    test('maps stored theme value "light" to AppThemeMode.light', () async {
       SharedPreferences.setMockInitialValues({'settings_theme': 'light'});
       final prefs = await SharedPreferences.getInstance();
-      expect(SettingsRepository(prefs).load().themeMode, ThemeMode.light);
+      expect(SettingsRepository(prefs).load().themeMode, AppThemeMode.light);
     });
 
-    test('maps stored theme value "dark" to ThemeMode.dark', () async {
+    test('maps stored theme value "dark" to AppThemeMode.dark', () async {
       SharedPreferences.setMockInitialValues({'settings_theme': 'dark'});
       final prefs = await SharedPreferences.getInstance();
-      expect(SettingsRepository(prefs).load().themeMode, ThemeMode.dark);
+      expect(SettingsRepository(prefs).load().themeMode, AppThemeMode.dark);
     });
 
-    test('falls back to ThemeMode.system for unknown theme value', () async {
+    test('falls back to AppThemeMode.system for unknown theme value', () async {
       SharedPreferences.setMockInitialValues({'settings_theme': 'unknown'});
       final prefs = await SharedPreferences.getInstance();
-      expect(SettingsRepository(prefs).load().themeMode, ThemeMode.system);
+      expect(SettingsRepository(prefs).load().themeMode, AppThemeMode.system);
     });
 
     test('restores stored language', () async {
@@ -50,7 +49,7 @@ void main() {
       final prefs = await SharedPreferences.getInstance();
       final repo = SettingsRepository(prefs);
       const saved = SettingsState(
-        themeMode: ThemeMode.dark,
+        themeMode: AppThemeMode.dark,
         language: 'en',
         phoneScamAlerts: false,
         smsPhishingAlerts: false,
@@ -60,7 +59,7 @@ void main() {
       await repo.save(saved);
       final loaded = repo.load();
 
-      expect(loaded.themeMode, ThemeMode.dark);
+      expect(loaded.themeMode, AppThemeMode.dark);
       expect(loaded.language, 'en');
       expect(loaded.phoneScamAlerts, false);
       expect(loaded.smsPhishingAlerts, false);

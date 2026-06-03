@@ -1,4 +1,7 @@
-import 'package:flutter/material.dart';
+/// Theme preference as a pure domain value. Mapped to Flutter's `ThemeMode`
+/// at the presentation edge (see presentation/theme_mode_x.dart) so the
+/// domain layer stays free of Flutter imports.
+enum AppThemeMode { light, dark, system }
 
 class SettingsState {
   const SettingsState({
@@ -9,14 +12,14 @@ class SettingsState {
     required this.smsScanning,
   });
 
-  final ThemeMode themeMode;
+  final AppThemeMode themeMode;
   final String language; // 'en' | 'th'
   final bool phoneScamAlerts;
   final bool smsPhishingAlerts;
   final bool smsScanning;
 
   static const SettingsState defaults = SettingsState(
-    themeMode: ThemeMode.system,
+    themeMode: AppThemeMode.system,
     language: 'th',
     phoneScamAlerts: true,
     smsPhishingAlerts: true,
@@ -24,7 +27,7 @@ class SettingsState {
   );
 
   SettingsState copyWith({
-    ThemeMode? themeMode,
+    AppThemeMode? themeMode,
     String? language,
     bool? phoneScamAlerts,
     bool? smsPhishingAlerts,
