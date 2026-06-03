@@ -272,8 +272,8 @@ void main() {
       await tester.pumpWidget(_wrap(repo));
       await tester.pumpAndSettle();
 
-      await tester.enterText(
-          find.byKey(const Key('askAiComposer')), 'Find reports about a fake loan app');
+      await tester.enterText(find.byKey(const Key('askAiComposer')),
+          'Find reports about a fake loan app');
       await tester.tap(find.byKey(const Key('askAiSendButton')));
       await tester.pumpAndSettle();
 

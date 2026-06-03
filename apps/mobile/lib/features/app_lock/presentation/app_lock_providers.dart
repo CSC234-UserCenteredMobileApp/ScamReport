@@ -14,7 +14,8 @@ final localAuthProvider = Provider<LocalAuthentication>((ref) {
 
 /// Async because it depends on [sharedPreferencesProvider]. Override this in
 /// tests to inject a mock repository.
-final appLockRepositoryProvider = FutureProvider<AppLockRepository>((ref) async {
+final appLockRepositoryProvider =
+    FutureProvider<AppLockRepository>((ref) async {
   final prefs = await ref.watch(sharedPreferencesProvider.future);
   return AppLockRepositoryImpl(
     secure: ref.watch(secureStorageProvider),
@@ -142,7 +143,9 @@ class AppLockController extends AsyncNotifier<AppLockRuntime> {
         LockoutState(failedAttempts: attempts, lockedUntil: lockedUntil);
     await _repo.writeLockout(lockout);
     state = AsyncData(rt.copyWith(lockout: lockout));
-    return lockedUntil != null ? UnlockOutcome.lockedOut : UnlockOutcome.wrongPin;
+    return lockedUntil != null
+        ? UnlockOutcome.lockedOut
+        : UnlockOutcome.wrongPin;
   }
 
   // ---- Settings mutations --------------------------------------------------

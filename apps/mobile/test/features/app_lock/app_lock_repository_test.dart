@@ -68,7 +68,8 @@ void main() {
   });
 
   group('config persistence', () {
-    test('defaults: disabled, no biometric, no pin, 1-minute timeout', () async {
+    test('defaults: disabled, no biometric, no pin, 1-minute timeout',
+        () async {
       final config = await repo.loadConfig();
       expect(config.enabled, isFalse);
       expect(config.biometricEnabled, isFalse);

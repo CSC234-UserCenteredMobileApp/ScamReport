@@ -1,4 +1,6 @@
-import { defineConfig } from 'vite';
+// vitest 4 moved the `test` field's typing — defineConfig must come from
+// 'vitest/config' (a superset of vite's) for the config to typecheck.
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import path from 'node:path';
 

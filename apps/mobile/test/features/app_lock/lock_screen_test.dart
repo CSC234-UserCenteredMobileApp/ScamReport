@@ -106,7 +106,8 @@ void main() {
     expect(find.textContaining('Try again'), findsOneWidget);
   });
 
-  testWidgets('backspace removes the last digit, then a corrected entry unlocks',
+  testWidgets(
+      'backspace removes the last digit, then a corrected entry unlocks',
       (tester) async {
     when(() => repo.verifyPin('123456')).thenAnswer((_) async => true);
     final c = await _pump(tester, repo);
@@ -177,8 +178,7 @@ void main() {
     when(() => repo.loadConfig()).thenAnswer(
       (_) async => _pinOnly.copyWith(biometricEnabled: true),
     );
-    when(() => repo.authenticateBiometric(any()))
-        .thenAnswer((_) async => true);
+    when(() => repo.authenticateBiometric(any())).thenAnswer((_) async => true);
 
     final c = await _pump(tester, repo);
 

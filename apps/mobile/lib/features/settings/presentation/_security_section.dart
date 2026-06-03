@@ -27,9 +27,8 @@ class _SecuritySection extends ConsumerWidget {
                 value: config.enabled,
                 isFirst: true,
                 isLast: !config.enabled,
-                onChanged: (v) => v
-                    ? _enable(context, ref)
-                    : _disable(context, ref),
+                onChanged: (v) =>
+                    v ? _enable(context, ref) : _disable(context, ref),
               ),
               if (config.enabled) ...[
                 const Divider(height: 1, indent: 16, endIndent: 16),
@@ -123,7 +122,8 @@ class _SecurityToggleTile extends StatelessWidget {
     return ClipRRect(
       borderRadius: radius,
       child: SwitchListTile(
-        secondary: Icon(Icons.lock_outline, color: cs.onSurfaceVariant, size: 22),
+        secondary:
+            Icon(Icons.lock_outline, color: cs.onSurfaceVariant, size: 22),
         title: Text(
           title,
           style: Theme.of(context)

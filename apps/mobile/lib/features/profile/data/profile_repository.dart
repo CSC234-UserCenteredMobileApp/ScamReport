@@ -14,9 +14,11 @@ class ProfileRepository {
   DocumentReference<Map<String, dynamic>> _doc(String uid) =>
       _firestore.collection('profiles').doc(uid);
 
-  Stream<UserProfile?> watch(String uid) => _doc(uid).snapshots().map(_fromSnap);
+  Stream<UserProfile?> watch(String uid) =>
+      _doc(uid).snapshots().map(_fromSnap);
 
-  Future<UserProfile?> fetch(String uid) async => _fromSnap(await _doc(uid).get());
+  Future<UserProfile?> fetch(String uid) async =>
+      _fromSnap(await _doc(uid).get());
 
   /// Merge-write so a partial update only touches the whitelisted keys —
   /// pairs with the rules' diff().affectedKeys() check. `updatedAt` MUST be

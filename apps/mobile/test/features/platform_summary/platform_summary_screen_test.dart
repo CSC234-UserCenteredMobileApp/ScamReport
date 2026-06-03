@@ -174,7 +174,8 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsNothing);
     });
 
-    testWidgets('lower sections become visible after scrolling', (tester) async {
+    testWidgets('lower sections become visible after scrolling',
+        (tester) async {
       _pinViewport(tester);
 
       await tester.pumpWidget(

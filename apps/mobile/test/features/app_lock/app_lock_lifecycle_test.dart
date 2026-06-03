@@ -50,7 +50,8 @@ void main() {
     expect(obscured, isTrue);
 
     handleLifecycle(AppLifecycleState.resumed, controller,
-        enabled: true, setObscured: setObscured,
+        enabled: true,
+        setObscured: setObscured,
         now: now.add(const Duration(seconds: 5)));
     expect(obscured, isFalse);
   });
@@ -65,7 +66,8 @@ void main() {
 
     bool? obscured;
     handleLifecycle(AppLifecycleState.inactive, controller,
-        enabled: true, setObscured: (v) => obscured = v,
+        enabled: true,
+        setObscured: (v) => obscured = v,
         now: DateTime.utc(2026, 6, 3, 10));
 
     expect(obscured, isNull); // suppressed

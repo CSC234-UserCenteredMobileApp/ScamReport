@@ -18,8 +18,7 @@ class AppLockObserver with WidgetsBindingObserver {
       enabled:
           _ref.read(appLockControllerProvider).valueOrNull?.config.enabled ??
               false,
-      setObscured: (v) =>
-          _ref.read(appLockObscuredProvider.notifier).state = v,
+      setObscured: (v) => _ref.read(appLockObscuredProvider.notifier).state = v,
       now: DateTime.now(),
     );
   }

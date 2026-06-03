@@ -70,7 +70,8 @@ void main() {
       expect(pinMatches((pin: '000000', encoded: encoded)), isFalse);
     });
 
-    test('hashing the same PIN twice yields different output (unique salt)', () {
+    test('hashing the same PIN twice yields different output (unique salt)',
+        () {
       final a = hashNewPin('424242');
       final b = hashNewPin('424242');
       expect(a, isNot(equals(b)));

@@ -46,8 +46,9 @@ AdminAnnouncementDetail _detail({
     createdAt: DateTime(2026, 5, 1),
     updatedAt: DateTime(2026, 5, 2),
     attachments: attachments,
-    publishedAt:
-        status == AdminAnnouncementStatus.published ? DateTime(2026, 5, 3) : null,
+    publishedAt: status == AdminAnnouncementStatus.published
+        ? DateTime(2026, 5, 3)
+        : null,
   );
 }
 
@@ -70,8 +71,7 @@ Widget _wrap(
 
 void main() {
   // Needed so `any(named: 'category')` can match the enum-typed argument.
-  setUpAll(() =>
-      registerFallbackValue(AdminAnnouncementCategory.fraudAlert));
+  setUpAll(() => registerFallbackValue(AdminAnnouncementCategory.fraudAlert));
 
   late MockAnnouncementEditorRepository repo;
 
@@ -92,8 +92,7 @@ void main() {
       pinViewport(tester);
       // Never-completing future → screen stays in the loading branch.
       final completer = Completer<AdminAnnouncementDetail>();
-      when(() => repo.getDetail('ann-1'))
-          .thenAnswer((_) => completer.future);
+      when(() => repo.getDetail('ann-1')).thenAnswer((_) => completer.future);
 
       await tester.pumpWidget(
         _wrap(const AnnouncementEditorScreen(announcementId: 'ann-1'),
@@ -103,7 +102,8 @@ void main() {
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       // The form has not rendered yet.
-      expect(find.widgetWithText(TextFormField, 'Existing title'), findsNothing);
+      expect(
+          find.widgetWithText(TextFormField, 'Existing title'), findsNothing);
 
       // Settle the pending future so teardown is clean.
       completer.complete(_detail());
@@ -129,8 +129,7 @@ void main() {
     testWidgets('populates the form fields from the loaded draft detail',
         (tester) async {
       pinViewport(tester);
-      when(() => repo.getDetail('ann-1'))
-          .thenAnswer((_) async => _detail());
+      when(() => repo.getDetail('ann-1')).thenAnswer((_) async => _detail());
 
       await tester.pumpWidget(
         _wrap(const AnnouncementEditorScreen(announcementId: 'ann-1'),
@@ -172,7 +171,8 @@ void main() {
   });
 
   group('AnnouncementEditorScreen — create mode', () {
-    testWidgets('Save Draft with an empty title shows a validation error '
+    testWidgets(
+        'Save Draft with an empty title shows a validation error '
         'and does not call create', (tester) async {
       pinViewport(tester);
 

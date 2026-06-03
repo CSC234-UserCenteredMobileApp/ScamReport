@@ -153,7 +153,8 @@ void main() {
     test('correct PIN unlocks and resets lockout', () async {
       when(() => repo.verifyPin('123456')).thenAnswer((_) async => true);
       final c = await lockedContainer();
-      final outcome = await _ctrl(c).submitPin('123456', now: DateTime.utc(2026));
+      final outcome =
+          await _ctrl(c).submitPin('123456', now: DateTime.utc(2026));
       expect(outcome, UnlockOutcome.success);
       expect(_state(c).status, AppLockStatus.unlocked);
       verify(() => repo.writeLockout(LockoutState.none)).called(1);
@@ -162,7 +163,8 @@ void main() {
     test('wrong PIN returns wrongPin and increments attempts', () async {
       when(() => repo.verifyPin(any())).thenAnswer((_) async => false);
       final c = await lockedContainer();
-      final outcome = await _ctrl(c).submitPin('000000', now: DateTime.utc(2026));
+      final outcome =
+          await _ctrl(c).submitPin('000000', now: DateTime.utc(2026));
       expect(outcome, UnlockOutcome.wrongPin);
       expect(_state(c).lockout.failedAttempts, 1);
       expect(_state(c).status, AppLockStatus.locked);
@@ -235,7 +237,8 @@ void main() {
       verifyNever(() => repo.verifyPin(any()));
     });
 
-    test('submitPin during an active lockout returns lockedOut without verifying',
+    test(
+        'submitPin during an active lockout returns lockedOut without verifying',
         () async {
       when(() => repo.verifyPin(any())).thenAnswer((_) async => false);
       final c = await lockedContainer();
@@ -245,8 +248,8 @@ void main() {
       }
       clearInteractions(repo);
       // Within the lockout window.
-      final outcome =
-          await _ctrl(c).submitPin('123456', now: now.add(const Duration(seconds: 5)));
+      final outcome = await _ctrl(c)
+          .submitPin('123456', now: now.add(const Duration(seconds: 5)));
       expect(outcome, UnlockOutcome.lockedOut);
       verifyNever(() => repo.verifyPin(any()));
     });
