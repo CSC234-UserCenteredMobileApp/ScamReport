@@ -6,7 +6,7 @@ part of 'profile_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$profileFirestoreHash() => r'8f0f3069c796c83ca3e08a528f743ee649112545';
+String _$profileFirestoreHash() => r'0d9ad77a0c862f5930935a5d99da9b534bbe7032';
 
 /// Overridable Firestore handle (tests inject FakeFirebaseFirestore).
 ///
@@ -25,7 +25,7 @@ final profileFirestoreProvider = Provider<FirebaseFirestore>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef ProfileFirestoreRef = ProviderRef<FirebaseFirestore>;
-String _$profileRepositoryHash() => r'ce74cfafb019e9c4f52d5eee1cc0387fab65e0c5';
+String _$profileRepositoryHash() => r'c9e9182a5a1f344e8cab252a9b91dafe50264172';
 
 /// See also [profileRepository].
 @ProviderFor(profileRepository)

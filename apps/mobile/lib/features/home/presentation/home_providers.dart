@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart' show Ref;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/api_client.dart';
@@ -15,26 +16,26 @@ part 'home_providers.g.dart';
 // call sites and test overrides are unaffected.
 
 @Riverpod(keepAlive: true)
-HomeApi homeApi(HomeApiRef ref) {
+HomeApi homeApi(Ref ref) {
   return HomeApi(ref.watch(httpClientProvider));
 }
 
 @Riverpod(keepAlive: true)
-HomeRepository homeRepository(HomeRepositoryRef ref) {
+HomeRepository homeRepository(Ref ref) {
   return HomeRepository(ref.watch(homeApiProvider));
 }
 
 @Riverpod(keepAlive: true)
-Future<HomeStats> homeStats(HomeStatsRef ref) {
+Future<HomeStats> homeStats(Ref ref) {
   return ref.read(homeRepositoryProvider).getStats();
 }
 
 @Riverpod(keepAlive: true)
-Future<List<RecentAlert>> recentAlerts(RecentAlertsRef ref) {
+Future<List<RecentAlert>> recentAlerts(Ref ref) {
   return ref.read(homeRepositoryProvider).getRecentAlerts();
 }
 
 @Riverpod(keepAlive: true)
-Future<List<RecentReport>> recentReports(RecentReportsRef ref) {
+Future<List<RecentReport>> recentReports(Ref ref) {
   return ref.read(homeRepositoryProvider).getRecentReports();
 }

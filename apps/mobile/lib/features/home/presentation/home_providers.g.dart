@@ -6,7 +6,7 @@ part of 'home_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$homeApiHash() => r'9eed5906a7efd640fd6350c7ba25285cce8b5998';
+String _$homeApiHash() => r'4205b497b145d9ea11dc6f07687a1fb3eeb2ae95';
 
 /// See also [homeApi].
 @ProviderFor(homeApi)
@@ -22,7 +22,7 @@ final homeApiProvider = Provider<HomeApi>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef HomeApiRef = ProviderRef<HomeApi>;
-String _$homeRepositoryHash() => r'2ab8947f5ab9284f4757758acb94b8f18bbdf493';
+String _$homeRepositoryHash() => r'4bca507a74381fe38d30de02855a9339fe041f25';
 
 /// See also [homeRepository].
 @ProviderFor(homeRepository)
@@ -39,7 +39,7 @@ final homeRepositoryProvider = Provider<HomeRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef HomeRepositoryRef = ProviderRef<HomeRepository>;
-String _$homeStatsHash() => r'9a6090efa8055c11deb8936bfe0fdbc5c24c3045';
+String _$homeStatsHash() => r'e4a30e686cc314ef1fa5b9ee55454468f7e61c11';
 
 /// See also [homeStats].
 @ProviderFor(homeStats)
@@ -55,7 +55,7 @@ final homeStatsProvider = FutureProvider<HomeStats>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef HomeStatsRef = FutureProviderRef<HomeStats>;
-String _$recentAlertsHash() => r'6bdad792f9f2377d7a0772d6a3092186bea17440';
+String _$recentAlertsHash() => r'22d141e44c502c1b413cfae1165dbdd54f46a145';
 
 /// See also [recentAlerts].
 @ProviderFor(recentAlerts)
@@ -71,7 +71,7 @@ final recentAlertsProvider = FutureProvider<List<RecentAlert>>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef RecentAlertsRef = FutureProviderRef<List<RecentAlert>>;
-String _$recentReportsHash() => r'0441b12ff0c23eb60ee8a991e9431585d23abc6a';
+String _$recentReportsHash() => r'b36e63ce3a5cbdab8840bf3d1e5ef050f8f4363c';
 
 /// See also [recentReports].
 @ProviderFor(recentReports)

@@ -7,7 +7,7 @@ part of 'platform_summary_providers.dart';
 // **************************************************************************
 
 String _$platformSummaryRepositoryHash() =>
-    r'd90e28f189355ba35baf4962e3c81b1f3a49a361';
+    r'31099149f5edfbaa4b935ad4774ab72f3b169d9c';
 
 /// See also [platformSummaryRepository].
 @ProviderFor(platformSummaryRepository)
@@ -25,7 +25,7 @@ final platformSummaryRepositoryProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef PlatformSummaryRepositoryRef = ProviderRef<PlatformSummaryRepository>;
-String _$platformSummaryHash() => r'a848d5b923244c8f956b8edacaad506be534c3d2';
+String _$platformSummaryHash() => r'a36290a94fd55dd5a0104bc2365c1b890636317f';
 
 /// See also [platformSummary].
 @ProviderFor(platformSummary)

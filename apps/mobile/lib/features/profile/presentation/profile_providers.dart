@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show Ref;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/di/auth.dart';
@@ -12,12 +13,12 @@ part 'profile_providers.g.dart';
 
 /// Overridable Firestore handle (tests inject FakeFirebaseFirestore).
 @Riverpod(keepAlive: true)
-FirebaseFirestore profileFirestore(ProfileFirestoreRef ref) {
+FirebaseFirestore profileFirestore(Ref ref) {
   return FirebaseFirestore.instance;
 }
 
 @Riverpod(keepAlive: true)
-ProfileRepository profileRepository(ProfileRepositoryRef ref) {
+ProfileRepository profileRepository(Ref ref) {
   return ProfileRepository(ref.watch(profileFirestoreProvider));
 }
 

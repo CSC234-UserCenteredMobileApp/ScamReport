@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart' show Ref;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../moderation/presentation/mod_providers.dart';
@@ -10,12 +11,11 @@ part 'platform_summary_providers.g.dart';
 // hand-written providers, so consumers and tests are unaffected.
 
 @Riverpod(keepAlive: true)
-PlatformSummaryRepository platformSummaryRepository(
-    PlatformSummaryRepositoryRef ref) {
+PlatformSummaryRepository platformSummaryRepository(Ref ref) {
   return PlatformSummaryRepository(ref.watch(modApiClientProvider));
 }
 
 @Riverpod(keepAlive: true)
-Future<PlatformSummary> platformSummary(PlatformSummaryRef ref) {
+Future<PlatformSummary> platformSummary(Ref ref) {
   return ref.watch(platformSummaryRepositoryProvider).getSummary();
 }
