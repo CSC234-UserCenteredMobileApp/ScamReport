@@ -250,6 +250,11 @@
   "askAiNewChat": "New chat",
   "askAiReportSeed": "I want to report a suspicious activity, can you help me?",
   "askAiSimilarReportsLabel": "Matched verified reports",
+  "askAiSearchResultsLabel": "Reports I found",
+  "askAiSuggestionsTitle": "Try asking…",
+  "askAiSuggestion0": "Find reports about a fake loan app",
+  "askAiSuggestion1": "Any scams from 081-234-5678?",
+  "askAiSuggestion2": "Search investment scams",
   "askAiPastChats": "Past chats",
   "askAiRefresh": "Refresh",
   "askAiNoConversations": "No past chats yet. Send a message to start one.",
@@ -430,5 +435,38 @@
   "adminReviewTimelineTitle": "Audit trail",
   "adminReviewRemarkTemplateSpam": "Spam",
   "adminReviewRemarkTemplateNotEnough": "Not enough evidence",
-  "adminReviewRemarkTemplateConfirmed": "Confirmed"
+  "adminReviewRemarkTemplateConfirmed": "Confirmed",
+
+  "appLockSectionTitle": "Security",
+  "appLockTileTitle": "App Lock",
+  "appLockTileSubtitle": "Require biometric or PIN to open the app",
+  "appLockUseBiometric": "Use biometric unlock",
+  "appLockChangePin": "Change PIN",
+  "appLockBiometricReason": "Unlock ScamReport",
+  "appLockLockedHeading": "App locked",
+  "appLockEnterPinPrompt": "Enter your PIN",
+  "appLockUseBiometricButton": "Use biometric",
+  "appLockWrongPin": "Incorrect PIN",
+  "appLockAttemptsRemaining": "{count} attempts remaining",
+  "@appLockAttemptsRemaining": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "appLockLockedOut": "Too many attempts. Try again in {seconds}s",
+  "@appLockLockedOut": {
+    "placeholders": { "seconds": { "type": "int" } }
+  },
+  "appLockSetupHeading": "Set a 6-digit PIN",
+  "appLockSetupSubtitle": "You'll use this to unlock the app",
+  "appLockConfirmHeading": "Re-enter your PIN",
+  "appLockPinMismatch": "PINs didn't match. Start again.",
+  "appLockBiometricUnavailable": "Biometric unavailable — use your PIN",
+  "appLockDisableHeading": "Unlock to turn off App Lock",
+  "appLockDeleteKey": "Delete",
+
+  "profileEditTile": "Public profile",
+  "profileEditHeading": "Edit public profile",
+  "profileDisplayNameLabel": "Display name",
+  "profileDisplayNameInvalid": "Enter 1\u201350 characters",
+  "profileSave": "Save",
+  "profileSaved": "Profile updated"
 }

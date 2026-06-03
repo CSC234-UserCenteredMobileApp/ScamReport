@@ -60,6 +60,7 @@ Future<Widget> _buildSettings({AuthUser? user}) async {
       // either way but the gate must not blow up reading Remote Config.
       featureFlagProvider('enable_sms_scan').overrideWith((_) => false),
       featureFlagProvider('enable_call_screening').overrideWith((_) => false),
+      featureFlagProvider('enable_biometric_login').overrideWith((_) => false),
     ],
     child: _wrap(const SettingsScreen()),
   );

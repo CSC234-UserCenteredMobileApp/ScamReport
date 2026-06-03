@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -595,12 +596,13 @@ class _AttachmentSection extends StatelessWidget {
             leading: att.kind == 'image'
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(6),
-                    child: Image.network(
-                      '$supabasePublicUrl/storage/v1/object/public/announcement-attachments/${att.storagePath}',
+                    child: CachedNetworkImage(
+                      imageUrl:
+                          '$supabasePublicUrl/storage/v1/object/public/announcement-attachments/${att.storagePath}',
                       width: 40,
                       height: 40,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
+                      errorWidget: (_, __, ___) =>
                           const Icon(Icons.image_outlined),
                     ),
                   )

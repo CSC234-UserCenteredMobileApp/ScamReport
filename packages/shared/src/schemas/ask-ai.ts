@@ -193,6 +193,13 @@ export const AskAiTurnResponse = Type.Object({
   userMessage: AskAiMessage,
   assistantMessage: AskAiMessage,
   intentDetected: Type.Boolean(),
+  // True when the user is looking up whether reports already exist about
+  // something (a company, app, phone, URL, scam pattern) rather than describing
+  // their own incident. In search mode the assistant answers with the
+  // similarReports cards as the result and suppresses the drafting interview;
+  // reportable/draft are always false/null. Mutually exclusive with
+  // intentDetected (the report track wins a mixed message — see normaliseOutput).
+  searchIntent: Type.Boolean(),
   reportable: Type.Boolean(),
   hasEnoughInfo: Type.Boolean(),
   draft: Type.Union([AskAiDraft, Type.Null()]),

@@ -121,6 +121,7 @@ describe('AskAiTurnResponse', () => {
         userMessage: baseMessage,
         assistantMessage,
         intentDetected: false,
+        searchIntent: false,
         reportable: false,
         hasEnoughInfo: false,
         draft: null,
@@ -137,6 +138,7 @@ describe('AskAiTurnResponse', () => {
         userMessage: baseMessage,
         assistantMessage: { ...assistantMessage, intentDetected: true },
         intentDetected: true,
+        searchIntent: false,
         reportable: true,
         hasEnoughInfo: true,
         draft: validDraft,
@@ -147,12 +149,46 @@ describe('AskAiTurnResponse', () => {
     ).toBe(true);
   });
 
+  test('accepts a search turn (cards, no draft, no missingFacts)', () => {
+    expect(
+      Value.Check(AskAiTurnResponse, {
+        userMessage: baseMessage,
+        assistantMessage,
+        intentDetected: false,
+        searchIntent: true,
+        reportable: false,
+        hasEnoughInfo: false,
+        draft: null,
+        similarReports: [sampleSimilarReport],
+        matchedScammers: [],
+        missingFacts: [],
+      }),
+    ).toBe(true);
+  });
+
+  test('rejects a turn missing searchIntent', () => {
+    expect(
+      Value.Check(AskAiTurnResponse, {
+        userMessage: baseMessage,
+        assistantMessage,
+        intentDetected: false,
+        reportable: false,
+        hasEnoughInfo: false,
+        draft: null,
+        similarReports: [],
+        matchedScammers: [],
+        missingFacts: [],
+      }),
+    ).toBe(false);
+  });
+
   test('rejects unknown missingFacts value', () => {
     expect(
       Value.Check(AskAiTurnResponse, {
         userMessage: baseMessage,
         assistantMessage,
         intentDetected: false,
+        searchIntent: false,
         reportable: false,
         hasEnoughInfo: false,
         draft: null,
@@ -168,6 +204,7 @@ describe('AskAiTurnResponse', () => {
         userMessage: baseMessage,
         assistantMessage,
         intentDetected: false,
+        searchIntent: false,
         reportable: false,
         hasEnoughInfo: false,
         draft: null,
@@ -190,6 +227,7 @@ describe('AskAiTurnResponse', () => {
         userMessage: baseMessage,
         assistantMessage,
         intentDetected: false,
+        searchIntent: false,
         reportable: false,
         hasEnoughInfo: false,
         draft: null,

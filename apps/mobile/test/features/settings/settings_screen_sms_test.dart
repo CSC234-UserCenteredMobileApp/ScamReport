@@ -43,6 +43,7 @@ Future<Widget> _buildSettings({bool consentGiven = false}) async {
       // Stretch features are gated; tests assume the flag is on.
       featureFlagProvider('enable_sms_scan').overrideWith((_) => true),
       featureFlagProvider('enable_call_screening').overrideWith((_) => true),
+      featureFlagProvider('enable_biometric_login').overrideWith((_) => false),
     ],
     child: _wrap(const SettingsScreen()),
   );

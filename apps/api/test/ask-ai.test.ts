@@ -29,6 +29,15 @@ let mockMessages: Array<{
   }>;
 }> = [];
 
+// Verified reports returned by `report.findMany` — drives the RAG card paths
+// (findReportsByIdentifiers / hydrateSimilarReports). Empty by default.
+let mockReports: Array<{
+  id: string;
+  title: string;
+  verifiedAt: Date | null;
+  scamType: { code: string; labelEn: string; labelTh: string };
+}> = [];
+
 let createdConversationCalls = 0;
 let insertedUserMessages: Array<{ conversationId: string; content: string }> = [];
 let insertedAssistantMessages: Array<{ conversationId: string; content: string; intentDetected: boolean }> = [];
@@ -181,6 +190,14 @@ mock.module('../src/core/db/client', () => ({
       }),
     },
     report: {
+      findMany: async () => mockReports,
+    },
+    // Scammer lookup is best-effort in the service; default to "no known
+    // scammer" so the RAG path runs without throwing.
+    scammerIdentifier: {
+      findMany: async () => [],
+    },
+    scammer: {
       findMany: async () => [],
     },
     $queryRaw: async () => [],
@@ -279,6 +296,7 @@ beforeEach(() => {
   mockConversation = null;
   mockConversationList = [] as never;
   mockMessages = [];
+  mockReports = [];
   createdConversationCalls = 0;
   insertedUserMessages = [];
   insertedAssistantMessages = [];
@@ -644,6 +662,187 @@ describe('POST /ask-ai/conversations/:id/messages', () => {
     expect(res.status).toBe(429);
     const body = (await res.json()) as { code: string };
     expect(body.code).toBe('rate_limited');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Search mode (lookup existing reports)
+// ---------------------------------------------------------------------------
+
+describe('POST /ask-ai/conversations/:id/messages — search mode', () => {
+  const SIM_REPORT_ID = '66666666-6666-6666-6666-666666666666';
+
+  beforeEach(() => {
+    mockDecoded = { uid: 'user-1', email: 'u@example.com' };
+    mockConversation = {
+      id: VALID_CONV_ID,
+      userId: 'user-1',
+      createdAt: new Date('2026-05-07T00:00:00Z'),
+      lastMessageAt: new Date('2026-05-07T00:00:00Z'),
+      linkedReportId: null,
+    };
+  });
+
+  test('search turn surfaces cards and suppresses the drafting signals', async () => {
+    // A verified report matches the phone in the user's message via the
+    // exact-identifier path (findReportsByIdentifiers → report.findMany).
+    mockReports = [
+      {
+        id: SIM_REPORT_ID,
+        title: 'Fake loan app via LINE',
+        verifiedAt: new Date('2026-05-01T00:00:00Z'),
+        scamType: {
+          code: 'ecommerce_fraud',
+          labelEn: 'E-commerce fraud',
+          labelTh: 'การฉ้อโกงอีคอมเมิร์ซ',
+        },
+      },
+    ];
+    geminiStub = () => ({
+      text: JSON.stringify({
+        reply: 'I found related reports. The closest ones are below.',
+        intentDetected: false,
+        searchIntent: true,
+        hasEnoughInfo: false,
+        reportable: false,
+        similarReportIds: [SIM_REPORT_ID],
+        missingFacts: [],
+      }),
+    });
+    const res = await app.handle(
+      jsonReq(`/ask-ai/conversations/${VALID_CONV_ID}/messages`, {
+        method: 'POST',
+        token: 'tok',
+        body: { content: 'Any scams from 081-234-5678?', attachmentIds: [] },
+      }),
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      searchIntent: boolean;
+      reportable: boolean;
+      draft: unknown;
+      missingFacts: string[];
+      similarReports: Array<{ id: string }>;
+    };
+    expect(body.searchIntent).toBe(true);
+    expect(body.reportable).toBe(false);
+    expect(body.draft).toBeNull();
+    expect(body.missingFacts).toHaveLength(0);
+    expect(body.similarReports).toHaveLength(1);
+    expect(body.similarReports[0]?.id).toBe(SIM_REPORT_ID);
+  });
+
+  test('no-match search returns zero cards (honest empty answer)', async () => {
+    // No identifier in the message + empty retrieval → no candidates; the
+    // model echoes nothing.
+    geminiStub = () => ({
+      text: JSON.stringify({
+        reply: "I couldn't find verified reports matching that yet.",
+        intentDetected: false,
+        searchIntent: true,
+        hasEnoughInfo: false,
+        reportable: false,
+        similarReportIds: [],
+        missingFacts: [],
+      }),
+    });
+    const res = await app.handle(
+      jsonReq(`/ask-ai/conversations/${VALID_CONV_ID}/messages`, {
+        method: 'POST',
+        token: 'tok',
+        body: { content: 'Any reports about Acme Holdings?', attachmentIds: [] },
+      }),
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      searchIntent: boolean;
+      similarReports: unknown[];
+      draft: unknown;
+    };
+    expect(body.searchIntent).toBe(true);
+    expect(body.similarReports).toHaveLength(0);
+    expect(body.draft).toBeNull();
+  });
+
+  test('tie-break: a personal incident keeps the report track even if the model also flags search', async () => {
+    geminiStub = () => ({
+      text: JSON.stringify({
+        reply: 'That sounds like a phishing SMS. I drafted a report.',
+        intentDetected: true,
+        searchIntent: true, // model over-flags; intentDetected must win
+        hasEnoughInfo: true,
+        reportable: true,
+        similarReportIds: [],
+        missingFacts: [],
+        draft: {
+          title: 'Fake Kerry parcel SMS',
+          description: 'I received an SMS asking me to click a tracking link with OTP form.',
+          scamTypeCode: 'phishing_sms',
+          targetIdentifier: 'kerry-th-track.net',
+          targetIdentifierKind: 'url',
+        },
+      }),
+    });
+    const res = await app.handle(
+      jsonReq(`/ask-ai/conversations/${VALID_CONV_ID}/messages`, {
+        method: 'POST',
+        token: 'tok',
+        body: {
+          content: 'I clicked a link from kerry-th-track.net and entered OTP. Anyone else?',
+          attachmentIds: [],
+        },
+      }),
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      searchIntent: boolean;
+      reportable: boolean;
+      intentDetected: boolean;
+      draft: { scamTypeCode: string } | null;
+    };
+    expect(body.searchIntent).toBe(false);
+    expect(body.intentDetected).toBe(true);
+    expect(body.reportable).toBe(true);
+    expect(body.draft?.scamTypeCode).toBe('phishing_sms');
+  });
+
+  test('search mode clamps contradictory drafting signals from the model', async () => {
+    geminiStub = () => ({
+      text: JSON.stringify({
+        reply: 'Here are related reports.',
+        intentDetected: false,
+        searchIntent: true,
+        hasEnoughInfo: true,
+        reportable: true, // contradictory — must be cleared in search mode
+        similarReportIds: [],
+        missingFacts: ['description'],
+        draft: {
+          title: 'should be dropped',
+          description: 'this draft must not survive search mode at all',
+          scamTypeCode: 'other',
+          targetIdentifier: null,
+          targetIdentifierKind: null,
+        },
+      }),
+    });
+    const res = await app.handle(
+      jsonReq(`/ask-ai/conversations/${VALID_CONV_ID}/messages`, {
+        method: 'POST',
+        token: 'tok',
+        body: { content: 'search investment scams', attachmentIds: [] },
+      }),
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      searchIntent: boolean;
+      reportable: boolean;
+      draft: unknown;
+      missingFacts: string[];
+    };
+    expect(body.searchIntent).toBe(true);
+    expect(body.reportable).toBe(false);
+    expect(body.draft).toBeNull();
+    expect(body.missingFacts).toHaveLength(0);
   });
 });
 

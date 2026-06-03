@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/core/di/cache.dart';
@@ -23,7 +22,7 @@ void main() {
 
       expect(state.language, 'th');
       expect(state.smsScanning, false);
-      expect(state.themeMode, ThemeMode.system);
+      expect(state.themeMode, AppThemeMode.system);
       expect(state.phoneScamAlerts, true);
     });
 
@@ -34,7 +33,7 @@ void main() {
       await container.read(settingsProvider.future);
 
       const updated = SettingsState(
-        themeMode: ThemeMode.dark,
+        themeMode: AppThemeMode.dark,
         language: 'en',
         phoneScamAlerts: false,
         smsPhishingAlerts: false,
@@ -44,7 +43,7 @@ void main() {
       await container.read(settingsProvider.notifier).save(updated);
 
       final newState = container.read(settingsProvider).requireValue;
-      expect(newState.themeMode, ThemeMode.dark);
+      expect(newState.themeMode, AppThemeMode.dark);
       expect(newState.language, 'en');
       expect(newState.smsScanning, true);
     });

@@ -1268,6 +1268,36 @@ abstract class AppLocalizations {
   /// **'Matched verified reports'**
   String get askAiSimilarReportsLabel;
 
+  /// No description provided for @askAiSearchResultsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports I found'**
+  String get askAiSearchResultsLabel;
+
+  /// No description provided for @askAiSuggestionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try asking…'**
+  String get askAiSuggestionsTitle;
+
+  /// No description provided for @askAiSuggestion0.
+  ///
+  /// In en, this message translates to:
+  /// **'Find reports about a fake loan app'**
+  String get askAiSuggestion0;
+
+  /// No description provided for @askAiSuggestion1.
+  ///
+  /// In en, this message translates to:
+  /// **'Any scams from 081-234-5678?'**
+  String get askAiSuggestion1;
+
+  /// No description provided for @askAiSuggestion2.
+  ///
+  /// In en, this message translates to:
+  /// **'Search investment scams'**
+  String get askAiSuggestion2;
+
   /// No description provided for @askAiPastChats.
   ///
   /// In en, this message translates to:
@@ -2173,6 +2203,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirmed'**
   String get adminReviewRemarkTemplateConfirmed;
+
+  /// No description provided for @appLockSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Security'**
+  String get appLockSectionTitle;
+
+  /// No description provided for @appLockTileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'App Lock'**
+  String get appLockTileTitle;
+
+  /// No description provided for @appLockTileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Require biometric or PIN to open the app'**
+  String get appLockTileSubtitle;
+
+  /// No description provided for @appLockUseBiometric.
+  ///
+  /// In en, this message translates to:
+  /// **'Use biometric unlock'**
+  String get appLockUseBiometric;
+
+  /// No description provided for @appLockChangePin.
+  ///
+  /// In en, this message translates to:
+  /// **'Change PIN'**
+  String get appLockChangePin;
+
+  /// No description provided for @appLockBiometricReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock ScamReport'**
+  String get appLockBiometricReason;
+
+  /// No description provided for @appLockLockedHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'App locked'**
+  String get appLockLockedHeading;
+
+  /// No description provided for @appLockEnterPinPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your PIN'**
+  String get appLockEnterPinPrompt;
+
+  /// No description provided for @appLockUseBiometricButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Use biometric'**
+  String get appLockUseBiometricButton;
+
+  /// No description provided for @appLockWrongPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect PIN'**
+  String get appLockWrongPin;
+
+  /// No description provided for @appLockAttemptsRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} attempts remaining'**
+  String appLockAttemptsRemaining(int count);
+
+  /// No description provided for @appLockLockedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Try again in {seconds}s'**
+  String appLockLockedOut(int seconds);
+
+  /// No description provided for @appLockSetupHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a 6-digit PIN'**
+  String get appLockSetupHeading;
+
+  /// No description provided for @appLockSetupSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll use this to unlock the app'**
+  String get appLockSetupSubtitle;
+
+  /// No description provided for @appLockConfirmHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter your PIN'**
+  String get appLockConfirmHeading;
+
+  /// No description provided for @appLockPinMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'PINs didn\'t match. Start again.'**
+  String get appLockPinMismatch;
+
+  /// No description provided for @appLockBiometricUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric unavailable — use your PIN'**
+  String get appLockBiometricUnavailable;
+
+  /// No description provided for @appLockDisableHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock to turn off App Lock'**
+  String get appLockDisableHeading;
+
+  /// No description provided for @appLockDeleteKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get appLockDeleteKey;
+
+  /// No description provided for @profileEditTile.
+  ///
+  /// In en, this message translates to:
+  /// **'Public profile'**
+  String get profileEditTile;
+
+  /// No description provided for @profileEditHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit public profile'**
+  String get profileEditHeading;
+
+  /// No description provided for @profileDisplayNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Display name'**
+  String get profileDisplayNameLabel;
+
+  /// No description provided for @profileDisplayNameInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 1–50 characters'**
+  String get profileDisplayNameInvalid;
+
+  /// No description provided for @profileSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get profileSave;
+
+  /// No description provided for @profileSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated'**
+  String get profileSaved;
 }
 
 class _AppLocalizationsDelegate

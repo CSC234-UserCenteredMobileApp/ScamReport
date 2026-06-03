@@ -239,6 +239,11 @@
   "askAiNewChat": "แชทใหม่",
   "askAiReportSeed": "ฉันต้องการรายงานกิจกรรมที่น่าสงสัย ช่วยฉันได้ไหม",
   "askAiSimilarReportsLabel": "รายงานที่ตรวจสอบแล้วที่ตรงกัน",
+  "askAiSearchResultsLabel": "รายงานที่ฉันพบ",
+  "askAiSuggestionsTitle": "ลองถามดู…",
+  "askAiSuggestion0": "ค้นหารายงานเกี่ยวกับแอปกู้เงินปลอม",
+  "askAiSuggestion1": "มีมิจฉาชีพจากเบอร์ 081-234-5678 ไหม",
+  "askAiSuggestion2": "ค้นหากลโกงการลงทุน",
   "askAiPastChats": "แชทที่ผ่านมา",
   "askAiRefresh": "รีเฟรช",
   "askAiNoConversations": "ยังไม่มีแชทเก่า ส่งข้อความเพื่อเริ่มแชทแรก",
@@ -399,5 +404,38 @@
   "adminReviewTimelineTitle": "ประวัติการตรวจสอบ",
   "adminReviewRemarkTemplateSpam": "สแปม",
   "adminReviewRemarkTemplateNotEnough": "หลักฐานไม่พอ",
-  "adminReviewRemarkTemplateConfirmed": "ยืนยันแล้ว"
+  "adminReviewRemarkTemplateConfirmed": "ยืนยันแล้ว",
+
+  "appLockSectionTitle": "ความปลอดภัย",
+  "appLockTileTitle": "ล็อกแอป",
+  "appLockTileSubtitle": "ต้องใช้ไบโอเมตริกหรือ PIN เพื่อเปิดแอป",
+  "appLockUseBiometric": "ปลดล็อกด้วยไบโอเมตริก",
+  "appLockChangePin": "เปลี่ยน PIN",
+  "appLockBiometricReason": "ปลดล็อก ScamReport",
+  "appLockLockedHeading": "แอปถูกล็อก",
+  "appLockEnterPinPrompt": "ป้อน PIN ของคุณ",
+  "appLockUseBiometricButton": "ใช้ไบโอเมตริก",
+  "appLockWrongPin": "PIN ไม่ถูกต้อง",
+  "appLockAttemptsRemaining": "เหลืออีก {count} ครั้ง",
+  "@appLockAttemptsRemaining": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "appLockLockedOut": "พยายามมากเกินไป ลองใหม่ใน {seconds} วินาที",
+  "@appLockLockedOut": {
+    "placeholders": { "seconds": { "type": "int" } }
+  },
+  "appLockSetupHeading": "ตั้ง PIN 6 หลัก",
+  "appLockSetupSubtitle": "ใช้สำหรับปลดล็อกแอป",
+  "appLockConfirmHeading": "ป้อน PIN อีกครั้ง",
+  "appLockPinMismatch": "PIN ไม่ตรงกัน เริ่มใหม่อีกครั้ง",
+  "appLockBiometricUnavailable": "ใช้ไบโอเมตริกไม่ได้ — ใช้ PIN แทน",
+  "appLockDisableHeading": "ปลดล็อกเพื่อปิดการล็อกแอป",
+  "appLockDeleteKey": "ลบ",
+
+  "profileEditTile": "โปรไฟล์สาธารณะ",
+  "profileEditHeading": "แก้ไขโปรไฟล์สาธารณะ",
+  "profileDisplayNameLabel": "ชื่อที่แสดง",
+  "profileDisplayNameInvalid": "กรอก 1\u201350 ตัวอักษร",
+  "profileSave": "บันทึก",
+  "profileSaved": "อัปเดตโปรไฟล์แล้ว"
 }

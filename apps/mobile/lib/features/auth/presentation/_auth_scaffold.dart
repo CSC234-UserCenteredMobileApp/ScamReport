@@ -28,6 +28,8 @@ class AuthScaffold extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back),
+                  // a11y: labeled tap target (labeledTapTargetGuideline).
+                  tooltip: MaterialLocalizations.of(context).backButtonTooltip,
                   onPressed: () {
                     if (context.canPop()) {
                       context.pop();

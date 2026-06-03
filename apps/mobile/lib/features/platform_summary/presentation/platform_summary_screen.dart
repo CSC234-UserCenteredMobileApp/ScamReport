@@ -128,18 +128,19 @@ class _ReportTotals extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget cell(String label, int value) => Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(label, style: Theme.of(context).textTheme.bodySmall),
-              Text('$value',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge
-                      ?.copyWith(fontWeight: FontWeight.w700)),
-            ],
-          ),
+    // NOTE: no Expanded here — these cells live inside SizedBox children of a
+    // Wrap, and Expanded requires a direct Row/Column parent (ParentDataWidget
+    // contract). The SizedBox(width: 140) already bounds each cell.
+    Widget cell(String label, int value) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: Theme.of(context).textTheme.bodySmall),
+            Text('$value',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleLarge
+                    ?.copyWith(fontWeight: FontWeight.w700)),
+          ],
         );
     return Wrap(
       runSpacing: 12,

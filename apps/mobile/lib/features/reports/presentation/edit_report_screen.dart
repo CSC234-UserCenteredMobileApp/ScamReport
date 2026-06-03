@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -77,7 +78,11 @@ class _EditReportScreenState extends ConsumerState<EditReportScreen> {
                 leading: const Icon(Icons.photo_camera_outlined),
                 title: Text(l10n.askAiAttachCamera),
                 onTap: () async {
-                  final f = await picker.pickImage(source: ImageSource.camera);
+                  final f = await picker.pickImage(
+                    source: ImageSource.camera,
+                    imageQuality: 80,
+                    maxWidth: 1920,
+                  );
                   if (ctx.mounted) Navigator.of(ctx).pop(f);
                 },
               ),
@@ -85,7 +90,11 @@ class _EditReportScreenState extends ConsumerState<EditReportScreen> {
                 leading: const Icon(Icons.photo_library_outlined),
                 title: Text(l10n.askAiAttachGallery),
                 onTap: () async {
-                  final f = await picker.pickImage(source: ImageSource.gallery);
+                  final f = await picker.pickImage(
+                    source: ImageSource.gallery,
+                    imageQuality: 80,
+                    maxWidth: 1920,
+                  );
                   if (ctx.mounted) Navigator.of(ctx).pop(f);
                 },
               ),
@@ -631,10 +640,10 @@ class _ExistingChip extends StatelessWidget {
     return _EvidenceChipFrame(
       onRemove: onRemove,
       child: file.kind == 'image' && file.signedUrl != null
-          ? Image.network(
-              file.signedUrl!,
+          ? CachedNetworkImage(
+              imageUrl: file.signedUrl!,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => _FileIcon(kind: file.kind),
+              errorWidget: (_, __, ___) => _FileIcon(kind: file.kind),
             )
           : _FileIcon(kind: file.kind),
     );

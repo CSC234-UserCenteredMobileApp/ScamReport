@@ -38,7 +38,17 @@ beforeEach(() => {
     }),
     upload: { addEventListener: vi.fn() },
   };
-  vi.stubGlobal('XMLHttpRequest', vi.fn(() => active));
+  // vitest 4: `new XMLHttpRequest()` requires a constructable stub — an
+  // arrow-fn vi.fn() throws "not a constructor". A constructor returning an
+  // object substitutes that object for the instance (spec behaviour).
+  vi.stubGlobal(
+    'XMLHttpRequest',
+    class {
+      constructor() {
+        return active as unknown as XMLHttpRequest;
+      }
+    },
+  );
 });
 
 afterEach(() => {

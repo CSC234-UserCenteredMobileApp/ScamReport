@@ -73,3 +73,6 @@ apps/mobile/lib/firebase_options.dart
 # Flutter desktop regen leftovers — repo targets Android + Web only per PRD §6.6.
 **/GeneratedPluginRegistrant.swift
 **/generated_plugins.cmake
+
+# Firestore emulator debris (apps/api local runs)
+apps/api/firestore-debug.log

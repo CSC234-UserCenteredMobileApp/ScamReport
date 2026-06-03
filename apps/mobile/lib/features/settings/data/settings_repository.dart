@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/settings_state.dart';
@@ -18,9 +17,9 @@ class SettingsRepository {
   SettingsState load() {
     final themeRaw = _prefs.getString(_keyTheme);
     final themeMode = switch (themeRaw) {
-      'light' => ThemeMode.light,
-      'dark' => ThemeMode.dark,
-      _ => ThemeMode.system,
+      'light' => AppThemeMode.light,
+      'dark' => AppThemeMode.dark,
+      _ => AppThemeMode.system,
     };
 
     return SettingsState(
@@ -40,9 +39,9 @@ class SettingsRepository {
 
   Future<void> save(SettingsState state) async {
     final themeRaw = switch (state.themeMode) {
-      ThemeMode.light => 'light',
-      ThemeMode.dark => 'dark',
-      _ => 'system',
+      AppThemeMode.light => 'light',
+      AppThemeMode.dark => 'dark',
+      AppThemeMode.system => 'system',
     };
     await Future.wait([
       _prefs.setString(_keyTheme, themeRaw),

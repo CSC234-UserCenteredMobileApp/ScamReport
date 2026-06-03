@@ -11,7 +11,8 @@
     "prisma:migrate": "prisma migrate dev",
     "seed:call-screening": "bun run prisma/seed-call-screening.ts",
     "seed:reset": "bun run prisma/reset-and-seed.ts",
-    "promote-admin": "bun run scripts/promote-admin.ts"
+    "promote-admin": "bun run scripts/promote-admin.ts",
+    "test:rules": "bunx firebase-tools emulators:exec --only firestore --project scamreport-rules-test 'bun test test/firestore-rules/'"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.2.0",
@@ -29,10 +30,12 @@
     "pg": "^8.13.0"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.1",
     "@types/bun": "^1.1.0",
     "@types/pdfmake": "^0.3.2",
     "@types/pg": "^8.11.0",
     "dotenv": "^16.4.0",
+    "firebase": "^12.14.0",
     "prisma": "^7.0.0",
     "typescript": "^5.6.0"
   }

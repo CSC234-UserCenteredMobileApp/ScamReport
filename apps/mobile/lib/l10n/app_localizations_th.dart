@@ -661,6 +661,21 @@ class AppLocalizationsTh extends AppLocalizations {
   String get askAiSimilarReportsLabel => 'รายงานที่ตรวจสอบแล้วที่ตรงกัน';
 
   @override
+  String get askAiSearchResultsLabel => 'รายงานที่ฉันพบ';
+
+  @override
+  String get askAiSuggestionsTitle => 'ลองถามดู…';
+
+  @override
+  String get askAiSuggestion0 => 'ค้นหารายงานเกี่ยวกับแอปกู้เงินปลอม';
+
+  @override
+  String get askAiSuggestion1 => 'มีมิจฉาชีพจากเบอร์ 081-234-5678 ไหม';
+
+  @override
+  String get askAiSuggestion2 => 'ค้นหากลโกงการลงทุน';
+
+  @override
   String get askAiPastChats => 'แชทที่ผ่านมา';
 
   @override
@@ -1148,4 +1163,83 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get adminReviewRemarkTemplateConfirmed => 'ยืนยันแล้ว';
+
+  @override
+  String get appLockSectionTitle => 'ความปลอดภัย';
+
+  @override
+  String get appLockTileTitle => 'ล็อกแอป';
+
+  @override
+  String get appLockTileSubtitle => 'ต้องใช้ไบโอเมตริกหรือ PIN เพื่อเปิดแอป';
+
+  @override
+  String get appLockUseBiometric => 'ปลดล็อกด้วยไบโอเมตริก';
+
+  @override
+  String get appLockChangePin => 'เปลี่ยน PIN';
+
+  @override
+  String get appLockBiometricReason => 'ปลดล็อก ScamReport';
+
+  @override
+  String get appLockLockedHeading => 'แอปถูกล็อก';
+
+  @override
+  String get appLockEnterPinPrompt => 'ป้อน PIN ของคุณ';
+
+  @override
+  String get appLockUseBiometricButton => 'ใช้ไบโอเมตริก';
+
+  @override
+  String get appLockWrongPin => 'PIN ไม่ถูกต้อง';
+
+  @override
+  String appLockAttemptsRemaining(int count) {
+    return 'เหลืออีก $count ครั้ง';
+  }
+
+  @override
+  String appLockLockedOut(int seconds) {
+    return 'พยายามมากเกินไป ลองใหม่ใน $seconds วินาที';
+  }
+
+  @override
+  String get appLockSetupHeading => 'ตั้ง PIN 6 หลัก';
+
+  @override
+  String get appLockSetupSubtitle => 'ใช้สำหรับปลดล็อกแอป';
+
+  @override
+  String get appLockConfirmHeading => 'ป้อน PIN อีกครั้ง';
+
+  @override
+  String get appLockPinMismatch => 'PIN ไม่ตรงกัน เริ่มใหม่อีกครั้ง';
+
+  @override
+  String get appLockBiometricUnavailable => 'ใช้ไบโอเมตริกไม่ได้ — ใช้ PIN แทน';
+
+  @override
+  String get appLockDisableHeading => 'ปลดล็อกเพื่อปิดการล็อกแอป';
+
+  @override
+  String get appLockDeleteKey => 'ลบ';
+
+  @override
+  String get profileEditTile => 'โปรไฟล์สาธารณะ';
+
+  @override
+  String get profileEditHeading => 'แก้ไขโปรไฟล์สาธารณะ';
+
+  @override
+  String get profileDisplayNameLabel => 'ชื่อที่แสดง';
+
+  @override
+  String get profileDisplayNameInvalid => 'กรอก 1–50 ตัวอักษร';
+
+  @override
+  String get profileSave => 'บันทึก';
+
+  @override
+  String get profileSaved => 'อัปเดตโปรไฟล์แล้ว';
 }

@@ -361,6 +361,7 @@ export async function handleTurn(
     userMessage: await toAskAiMessage(userMessage),
     assistantMessage: await toAskAiMessage(assistantMessage),
     intentDetected: turn.intentDetected,
+    searchIntent: turn.searchIntent,
     reportable: turn.reportable,
     hasEnoughInfo: turn.hasEnoughInfo,
     draft: turn.draft,

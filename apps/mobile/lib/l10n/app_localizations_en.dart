@@ -662,6 +662,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get askAiSimilarReportsLabel => 'Matched verified reports';
 
   @override
+  String get askAiSearchResultsLabel => 'Reports I found';
+
+  @override
+  String get askAiSuggestionsTitle => 'Try asking…';
+
+  @override
+  String get askAiSuggestion0 => 'Find reports about a fake loan app';
+
+  @override
+  String get askAiSuggestion1 => 'Any scams from 081-234-5678?';
+
+  @override
+  String get askAiSuggestion2 => 'Search investment scams';
+
+  @override
   String get askAiPastChats => 'Past chats';
 
   @override
@@ -1150,4 +1165,84 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminReviewRemarkTemplateConfirmed => 'Confirmed';
+
+  @override
+  String get appLockSectionTitle => 'Security';
+
+  @override
+  String get appLockTileTitle => 'App Lock';
+
+  @override
+  String get appLockTileSubtitle => 'Require biometric or PIN to open the app';
+
+  @override
+  String get appLockUseBiometric => 'Use biometric unlock';
+
+  @override
+  String get appLockChangePin => 'Change PIN';
+
+  @override
+  String get appLockBiometricReason => 'Unlock ScamReport';
+
+  @override
+  String get appLockLockedHeading => 'App locked';
+
+  @override
+  String get appLockEnterPinPrompt => 'Enter your PIN';
+
+  @override
+  String get appLockUseBiometricButton => 'Use biometric';
+
+  @override
+  String get appLockWrongPin => 'Incorrect PIN';
+
+  @override
+  String appLockAttemptsRemaining(int count) {
+    return '$count attempts remaining';
+  }
+
+  @override
+  String appLockLockedOut(int seconds) {
+    return 'Too many attempts. Try again in ${seconds}s';
+  }
+
+  @override
+  String get appLockSetupHeading => 'Set a 6-digit PIN';
+
+  @override
+  String get appLockSetupSubtitle => 'You\'ll use this to unlock the app';
+
+  @override
+  String get appLockConfirmHeading => 'Re-enter your PIN';
+
+  @override
+  String get appLockPinMismatch => 'PINs didn\'t match. Start again.';
+
+  @override
+  String get appLockBiometricUnavailable =>
+      'Biometric unavailable — use your PIN';
+
+  @override
+  String get appLockDisableHeading => 'Unlock to turn off App Lock';
+
+  @override
+  String get appLockDeleteKey => 'Delete';
+
+  @override
+  String get profileEditTile => 'Public profile';
+
+  @override
+  String get profileEditHeading => 'Edit public profile';
+
+  @override
+  String get profileDisplayNameLabel => 'Display name';
+
+  @override
+  String get profileDisplayNameInvalid => 'Enter 1–50 characters';
+
+  @override
+  String get profileSave => 'Save';
+
+  @override
+  String get profileSaved => 'Profile updated';
 }

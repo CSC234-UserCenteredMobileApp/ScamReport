@@ -14,12 +14,15 @@ class SectionHeader extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title.toUpperCase(),
-          style: theme.textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: theme.colorScheme.onSurfaceVariant,
-            letterSpacing: 0.8,
+        // Expanded so large dynamic type wraps instead of overflowing the row.
+        Expanded(
+          child: Text(
+            title.toUpperCase(),
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: theme.colorScheme.onSurfaceVariant,
+              letterSpacing: 0.8,
+            ),
           ),
         ),
         if (onSeeAll != null)
@@ -27,7 +30,8 @@ class SectionHeader extends StatelessWidget {
             onPressed: onSeeAll,
             style: TextButton.styleFrom(
               foregroundColor: theme.colorScheme.primary,
-              visualDensity: VisualDensity.compact,
+              // a11y: tap target >= 48dp (androidTapTargetGuideline).
+              minimumSize: const Size(48, 48),
               padding: const EdgeInsets.symmetric(horizontal: 8),
             ),
             child: Text(context.l10n.seeAll),

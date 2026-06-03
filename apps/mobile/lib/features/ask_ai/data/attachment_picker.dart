@@ -49,13 +49,21 @@ class AttachmentPicker {
   final ImagePicker _picker;
 
   Future<StagedAttachment?> pickFromGallery() async {
-    final file = await _picker.pickImage(source: ImageSource.gallery);
+    final file = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+      maxWidth: 1920,
+    );
     if (file == null) return null;
     return _stageOrThrow(file);
   }
 
   Future<StagedAttachment?> pickFromCamera() async {
-    final file = await _picker.pickImage(source: ImageSource.camera);
+    final file = await _picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 80,
+      maxWidth: 1920,
+    );
     if (file == null) return null;
     return _stageOrThrow(file);
   }

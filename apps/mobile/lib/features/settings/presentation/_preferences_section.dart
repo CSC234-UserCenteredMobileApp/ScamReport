@@ -47,18 +47,18 @@ class _PreferencesSection extends ConsumerWidget {
               icon: Icons.visibility_outlined,
               label: context.l10n.themeLabel,
               isLast: true,
-              trailing: SegmentedButton<ThemeMode>(
+              trailing: SegmentedButton<AppThemeMode>(
                 segments: [
                   ButtonSegment(
-                      value: ThemeMode.light,
+                      value: AppThemeMode.light,
                       label: Text(context.l10n.themeLight)),
                   ButtonSegment(
-                      value: ThemeMode.dark,
+                      value: AppThemeMode.dark,
                       label: Text(context.l10n.themeDark)),
                 ],
                 selected: {
-                  settings.themeMode == ThemeMode.system
-                      ? ThemeMode.light
+                  settings.themeMode == AppThemeMode.system
+                      ? AppThemeMode.light
                       : settings.themeMode,
                 },
                 onSelectionChanged: (s) => ref

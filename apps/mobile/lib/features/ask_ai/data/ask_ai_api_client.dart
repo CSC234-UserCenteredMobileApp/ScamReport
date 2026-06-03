@@ -298,6 +298,8 @@ class AskAiApiClient {
       assistantMessage:
           _messageFromJson(j['assistantMessage'] as Map<String, dynamic>),
       intentDetected: (j['intentDetected'] as bool?) ?? false,
+      // Default false when older servers don't send the field.
+      searchIntent: (j['searchIntent'] as bool?) ?? false,
       reportable: (j['reportable'] as bool?) ?? false,
       hasEnoughInfo: (j['hasEnoughInfo'] as bool?) ?? false,
       similarReports: ((j['similarReports'] as List?) ?? const [])

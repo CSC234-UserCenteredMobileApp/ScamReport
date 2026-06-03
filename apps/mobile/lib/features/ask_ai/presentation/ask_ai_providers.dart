@@ -415,6 +415,7 @@ class AskAiChatController extends StateNotifier<AskAiChatState> {
         createdAt: result.outcome.assistantMessage.createdAt,
         attachments: result.outcome.assistantMessage.attachments,
         similarReports: result.outcome.similarReports,
+        searchIntent: result.outcome.searchIntent,
       );
       final swapped =
           state.messages.where((m) => m.id != tempId).toList(growable: true)

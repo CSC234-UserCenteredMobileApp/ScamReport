@@ -7,11 +7,14 @@ import 'package:mobile/features/ask_ai/domain/ask_ai_repository.dart';
 import 'package:mobile/features/ask_ai/domain/entities/ai_draft.dart';
 import 'package:mobile/features/ask_ai/domain/entities/chat_message.dart';
 import 'package:mobile/features/ask_ai/domain/entities/conversation.dart';
+import 'package:mobile/features/ask_ai/domain/entities/similar_report.dart';
 import 'package:mobile/features/ask_ai/domain/entities/turn_outcome.dart';
 import 'package:mobile/features/ask_ai/domain/use_cases/send_turn.dart';
 import 'package:mobile/features/ask_ai/domain/use_cases/submit_drafted_report.dart';
 import 'package:mobile/features/ask_ai/presentation/ask_ai_providers.dart';
 import 'package:mobile/features/ask_ai/presentation/ask_ai_screen.dart';
+import 'package:mobile/features/ask_ai/presentation/widgets/consent_card.dart';
+import 'package:mobile/features/ask_ai/presentation/widgets/similar_report_card.dart';
 import 'package:mobile/l10n/app_localizations.dart';
 
 class _StubRepo implements AskAiRepository {
@@ -207,6 +210,79 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(repo.sent, isEmpty);
+    },
+  );
+
+  testWidgets('empty state shows suggestion chips; tapping one sends it',
+      (tester) async {
+    final repo = _StubRepo();
+    await tester.pumpWidget(_wrap(repo));
+    await tester.pumpAndSettle();
+
+    // Suggestions title + the three keyed chips (en strings).
+    expect(find.text('Try asking…'), findsOneWidget);
+    expect(find.byKey(const Key('askAiSuggestion0')), findsOneWidget);
+    expect(find.byKey(const Key('askAiSuggestion1')), findsOneWidget);
+    expect(find.byKey(const Key('askAiSuggestion2')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('askAiSuggestion0')));
+    await tester.pumpAndSettle();
+
+    expect(repo.sent, ['Find reports about a fake loan app']);
+  });
+
+  testWidgets(
+    'search-mode turn renders report cards under the search label and no consent card',
+    (tester) async {
+      final repo = _StubRepo();
+      final ts = DateTime(2026, 5, 7);
+      repo.respondWith(
+        TurnOutcome(
+          userMessage: ChatMessage(
+            id: 'u-1',
+            role: ChatRole.user,
+            content: 'Find reports about a fake loan app',
+            intentDetected: false,
+            createdAt: ts,
+          ),
+          assistantMessage: ChatMessage(
+            id: 'a-1',
+            role: ChatRole.assistant,
+            content: 'I found related reports. The closest ones are below.',
+            intentDetected: false,
+            createdAt: ts,
+          ),
+          intentDetected: false,
+          searchIntent: true,
+          reportable: false,
+          hasEnoughInfo: false,
+          similarReports: const [
+            SimilarReport(
+              id: 'rep-1',
+              title: 'Fake loan app via LINE',
+              scamTypeCode: 'ecommerce_fraud',
+              scamTypeLabelEn: 'E-commerce fraud',
+              scamTypeLabelTh: 'การฉ้อโกงอีคอมเมิร์ซ',
+              verifiedAt: null,
+            ),
+          ],
+        ),
+      );
+
+      await tester.pumpWidget(_wrap(repo));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byKey(const Key('askAiComposer')),
+          'Find reports about a fake loan app');
+      await tester.tap(find.byKey(const Key('askAiSendButton')));
+      await tester.pumpAndSettle();
+
+      // Search label (not the drafting "Matched verified reports" label).
+      expect(find.text('Reports I found'), findsOneWidget);
+      expect(find.text('Matched verified reports'), findsNothing);
+      expect(find.byType(SimilarReportCard), findsOneWidget);
+      // Search mode never offers a report submission.
+      expect(find.byType(ConsentCard), findsNothing);
     },
   );
 }
