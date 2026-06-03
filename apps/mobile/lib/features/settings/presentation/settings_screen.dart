@@ -1,10 +1,11 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../../core/di/auth.dart';
 import '../../../core/feature_flags/feature_flags.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../l10n/l10n.dart';
@@ -108,6 +109,29 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: 8),
             _AccountSection(user: user),
             const SizedBox(height: 32),
+
+            // Debug-only: deliberate Crashlytics evidence (D4 — dashboard
+            // screenshot of a caught fatal + non-fatal). Hidden in release.
+            if (kDebugMode) ...[
+              Center(
+                child: TextButton(
+                  onPressed: () {
+                    FirebaseCrashlytics.instance.recordError(
+                      Exception('D4 evidence: deliberate non-fatal test error'),
+                      StackTrace.current,
+                      reason: 'crashlytics-evidence-button',
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Non-fatal sent. Long-press = crash.')),
+                    );
+                  },
+                  onLongPress: () => FirebaseCrashlytics.instance.crash(),
+                  child: const Text('Send test crash (debug only)'),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
 
             // Version footer
             Center(
@@ -341,11 +365,11 @@ class _NotificationsNavTile extends ConsumerWidget {
 // ---------------------------------------------------------------------------
 // Sign out
 // ---------------------------------------------------------------------------
-class _SignOutTile extends StatelessWidget {
+class _SignOutTile extends ConsumerWidget {
   const _SignOutTile();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final verdict = Theme.of(context).extension<VerdictPalette>()!;
 
@@ -361,13 +385,15 @@ class _SignOutTile extends StatelessWidget {
               ),
         ),
         trailing: Icon(Icons.chevron_right, color: cs.onSurfaceVariant),
-        onTap: () => _showSignOutDialog(context),
+        onTap: () => _showSignOutDialog(context, ref),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
       ),
     );
   }
 
-  void _showSignOutDialog(BuildContext context) {
+  void _showSignOutDialog(BuildContext context, WidgetRef ref) {
+    // DI instead of FirebaseAuth.instance so integration tests can fake auth.
+    final auth = ref.read(firebaseAuthProvider);
     final l10n = context.l10n;
     showDialog<void>(
       context: context,
@@ -382,7 +408,7 @@ class _SignOutTile extends StatelessWidget {
           FilledButton(
             onPressed: () async {
               Navigator.of(ctx).pop();
-              await FirebaseAuth.instance.signOut();
+              await auth.signOut();
             },
             style: FilledButton.styleFrom(
               backgroundColor:
