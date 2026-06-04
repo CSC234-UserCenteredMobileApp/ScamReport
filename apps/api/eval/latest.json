@@ -1,40 +1,40 @@
 {
-  "runAt": "2026-06-03T07:00:52.428Z",
-  "gitSha": "857f1a19444ca5a466aa731bffe218cb8516df9b",
+  "runAt": "2026-06-04T06:50:23.176Z",
+  "gitSha": "883be45f5a6f137caeb020c9094f8c5b21a08da5",
   "totalCases": 50,
-  "verdictAccuracy": 0.8,
+  "verdictAccuracy": 0.84,
   "scammerRecallAt1": 0.8214,
   "mrr": 0.8214,
-  "p95LatencyMs": 7312,
+  "p95LatencyMs": 6648,
   "byType": {
     "phone": {
       "n": 15,
       "verdictAccuracy": 0.9333,
       "scammerRecallAt1": 0.875,
       "mrr": 0.875,
-      "p95LatencyMs": 1409
+      "p95LatencyMs": 1658
     },
     "url": {
       "n": 15,
-      "verdictAccuracy": 0.8667,
+      "verdictAccuracy": 0.6667,
       "scammerRecallAt1": 0.8571,
       "mrr": 0.8571,
-      "p95LatencyMs": 8306
+      "p95LatencyMs": 7412
     },
     "text": {
       "n": 20,
-      "verdictAccuracy": 0.65,
+      "verdictAccuracy": 0.9,
       "scammerRecallAt1": 0.7692,
       "mrr": 0.7692,
-      "p95LatencyMs": 33944
+      "p95LatencyMs": 13612
     }
   },
   "confusionMatrix": {
     "scam": {
-      "scam": 25,
+      "scam": 27,
       "suspicious": 2,
       "safe": 1,
-      "unknown": 2
+      "unknown": 0
     },
     "suspicious": {
       "scam": 0,
@@ -44,9 +44,9 @@
     },
     "safe": {
       "scam": 2,
-      "suspicious": 0,
+      "suspicious": 3,
       "safe": 15,
-      "unknown": 3
+      "unknown": 0
     },
     "unknown": {
       "scam": 0,
@@ -67,7 +67,7 @@
       "actualScammerDisplayName": "Revenue Dept Impersonator",
       "rankOfExpected": 1,
       "verdictHit": true,
-      "latencyMs": 1409,
+      "latencyMs": 1658,
       "tags": []
     },
     {
@@ -79,7 +79,7 @@
       "actualScammerDisplayName": "Revenue Dept Impersonator",
       "rankOfExpected": 1,
       "verdictHit": true,
-      "latencyMs": 750,
+      "latencyMs": 869,
       "tags": []
     },
     {
@@ -91,7 +91,7 @@
       "actualScammerDisplayName": "Customs Duty Scam Caller",
       "rankOfExpected": 1,
       "verdictHit": true,
-      "latencyMs": 755,
+      "latencyMs": 873,
       "tags": []
     },
     {
@@ -103,7 +103,7 @@
       "actualScammerDisplayName": "SCB Fraud-Team Caller",
       "rankOfExpected": 1,
       "verdictHit": true,
-      "latencyMs": 748,
+      "latencyMs": 867,
       "tags": []
     },
     {
@@ -115,7 +115,7 @@
       "actualScammerDisplayName": "SCB Fraud-Team Caller",
       "rankOfExpected": 1,
       "verdictHit": true,
-      "latencyMs": 746,
+      "latencyMs": 867,
       "tags": []
     },
     {
@@ -127,7 +127,7 @@
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
       "verdictHit": true,
-      "latencyMs": 1278,
+      "latencyMs": 1417,
       "tags": []
     },
     {
@@ -139,7 +139,7 @@
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
       "verdictHit": true,
-      "latencyMs": 933,
+      "latencyMs": 1037,
       "tags": []
     },
     {
@@ -151,7 +151,7 @@
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
       "verdictHit": true,
-      "latencyMs": 936,
+      "latencyMs": 1046,
       "tags": []
     },
     {
@@ -163,7 +163,7 @@
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
       "verdictHit": true,
-      "latencyMs": 949,
+      "latencyMs": 1043,
       "tags": []
     },
     {
@@ -175,7 +175,7 @@
       "actualScammerDisplayName": "Revenue Dept Impersonator",
       "rankOfExpected": 1,
       "verdictHit": true,
-      "latencyMs": 751,
+      "latencyMs": 865,
       "tags": []
     },
     {
@@ -187,7 +187,7 @@
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
       "verdictHit": true,
-      "latencyMs": 1059,
+      "latencyMs": 1173,
       "tags": [
         "adversarial",
         "lookalike"
@@ -202,7 +202,7 @@
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
       "verdictHit": true,
-      "latencyMs": 920,
+      "latencyMs": 1006,
       "tags": [
         "adversarial"
       ]
@@ -216,7 +216,7 @@
       "actualScammerDisplayName": "Customs Duty Scam Caller",
       "rankOfExpected": 1,
       "verdictHit": true,
-      "latencyMs": 747,
+      "latencyMs": 870,
       "tags": []
     },
     {
@@ -228,7 +228,7 @@
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
       "verdictHit": false,
-      "latencyMs": 1073,
+      "latencyMs": 1205,
       "tags": [
         "adversarial"
       ]
@@ -242,7 +242,7 @@
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
       "verdictHit": true,
-      "latencyMs": 908,
+      "latencyMs": 1017,
       "tags": []
     },
     {
@@ -254,7 +254,7 @@
       "actualScammerDisplayName": "Kerry Parcel Phisher",
       "rankOfExpected": 1,
       "verdictHit": true,
-      "latencyMs": 3453,
+      "latencyMs": 4535,
       "tags": []
     },
     {
@@ -266,7 +266,7 @@
       "actualScammerDisplayName": "Kerry Parcel Phisher",
       "rankOfExpected": 1,
       "verdictHit": true,
-      "latencyMs": 4531,
+      "latencyMs": 4424,
       "tags": []
     },
     {
@@ -278,7 +278,7 @@
       "actualScammerDisplayName": "KTB Phishing Ring",
       "rankOfExpected": 1,
       "verdictHit": true,
-      "latencyMs": 1677,
+      "latencyMs": 3320,
       "tags": []
     },
     {
@@ -290,7 +290,7 @@
       "actualScammerDisplayName": "KTB Phishing Ring",
       "rankOfExpected": 1,
       "verdictHit": true,
-      "latencyMs": 2836,
+      "latencyMs": 2983,
       "tags": []
     },
     {
@@ -302,7 +302,7 @@
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
       "verdictHit": true,
-      "latencyMs": 3030,
+      "latencyMs": 3477,
       "tags": []
     },
     {
@@ -314,19 +314,19 @@
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
       "verdictHit": true,
-      "latencyMs": 2918,
+      "latencyMs": 1882,
       "tags": []
     },
     {
       "label": "url-unknown-https",
       "inputType": "url",
       "expectedVerdict": "safe",
-      "actualVerdict": "safe",
+      "actualVerdict": "suspicious",
       "expectedScammerDisplayName": null,
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
-      "verdictHit": true,
-      "latencyMs": 8306,
+      "verdictHit": false,
+      "latencyMs": 6131,
       "tags": []
     },
     {
@@ -338,7 +338,7 @@
       "actualScammerDisplayName": "Kerry Parcel Phisher",
       "rankOfExpected": 1,
       "verdictHit": true,
-      "latencyMs": 2321,
+      "latencyMs": 4571,
       "tags": []
     },
     {
@@ -350,7 +350,7 @@
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
       "verdictHit": false,
-      "latencyMs": 4185,
+      "latencyMs": 3432,
       "tags": [
         "adversarial",
         "lookalike"
@@ -365,7 +365,7 @@
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
       "verdictHit": true,
-      "latencyMs": 3546,
+      "latencyMs": 3626,
       "tags": [
         "adversarial"
       ]
@@ -379,7 +379,7 @@
       "actualScammerDisplayName": "Kerry Parcel Phisher",
       "rankOfExpected": 1,
       "verdictHit": true,
-      "latencyMs": 3225,
+      "latencyMs": 4748,
       "tags": [
         "adversarial"
       ]
@@ -388,12 +388,12 @@
       "label": "url-malformed",
       "inputType": "url",
       "expectedVerdict": "safe",
-      "actualVerdict": "safe",
+      "actualVerdict": "suspicious",
       "expectedScammerDisplayName": null,
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
-      "verdictHit": true,
-      "latencyMs": 3184,
+      "verdictHit": false,
+      "latencyMs": 7412,
       "tags": [
         "adversarial",
         "garbage"
@@ -403,12 +403,12 @@
       "label": "url-shortener-bitly",
       "inputType": "url",
       "expectedVerdict": "safe",
-      "actualVerdict": "safe",
+      "actualVerdict": "suspicious",
       "expectedScammerDisplayName": null,
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
-      "verdictHit": true,
-      "latencyMs": 1593,
+      "verdictHit": false,
+      "latencyMs": 3888,
       "tags": [
         "adversarial"
       ]
@@ -422,7 +422,7 @@
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
       "verdictHit": false,
-      "latencyMs": 2795,
+      "latencyMs": 3360,
       "tags": [
         "adversarial",
         "lookalike"
@@ -437,7 +437,7 @@
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
       "verdictHit": true,
-      "latencyMs": 3235,
+      "latencyMs": 3351,
       "tags": []
     },
     {
@@ -449,7 +449,7 @@
       "actualScammerDisplayName": "Revenue Dept Impersonator",
       "rankOfExpected": 1,
       "verdictHit": true,
-      "latencyMs": 4260,
+      "latencyMs": 4483,
       "tags": []
     },
     {
@@ -461,7 +461,7 @@
       "actualScammerDisplayName": "Kerry Parcel Phisher",
       "rankOfExpected": 1,
       "verdictHit": true,
-      "latencyMs": 3414,
+      "latencyMs": 3457,
       "tags": []
     },
     {
@@ -473,7 +473,7 @@
       "actualScammerDisplayName": "KTB Phishing Ring",
       "rankOfExpected": 1,
       "verdictHit": true,
-      "latencyMs": 4087,
+      "latencyMs": 4498,
       "tags": []
     },
     {
@@ -485,7 +485,7 @@
       "actualScammerDisplayName": "SCB Fraud-Team Caller",
       "rankOfExpected": 1,
       "verdictHit": true,
-      "latencyMs": 4104,
+      "latencyMs": 4407,
       "tags": []
     },
     {
@@ -497,7 +497,7 @@
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
       "verdictHit": false,
-      "latencyMs": 3719,
+      "latencyMs": 3811,
       "tags": []
     },
     {
@@ -509,7 +509,7 @@
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
       "verdictHit": true,
-      "latencyMs": 2924,
+      "latencyMs": 3068,
       "tags": []
     },
     {
@@ -521,7 +521,7 @@
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
       "verdictHit": true,
-      "latencyMs": 2198,
+      "latencyMs": 2665,
       "tags": []
     },
     {
@@ -533,7 +533,7 @@
       "actualScammerDisplayName": "Revenue Dept Impersonator",
       "rankOfExpected": 1,
       "verdictHit": true,
-      "latencyMs": 4486,
+      "latencyMs": 4787,
       "tags": [
         "paraphrase"
       ]
@@ -547,7 +547,7 @@
       "actualScammerDisplayName": "Kerry Parcel Phisher",
       "rankOfExpected": 1,
       "verdictHit": true,
-      "latencyMs": 3403,
+      "latencyMs": 3632,
       "tags": [
         "paraphrase"
       ]
@@ -561,7 +561,7 @@
       "actualScammerDisplayName": "KTB Phishing Ring",
       "rankOfExpected": 1,
       "verdictHit": true,
-      "latencyMs": 3373,
+      "latencyMs": 3367,
       "tags": [
         "paraphrase"
       ]
@@ -575,7 +575,7 @@
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
       "verdictHit": true,
-      "latencyMs": 3030,
+      "latencyMs": 2862,
       "tags": [
         "paraphrase"
       ]
@@ -589,7 +589,7 @@
       "actualScammerDisplayName": "SCB Fraud-Team Caller",
       "rankOfExpected": 1,
       "verdictHit": true,
-      "latencyMs": 3979,
+      "latencyMs": 4130,
       "tags": [
         "paraphrase"
       ]
@@ -603,7 +603,7 @@
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
       "verdictHit": false,
-      "latencyMs": 7312,
+      "latencyMs": 6648,
       "tags": [
         "paraphrase"
       ]
@@ -612,12 +612,12 @@
       "label": "text-investment-paraphrase",
       "inputType": "text",
       "expectedVerdict": "scam",
-      "actualVerdict": "unknown",
+      "actualVerdict": "scam",
       "expectedScammerDisplayName": null,
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
-      "verdictHit": false,
-      "latencyMs": 1382,
+      "verdictHit": true,
+      "latencyMs": 13612,
       "tags": [
         "paraphrase"
       ]
@@ -626,12 +626,12 @@
       "label": "text-otp-paraphrase",
       "inputType": "text",
       "expectedVerdict": "scam",
-      "actualVerdict": "unknown",
+      "actualVerdict": "scam",
       "expectedScammerDisplayName": null,
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
-      "verdictHit": false,
-      "latencyMs": 2140,
+      "verdictHit": true,
+      "latencyMs": 3095,
       "tags": [
         "paraphrase"
       ]
@@ -640,12 +640,12 @@
       "label": "text-safe-tone-bank-verified",
       "inputType": "text",
       "expectedVerdict": "safe",
-      "actualVerdict": "unknown",
+      "actualVerdict": "safe",
       "expectedScammerDisplayName": null,
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
-      "verdictHit": false,
-      "latencyMs": 1448,
+      "verdictHit": true,
+      "latencyMs": 2806,
       "tags": [
         "adversarial"
       ]
@@ -654,12 +654,12 @@
       "label": "text-safe-courier-real",
       "inputType": "text",
       "expectedVerdict": "safe",
-      "actualVerdict": "unknown",
+      "actualVerdict": "safe",
       "expectedScammerDisplayName": null,
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
-      "verdictHit": false,
-      "latencyMs": 3083,
+      "verdictHit": true,
+      "latencyMs": 3065,
       "tags": [
         "adversarial"
       ]
@@ -668,12 +668,12 @@
       "label": "text-safe-tax-real",
       "inputType": "text",
       "expectedVerdict": "safe",
-      "actualVerdict": "unknown",
+      "actualVerdict": "safe",
       "expectedScammerDisplayName": null,
       "actualScammerDisplayName": null,
       "rankOfExpected": null,
-      "verdictHit": false,
-      "latencyMs": 33944,
+      "verdictHit": true,
+      "latencyMs": 2393,
       "tags": [
         "adversarial"
       ]
@@ -687,7 +687,7 @@
       "actualScammerDisplayName": "SCB Fraud-Team Caller",
       "rankOfExpected": 1,
       "verdictHit": true,
-      "latencyMs": 3867,
+      "latencyMs": 4372,
       "tags": [
         "paraphrase",
         "mixed-lang"
@@ -702,7 +702,7 @@
       "actualScammerDisplayName": "Kerry Parcel Phisher",
       "rankOfExpected": 1,
       "verdictHit": true,
-      "latencyMs": 2763,
+      "latencyMs": 3854,
       "tags": [
         "paraphrase",
         "mixed-lang"
